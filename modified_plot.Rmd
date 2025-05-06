@@ -1,67 +1,11 @@
 ```{r}
-library(MotrpacRatTraining6mo)
-library(DESeq2)
 library(readr)
-library(Seurat)
-library(Matrix)
 library(tidyverse)
-library(tximport)
-library(aggregation)
-library(UpSetR)
-library(HDF5Array)
 library(tidyr)
 library(dplyr)
-library(SummarizedExperiment)
 library(ggplot2)
 library(ggalluvial)
 
-```
-
-```{r}
-library(splines)
-library(DESeq2)
-
-# make some demo data
-dds <- makeExampleDESeqDataSet(n=100, m=40)
-dds$condition <- sort(runif(40))
-# make one gene where expression has a curve shape (just for demo)
-s_shape <- round(500 * sin(dds$condition*2*pi) + 1000 + rnorm(40,0,50))
-mode(s_shape) <- "integer"
-counts(dds)[1,] <- s_shape
-
-# just for visualization
-# next line just for demo, use standard size factors for real data
-sizeFactors(dds) <- rep(1,ncol(dds))
-library(ggplot2)
-plotCounts(dds, 1, returnData=TRUE) %>%
-  ggplot(aes(condition, count)) +
-  geom_point()
-
-# how to fit curves in DESeq2
-design(dds) <- ~ns(condition, df=5)
-dds <- DESeq(dds, test="LRT", reduced=~1)
-
-# expected results?
-res <- results(dds)
-hist(res$pvalue)
-plot(res$pvalue, log="y")
-
-# build the needed matrices for fitted spline
-coef_mat <- coef(dds)
-design_mat <- model.matrix(design(dds), colData(dds))
-
-# build the fitted splines and log counts
-library(ggplot2)
-library(dplyr)
-dat <- plotCounts(dds, 1, returnData=TRUE) %>%
-    mutate(logmu = design_mat %*% coef_mat[1,],
-         logcount = log2(count))
-
-# plot it all together
-dat %>%
-  ggplot(aes(condition, logcount)) +
-  geom_point() +
-  geom_line(aes(condition, logmu), col="dodgerblue")
 ```
 
 ```{r}
@@ -198,38 +142,7 @@ color_opts =  c(
 )
 
 
-all_df <- read_csv('/workspace/metadata_csvs/alluvial_inputs.csv')
+all_df <- read_csv('/workspace/test_dataframe.csv')
 
-#all_df$tissue = paste(all_df$tissue, "tissue", sep="_")
-#all_df$leiden_tissue = paste(all_df$leiden_tissue, "cluster", sep="_")
-
-all_df$matched <- (all_df$tissue_cluster == all_df$leiden) | all_df$count > 5
-all_df$swapped <- !all_df$matched & (all_df$tissue == 'HIPPOC' | all_df$tissue == 'HYPOTH')
-all_df$leiden <- factor(all_df$leiden)
-all_df$tissue_cluster <- factor(all_df$tissue_cluster)
-all_df$matched <- ifelse(all_df$matched, '', 
-                         ifelse(all_df$swapped, 'Swapped', 'Mismatched'))
-#all_df$tissue <- factor(all_df$tissue)
-#all_df$leiden_tissue <- factor(all_df$leiden_tissue)
-
-
-all_df$tissue_num <- factor(as.numeric(factor(all_df$tissue)))
-all_df$leiden_num <- factor(as.numeric(factor(all_df$leiden)))
-renumbered <- c()
-current = 1
-for (i in seq_along(all_df$leiden)){
-    current_entry <- all_df$leiden[i]
-        if (!(current_entry %in% all_df$leiden[0:(i-1)])){
-            renumbered <- c(renumbered, current)
-            current <- current +1
-        } else{
-            renumbered <- c(renumbered,renumbered[which(all_df$leiden == current_entry)[1]])
-        }
-}
-#all_df$leiden_num <- factor(renumbered)
-
-final_colors <- color_opts
-all_df$tissue = toupper(all_df$tissue)
-all_df$leiden_tissue = toupper(all_df$leiden_tissue)
-plot_alluvial(all_df, group1_name = 'tissue_num', group2_name = 'leiden_num', ditto_colors = final_colors, color_boxes = TRUE, color_bands = TRUE, save = '/workspace/output/figure_1c.png')
+plot_alluvial(all_df, group1_name = 'tissue_num', group2_name = 'leiden_num', ditto_colors = color_opts, color_boxes = TRUE, color_bands = TRUE)
 ```
