@@ -321,6 +321,8 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
         df <- read.csv(df)  # load in CSV as dataframe
     } else if (is_tibble(df)) {
         df <- as.data.frame(df)  # convert tibble to dataframe
+    } else if (!is.data.frame(df)) {
+        stop("Input must be a data frame, tibble, or CSV file path.")
     }
 
     df_type_checking <- df
@@ -369,7 +371,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
     }
 
     alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = 'col1_int', group2_name = 'col2_int', group1_name_mapping = column1, group2_name_mapping = column2, color_list = color_list,
-                                            color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles, 
+                                            color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
                                             show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path)
 
     return(alluvial_plot)
