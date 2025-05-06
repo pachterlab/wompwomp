@@ -291,28 +291,35 @@ get_alluvial_df <- function(df) {
 #' }
 #'
 #' @export
-plot_alluvial <- function(df, column1 = NULL, column2 = NULL, 
+plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
                           show_group_2_box_labels_in_ascending = FALSE,
-                          color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, 
-                          show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path) {
+                          color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, output_path = NULL, column_weights = NULL) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
     } else if (is_tibble(df)) {
         df <- as.data.frame(df)  # convert tibble to dataframe
     }
 
-    if (ncol(df) <= 1) {
-        stop(sprintf("Dataframe has %d columns. It must have at least two columns.", ncol(df)))
-    } else if (ncol(df) == 2) {
-        if (is.null(column1) && is.null(column2)) {
-            column1 <- colnames(df)[1]
-            column2 <- colnames(df)[2]
-        } else if (is.null(column1)) {
-            column1 <- setdiff(colnames(df), column2)
-        } else if (is.null(column2)) {
-            column2 <- setdiff(colnames(df), column1)
+    df_type_checking <- df
+    if (!is.null(column_weights)) {
+        if (!(column_weights %in% colnames(df))) {
+            stop(sprintf("column_weights '%s' is not a column in the dataframe.", column_weights))
         }
-    } else if (ncol(df) > 2) {
+        df_type_checking <- df_type_checking[, setdiff(colnames(df_type_checking), column_weights)]
+    }
+
+    if (ncol(df_type_checking) <= 1) {
+        stop(sprintf("Dataframe has %d columns. It must have at least two columns.", ncol(df_type_checking)))
+    } else if (ncol(df_type_checking) == 2) {
+        if (is.null(column1) && is.null(column2)) {
+            column1 <- colnames(df_type_checking)[1]
+            column2 <- colnames(df_type_checking)[2]
+        } else if (is.null(column1)) {
+            column1 <- setdiff(colnames(df_type_checking), column2)
+        } else if (is.null(column2)) {
+            column2 <- setdiff(colnames(df_type_checking), column1)
+        }
+    } else if (ncol(df_type_checking) > 2) {
         if (is.null(column1) || is.null(column2)) {
             stop("Dataframe has more than two columns. Please specify column1 and column2 for the plot.")
         }
@@ -327,11 +334,11 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
 
     df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
     df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
-    
+
     clus_df_gather <- get_alluvial_df(df)
 
-    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = 'col1_int', group2_name = 'col2_int', group1_name_mapping = column1, group2_name_mapping = column2, 
-                                            color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles, 
+    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = 'col1_int', group2_name = 'col2_int', group1_name_mapping = column1, group2_name_mapping = column2,
+                                            color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
                                             show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path)
 
     return(alluvial_plot)
