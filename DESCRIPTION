@@ -1,5 +1,5 @@
 Package: alluvialmatch
-Title: Make alluvial plots with order and colors optimized to minimize cluster cross-over 
+Title: Make alluvial plots with order and colors optimized to minimize cluster cross-over
 Version: 0.0.1
 Authors@R: 
     person("Joseph", "Rich", "jmrich@caltech.edu", role = c("aut", "cre"))
