@@ -242,18 +242,19 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
         if (include_labels_in_boxes == 'COUNT') {p <- p +
             geom_text(stat = "stratum", aes(label = after_stat(stratum)), size = 3, color = "black")
         } else{
+            combined_names <- c(levels(clus_df_gather[[group1_name]]), levels(clus_df_gather[[group2_name]]))
             label_names <- c()
             for (i in seq_along(combined_colors)){
                 current_color <- combined_colors[i]
                 if (!(current_color %in% combined_colors[0:(i-1)])){
-                    label_names <- c(label_names, levels(factor(clus_df_gather[[group1_name]]))[i])
+                    label_names <- c(label_names, combined_names[i])
                 } else{
                     label_names <- c(label_names,label_names[which(combined_colors == current_color)[1]])
                 }
             }
             A_label_names <- rev(label_names[1:num_levels_group1])
             B_label_names <- rev(label_names[(1+num_levels_group1):length(label_names)])
-            #final_tiss_names <- c(paste(tissue_label_names, 'label', sep=' '), paste(cluster_label_names, 'cluster', sep=' '))
+            
             final_label_names <- c(A_label_names, B_label_names)
             p <- p +
                 geom_text(stat = "stratum",aes(label = after_stat(final_label_names)))
@@ -374,5 +375,4 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
                                             show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path)
 
     return(alluvial_plot)
-    }
-
+}
