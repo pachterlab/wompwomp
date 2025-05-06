@@ -1,0 +1,11 @@
+Package: alluvialmatch
+Title: Make alluvial plots with order and colors optimized to minimize cluster cross-over 
+Version: 0.0.1
+Authors@R: 
+    person("Joseph", "Rich", "jmrich@caltech.edu", role = c("aut", "cre"))
+    person("Conrad", "Oakes", "coakes@caltech.edu", role = c("aut", "cre"))
+Description: Alluvial plots are great for visualizing the concordance between two different clustering methods applied to a dataset. However, these plots only allow for cluster agreement when each side of the bipartite graph is lined up in such a way that there is minimal cross-over between clusters, thus allowing one to visualize something analogous to an Adjusted Rand Index. alluvialmatch utilizes ggalluvial and igraph::max_bipartite_match in order to achieve this goal. 
+License: BSD_2_clause + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
