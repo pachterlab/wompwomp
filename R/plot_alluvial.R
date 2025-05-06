@@ -335,7 +335,11 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
     df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
     df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
 
-    clus_df_gather <- get_alluvial_df(df)
+    if (is.null(column_weights)) {
+        clus_df_gather <- get_alluvial_df(df)
+    } else {
+        clus_df_gather <- df
+    }
 
     alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = 'col1_int', group2_name = 'col2_int', group1_name_mapping = column1, group2_name_mapping = column2,
                                             color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
