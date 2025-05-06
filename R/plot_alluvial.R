@@ -254,7 +254,7 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
             }
             A_label_names <- rev(label_names[1:num_levels_group1])
             B_label_names <- rev(label_names[(1+num_levels_group1):length(label_names)])
-            
+
             final_label_names <- c(A_label_names, B_label_names)
             p <- p +
                 geom_text(stat = "stratum",aes(label = after_stat(final_label_names)))
@@ -286,13 +286,11 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
 
 
 get_alluvial_df <- function(df) {
-    if (!"value" %in% colnames(df)) {
-        # Convert numeric clustering columns to ordered factors
-        df <- df |>
-            dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
-            dplyr::group_by_all() |>
-            dplyr::count(name = "value")
-    }
+    # Convert numeric clustering columns to ordered factors
+    df <- df |>
+        dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+        dplyr::group_by_all() |>
+        dplyr::count(name = "value")
     gather_set_data(df, 1:2)
 }
 
@@ -328,26 +326,25 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
         stop("Input must be a data frame, tibble, or CSV file path.")
     }
 
-    df_type_checking <- df
     if (!is.null(column_weights)) {
         if (!(column_weights %in% colnames(df))) {
             stop(sprintf("column_weights '%s' is not a column in the dataframe.", column_weights))
         }
-        df_type_checking <- df_type_checking[, setdiff(colnames(df_type_checking), column_weights)]
+        df <- tidyr::uncount(df, weights = !!rlang::sym(column_weights))
     }
 
-    if (ncol(df_type_checking) <= 1) {
-        stop(sprintf("Dataframe has %d columns. It must have at least two columns.", ncol(df_type_checking)))
-    } else if (ncol(df_type_checking) == 2) {
+    if (ncol(df) <= 1) {
+        stop(sprintf("Dataframe has %d columns. It must have at least two columns.", ncol(df)))
+    } else if (ncol(df) == 2) {
         if (is.null(column1) && is.null(column2)) {
-            column1 <- colnames(df_type_checking)[1]
-            column2 <- colnames(df_type_checking)[2]
+            column1 <- colnames(df)[1]
+            column2 <- colnames(df)[2]
         } else if (is.null(column1)) {
-            column1 <- setdiff(colnames(df_type_checking), column2)
+            column1 <- setdiff(colnames(df), column2)
         } else if (is.null(column2)) {
-            column2 <- setdiff(colnames(df_type_checking), column1)
+            column2 <- setdiff(colnames(df), column1)
         }
-    } else if (ncol(df_type_checking) > 2) {
+    } else if (ncol(df) > 2) {
         if (is.null(column1) || is.null(column2)) {
             stop("Dataframe has more than two columns. Please specify column1 and column2 for the plot.")
         }
@@ -362,11 +359,6 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
 
     df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
     df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
-
-    # make sure weight column is named "value"
-    if (!is.null(column_weights) && column_weights != "value") {
-        names(df)[names(df) == column_weights] <- "value"
-    }
 
     clus_df_gather <- get_alluvial_df(df)
 
