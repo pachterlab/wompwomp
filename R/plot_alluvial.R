@@ -302,12 +302,12 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
         stop(sprintf("Dataframe has %d columns. It must have at least two columns.", ncol(df)))
     } else if (ncol(df) == 2) {
         if (is.null(column1) && is.null(column2)) {
-            column1 <- df[[1]]
-            column2 <- df[[2]]
+            column1 <- colnames(df)[1]
+            column2 <- colnames(df)[2]
         } else if (is.null(column1)) {
-            column1 <- df[[setdiff(1:2, which(sapply(df, identical, column2)))]]
+            column1 <- setdiff(colnames(df), column2)
         } else if (is.null(column2)) {
-            column2 <- df[[setdiff(1:2, which(sapply(df, identical, column1)))]]
+            column2 <- setdiff(colnames(df), column1)
         }
     } else if (ncol(df) > 2) {
         if (is.null(column1) || is.null(column2)) {
