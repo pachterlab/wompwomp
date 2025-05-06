@@ -12,7 +12,7 @@ default_colors <- c(
     "#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700", "#1C91D4", "#007756", "#D5C711", "#005685",
     "#A04700", "#B14380", "#4D4D4D", "#FFBE2D", "#80C7EF", "#00F6B3", "#F4EB71", "#06A5FF", "#FF8320", "#D99BBD", "#8C8C8C", "#FFCB57", "#9AD2F2",
     "#2CFFC6", "#F6EF8E", "#38B7FF", "#FF9B4D", "#E0AFCA", "#A3A3A3", "#8A5F00", "#1674A9", "#005F45", "#AA9F0D", "#00446B", "#803800", "#8D3666",
-    "#3D3D3D"
+    "#3D3D3D", 'black', 'white', 'red', 'blue'
 )
 
 if (!exists("group1_color")) {
@@ -141,6 +141,8 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
 
 
 find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_colors) {
+    group1_name = 'col1_int'
+    group2_name = 'col2_int'
     clus_df_filtered <- clus_df_gather[, c(group1_name, group2_name, "value")]
 
     clus_df_filtered[[group1_name]] <- paste0("G1_", clus_df_filtered[[group1_name]])
@@ -178,8 +180,22 @@ find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_c
     }
 
     remaining_colors <- ditto_colors[number_group1_clusters+1:length(ditto_colors)]
-    group2_colors[(group2_colors == "")] <- remaining_colors[1:sum(group2_colors == "")]
-
+    
+    # logic: take parents color if fraction > .5
+    #     but not if multiple parents contributing >.1 
+    test <- clus_df_filtered[, c(group1_name, group2_name, "value")]
+    test <- test[test$value > 1,]
+    test2 <- test %>% group_by_at(group1_name) %>% filter(value == min(value))
+    test3 <- test2[test2$value < (max(test$value)*.6),]
+    #test3 <- test2[test2$value < 30,]
+    
+    for (i in which(group2_colors %in% c(''))){
+        g1_index = test3[test3[[group2_name]] ==  paste0("G2_", i),][[group1_name]]
+        group2_colors[i] = ditto_colors[as.numeric(sub("G1_", "", g1_index[[1]]))]
+    }
+    #group2_colors[(group2_colors == "")] <- remaining_colors[1:sum(group2_colors == "")]
+    
+    
     return (group2_colors)
 }
 
@@ -202,7 +218,7 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
     if (match_colors) {
         colors_group2 <- find_group2_colors(clus_df_gather, group1_name, group2_name, ditto_colors)
     } else {
-        colors_group2 <- ditto_colors[1:num_levels_group2]
+        colors_group2 <- ditto_colors[(num_levels_group1+1):(num_levels_group1+num_levels_group2)]
     }
 
     colors_group1_reverse <- rev(colors_group1)
@@ -239,7 +255,7 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
     }
 
     if (!(include_labels_in_boxes==FALSE)) {
-        if (include_labels_in_boxes == 'COUNT') {p <- p +
+        if (!match_colors) {p <- p +
             geom_text(stat = "stratum", aes(label = after_stat(stratum)), size = 3, color = "black")
         } else{
             combined_names <- c(levels(clus_df_gather[[group1_name]]), levels(clus_df_gather[[group2_name]]))
@@ -359,12 +375,18 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
 
     df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
     df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
+    
+    #factorize input columns
+    df[[column1]] <- as.factor(df[[column1]])
+    df[[column2]] <- as.factor(df[[column2]])
 
     clus_df_gather <- get_alluvial_df(df)
 
-    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = 'col1_int', group2_name = 'col2_int', group1_name_mapping = column1, group2_name_mapping = column2, color_list = color_list,
+    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = column1, group2_name = column2, group1_name_mapping = column1, group2_name_mapping = column2, color_list = color_list,
                                             color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
                                             show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path)
 
     return(alluvial_plot)
 }
+
+
