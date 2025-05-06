@@ -291,11 +291,14 @@ get_alluvial_df <- function(df) {
 #' }
 #'
 #' @export
-plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_labels_in_ascending = FALSE, output_path = NULL) {
+plot_alluvial <- function(df, column1 = NULL, column2 = NULL, 
+                          show_group_2_box_labels_in_ascending = FALSE,
+                          color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, 
+                          show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
     } else if (is_tibble(df)) {
-        df <- as.data.frame(tibble_object)  # convert tibble to dataframe
+        df <- as.data.frame(df)  # convert tibble to dataframe
     }
 
     if (ncol(df) <= 1) {
@@ -322,53 +325,15 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
         stop(sprintf("column2 '%s' is not a column in the dataframe.", column2))
     }
 
+    df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
+    df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
+    
+    clus_df_gather <- get_alluvial_df(df)
 
+    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = 'col1_int', group2_name = 'col2_int', group1_name_mapping = column1, group2_name_mapping = column2, 
+                                            color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles, 
+                                            show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path)
 
-
-    # adata_obs$tissue_int <- as.integer(as.factor(adata_obs$tissue))
-    #
-    # if ("tissue" %in% colnames(adata_obs)) {
-    #     colnames(adata_obs)[colnames(adata_obs) == "tissue"] <- "tissue_name"
-    # }
-    #
-    # # Convert tissue to a factor
-    # adata_obs_tissue <- setNames(adata_obs$tissue_int, adata_obs$experiment_accession)
-    # adata_obs_leiden <- setNames(adata_obs$leiden, adata_obs$experiment_accession)
-    #
-    # df <- tibble(
-    #     tissue = adata_obs_tissue,
-    #     leiden = adata_obs_leiden
-    # )
-    #
-    # clus_df_gather <- get_alluvial_df(df)
-    #
-    # clus_df_gather <- clus_df_gather %>% mutate(
-    #     group1_column_original_clusters := as.numeric(as.character(.data[["tissue"]])),
-    #     group2_column_original_clusters := as.numeric(as.character(.data[["leiden"]]))
-    # )
-    #
-    # clus_df_gather <- sort_clusters_by_agreement(clus_df_gather, stable_column = "tissue", reordered_column = "leiden")
-    #
-    # clus_df_gather <- merge(
-    #     clus_df_gather,
-    #     adata_obs[, c("tissue_int", "tissue_name")],
-    #     by.x = "tissue",
-    #     by.y = "tissue_int",
-    #     all.x = TRUE
-    # )
-    #
-    # clus_df_gather <- clus_df_gather %>%
-    #     mutate(
-    #         tissue_mapping = factor(group1_column_original_clusters, levels = unique(group1_column_original_clusters[order(tissue)])),
-    #         leiden_mapping = factor(group2_column_original_clusters, levels = unique(group2_column_original_clusters[order(leiden)]))
-    #     )
-    #
-    # alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = "tissue", group2_name = "leiden", group1_name_mapping = "tissue_name", group2_name_mapping = "leiden_mapping", color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path)
-    # alluvial_plotdf <- tibble(
-    #     tissue = adata_obs_tissue,
-    #     leiden = adata_obs_leiden
-    # )
-
-    # return(alluvial_plot)
-}
+    return(alluvial_plot)
+    }
 

@@ -1,11 +1,12 @@
 ```{r}
 library(readr)
-library(tidyverse)
-library(tidyr)
-library(dplyr)
-library(ggplot2)
-library(ggalluvial)
+library(tibble)
+```
 
+```{r}
+all_df <- read_csv('/workspace/test_dataframe.csv', )
+source('R/plot_alluvial.R')
+plot_alluvial(tibble(all_df))
 ```
 
 ```{r}
