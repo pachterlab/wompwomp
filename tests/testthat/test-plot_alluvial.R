@@ -86,6 +86,15 @@ test_that("plot_alluvial works with 2 columns, column2 specified, column1 NULL",
     expect_s3_class(plot_alluvial(df, column2 = "method2"), "ggplot")
 })
 
+test_that("VDIFFR - plot_alluvial works with 2 columns, column2 specified, column1 NULL", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+    p <- plot_alluvial(df, column2 = "method2")
+    vdiffr::expect_doppelganger("basic alluvial plot", p)
+})
+
 test_that("plot_alluvial works with 4 columns, column1 and column2 specified", {
     set.seed(42)
     df <- data.frame(
@@ -110,3 +119,22 @@ test_that("plot_alluvial works with a pre-aggregated df with weight column", {
 
     expect_s3_class(plot_alluvial(df, column1 = "method1", column2 = "method2", column_weights = "weight"), "ggplot")
 })
+
+test_that("VDIFFR - plot_alluvial works with a pre-aggregated df with weight column", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    # Generate raw data
+    raw_df <- data.frame(
+        method1 = sample(1:3, 100, TRUE),
+        method2 = sample(1:3, 100, TRUE)
+    )
+
+    # Aggregate by combination
+    df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "weight"))
+
+    p <- plot_alluvial(df, column1 = "method1", column2 = "method2", column_weights = "weight")
+
+    vdiffr::expect_doppelganger("basic alluvial plot weighted", p)
+})
+
