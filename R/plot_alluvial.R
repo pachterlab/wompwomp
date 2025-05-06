@@ -285,11 +285,13 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
 
 
 get_alluvial_df <- function(df) {
-    # Each column of df is clustering results from one package
-    df <- df |>
-        mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
-        group_by_all() |>
-        dplyr::count(name = "value")
+    if (!"value" %in% colnames(df)) {
+        # Convert numeric clustering columns to ordered factors
+        df <- df |>
+            dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+            dplyr::group_by_all() |>
+            dplyr::count(name = "value")
+    }
     gather_set_data(df, 1:2)
 }
 
@@ -360,15 +362,12 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
     df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
     df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
 
-    if (is.null(column_weights)) {
-        clus_df_gather <- get_alluvial_df(df)
-    } else {
-        clus_df_gather <- df
-        # make sure weight column is named "value"
-        if (!is.null(column_weights) && column_weights != "value") {
-            names(clus_df_gather)[names(clus_df_gather) == column_weights] <- "value"
-        }
+    # make sure weight column is named "value"
+    if (!is.null(column_weights) && column_weights != "value") {
+        names(df)[names(df) == column_weights] <- "value"
     }
+
+    clus_df_gather <- get_alluvial_df(df)
 
     alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = 'col1_int', group2_name = 'col2_int', group1_name_mapping = column1, group2_name_mapping = column2, color_list = color_list,
                                             color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
