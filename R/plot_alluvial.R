@@ -180,22 +180,22 @@ find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_c
     }
 
     remaining_colors <- ditto_colors[number_group1_clusters+1:length(ditto_colors)]
-    
+
     # logic: take parents color if fraction > .5
-    #     but not if multiple parents contributing >.1 
+    #     but not if multiple parents contributing >.1
     test <- clus_df_filtered[, c(group1_name, group2_name, "value")]
     test <- test[test$value > 1,]
     test2 <- test %>% group_by_at(group1_name) %>% filter(value == min(value))
     test3 <- test2[test2$value < (max(test$value)*.6),]
     #test3 <- test2[test2$value < 30,]
-    
+
     for (i in which(group2_colors %in% c(''))){
         g1_index = test3[test3[[group2_name]] ==  paste0("G2_", i),][[group1_name]]
         group2_colors[i] = ditto_colors[as.numeric(sub("G1_", "", g1_index[[1]]))]
     }
     #group2_colors[(group2_colors == "")] <- remaining_colors[1:sum(group2_colors == "")]
-    
-    
+
+
     return (group2_colors)
 }
 
@@ -336,7 +336,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
                           output_path = NULL, color_list = NULL) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
-    } else if (is_tibble(df)) {
+    } else if (tibble::is_tibble(df)) {
         df <- as.data.frame(df)  # convert tibble to dataframe
     } else if (!is.data.frame(df)) {
         stop("Input must be a data frame, tibble, or CSV file path.")
@@ -364,6 +364,10 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
         if (is.null(column1) || is.null(column2)) {
             stop("Dataframe has more than two columns. Please specify column1 and column2 for the plot.")
         }
+        warning(sprintf(
+            "Dataframe has %d columns. Only columns %s and %s will be used.",
+            ncol(df), column1, column2
+        ))
     }
 
     if (!(column1 %in% colnames(df))) {
@@ -375,7 +379,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
 
     df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
     df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
-    
+
     #factorize input columns
     df[[column1]] <- as.factor(df[[column1]])
     df[[column2]] <- as.factor(df[[column2]])
