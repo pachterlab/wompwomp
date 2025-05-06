@@ -298,7 +298,7 @@ get_alluvial_df <- function(df) {
 #' @export
 plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
                           show_group_2_box_labels_in_ascending = FALSE,
-                          color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, output_path = NULL, column_weights = NULL) {
+                          color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, column_weights = NULL,
                           output_path = NULL, color_list = NULL) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
