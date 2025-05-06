@@ -1,2 +1,4 @@
 .Rproj.user
 .DS_Store
+.Rhistory
+tmp.Rmd

@@ -339,6 +339,10 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
         clus_df_gather <- get_alluvial_df(df)
     } else {
         clus_df_gather <- df
+        # make sure weight column is named "value"
+        if (!is.null(column_weights) && column_weights != "value") {
+            names(clus_df_gather)[names(clus_df_gather) == column_weights] <- "value"
+        }
     }
 
     alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = 'col1_int', group2_name = 'col2_int', group1_name_mapping = column1, group2_name_mapping = column2,
