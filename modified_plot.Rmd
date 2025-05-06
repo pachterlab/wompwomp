@@ -1,0 +1,235 @@
+```{r}
+library(MotrpacRatTraining6mo)
+library(DESeq2)
+library(readr)
+library(Seurat)
+library(Matrix)
+library(tidyverse)
+library(tximport)
+library(aggregation)
+library(UpSetR)
+library(HDF5Array)
+library(tidyr)
+library(dplyr)
+library(SummarizedExperiment)
+library(ggplot2)
+library(ggalluvial)
+
+```
+
+```{r}
+library(splines)
+library(DESeq2)
+
+# make some demo data
+dds <- makeExampleDESeqDataSet(n=100, m=40)
+dds$condition <- sort(runif(40))
+# make one gene where expression has a curve shape (just for demo)
+s_shape <- round(500 * sin(dds$condition*2*pi) + 1000 + rnorm(40,0,50))
+mode(s_shape) <- "integer"
+counts(dds)[1,] <- s_shape
+
+# just for visualization
+# next line just for demo, use standard size factors for real data
+sizeFactors(dds) <- rep(1,ncol(dds))
+library(ggplot2)
+plotCounts(dds, 1, returnData=TRUE) %>%
+  ggplot(aes(condition, count)) +
+  geom_point()
+
+# how to fit curves in DESeq2
+design(dds) <- ~ns(condition, df=5)
+dds <- DESeq(dds, test="LRT", reduced=~1)
+
+# expected results?
+res <- results(dds)
+hist(res$pvalue)
+plot(res$pvalue, log="y")
+
+# build the needed matrices for fitted spline
+coef_mat <- coef(dds)
+design_mat <- model.matrix(design(dds), colData(dds))
+
+# build the fitted splines and log counts
+library(ggplot2)
+library(dplyr)
+dat <- plotCounts(dds, 1, returnData=TRUE) %>%
+    mutate(logmu = design_mat %*% coef_mat[1,],
+         logcount = log2(count))
+
+# plot it all together
+dat %>%
+  ggplot(aes(condition, logcount)) +
+  geom_point() +
+  geom_line(aes(condition, logmu), col="dodgerblue")
+```
+
+```{r}
+
+find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_colors) {
+    clus_df_filtered <- clus_df_gather[, c(group1_name, group2_name, "count")]
+    
+    clus_df_filtered[[group1_name]] <- paste0("G1_", clus_df_filtered[[group1_name]])
+    clus_df_filtered[[group2_name]] <- paste0("G2_", clus_df_filtered[[group2_name]])
+    
+    g <- igraph::graph_from_data_frame(d = clus_df_filtered, directed = FALSE)
+    igraph::V(g)$type <- ifelse(igraph::V(g)$name %in% clus_df_filtered[[group1_name]], TRUE, FALSE)
+    
+    matching <- igraph::max_bipartite_match(g, weights = clus_df_filtered$count)
+    
+    keys <- names(matching$matching)
+    number_group1_clusters <- length(sub("^G1_", "", keys[grep("^G1_", keys)]))
+    number_group2_clusters <- length(sub("^G2_", "", keys[grep("^G2_", keys)]))
+    
+    # Extract and filter the matching pairs
+    non_na_pairs <- matching$matching[!is.na(matching$matching)]
+    
+    # Filter out pairs where S is matched to C (excluding C matched to S or NA)
+    g1_to_g2_pairs <- non_na_pairs[grep("^G1_", names(non_na_pairs))]
+    
+    
+    # Extract numeric indices from the filtered pairs
+    g1_indices <- as.numeric(sub("G1_", "", names(g1_to_g2_pairs)))
+    g2_indices <- as.numeric(sub("G2_", "", g1_to_g2_pairs))
+    
+    # Initialize the new colors vector
+    group2_colors <- vector("character", number_group2_clusters)
+    
+    # Assign colors based on the matching
+    for (i in seq_along(g1_indices)) {
+        # Check if the C index is within the bounds of ditto_colors
+        if (g2_indices[i] <= length(ditto_colors)) {
+            group2_colors[g2_indices[i]] <- ditto_colors[g1_indices[i]]
+        }
+    }
+    
+    test <- clus_df_gather[, c(group1_name, group2_name, "count")]
+    test <- test[test$count > 1,]
+    test2 <- test %>% group_by(tissue_num) %>% filter(count == min(count))
+    test3 <- test2[test2$count < 30,]
+    #browser()
+    remaining_colors <- ditto_colors[number_group1_clusters+1:length(ditto_colors)]
+    for (i in which(group2_colors %in% c(''))){
+        g1_index = test3[test3$leiden_num == i,]$tissue_num
+        group2_colors[i] = ditto_colors[g1_index]
+    }
+    #group2_colors[(group2_colors == "")] <- remaining_colors[1:sum(group2_colors == "")]
+    #browser()
+    return (group2_colors)
+}
+
+plot_alluvial <- function(clus_df_gather, group1_name, group2_name, ditto_colors, 
+                          color_boxes = TRUE, color_bands = FALSE, alluvial_alpha = 0.75, match_colors = TRUE, save = FALSE) {
+    axis_text_size <- 1.7
+    axis_numbering_size <- 1.4
+    num_levels_group1 <- length(levels(clus_df_gather[[group1_name]]))
+    num_levels_group2 <- length(levels(clus_df_gather[[group2_name]]))
+    
+    
+    # Extract colors for each factor, assuming ditto_colors is long enough
+    colors_group1 <- ditto_colors[1:num_levels_group1]
+    
+    if (match_colors) {
+        colors_group2 <- find_group2_colors(clus_df_gather, group1_name, group2_name, ditto_colors)
+    } else {
+        colors_group2 <- ditto_colors[1:num_levels_group2]
+    }
+    colors_group1_reverse <- rev(colors_group1)
+    colors_group2_reverse <- rev(colors_group2)
+    
+    # Combine the colors
+    combined_colors <- c(colors_group1, colors_group2)
+    combined_colors_reverse <- c(colors_group1_reverse, colors_group2_reverse)
+    
+    tiss_names <- c()
+    for (i in seq_along(combined_colors)){
+        current_color <- combined_colors[i]
+        if (!(current_color %in% combined_colors[0:(i-1)])){
+            tiss_names <- c(tiss_names, levels(factor(clus_df_gather$tissue))[i])
+        } else{
+            tiss_names <- c(tiss_names,tiss_names[which(combined_colors == current_color)[1]])
+        }
+    }
+    tissue_label_names <- rev(tiss_names[1:num_levels_group1])
+    cluster_label_names <- rev(tiss_names[(1+num_levels_group1):length(tiss_names)])
+    final_tiss_names <- c(paste(tissue_label_names, 'label', sep=' '), paste(cluster_label_names, 'cluster', sep=' '))
+    p <- ggplot(data = clus_df_gather, aes(axis1 = !!sym(group1_name), axis2 = !!sym(group2_name), y = count))
+
+    if (color_bands) {
+        p <- p +
+#                geom_alluvium(aes(fill = !!sym(group2_name)), alpha = alluvial_alpha) +
+#                scale_fill_manual(values = colors_group2) +
+#                labs(fill = NULL)
+                geom_alluvium(aes(fill = matched), alpha = alluvial_alpha) +
+                scale_fill_manual(values = c('snow2', 'red3', 'blue3')) +labs(fill = NULL)+guides(fill='none')
+    } else {
+        p <- p + geom_alluvium()
+    }
+    #browser()
+    if (color_boxes) {
+        p <- p + geom_stratum(fill = combined_colors_reverse)+geom_text(stat = "stratum",aes(label = after_stat(final_tiss_names))) + annotate("text", 
+                                x = c(1, 2), y = c(900, 900), label = c('Experimenter\n Sample Label','Transcriptome\n Cluster'), size = 5, fontface='bold', lineheight=.75) 
+    } else {
+        p <- p + geom_stratum() #+ geom_text(stat = "stratum",aes(label = after_stat(stratum)))
+    }
+
+    p <- p +
+        # geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+        theme_void()
+        theme(
+            text = element_text(family = "Arial"), 
+            legend.text = element_text(size = rel(axis_text_size))
+        )
+
+    if (save == TRUE || is.character(save)) {
+        ggsave(save, plot = p, bg = "white", width=6, height=9, dpi=300)
+    }
+
+    return(p)
+}
+```
+
+```{r}
+color_opts =  c(
+    "#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700", "#1C91D4", "#007756", "#D5C711", "#005685",
+    "#A04700", "#B14380", "#4D4D4D", "#FFBE2D", "#80C7EF", "#00F6B3", "#F4EB71", "#06A5FF", "#FF8320", "#D99BBD", "#8C8C8C", "#FFCB57", "#9AD2F2",
+    "#2CFFC6", "#F6EF8E", "#38B7FF", "#FF9B4D", "#E0AFCA", "#A3A3A3", "#8A5F00", "#1674A9", "#005F45", "#AA9F0D", "#00446B", "#803800", "#8D3666",
+    "#3D3D3D"
+)
+
+
+all_df <- read_csv('/workspace/metadata_csvs/alluvial_inputs.csv')
+
+#all_df$tissue = paste(all_df$tissue, "tissue", sep="_")
+#all_df$leiden_tissue = paste(all_df$leiden_tissue, "cluster", sep="_")
+
+all_df$matched <- (all_df$tissue_cluster == all_df$leiden) | all_df$count > 5
+all_df$swapped <- !all_df$matched & (all_df$tissue == 'HIPPOC' | all_df$tissue == 'HYPOTH')
+all_df$leiden <- factor(all_df$leiden)
+all_df$tissue_cluster <- factor(all_df$tissue_cluster)
+all_df$matched <- ifelse(all_df$matched, '', 
+                         ifelse(all_df$swapped, 'Swapped', 'Mismatched'))
+#all_df$tissue <- factor(all_df$tissue)
+#all_df$leiden_tissue <- factor(all_df$leiden_tissue)
+
+
+all_df$tissue_num <- factor(as.numeric(factor(all_df$tissue)))
+all_df$leiden_num <- factor(as.numeric(factor(all_df$leiden)))
+renumbered <- c()
+current = 1
+for (i in seq_along(all_df$leiden)){
+    current_entry <- all_df$leiden[i]
+        if (!(current_entry %in% all_df$leiden[0:(i-1)])){
+            renumbered <- c(renumbered, current)
+            current <- current +1
+        } else{
+            renumbered <- c(renumbered,renumbered[which(all_df$leiden == current_entry)[1]])
+        }
+}
+#all_df$leiden_num <- factor(renumbered)
+
+final_colors <- color_opts
+all_df$tissue = toupper(all_df$tissue)
+all_df$leiden_tissue = toupper(all_df$leiden_tissue)
+plot_alluvial(all_df, group1_name = 'tissue_num', group2_name = 'leiden_num', ditto_colors = final_colors, color_boxes = TRUE, color_bands = TRUE, save = '/workspace/output/figure_1c.png')
+```
