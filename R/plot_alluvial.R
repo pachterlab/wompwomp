@@ -182,16 +182,32 @@ find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_c
     remaining_colors <- ditto_colors[number_group1_clusters+1:length(ditto_colors)]
 
     # logic: take parents color if fraction > .5
-    #     but not if multiple parents contributing >.1
-    test <- clus_df_filtered[, c(group1_name, group2_name, "value")]
-    test <- test[test$value > 1,]
-    test2 <- test %>% group_by_at(group1_name) %>% filter(value == min(value))
-    test3 <- test2[test2$value < (max(test$value)*.6),]
-    #test3 <- test2[test2$value < 30,]
-
     for (i in which(group2_colors %in% c(''))){
-        g1_index = test3[test3[[group2_name]] ==  paste0("G2_", i),][[group1_name]]
-        group2_colors[i] = ditto_colors[as.numeric(sub("G1_", "", g1_index[[1]]))]
+        current_g2 <-  paste0("G2_", i)
+            
+        test <- clus_df_filtered[, c(group1_name, group2_name, "value")]
+        test2 <- test[test[[group2_name]] == current_g2,]
+    
+        potential_g1 = test2[[group1_name]]
+        
+        if (length(unique(potential_g1)) > 1) {
+            test2[['fraction']] <- test2['value']/sum(test2['value'])
+            if (sum(test2[['fraction']] > .1) > 3) {
+                group2_colors[i] <- remaining_colors[1]
+                remaining_colors <- remaining_colors[2:length(remaining_colors)]
+            } else if (max(test2[['fraction']]) > .5) {
+                test3 <- test2[test2[['fraction']]==max(test2[['fraction']]),]
+                potential_g1 = test3[[group1_name]]
+                group2_colors[i] = ditto_colors[as.numeric(sub("G1_", "", unique(potential_g1)))]
+            } else {
+                group2_colors[i] <- remaining_colors[1]
+                remaining_colors <- remaining_colors[2:length(remaining_colors)]
+            }
+        } else{
+            group2_colors[i] = ditto_colors[as.numeric(sub("G1_", "", unique(potential_g1)))]
+        }
+        
+        
     }
     #group2_colors[(group2_colors == "")] <- remaining_colors[1:sum(group2_colors == "")]
 
@@ -209,7 +225,7 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
     num_levels_group2 <- length(levels(clus_df_gather[[group2_name]]))
 
     if (show_group_2_box_labels_in_ascending) {
-        group2_name_mapping <- group2_name
+        group2_name_mapping <- group2_name_mapping
     }
 
     # Extract colors for each factor, assuming ditto_colors is long enough
@@ -255,7 +271,7 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
     }
 
     if (!(include_labels_in_boxes==FALSE)) {
-        if (!match_colors) {p <- p +
+        if (match_colors) {p <- p +
             geom_text(stat = "stratum", aes(label = after_stat(stratum)), size = 3, color = "black")
         } else{
             combined_names <- c(levels(clus_df_gather[[group1_name]]), levels(clus_df_gather[[group2_name]]))
@@ -332,7 +348,7 @@ get_alluvial_df <- function(df) {
 #' @export
 plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
                           show_group_2_box_labels_in_ascending = FALSE,
-                          color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, column_weights = NULL,
+                          color_boxes = TRUE, color_bands = TRUE, match_colors = 'RENAME', alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, column_weights = NULL,
                           output_path = NULL, color_list = NULL) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
