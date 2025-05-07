@@ -1,6 +1,12 @@
 # alluvialmatch
 Make alluvial plots with order and colors optimized to minimize cluster cross-over
 
+## Before alluvialmatch
+![alt text](https://github.com/pachterlab/varseek/blob/main/figures/ggalluvial.pdf?raw=true)
+
+## After alluvialmatch
+![alt text](https://github.com/pachterlab/varseek/blob/main/figures/alluvialmatch.pdf?raw=true)
+
 ## Installation: 
 `remotes::install_github("pachterlab/alluvialmatch")`
 
