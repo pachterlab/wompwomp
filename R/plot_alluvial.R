@@ -58,11 +58,12 @@ increment_if_zeros <- function(clus_df_gather, column) {
 
 sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reordered_column = "B") {
     for (n in 1:2) {
+        clus_df_gather$y <- -2  # tmp
         reordered_column_original_clusters_name <- paste0(reordered_column, "_original_clusters")
 
         clus_df_gather <- increment_if_zeros(clus_df_gather, stable_column)
         clus_df_gather <- increment_if_zeros(clus_df_gather, reordered_column)
-        clus_df_gather <- increment_if_zeros(clus_df_gather, "y")
+        clus_df_gather <- increment_if_zeros(clus_df_gather, "col2_int")
 
         # Initialize variables
         half_rows <- nrow(clus_df_gather) / 2
@@ -134,6 +135,12 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
         sorted_levels <- sort(as.numeric(levels(clus_df_gather$y)))
         sorted_levels <- as.character(sorted_levels)
         clus_df_gather$y <- factor(clus_df_gather$y, levels = sorted_levels)
+
+        # set clus_df_gather$y to col1_int for rows where x=1, and clus_df_gather$y to col2_int for rows where x=2
+        clus_df_gather$y <- ifelse(clus_df_gather$x == 1,
+                                   clus_df_gather[[stable_column]],
+                                   clus_df_gather[[reordered_column]])
+
     }
 
     return(clus_df_gather)
@@ -184,12 +191,12 @@ find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_c
     # logic: take parents color if fraction > .5
     for (i in which(group2_colors %in% c(''))){
         current_g2 <-  paste0("G2_", i)
-            
+
         test <- clus_df_filtered[, c(group1_name, group2_name, "value")]
         test2 <- test[test[[group2_name]] == current_g2,]
-    
+
         potential_g1 = test2[[group1_name]]
-        
+
         if (length(unique(potential_g1)) > 1) {
             test2[['fraction']] <- test2['value']/sum(test2['value'])
             if (sum(test2[['fraction']] > .1) > 3) {
@@ -206,8 +213,8 @@ find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_c
         } else{
             group2_colors[i] = ditto_colors[as.numeric(sub("G1_", "", unique(potential_g1)))]
         }
-        
-        
+
+
     }
     #group2_colors[(group2_colors == "")] <- remaining_colors[1:sum(group2_colors == "")]
 
@@ -215,7 +222,7 @@ find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_c
     return (group2_colors)
 }
 
-plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_name = "B", group1_name_mapping = "A", group2_name_mapping = "B", color_list = 'DEFAULT', color_boxes = TRUE, color_bands = FALSE, alluvial_alpha = 0.5, match_colors = TRUE, output_path = NULL, include_labels_in_boxes = FALSE, include_axis_titles = FALSE, show_group_2_box_labels_in_ascending = FALSE) {
+plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_name = "B", group1_name_mapping = "A", group2_name_mapping = "B", color_list = 'DEFAULT', color_boxes = TRUE, color_bands = FALSE, alluvial_alpha = 0.5, match_colors = TRUE, output_path = NULL, include_labels_in_boxes = FALSE, include_axis_titles = FALSE, include_group_sizes = FALSE, show_group_2_box_labels_in_ascending = FALSE) {
     if (!is.null(color_list)){
         ditto_colors <- color_list
     } else{
@@ -293,21 +300,52 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
         }
     }
 
+    top_y1 <- clus_df_gather %>%
+        filter(x == 1) %>%
+        group_by(y) %>%
+        summarise(total = sum(value), .groups = "drop") %>%
+        arrange(desc(total)) %>%
+        mutate(cum_y = cumsum(total)) %>%
+        pull(cum_y) %>%
+        max()
+
+    top_y2 <- clus_df_gather %>%
+        filter(x == 2) %>%
+        group_by(y) %>%
+        summarise(total = sum(value), .groups = "drop") %>%
+        arrange(desc(total)) %>%
+        mutate(cum_y = cumsum(total)) %>%
+        pull(cum_y) %>%
+        max()
+
+    top_y <- max(top_y1, top_y2)  # top_y1 and top_y2 are probably the same
+
     if (include_axis_titles) {
+        # Offset to place labels a bit above
+        offset <- 1.1 * top_y
+
         p <- p +
-            annotate("text", x = 1, y = max(clus_df_gather$value) + 510, label = group1_name, size = 5, hjust = 0.5) +
-            annotate("text", x = 2, y = max(clus_df_gather$value) + 510, label = group2_name, size = 5, hjust = 0.5)
+            annotate("text", x = 1, y = top_y + offset, label = group1_name, size = 5, hjust = 0.5) +
+            annotate("text", x = 2, y = top_y + offset, label = group2_name, size = 5, hjust = 0.5)
+    }
+
+    if (include_group_sizes) {
+        offset_below <- top_y * 0.075
+
+        p <- p +
+            annotate("text", x = 1, y = -offset_below, label = num_levels_group1, hjust = 0.5, size = 5) + # Adjust x, y for Seurat
+            annotate("text", x = 2, y = -offset_below, label = num_levels_group2, hjust = 0.5, size = 5) # Adjust x, y for Scanpy
     }
 
     p <- p +
         # geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
         theme_void() +
-        annotate("text", x = 1.023, y = 1, label = num_levels_group1, hjust = 1, vjust = 1.35, size = 5) + # Adjust x, y for Seurat
-        annotate("text", x = 1.978, y = 1, label = num_levels_group2, hjust = 0, vjust = 1.35, size = 5) + # Adjust x, y for Scanpy
         theme(
             text = element_text(family = "sans"),
             legend.text = element_text(size = rel(axis_text_size))
         )
+
+    p <- p + theme(legend.position = "none")  # to hide legend
 
     if (!is.null(output_path)) {
         ggsave(output_path, plot = p, dpi = 300, bg = "white")
@@ -346,10 +384,7 @@ get_alluvial_df <- function(df) {
 #' }
 #'
 #' @export
-plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
-                          show_group_2_box_labels_in_ascending = FALSE,
-                          color_boxes = TRUE, color_bands = TRUE, match_colors = 'RENAME', alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, column_weights = NULL,
-                          output_path = NULL, color_list = NULL) {
+plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_labels_in_ascending = FALSE, color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, column_weights = NULL, output_path = NULL, color_list = NULL, return_greedy_wolf = FALSE) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
     } else if (tibble::is_tibble(df)) {
@@ -402,11 +437,70 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL,
 
     clus_df_gather <- get_alluvial_df(df)
 
-    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = column1, group2_name = column2, group1_name_mapping = column1, group2_name_mapping = column2, color_list = color_list,
-                                            color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
-                                            show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path)
+    # clus_df_gather <- clus_df_gather %>% mutate(
+    #     group1_column_original_clusters := as.character(.data[[column1]]),
+    #     group2_column_original_clusters := as.character(.data[[column2]])
+    # )
+
+    # clus_df_gather <- sort_clusters_by_agreement(clus_df_gather, stable_column = column1, reordered_column = column2)
+    clus_df_gather <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int', reordered_column = 'col2_int')
+    clus_df_gather[[column2]] <- clus_df_gather$col2_int
+
+    if (return_greedy_wolf) {
+        clus_df_gather <- clus_df_gather %>%
+            ungroup() %>%
+            slice(1:(n() %/% 2)) %>%              # keep first half of rows
+            select(-id, -x, -y, -col1_int, -col2_int)         # drop columns
+        return(clus_df_gather)
+    }
+
+    # clus_df_gather <- merge(
+    #     clus_df_gather,
+    #     adata_obs[, c(col1_int, column1)],
+    #     by.x = column1,
+    #     by.y = col1_int,
+    #     all.x = TRUE
+    # )
+    #
+    # clus_df_gather <- merge(
+    #     clus_df_gather,
+    #     adata_obs[, c(col2_int, column2)],
+    #     by.x = column2,
+    #     by.y = col2_int,
+    #     all.x = TRUE
+    # )
+    #
+    # clus_df_gather <- clus_df_gather %>%
+    #     mutate(
+    #         column1_mapping = factor(group1_column_original_clusters, levels = unique(group1_column_original_clusters[order(column1)])),
+    #         column2_mapping = factor(group2_column_original_clusters, levels = unique(group2_column_original_clusters[order(column2)]))
+    #     )
+
+    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = column1, group2_name = column2, group1_name_mapping = column1, group2_name_mapping = column2, color_list = color_list, color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles, include_group_sizes = include_group_sizes, show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path)
 
     return(alluvial_plot)
 }
 
 
+#' Perform a greedy algorithm heuristic for the Weighted One Layer Free problem
+#'
+#' Perform a greedy algorithm heuristic for the Weighted One Layer Free problem
+#'
+#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
+#' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns.
+#' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns.
+#' @param output_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.
+#'
+#' @return A data frame.
+#'
+#' @examples
+#' \dontrun{
+#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' greedy_wolf(df)
+#' }
+#'
+#' @export
+greedy_wolf <- function(df, column1 = NULL, column2 = NULL, column_weights = NULL) {
+    clus_df_gather <-  plot_alluvial(df = df, column1 = column1, column2 = column2, column_weights = column_weights, return_greedy_wolf = TRUE)
+    return(clus_df_gather)
+}

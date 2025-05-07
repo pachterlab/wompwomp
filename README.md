@@ -1,5 +1,5 @@
 # alluvialmatch
-Make alluvial plots with order and colors optimized to minimize cluster cross-over
+Make alluvial plots with order and colors optimized to minimize cluster cross-over (i.e., the product of weighted edge overlap)
 
 ## Before alluvialmatch
 ![alt text](https://github.com/pachterlab/varseek/blob/main/figures/ggalluvial.pdf?raw=true)
