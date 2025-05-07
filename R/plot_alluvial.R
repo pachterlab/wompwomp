@@ -289,7 +289,7 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
         annotate("text", x = 1.023, y = 1, label = num_levels_group1, hjust = 1, vjust = 1.35, size = 5) + # Adjust x, y for Seurat
         annotate("text", x = 1.978, y = 1, label = num_levels_group2, hjust = 0, vjust = 1.35, size = 5) + # Adjust x, y for Scanpy
         theme(
-            text = element_text(family = "Arial"),
+            text = element_text(family = "sans"),
             legend.text = element_text(size = rel(axis_text_size))
         )
 
