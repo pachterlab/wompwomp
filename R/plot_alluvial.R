@@ -371,9 +371,20 @@ get_alluvial_df <- function(df) {
 #' minimizing crossover and aligning clusters based on agreement.
 #'
 #' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
-#' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns.
-#' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns.
+#' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
+#' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
+#' @param show_group_2_box_labels_in_ascending Logical. If \code{TRUE}, forces the group 2 axis to be displayed in ascending label order rather than greedy matching.
+#' @param color_boxes Logical. Whether to color the rectangular strata boxes representing groups.
+#' @param color_bands Logical. Whether to color the alluvial bands connecting the groups.
+#' @param match_colors Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.
+#' @param alluvial_alpha Numeric between 0 and 1. Transparency level for the alluvial bands.
+#' @param include_labels_in_boxes Logical. Whether to include text labels inside the rectangular group boxes.
+#' @param include_axis_titles Logical. Whether to display axis titles for column1 and column2.
+#' @param include_group_sizes Logical. If \code{TRUE}, includes group sizes in the labels (e.g., "Group A (42)").
+#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
 #' @param output_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.
+#' @param color_list Optional named list or vector of colors to override default group colors.
+#' @param return_greedy_wolf Logical. If \code{TRUE}, returns the underlying bipartite match data frame instead of a ggplot object.
 #'
 #' @return A \code{ggplot2} object representing the alluvial plot.
 #'
@@ -487,8 +498,8 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
 #' Perform a greedy algorithm heuristic for the Weighted One Layer Free problem
 #'
 #' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
-#' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns.
-#' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns.
+#' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
+#' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}
 #' @param output_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.
 #'
 #' @return A data frame.
