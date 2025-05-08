@@ -1,0 +1,79 @@
+---
+title: "Introduction to alluvialmatch"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to alluvialmatch}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+library(alluvialmatch)
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+library(ggforce)
+library(igraph)
+library(tibble)
+```
+
+We create a toy data frame that maps tissues (brain, stomach, heart, T cell, B cell) to clustering (1-4)
+```{r}
+df <- data.frame(
+  tissue = c(
+    "brain", "brain", "brain",
+    "stomach", "stomach", "stomach", "stomach", "stomach", "stomach",
+    "heart", "heart", "heart", "heart", "heart", "heart", "heart",
+    "T cell", "T cell",
+    "B cell", "B cell", "B cell", "B cell", "B cell", "B cell", "B cell", "B cell", "B cell"
+  ),
+  cluster = c(
+    1, 1, 2,
+    1, 2, 2, 2, 2, 2,
+    1, 3, 3, 3, 3, 3, 3,
+    4, 4,
+    4, 4, 4, 4, 4, 4, 4, 4, 4
+  )
+)
+
+head(df)
+```
+
+Group by tissue and cluster, counting the values in a new column value
+```{r}
+clus_df_gather <- df |>
+    dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+    dplyr::group_by_all() |>
+    dplyr::count(name = "value")
+gather_set_data(clus_df_gather, 1:2)
+
+clus_df_gather
+```
+
+
+Plot with ggalluvial before sorting - notice especially how B cells cross down to cluster 4, and stomach crosses up to cluster 2 - we would like to straighten this out, and add colors to show corresponding groups
+```{r}
+p1 <- ggplot(data = clus_df_gather, aes(axis1 = tissue, axis2 = cluster, y = value)) +
+    geom_alluvium() +
+    geom_stratum() +
+    scale_x_discrete(limits = c("tissue", "cluster"), expand = c(.2, .05)) +
+    geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+    theme_minimal()
+p1
+```
+Implementing a greedy heuristic for weighted one-layer free problem
+```{r}
+clus_df_gather_sorted <- greedy_wolf(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value")
+clus_df_gather_sorted
+```
+
+Plot the alluvial plot with sorting and color matching
+```{r}
+p2 <- plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value")
+# alternatively: p2 <- plot_alluvial(df, column1="tissue", column2="cluster")
+p2
+```
+
+```{r}
+sessioninfo::session_info()
+```

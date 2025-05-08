@@ -1,9 +1,31 @@
-library(dplyr)
-library(ggplot2)
-library(ggforce)
-library(ggalluvial)
-library(igraph)
-library(tibble)
+#' alluvialmatch: Cluster-matching alluvial plots
+#'
+#' Main plotting function and helpers for bipartite-matching-based alluvial diagrams
+#' @docType package
+#' @name alluvialmatch
+#'
+#' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter
+#' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave
+#' @importFrom ggalluvial geom_alluvium geom_stratum
+#' @importFrom ggforce gather_set_data
+#' @importFrom igraph max_bipartite_match V graph_from_data_frame
+#' @importFrom tibble is_tibble
+#' @importFrom utils read.csv
+#' @importFrom stats setNames
+#' @importFrom rlang sym .data
+#' @importFrom magrittr %>%
+#' @importFrom data.table :=
+
+utils::globalVariables(c(
+    ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement"
+))
+
+# library(dplyr)
+# library(ggplot2)
+# library(ggalluvial)
+# library(ggforce)
+# library(igraph)
+# library(tibble)
 
 axis_text_size <- 1.7
 axis_numbering_size <- 1.4
@@ -361,7 +383,7 @@ get_alluvial_df <- function(df) {
         dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
         dplyr::group_by_all() |>
         dplyr::count(name = "value")
-    gather_set_data(df, 1:2)
+    ggforce::gather_set_data(df, 1:2)
 }
 
 
@@ -500,7 +522,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
 #' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
 #' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
 #' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}
-#' @param output_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.
+#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
 #'
 #' @return A data frame.
 #'

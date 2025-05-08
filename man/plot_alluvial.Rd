@@ -15,18 +15,43 @@ plot_alluvial(
   alluvial_alpha = 0.5,
   include_labels_in_boxes = TRUE,
   include_axis_titles = TRUE,
+  include_group_sizes = TRUE,
+  column_weights = NULL,
   output_path = NULL,
-  column_weights = NULL
+  color_list = NULL,
+  return_greedy_wolf = FALSE
 )
 }
 \arguments{
 \item{df}{A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).}
 
-\item{column1}{Character. Name of the first column to plot. Optional if \code{df} has exactly two columns.}
+\item{column1}{Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
 
-\item{column2}{Character. Name of the second column to plot. Optional if \code{df} has exactly two columns.}
+\item{column2}{Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
+
+\item{show_group_2_box_labels_in_ascending}{Logical. If \code{TRUE}, forces the group 2 axis to be displayed in ascending label order rather than greedy matching.}
+
+\item{color_boxes}{Logical. Whether to color the rectangular strata boxes representing groups.}
+
+\item{color_bands}{Logical. Whether to color the alluvial bands connecting the groups.}
+
+\item{match_colors}{Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.}
+
+\item{alluvial_alpha}{Numeric between 0 and 1. Transparency level for the alluvial bands.}
+
+\item{include_labels_in_boxes}{Logical. Whether to include text labels inside the rectangular group boxes.}
+
+\item{include_axis_titles}{Logical. Whether to display axis titles for column1 and column2.}
+
+\item{include_group_sizes}{Logical. If \code{TRUE}, includes group sizes in the labels (e.g., "Group A (42)").}
+
+\item{column_weights}{Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.}
 
 \item{output_path}{Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.}
+
+\item{color_list}{Optional named list or vector of colors to override default group colors.}
+
+\item{return_greedy_wolf}{Logical. If \code{TRUE}, returns the underlying bipartite match data frame instead of a ggplot object.}
 }
 \value{
 A \code{ggplot2} object representing the alluvial plot.

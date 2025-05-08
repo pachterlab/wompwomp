@@ -10,6 +10,7 @@ Description: Alluvial plots are great for visualizing the concordance between tw
 License: BSD_2_clause + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr
 RoxygenNote: 7.3.2
 Imports:
     dplyr,
@@ -17,9 +18,16 @@ Imports:
     ggforce,
     ggalluvial,
     igraph,
-    tibble
+    tibble,
+    rlang,
+    tidyr,
+    magrittr,
+    data.table
 Depends: R (>= 3.5.0)
 Suggests: 
     testthat (>= 3.0.0),
-    vdiffr
+    vdiffr,
+    knitr,
+    rmarkdown,
+    sessioninfo
 Config/testthat/edition: 3

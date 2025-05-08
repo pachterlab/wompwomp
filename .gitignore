@@ -2,3 +2,5 @@
 .DS_Store
 .Rhistory
 tmp.Rmd
+/doc/
+/Meta/
