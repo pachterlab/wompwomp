@@ -2,5 +2,7 @@
 .DS_Store
 .Rhistory
 tmp.Rmd
+tmp_files
+trash
 /doc/
 /Meta/

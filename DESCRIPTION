@@ -2,7 +2,7 @@ Package: alluvialmatch
 Version: 0.0.1
 Date: 2025-05-07
 Title: Make alluvial plots with order and colors optimized to minimize cluster cross-over
-Authors@R: c(person("Joseph", "Rich", role = c("aut", "cre"), email = "jmrich@caltech.edu"), person("Conrad", "Oakes", role = c("aut", "cre"), email = "coakes@caltech.edu"))
+Authors@R: c(person("Joseph", "Rich", role = c("aut", "cre"), email = "jmrich@caltech.edu"), person("Conrad", "Oakes", role = "aut", email = "coakes@caltech.edu"))
 Author: Joseph Rich [aut, cre],
   Conrad Oakes [aut, cre],
 Maintainer: Joseph Rich <jmrich@caltech.edu>

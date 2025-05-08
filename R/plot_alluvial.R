@@ -6,7 +6,7 @@
 #'
 #' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter
 #' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave
-#' @importFrom ggalluvial geom_alluvium geom_stratum
+#' @importFrom ggalluvial geom_alluvium geom_stratum stat_stratum
 #' @importFrom ggforce gather_set_data
 #' @importFrom igraph max_bipartite_match V graph_from_data_frame
 #' @importFrom tibble is_tibble
@@ -44,6 +44,8 @@ if (!exists("group1_color")) {
 if (!exists("group2_color")) {
     group2_color <- "#56B4E9"
 }
+
+StatStratum <- ggalluvial::StatStratum  # avoid the error Can't find stat called "stratum"
 
 reorder_clusters_descending <- function(clusters) {
     # Count the size of each cluster
@@ -301,7 +303,7 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
 
     if (!(include_labels_in_boxes==FALSE)) {
         if (match_colors) {p <- p +
-            geom_text(stat = "stratum", aes(label = after_stat(stratum)), size = 3, color = "black")
+            geom_text(stat = StatStratum, aes(label = after_stat(stratum)), size = 3, color = "black")
         } else{
             combined_names <- c(levels(clus_df_gather[[group1_name]]), levels(clus_df_gather[[group2_name]]))
             label_names <- c()
@@ -318,7 +320,7 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
 
             final_label_names <- c(A_label_names, B_label_names)
             p <- p +
-                geom_text(stat = "stratum",aes(label = after_stat(final_label_names)))
+                geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))
         }
     }
 
