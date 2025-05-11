@@ -8,6 +8,7 @@ vignette: >
 ---
 
 ```{r}
+# devtools::load_all()
 library(alluvialmatch)
 library(dplyr)
 library(ggplot2)

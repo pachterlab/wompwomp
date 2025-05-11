@@ -2,6 +2,9 @@
 
 export(greedy_wolf)
 export(plot_alluvial)
+export(run_cli)
+export(run_greedy_wolf_cli)
+export(run_plot_alluvial_cli)
 importFrom(data.table,":=")
 importFrom(dplyr,arrange)
 importFrom(dplyr,desc)

@@ -57,3 +57,12 @@ head(df)
 p <- plot_alluvial(df, column_weights = "weight")
 p
 ```
+
+Each function can also be run from the command line as follows:
+Installation:
+git clone https://github.com/josephrich98/alluvialmatch
+cd alluvialmatch
+
+Running:
+./exec/alluvialmatch plot_alluvial --input mydata.csv --output out.pdf
+./exec/alluvialmatch greedy_wolf --input graphdata.csv

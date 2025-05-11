@@ -1,0 +1,31 @@
+#!/usr/bin/env Rscript
+
+args <- commandArgs(trailingOnly = TRUE)
+
+# Install devtools if needed
+if (!requireNamespace("devtools", quietly = TRUE)) {
+  message("Installing 'devtools'...")
+  install.packages("devtools", repos = "https://cloud.r-project.org")
+}
+
+# Install your package's runtime dependencies if missing
+required_pkgs <- c(
+  "dplyr", "ggplot2", "ggforce", "ggalluvial", "igraph",
+  "tibble", "rlang", "tidyr", "magrittr", "data.table"
+)
+
+missing <- required_pkgs[!vapply(required_pkgs, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))]
+if (length(missing) > 0) {
+  message("Installing missing packages: ", paste(missing, collapse = ", "))
+  install.packages(missing, repos = "https://cloud.r-project.org")
+}
+
+# Load the package from the local directory
+args_full <- commandArgs(trailingOnly = FALSE)
+script_path <- sub("^--file=", "", args_full[grep("^--file=", args_full)])
+if (length(script_path) == 0) stop("Failed to detect script path.")
+package_root <- dirname(dirname(script_path))
+setwd(package_root)
+
+devtools::load_all(".")
+alluvialmatch::run_cli(args)

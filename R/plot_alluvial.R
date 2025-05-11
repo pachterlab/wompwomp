@@ -539,3 +539,4 @@ greedy_wolf <- function(df, column1 = NULL, column2 = NULL, column_weights = NUL
     clus_df_gather <-  plot_alluvial(df = df, column1 = column1, column2 = column2, column_weights = column_weights, return_greedy_wolf = TRUE)
     return(clus_df_gather)
 }
+
