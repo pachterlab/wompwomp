@@ -2,10 +2,10 @@
 Make alluvial plots with node order and colors optimized to minimize edge crossings.
 
 ## Before alluvialmatch
-![alt text](https://github.com/pachterlab/alluvialmatch/blob/main/figures/ggalluvial.pdf?raw=true)
+![alt text](https://github.com/pachterlab/alluvialmatch/blob/main/figures/ggalluvial.pdf)
 
 ## After alluvialmatch
-![alt text](https://github.com/pachterlab/alluvialmatch/blob/main/figures/alluvialmatch.pdf?raw=true)
+![alt text](https://github.com/pachterlab/alluvialmatch/blob/main/figures/alluvialmatch.pdf)
 
 ## Installation: 
 `remotes::install_github("pachterlab/alluvialmatch")`
