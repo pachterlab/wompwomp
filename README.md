@@ -1,5 +1,5 @@
 # alluvialmatch
-Make alluvial plots with order and colors optimized to minimize cluster cross-over (i.e., the product of weighted edge overlap)
+Make alluvial plots with node order and colors optimized to minimize edge crossings.
 
 ## Before alluvialmatch
 ![alt text](https://github.com/pachterlab/varseek/blob/main/figures/ggalluvial.pdf?raw=true)
@@ -11,7 +11,7 @@ Make alluvial plots with order and colors optimized to minimize cluster cross-ov
 `remotes::install_github("pachterlab/alluvialmatch")`
 
 ## Usage
-The alluvialmatch library has a has two functions, plot_alluvial and greedy_wolf, both of which which takes in a data frame, CSV, or tibble as input. plot_alluvial returns a ggplot2 object as output, and greedy_wold returns a data frame as output. greedy_wolf performs a greedy algorithm implementation of the weighted one-layer free problem, and plot_alluvial plots the resulting bipartite graph as an alluvial plot using ggalluvial as a framework.
+The alluvialmatch library has two functions: plot_alluvial and greedy_wolf. Both of these takes in a data frame, CSV, or tibble as input. plot_alluvial returns a ggplot2 object as output, and greedy_wolf returns a data frame as output. greedy_wolf performs a greedy algorithm implementation of the weighted one-layer free problem, and plot_alluvial plots the resulting bipartite graph as an alluvial plot using ggalluvial as a framework.
 
 The input table can have one of two formats: 
 1) Ungrouped: columns specified by column1 and column2, where each row corresponds to a separate entity
