@@ -407,6 +407,7 @@ get_alluvial_df <- function(df) {
 #' @param include_group_sizes Logical. If \code{TRUE}, includes group sizes in the labels (e.g., "Group A (42)").
 #' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
 #' @param output_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.
+#' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
 #' @param color_list Optional named list or vector of colors to override default group colors.
 #' @param return_greedy_wolf Logical. If \code{TRUE}, returns the underlying bipartite match data frame instead of a ggplot object.
 #'
@@ -419,7 +420,7 @@ get_alluvial_df <- function(df) {
 #' }
 #'
 #' @export
-plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_labels_in_ascending = FALSE, color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, column_weights = NULL, output_path = NULL, color_list = NULL, return_greedy_wolf = FALSE) {
+plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_labels_in_ascending = FALSE, color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, column_weights = NULL, output_path = NULL, output_df_path = NULL, color_list = NULL, return_greedy_wolf = FALSE) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
     } else if (tibble::is_tibble(df)) {
@@ -481,6 +482,11 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
     clus_df_gather <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int', reordered_column = 'col2_int')
     clus_df_gather[[column2]] <- clus_df_gather$col2_int
 
+    if (is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) {
+        write.csv(df, file = output_df_path, row.names = FALSE)
+        # message("Data frame written to ", output_df_path)
+    }
+
     if (return_greedy_wolf) {
         clus_df_gather <- clus_df_gather %>%
             ungroup() %>%
@@ -519,12 +525,11 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
 
 #' Perform a greedy algorithm heuristic for the Weighted One Layer Free problem
 #'
-#' Perform a greedy algorithm heuristic for the Weighted One Layer Free problem
-#'
 #' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
 #' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
 #' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}
 #' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
+#' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
 #'
 #' @return A data frame.
 #'
@@ -535,8 +540,195 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
 #' }
 #'
 #' @export
-greedy_wolf <- function(df, column1 = NULL, column2 = NULL, column_weights = NULL) {
-    clus_df_gather <-  plot_alluvial(df = df, column1 = column1, column2 = column2, column_weights = column_weights, return_greedy_wolf = TRUE)
+greedy_wolf <- function(df, column1 = NULL, column2 = NULL, column_weights = NULL, output_df_path = NULL) {
+    clus_df_gather <-  plot_alluvial(df = df, column1 = column1, column2 = column2, column_weights = column_weights, output_df_path = output_df_path, return_greedy_wolf = TRUE)
     return(clus_df_gather)
 }
 
+
+
+
+determine_number_of_crossing_edges <- function(crossing_edges) {
+    return(length(crossing_edges))
+}
+
+
+
+
+load_crossing_edges <- function(input) {
+    # Case 1: If input is a character path to a CSV/TSV file
+    if (is.character(input) && length(input) == 1 && file.exists(input)) {
+        df_in <- read.table(input, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+
+        if (ncol(df_in) != 6) {
+            stop("File must contain exactly 6 columns: left1, right1, weight1, left2, right2, weight2")
+        }
+
+        crossing_edges <- apply(df_in, 1, function(row) {
+            edge1 <- as.character(row[1:3])
+            edge2 <- as.character(row[4:6])
+            list(edge1, edge2)
+        })
+
+        return(unname(as.list(crossing_edges)))
+
+        # Case 2: Already a list of edge pairs
+    } else if (is.list(input) && all(sapply(input, function(x) {
+        is.list(x) && length(x) == 2 &&
+            all(sapply(x, function(e) is.character(e) && length(e) == 3))
+    }))) {
+        return(input)
+
+        # Otherwise: invalid input
+    } else {
+        stop("Input must be a path to a crossing edge CSV/TSV file or a list of edge pairs.")
+    }
+}
+
+
+#' Determine sum of products of overlapping edges
+#'
+#' @param crossing_edges A CSV path or list as outputted from determine_crossing_edges.
+#' @param minimum_edge_weight Optional positive integer that represents the minimum edge weight to count an edge in the calculation.
+#'
+#' @return A data frame.
+#'
+#' @examples
+#' \dontrun{
+#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' greedy_wolf(df)  # or greedy_wblf(df, column1, column2, column_weights)
+#' crossing_edges <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
+#' objective <- determine_weighted_layer_free_objective(crossing_edges)
+#' }
+#'
+#' @export
+determine_weighted_layer_free_objective <- function(crossing_edges, minimum_edge_weight = 0) {
+    # Read the file (tab-separated or CSV)
+    if (is.character(crossing_edges) && length(crossing_edges) == 1 && file.exists(crossing_edges)) {
+        df_in <- read.table(crossing_edges, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+
+        if (ncol(df_in) != 6) {
+            stop("File must contain exactly 6 columns: left1, right1, weight1, left2, right2, weight2")
+        }
+
+        crossing_edges <- apply(df_in, 1, function(row) {
+            edge1 <- as.character(row[1:3])
+            edge2 <- as.character(row[4:6])
+            list(edge1, edge2)
+        })
+
+        crossing_edges <- unname(as.list(crossing_edges))
+
+        # Case 2: Already a list of edge pairs
+    } else if (is.list(crossing_edges)) {
+        # do nothing
+    } else
+        stop("Input must be either a file path or a list.")
+
+    total_weighted_crossings <- 0
+    for (pair in crossing_edges) {
+        w1 <- as.numeric(pair[[1]][3])
+        w2 <- as.numeric(pair[[2]][3])
+
+        if (w1 < minimum_edge_weight || w2 < minimum_edge_weight) {
+            next
+        }
+
+        total_weighted_crossings <- total_weighted_crossings + w1 * w2
+    }
+
+    # Correct for double-counting
+    total_weighted_crossings <- total_weighted_crossings / 2
+
+    return(total_weighted_crossings)
+}
+
+
+# list(
+#    list(c(l1, r1, e1), c(l2, r2, e2)),
+#    ...
+# )
+#' Determine overlapping edges of graph run through greedy_wolf or greedy_wblf
+#'
+#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
+#' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
+#' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}
+#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
+#' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
+#'
+#' @return A data frame.
+#'
+#' @examples
+#' \dontrun{
+#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' greedy_wolf(df)  # or greedy_wblf(df, column1, column2, column_weights)
+#' crossing_edges <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
+#' }
+#'
+#' @export
+determine_crossing_edges <- function(df, column1, column2, column_weights = "value", minimum_edge_weight = 0, output_path = NULL, map_dict = NULL, return_weighted_layer_free_objective = FALSE) {
+    col1_sym <- sym(column1)
+    col2_sym <- sym(column2)
+    weight_sym <- sym(column_weights)
+
+    # Assign fixed coordinates for bipartite layout
+    df <- df %>%
+        mutate(x1 = as.integer(factor(!!col1_sym)),
+               x2 = as.integer(factor(!!col2_sym)),
+               y1 = 1,
+               y2 = 0)
+
+    if (!is.null(map_dict)) {
+        df$x2 <- map_dict[as.character(df$x2)]
+    }
+
+    # Initialize result list and seen pair tracker
+    crossing_edges <- list()
+    n <- nrow(df)
+
+    # Compare each pair of edges
+    for (i in 1:n) {
+        for (j in 1:n) {
+            if (i != j) {
+                if ((df$x1[i] < df$x1[j] && df$x2[i] > df$x2[j]) | (df$x1[i] > df$x1[j] && df$x2[i] < df$x2[j])) {
+                    edge1 <- c(
+                        as.character(df[[column1]][i]),
+                        as.character(df[[column2]][i]),
+                        as.character(df[[column_weights]][i])
+                    )
+                    edge2 <- c(
+                        as.character(df[[column1]][j]),
+                        as.character(df[[column2]][j]),
+                        as.character(df[[column_weights]][j])
+                    )
+
+                    w1 <- as.numeric(edge1[3])
+                    w2 <- as.numeric(edge2[3])
+                    if (w1 < minimum_edge_weight || w2 < minimum_edge_weight) {
+                        next
+                    }
+
+                    # # Avoid duplicates using a symmetric key
+                    # key <- paste(sort(c(paste(edge1, collapse = "::"), paste(edge2, collapse = "::"))), collapse = "||")
+                    crossing_edges <- append(crossing_edges, list(list(edge1, edge2)))
+                }
+            }
+        }
+    }
+
+    if (is.character(output_path) && grepl("\\.csv$", output_path, ignore.case = TRUE)) {
+        df_out <- do.call(rbind, lapply(crossing_edges, function(pair) {
+            c(pair[[1]], pair[[2]])
+        }))
+        colnames(df_out) <- c("left1", "right1", "weight1", "left2", "right2", "weight2")
+
+        write.table(df_out, file = output_path, sep = "\t", row.names = FALSE, quote = FALSE)
+    }
+
+    if (return_weighted_layer_free_objective) {
+        WLF_objective <- determine_weighted_layer_free_objective(crossing_edges)
+        return(WLF_objective)
+    }
+
+    return(crossing_edges)
+}

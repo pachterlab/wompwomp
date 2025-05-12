@@ -59,10 +59,16 @@ p
 ```
 
 Each function can also be run from the command line as follows:
-Installation:
-git clone https://github.com/josephrich98/alluvialmatch
+Installation (requires R to be installed):
+git clone https://github.com/pachterlab/alluvialmatch
 cd alluvialmatch
 
+The first time any command is run, it will bring up a prompt asking to download any missing R dependencies.
+
 Running:
-./exec/alluvialmatch plot_alluvial --input mydata.csv --output out.pdf
-./exec/alluvialmatch greedy_wolf --input graphdata.csv
+./exec/alluvialmatch plot_alluvial --input mydata.csv --column1 method1 --column2 method2
+./exec/alluvialmatch greedy_wolf --input mydata.csv --column1 method1 --column2 method2
+
+Help:
+./exec/alluvialmatch plot_alluvial --help
+./exec/alluvialmatch greedy_wolf --help

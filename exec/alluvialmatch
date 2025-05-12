@@ -4,8 +4,16 @@ args <- commandArgs(trailingOnly = TRUE)
 
 # Install devtools if needed
 if (!requireNamespace("devtools", quietly = TRUE)) {
-  message("Installing 'devtools'...")
-  install.packages("devtools", repos = "https://cloud.r-project.org")
+  if (interactive()) {
+    install <- askYesNo("The 'devtools' package is required but not installed. Install it now?")
+    if (isTRUE(install)) {
+      install.packages("devtools", repos = "https://cloud.r-project.org")
+    } else {
+      stop("Aborted. Please install 'devtools' manually with install.packages('devtools').")
+    }
+  } else {
+    stop("The 'devtools' package is required. Please install it with install.packages('devtools').")
+  }
 }
 
 # Install your package's runtime dependencies if missing
@@ -16,8 +24,20 @@ required_pkgs <- c(
 
 missing <- required_pkgs[!vapply(required_pkgs, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))]
 if (length(missing) > 0) {
-  message("Installing missing packages: ", paste(missing, collapse = ", "))
-  install.packages(missing, repos = "https://cloud.r-project.org")
+  msg <- paste("The following required packages are missing:\n  ",
+               paste(missing, collapse = ", "),
+               "\nInstall them now?")
+  if (interactive()) {
+    install <- askYesNo(msg)
+    if (isTRUE(install)) {
+      install.packages(missing, repos = "https://cloud.r-project.org")
+    } else {
+      stop("Aborted. Please install the missing packages manually.")
+    }
+  } else {
+    stop("Missing packages: ", paste(missing, collapse = ", "),
+         "\nPlease install them with install.packages().")
+  }
 }
 
 # Load the package from the local directory
