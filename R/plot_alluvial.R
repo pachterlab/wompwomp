@@ -397,6 +397,8 @@ get_alluvial_df <- function(df) {
 #' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
 #' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
 #' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
+#' @param fixed_column Character. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free.
+#' @param random_initializations Optional Integer. Number of random initializations of the WLF heuristic to perform.
 #' @param show_group_2_box_labels_in_ascending Logical. If \code{TRUE}, forces the group 2 axis to be displayed in ascending label order rather than greedy matching.
 #' @param color_boxes Logical. Whether to color the rectangular strata boxes representing groups.
 #' @param color_bands Logical. Whether to color the alluvial bands connecting the groups.
@@ -420,7 +422,7 @@ get_alluvial_df <- function(df) {
 #' }
 #'
 #' @export
-plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_labels_in_ascending = FALSE, color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, column_weights = NULL, output_path = NULL, output_df_path = NULL, color_list = NULL, return_greedy_wolf = FALSE) {
+plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NULL, random_initializations = 1, show_group_2_box_labels_in_ascending = FALSE, color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, column_weights = NULL, output_path = NULL, output_df_path = NULL, color_list = NULL, return_greedy_wolf = FALSE) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
     } else if (tibble::is_tibble(df)) {
@@ -464,6 +466,24 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
         stop(sprintf("column2 '%s' is not a column in the dataframe.", column2))
     }
 
+    if (isTRUE(fixed_column == 1)) {
+        fixed_column <- column1
+    } else if (isTRUE(fixed_column == 2)) {
+        fixed_column <- column2
+    }
+
+    if ((!is.null(fixed_column)) && !(column2 %in% colnames(df))) {
+        stop(sprintf("fixed_column '%s' is not a column in the dataframe.", fixed_column))
+    }
+
+    if (isTRUE(fixed_column == column1)) {
+        fixed_column <- "col1_int"
+        reordered_column <- "col2_int"
+    } else if (isTRUE(fixed_column == column2)) {
+        fixed_column <- "col2_int"
+        reordered_column <- "col1_int"
+    }
+
     df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
     df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
 
@@ -479,19 +499,56 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
     # )
 
     # clus_df_gather <- sort_clusters_by_agreement(clus_df_gather, stable_column = column1, reordered_column = column2)
-    clus_df_gather <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int', reordered_column = 'col2_int')
+    crossing_edges_objective_minimum <- Inf
+    for (i in seq_len(random_initializations)) {
+        #!!! randomize clus_df_gather order
+
+        if (is.null(fixed_column)) {
+            # WBLF
+            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int', reordered_column = 'col2_int')
+            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col2_int', reordered_column = 'col1_int')
+        } else {
+            # WOLF
+            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = fixed_column, reordered_column = reordered_column)
+        }
+
+        if (random_initializations > 1) {
+            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, column1=column1, column2=column2, column_weights = "value", minimum_edge_weight = 0, output_path = NULL, return_weighted_layer_free_objective = TRUE)
+            if (crossing_edges_objective < crossing_edges_objective_minimum) {
+                crossing_edges_objective_minimum <- crossing_edges_objective
+                clus_df_gather_best <- clus_df_gather_tmp
+            }
+        } else {
+            clus_df_gather_best <- clus_df_gather_tmp
+        }
+    }
+
+    clus_df_gather <- clus_df_gather_best
+
     clus_df_gather[[column2]] <- clus_df_gather$col2_int
 
+    clus_df_gather_to_save <- NULL
     if (is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) {
-        write.csv(df, file = output_df_path, row.names = FALSE)
+        if(is.null(clus_df_gather_to_save)) {
+            clus_df_gather <- clus_df_gather %>%
+                ungroup() %>%
+                slice(1:(n() %/% 2)) %>%              # keep first half of rows
+                select(-id, -x, -y, -col1_int, -col2_int)
+            clus_df_gather_to_save <- TRUE
+        }
+
+        write.csv(clus_df_gather, file = output_df_path, row.names = FALSE)
         # message("Data frame written to ", output_df_path)
     }
 
     if (return_greedy_wolf) {
-        clus_df_gather <- clus_df_gather %>%
-            ungroup() %>%
-            slice(1:(n() %/% 2)) %>%              # keep first half of rows
-            select(-id, -x, -y, -col1_int, -col2_int)         # drop columns
+        if(is.null(clus_df_gather_to_save)) {
+            clus_df_gather_to_save <- clus_df_gather %>%
+                ungroup() %>%
+                slice(1:(n() %/% 2)) %>%              # keep first half of rows
+                select(-id, -x, -y, -col1_int, -col2_int)    # drop columns
+            clus_df_gather_to_save <- TRUE
+        }
         return(clus_df_gather)
     }
 
@@ -529,6 +586,8 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
 #' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
 #' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}
 #' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
+#' @param fixed_column Optional Character or Integer. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free. If 1, then will fix column1; if 2, then will fix column2
+#' @param random_initializations Optional Integer. Number of random initializations of the WLF heuristic to perform.
 #' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
 #'
 #' @return A data frame.
@@ -540,20 +599,16 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, show_group_2_box_l
 #' }
 #'
 #' @export
-greedy_wolf <- function(df, column1 = NULL, column2 = NULL, column_weights = NULL, output_df_path = NULL) {
-    clus_df_gather <-  plot_alluvial(df = df, column1 = column1, column2 = column2, column_weights = column_weights, output_df_path = output_df_path, return_greedy_wolf = TRUE)
+greedy_wolf <- function(df, column1 = NULL, column2 = NULL, column_weights = NULL, fixed_column = NULL, random_initializations = 1, output_df_path = NULL) {
+    clus_df_gather <- plot_alluvial(df = df, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, output_df_path = output_df_path, return_greedy_wolf = TRUE)
     return(clus_df_gather)
 }
-
 
 
 
 determine_number_of_crossing_edges <- function(crossing_edges) {
     return(length(crossing_edges))
 }
-
-
-
 
 load_crossing_edges <- function(input) {
     # Case 1: If input is a character path to a CSV/TSV file
@@ -630,7 +685,7 @@ determine_weighted_layer_free_objective <- function(crossing_edges, minimum_edge
         w1 <- as.numeric(pair[[1]][3])
         w2 <- as.numeric(pair[[2]][3])
 
-        if (w1 < minimum_edge_weight || w2 < minimum_edge_weight) {
+        if (is.na(w1) || is.na(w2) || w1 < minimum_edge_weight || w2 < minimum_edge_weight) {
             next
         }
 
@@ -654,7 +709,9 @@ determine_weighted_layer_free_objective <- function(crossing_edges, minimum_edge
 #' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
 #' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}
 #' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
+#' @param minimum_edge_weight Optional positive integer that represents the minimum edge weight to count an edge in the calculation.
 #' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
+#' @param return_weighted_layer_free_objective Bool Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
 #'
 #' @return A data frame.
 #'
@@ -670,6 +727,18 @@ determine_crossing_edges <- function(df, column1, column2, column_weights = "val
     col1_sym <- sym(column1)
     col2_sym <- sym(column2)
     weight_sym <- sym(column_weights)
+
+    if (is.character(df)) {
+        if (grepl("\\.rds$", df, ignore.case = TRUE)) {
+            df <- readRDS(df)
+        } else if (grepl("\\.csv$", df, ignore.case = TRUE)) {
+            df <- read.csv(df)
+        } else {
+            stop("Input path must be a .csv or .rds file.")
+        }
+    } else if (!is.data.frame(df)) {
+        stop("Input must be a data frame or a file path to a .csv or .rds file.")
+    }
 
     # Assign fixed coordinates for bipartite layout
     df <- df %>%

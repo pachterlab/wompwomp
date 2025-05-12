@@ -8,6 +8,8 @@ plot_alluvial(
   df,
   column1 = NULL,
   column2 = NULL,
+  fixed_column = NULL,
+  random_initializations = 1,
   show_group_2_box_labels_in_ascending = FALSE,
   color_boxes = TRUE,
   color_bands = TRUE,
@@ -29,6 +31,10 @@ plot_alluvial(
 \item{column1}{Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
 
 \item{column2}{Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
+
+\item{fixed_column}{Character. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free.}
+
+\item{random_initializations}{Optional Integer. Number of random initializations of the WLF heuristic to perform.}
 
 \item{show_group_2_box_labels_in_ascending}{Logical. If \code{TRUE}, forces the group 2 axis to be displayed in ascending label order rather than greedy matching.}
 

@@ -114,8 +114,6 @@ matrix = matrix.tolist()  # convert numpy matrix --> list of lists
 cycle, splits = neighbor_net(labels, matrix)
 ```
 
-
-
 ```{r}
 sessioninfo::session_info()
 ```

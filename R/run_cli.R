@@ -8,10 +8,13 @@ Usage:
 Commands:
   plot_alluvial     Generate an alluvial plot
   greedy_wolf       Run the greedy heuristic
+  determine_crossing_edges    Determine sum of products of overlapping edges
+  determine_weighted_layer_free_objective    Determine sum of products of overlapping edges
 
 Use:
   alluvialmatch plot_alluvial --help
   alluvialmatch greedy_wolf --help
+  alluvialmatch determine_crossing_edges --help
 
 ")
     quit(save = "no", status = 0)
@@ -24,6 +27,10 @@ Use:
     run_plot_alluvial_cli(sub_args)
   } else if (command == "greedy_wolf") {
     run_greedy_wolf_cli(sub_args)
+  } else if (command == "determine_crossing_edges") {
+      run_determine_crossing_edges_cli(sub_args)
+  } else if (command == "determine_weighted_layer_free_objective") {
+      run_determine_weighted_layer_free_objective_cli(sub_args)
   } else {
     cat("Unknown command: ", command, "\n")
     run_cli("--help")

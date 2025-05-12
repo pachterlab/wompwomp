@@ -11,6 +11,7 @@ determine_crossing_edges(
   column_weights = "value",
   minimum_edge_weight = 0,
   output_path = NULL,
+  map_dict = NULL,
   return_weighted_layer_free_objective = FALSE
 )
 }
@@ -22,6 +23,10 @@ determine_crossing_edges(
 \item{column2}{Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}}
 
 \item{column_weights}{Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.}
+
+\item{minimum_edge_weight}{Optional positive integer that represents the minimum edge weight to count an edge in the calculation.}
+
+\item{return_weighted_layer_free_objective}{Bool Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)}
 
 \item{output_df_path}{Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.}
 }

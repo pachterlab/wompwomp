@@ -2,14 +2,16 @@
 run_plot_alluvial_cli <- function(args) {
   if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
     cat("
-Usage: alluvialmatch plot_alluvial --input FILE --column1 C1 --column2 C2 [options]
+Usage: alluvialmatch plot_alluvial --df FILE [options]
 
 Required:
-  --input                         CSV input file
-  --column1                       Name of first column
-  --column2                       Name of second column
+  --df                         CSV input file
 
 Optional:
+  --column1                       Name of first column
+  --column2                       Name of second column
+  --fixed_column                   Fix one column for one-layer free layout (1, 2, or column name)
+  --random_initializations         Number of random WLF initializations to run (default: 1)
   --show_group_2_box_labels_in_ascending  TRUE/FALSE (default: FALSE)
   --color_boxes                  TRUE/FALSE (default: TRUE)
   --color_bands                  TRUE/FALSE (default: TRUE)
@@ -20,6 +22,7 @@ Optional:
   --include_group_sizes          TRUE/FALSE (default: TRUE)
   --column_weights               Comma-separated numbers (e.g. 1,2)
   --output_path                  Path to save output
+  --output_df_path               Path to save resulting edge table (e.g. df.csv)
   --color_list                   Comma-separated hex codes
 ")
     quit(save = "no", status = 0)
@@ -42,22 +45,30 @@ Optional:
     strsplit(val, ",")[[1]]
   }
 
+  get_numeric_arg <- function(flags, default = NULL) {
+      val <- get_arg(flags)
+      if (is.null(val)) return(default)
+      as.numeric(val)
+  }
+
   get_numeric_list_arg <- function(flag) {
     val <- get_list_arg(flag)
     if (is.null(val)) return(NULL)
     as.numeric(val)
   }
 
-  input_file  <- get_arg("--input")
-  column1     <- get_arg("--column1")
-  column2     <- get_arg("--column2")
+  df          <- get_arg("--df")
 
-  if (is.null(input_file) || is.null(column1) || is.null(column2)) {
-    cat("Error: --input, --column1, and --column2 are required.\n\n")
+  if (is.null(df)) {
+    cat("Error: --df is required.\n\n")
     run_plot_alluvial_cli("--help")
   }
 
   # Optional args
+  column1     <- get_arg("--column1")
+  column2     <- get_arg("--column2")
+  fixed_column    <- get_arg("--fixed_column")
+  random_initializations <- get_numeric_arg("--random_initializations", 1)
   show_group_2_box_labels_in_ascending <- get_bool_arg("--show_group_2_box_labels_in_ascending", FALSE)
   color_boxes        <- get_bool_arg("--color_boxes", TRUE)
   color_bands        <- get_bool_arg("--color_bands", TRUE)
@@ -68,12 +79,15 @@ Optional:
   include_group_sizes     <- get_bool_arg("--include_group_sizes", TRUE)
   column_weights    <- get_numeric_list_arg("--column_weights")
   output_path       <- get_arg("--output_path")
+  output_df_path       <- get_arg("--output_df_path")
   color_list        <- get_list_arg("--color_list")
 
   result <- plot_alluvial(
-    df = input_file,
+    df = df,
     column1 = column1,
     column2 = column2,
+    fixed_column = fixed_column,
+    random_initializations = random_initializations,
     show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending,
     color_boxes = color_boxes,
     color_bands = color_bands,
@@ -84,10 +98,11 @@ Optional:
     include_group_sizes = include_group_sizes,
     column_weights = column_weights,
     output_path = output_path,
+    output_df_path = output_df_path,
     color_list = color_list,
   )
 
   if (!is.null(output_path)) {
-    message("Output saved to ", output_path)
+    message("Plot saved to ", output_path)
   }
 }

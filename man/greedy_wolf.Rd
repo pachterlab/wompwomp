@@ -9,6 +9,8 @@ greedy_wolf(
   column1 = NULL,
   column2 = NULL,
   column_weights = NULL,
+  fixed_column = NULL,
+  random_initializations = 1,
   output_df_path = NULL
 )
 }
@@ -20,6 +22,10 @@ greedy_wolf(
 \item{column2}{Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}}
 
 \item{column_weights}{Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.}
+
+\item{fixed_column}{Optional Character or Integer. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free. If 1, then will fix column1; if 2, then will fix column2}
+
+\item{random_initializations}{Optional Integer. Number of random initializations of the WLF heuristic to perform.}
 
 \item{output_df_path}{Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.}
 }
