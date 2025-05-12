@@ -246,7 +246,7 @@ find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_c
     return (group2_colors)
 }
 
-plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_name = "B", group1_name_mapping = "A", group2_name_mapping = "B", color_list = 'DEFAULT', color_boxes = TRUE, color_bands = FALSE, alluvial_alpha = 0.5, match_colors = TRUE, output_path = NULL, include_labels_in_boxes = FALSE, include_axis_titles = FALSE, include_group_sizes = FALSE, show_group_2_box_labels_in_ascending = FALSE) {
+plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_name = "B", group1_name_mapping = "A", group2_name_mapping = "B", color_list = 'DEFAULT', color_boxes = TRUE, color_bands = FALSE, alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL, include_labels_in_boxes = FALSE, include_axis_titles = FALSE, include_group_sizes = FALSE, show_group_2_box_labels_in_ascending = FALSE) {
     if (!is.null(color_list)){
         ditto_colors <- color_list
     } else{
@@ -371,8 +371,8 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
 
     p <- p + theme(legend.position = "none")  # to hide legend
 
-    if (!is.null(output_path)) {
-        ggsave(output_path, plot = p, dpi = 300, bg = "white")
+    if (!is.null(output_plot_path)) {
+        ggsave(output_plot_path, plot = p, dpi = 300, bg = "white")
     }
 
     return(p)
@@ -408,7 +408,7 @@ get_alluvial_df <- function(df) {
 #' @param include_axis_titles Logical. Whether to display axis titles for column1 and column2.
 #' @param include_group_sizes Logical. If \code{TRUE}, includes group sizes in the labels (e.g., "Group A (42)").
 #' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
-#' @param output_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.
+#' @param output_plot_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.
 #' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
 #' @param color_list Optional named list or vector of colors to override default group colors.
 #' @param return_greedy_wolf Logical. If \code{TRUE}, returns the underlying bipartite match data frame instead of a ggplot object.
@@ -422,7 +422,7 @@ get_alluvial_df <- function(df) {
 #' }
 #'
 #' @export
-plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NULL, random_initializations = 1, show_group_2_box_labels_in_ascending = FALSE, color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, column_weights = NULL, output_path = NULL, output_df_path = NULL, color_list = NULL, return_greedy_wolf = FALSE) {
+plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NULL, random_initializations = 1, show_group_2_box_labels_in_ascending = FALSE, color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, column_weights = NULL, output_plot_path = NULL, output_df_path = NULL, color_list = NULL, return_greedy_wolf = FALSE) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
     } else if (tibble::is_tibble(df)) {
@@ -513,7 +513,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
         }
 
         if (random_initializations > 1) {
-            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, column1=column1, column2=column2, column_weights = "value", minimum_edge_weight = 0, output_path = NULL, return_weighted_layer_free_objective = TRUE)
+            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, column1=column1, column2=column2, column_weights = "value", minimum_edge_weight = 0, output_plot_path = NULL, return_weighted_layer_free_objective = TRUE)
             if (crossing_edges_objective < crossing_edges_objective_minimum) {
                 crossing_edges_objective_minimum <- crossing_edges_objective
                 clus_df_gather_best <- clus_df_gather_tmp
@@ -574,7 +574,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
     #         column2_mapping = factor(group2_column_original_clusters, levels = unique(group2_column_original_clusters[order(column2)]))
     #     )
 
-    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = column1, group2_name = column2, group1_name_mapping = column1, group2_name_mapping = column2, color_list = color_list, color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles, include_group_sizes = include_group_sizes, show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_path = output_path)
+    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = column1, group2_name = column2, group1_name_mapping = column1, group2_name_mapping = column2, color_list = color_list, color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles, include_group_sizes = include_group_sizes, show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_plot_path = output_plot_path)
 
     return(alluvial_plot)
 }

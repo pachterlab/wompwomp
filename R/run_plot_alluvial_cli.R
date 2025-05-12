@@ -21,7 +21,7 @@ Optional:
   --include_axis_titles          TRUE/FALSE (default: TRUE)
   --include_group_sizes          TRUE/FALSE (default: TRUE)
   --column_weights               Comma-separated numbers (e.g. 1,2)
-  --output_path                  Path to save output
+  --output_plot_path                  Path to save output
   --output_df_path               Path to save resulting edge table (e.g. df.csv)
   --color_list                   Comma-separated hex codes
 ")
@@ -78,7 +78,7 @@ Optional:
   include_axis_titles     <- get_bool_arg("--include_axis_titles", TRUE)
   include_group_sizes     <- get_bool_arg("--include_group_sizes", TRUE)
   column_weights    <- get_numeric_list_arg("--column_weights")
-  output_path       <- get_arg("--output_path")
+  output_plot_path       <- get_arg("--output_plot_path")
   output_df_path       <- get_arg("--output_df_path")
   color_list        <- get_list_arg("--color_list")
 
@@ -97,12 +97,12 @@ Optional:
     include_axis_titles = include_axis_titles,
     include_group_sizes = include_group_sizes,
     column_weights = column_weights,
-    output_path = output_path,
+    output_plot_path = output_plot_path,
     output_df_path = output_df_path,
     color_list = color_list,
   )
 
-  if (!is.null(output_path)) {
-    message("Plot saved to ", output_path)
+  if (!is.null(output_plot_path)) {
+    message("Plot saved to ", output_plot_path)
   }
 }

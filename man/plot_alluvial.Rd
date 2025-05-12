@@ -19,7 +19,7 @@ plot_alluvial(
   include_axis_titles = TRUE,
   include_group_sizes = TRUE,
   column_weights = NULL,
-  output_path = NULL,
+  output_plot_path = NULL,
   output_df_path = NULL,
   color_list = NULL,
   return_greedy_wolf = FALSE
@@ -54,7 +54,7 @@ plot_alluvial(
 
 \item{column_weights}{Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.}
 
-\item{output_path}{Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.}
+\item{output_plot_path}{Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.}
 
 \item{output_df_path}{Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.}
 
