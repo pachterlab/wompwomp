@@ -246,7 +246,12 @@ find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_c
     return (group2_colors)
 }
 
-plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_name = "B", group1_name_mapping = "A", group2_name_mapping = "B", color_list = 'DEFAULT', color_boxes = TRUE, color_bands = FALSE, alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL, include_labels_in_boxes = FALSE, include_axis_titles = FALSE, include_group_sizes = FALSE, show_group_2_box_labels_in_ascending = FALSE) {
+plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_name = "B", 
+                                   group1_name_mapping = "A", group2_name_mapping = "B", 
+                                   color_list = 'DEFAULT', color_boxes = TRUE, color_bands = FALSE, 
+                                   alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL, 
+                                   include_labels_in_boxes = FALSE, include_axis_titles = FALSE, include_group_sizes = FALSE, 
+                                   show_group_2_box_labels_in_ascending = FALSE) {
     if (!is.null(color_list)){
         ditto_colors <- color_list
     } else{
@@ -280,12 +285,19 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
     # p <- ggplot(data = clus_df_gather, aes(axis1 = !!sym(group1_name), axis2 = !!sym(group2_name), y = value))
 
     if (color_bands) {
-        if (num_levels_group2 > num_levels_group1) {
-            p <- p +
-                geom_alluvium(aes(fill = !!sym(group2_name)), alpha = alluvial_alpha) +
-                scale_fill_manual(values = colors_group2) +
-                labs(fill = NULL)
-        } else {
+        if (color_bands==TRUE){
+            if (num_levels_group2 > num_levels_group1) {
+                p <- p +
+                    geom_alluvium(aes(fill = !!sym(group2_name)), alpha = alluvial_alpha) +
+                    scale_fill_manual(values = colors_group2) +
+                    labs(fill = NULL)
+            } else {
+                p <- p +
+                    geom_alluvium(aes(fill = !!sym(group1_name)), alpha = alluvial_alpha) +
+                    #scale_fill_manual(values = color_bands) +
+                    labs(fill = NULL)
+            }
+        } else{
             p <- p +
                 geom_alluvium(aes(fill = !!sym(group1_name)), alpha = alluvial_alpha) +
                 scale_fill_manual(values = colors_group1) +
@@ -525,8 +537,6 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
 
     clus_df_gather <- clus_df_gather_best
 
-    clus_df_gather[[column2]] <- clus_df_gather$col2_int
-
     clus_df_gather_to_save <- NULL
     if (is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) {
         if(is.null(clus_df_gather_to_save)) {
@@ -543,7 +553,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
 
     if (return_greedy_wolf) {
         if(is.null(clus_df_gather_to_save)) {
-            clus_df_gather_to_save <- clus_df_gather %>%
+            clus_df_gather <- clus_df_gather %>%
                 ungroup() %>%
                 slice(1:(n() %/% 2)) %>%              # keep first half of rows
                 select(-id, -x, -y, -col1_int, -col2_int)    # drop columns
@@ -801,3 +811,4 @@ determine_crossing_edges <- function(df, column1, column2, column_weights = "val
 
     return(crossing_edges)
 }
+
