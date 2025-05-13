@@ -506,7 +506,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
         if (is.null(fixed_column)) {
             # WBLF
             clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int', reordered_column = 'col2_int')
-            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col2_int', reordered_column = 'col1_int')
+            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather_tmp, stable_column = 'col2_int', reordered_column = 'col1_int')
         } else {
             # WOLF
             clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = fixed_column, reordered_column = reordered_column)

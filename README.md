@@ -66,8 +66,8 @@ cd alluvialmatch
 The first time any command is run, it will bring up a prompt asking to download any missing R dependencies.
 
 Running:
-./exec/alluvialmatch plot_alluvial --input mydata.csv --column1 method1 --column2 method2
-./exec/alluvialmatch greedy_wolf --input mydata.csv --column1 method1 --column2 method2
+./exec/alluvialmatch plot_alluvial --df mydata.csv --column1 method1 --column2 method2
+./exec/alluvialmatch greedy_wolf --df mydata.csv --column1 method1 --column2 method2
 
 Help:
 ./exec/alluvialmatch plot_alluvial --help

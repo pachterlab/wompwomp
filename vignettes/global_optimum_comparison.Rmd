@@ -88,6 +88,11 @@ for (i in 1:nrow(perms)) {
 ```
 
 ```{r}
+clus_permuted_best
+```
+
+
+```{r}
 p_best <- plot_alluvial(clus_permuted_best, column1="tissue", column2="cluster", column_weights = "value")
 p_best
 ```
