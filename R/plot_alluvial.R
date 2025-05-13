@@ -171,9 +171,8 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
 }
 
 
-find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_colors) {
-    group1_name = 'col1_int'
-    group2_name = 'col2_int'
+find_group2_colors <- function(clus_df_gather, ditto_colors, 
+                               group1_name = 'col1_int', group2_name = 'col2_int') {
     clus_df_filtered <- clus_df_gather[, c(group1_name, group2_name, "value")]
 
     clus_df_filtered[[group1_name]] <- paste0("G1_", clus_df_filtered[[group1_name]])
@@ -246,12 +245,14 @@ find_group2_colors <- function(clus_df_gather, group1_name, group2_name, ditto_c
     return (group2_colors)
 }
 
-plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_name = "B", 
-                                   group1_name_mapping = "A", group2_name_mapping = "B", 
+plot_alluvial_internal <- function(clus_df_gather, 
+                                   sorting_algorithm = NULL,
+                                   group1_name = "A", group2_name = "B", 
+                                   group1_name_mapping = "A", group2_name_mapping = "B", color_column=NULL,
                                    color_list = 'DEFAULT', color_boxes = TRUE, color_bands = FALSE, 
                                    alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL, 
-                                   include_labels_in_boxes = FALSE, include_axis_titles = FALSE, include_group_sizes = FALSE, 
-                                   show_group_2_box_labels_in_ascending = FALSE) {
+                                   include_labels_in_boxes = FALSE, include_axis_titles = FALSE, include_group_sizes = FALSE
+                                   ) {
     if (!is.null(color_list)){
         ditto_colors <- color_list
     } else{
@@ -259,17 +260,26 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
     }
     num_levels_group1 <- length(levels(clus_df_gather[[group1_name]]))
     num_levels_group2 <- length(levels(clus_df_gather[[group2_name]]))
-
-    if (show_group_2_box_labels_in_ascending) {
-        group2_name_mapping <- group2_name_mapping
-    }
-
+    
+    
     # Extract colors for each factor, assuming ditto_colors is long enough
-    colors_group1 <- ditto_colors[1:num_levels_group1]
-
     if (match_colors) {
-        colors_group2 <- find_group2_colors(clus_df_gather, group1_name, group2_name, ditto_colors)
+        if (is.null(color_column)) {
+            colors_group1 <- ditto_colors[1:num_levels_group1]
+            colors_group2 <- find_group2_colors(clus_df_gather, ditto_colors)
+            color_column=group1_name
+            
+        } else if (color_column==group2_name) {
+            colors_group2 <- ditto_colors[1:num_levels_group2]
+            colors_group1 <- find_group2_colors(clus_df_gather, ditto_colors, 
+                                                group1_name = 'col2_int', group2_name = 'col1_int')
+        } else {
+            colors_group1 <- ditto_colors[1:num_levels_group1]
+            colors_group2 <- find_group2_colors(clus_df_gather, ditto_colors)
+            color_column=group1_name
+        }
     } else {
+        colors_group1 <- ditto_colors[1:num_levels_group1]
         colors_group2 <- ditto_colors[(num_levels_group1+1):(num_levels_group1+num_levels_group2)]
     }
 
@@ -281,7 +291,9 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
     combined_colors_reverse <- c(colors_group1_reverse, colors_group2_reverse)
 
     # uncomment to attempt mapping
-    p <- ggplot(data = clus_df_gather, aes(axis1 = !!sym(group1_name_mapping), axis2 = !!sym(group2_name_mapping), y = value))
+    p <- ggplot(data = clus_df_gather, aes(axis1 = !!sym('col1_int'), 
+                                           axis2 = !!sym('col2_int'), y = value),
+                )
     # p <- ggplot(data = clus_df_gather, aes(axis1 = !!sym(group1_name), axis2 = !!sym(group2_name), y = value))
 
     if (color_bands) {
@@ -293,8 +305,8 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
                     labs(fill = NULL)
             } else {
                 p <- p +
-                    geom_alluvium(aes(fill = !!sym(group1_name)), alpha = alluvial_alpha) +
-                    #scale_fill_manual(values = color_bands) +
+                    geom_alluvium(aes(fill = color_bands), alpha = alluvial_alpha) +
+                    #scale_fill_manual(values = color_bands_values) +
                     labs(fill = NULL)
             }
         } else{
@@ -308,32 +320,19 @@ plot_alluvial_internal <- function(clus_df_gather, group1_name = "A", group2_nam
     }
 
     if (color_boxes) {
-        p <- p + geom_stratum(fill = combined_colors_reverse)
+        p <- p + geom_stratum(fill = combined_colors_reverse, 
+                              )
     } else {
         p <- p + geom_stratum()
     }
 
     if (!(include_labels_in_boxes==FALSE)) {
-        if (match_colors) {p <- p +
-            geom_text(stat = StatStratum, aes(label = after_stat(stratum)), size = 3, color = "black")
-        } else{
-            combined_names <- c(levels(clus_df_gather[[group1_name]]), levels(clus_df_gather[[group2_name]]))
-            label_names <- c()
-            for (i in seq_along(combined_colors)){
-                current_color <- combined_colors[i]
-                if (!(current_color %in% combined_colors[0:(i-1)])){
-                    label_names <- c(label_names, combined_names[i])
-                } else{
-                    label_names <- c(label_names,label_names[which(combined_colors == current_color)[1]])
-                }
-            }
-            A_label_names <- rev(label_names[1:num_levels_group1])
-            B_label_names <- rev(label_names[(1+num_levels_group1):length(label_names)])
-
-            final_label_names <- c(A_label_names, B_label_names)
-            p <- p +
-                geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))
-        }
+        A_label_names <- rev(levels(clus_df_gather[[group1_name]]))
+        B_label_names <- rev(levels(clus_df_gather[[group2_name]]))
+        
+        final_label_names <- c(A_label_names, B_label_names)
+        p <- p +
+            geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))
     }
 
     top_y1 <- clus_df_gather %>%
@@ -434,7 +433,12 @@ get_alluvial_df <- function(df) {
 #' }
 #'
 #' @export
-plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NULL, random_initializations = 1, show_group_2_box_labels_in_ascending = FALSE, color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, column_weights = NULL, output_plot_path = NULL, output_df_path = NULL, color_list = NULL, return_greedy_wolf = FALSE) {
+plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NULL, color_column = NULL,
+                          random_initializations = 1, 
+                          color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, 
+                          include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, 
+                          column_weights = NULL, output_plot_path = NULL, output_df_path = NULL, color_list = NULL, 
+                          return_greedy_wolf = FALSE) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
     } else if (tibble::is_tibble(df)) {
@@ -500,8 +504,8 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
     df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
 
     #factorize input columns
-    df[[column1]] <- as.factor(df[[column1]])
-    df[[column2]] <- as.factor(df[[column2]])
+    df[[column1]] <- as.factor(as.character(df[[column1]]))
+    df[[column2]] <- as.factor(as.character(df[[column2]]))
 
     clus_df_gather <- get_alluvial_df(df)
 
@@ -584,7 +588,13 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
     #         column2_mapping = factor(group2_column_original_clusters, levels = unique(group2_column_original_clusters[order(column2)]))
     #     )
 
-    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = column1, group2_name = column2, group1_name_mapping = column1, group2_name_mapping = column2, color_list = color_list, color_boxes = color_boxes, color_bands = color_bands, match_colors = match_colors, alluvial_alpha = alluvial_alpha, include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles, include_group_sizes = include_group_sizes, show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending, output_plot_path = output_plot_path)
+    alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = column1, group2_name = column2, 
+                                            group1_name_mapping = column1, group2_name_mapping = column2, color_column = color_column,
+                                            color_list = color_list, color_boxes = color_boxes, color_bands = color_bands, 
+                                            match_colors = match_colors, alluvial_alpha = alluvial_alpha, 
+                                            include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles, 
+                                            include_group_sizes = include_group_sizes, 
+                                            output_plot_path = output_plot_path)
 
     return(alluvial_plot)
 }
@@ -811,4 +821,3 @@ determine_crossing_edges <- function(df, column1, column2, column_weights = "val
 
     return(crossing_edges)
 }
-
