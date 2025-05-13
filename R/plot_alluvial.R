@@ -34,7 +34,7 @@ default_colors <- c(
     "#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700", "#1C91D4", "#007756", "#D5C711", "#005685",
     "#A04700", "#B14380", "#4D4D4D", "#FFBE2D", "#80C7EF", "#00F6B3", "#F4EB71", "#06A5FF", "#FF8320", "#D99BBD", "#8C8C8C", "#FFCB57", "#9AD2F2",
     "#2CFFC6", "#F6EF8E", "#38B7FF", "#FF9B4D", "#E0AFCA", "#A3A3A3", "#8A5F00", "#1674A9", "#005F45", "#AA9F0D", "#00446B", "#803800", "#8D3666",
-    "#3D3D3D", 'black', 'white', 'red', 'blue'
+    "#3D3D3D"
 )
 
 if (!exists("group1_color")) {
@@ -438,7 +438,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
                           color_boxes = TRUE, color_bands = TRUE, match_colors = TRUE, alluvial_alpha = 0.5, 
                           include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, 
                           column_weights = NULL, output_plot_path = NULL, output_df_path = NULL, color_list = NULL, 
-                          return_greedy_wolf = FALSE) {
+                          return_greedy_wolf = FALSE, set_seed=42) {
     if (is.character(df) && grepl("\\.csv$", df)) {
         df <- read.csv(df)  # load in CSV as dataframe
     } else if (tibble::is_tibble(df)) {
@@ -516,9 +516,15 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
 
     # clus_df_gather <- sort_clusters_by_agreement(clus_df_gather, stable_column = column1, reordered_column = column2)
     crossing_edges_objective_minimum <- Inf
+    set.seed(set_seed)
     for (i in seq_len(random_initializations)) {
         #!!! randomize clus_df_gather order
-
+        for (column_num in c('col1_int', 'col2_int')){
+            df[[column_num]] = as.factor(df[[column_num]])
+            df[[column_num]] = factor(df[[column_num]], levels=sample(levels(df[[column_num]])))
+            df[[column_num]] = as.integer(df[[column_num]])
+        }
+        
         if (is.null(fixed_column)) {
             # WBLF
             clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int', reordered_column = 'col2_int')
