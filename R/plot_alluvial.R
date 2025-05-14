@@ -410,7 +410,6 @@ get_alluvial_df <- function(df) {
 #' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
 #' @param fixed_column Character. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free.
 #' @param random_initializations Optional Integer. Number of random initializations of the WLF heuristic to perform.
-#' @param show_group_2_box_labels_in_ascending Logical. If \code{TRUE}, forces the group 2 axis to be displayed in ascending label order rather than greedy matching.
 #' @param color_boxes Logical. Whether to color the rectangular strata boxes representing groups.
 #' @param color_bands Logical. Whether to color the alluvial bands connecting the groups.
 #' @param match_colors Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.
@@ -434,7 +433,7 @@ get_alluvial_df <- function(df) {
 #'
 #' @export
 plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NULL, color_column = NULL,
-                          random_initializations = 1, color_list = NULL,
+                          sorting_algorithm = 'greedy_WBLF',random_initializations = 1, color_list = NULL,
                           color_boxes = TRUE, 
                           color_bands = NULL, color_band_list = NULL, 
                           match_colors = TRUE, alluvial_alpha = 0.5, 
@@ -493,6 +492,10 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
     if ((!is.null(fixed_column)) && !(column2 %in% colnames(df))) {
         stop(sprintf("fixed_column '%s' is not a column in the dataframe.", fixed_column))
     }
+    
+    if ((is.null(fixed_column)) && (sorting_algorithm=='greedy_WOLF')) {
+        stop(sprintf("Column to fix for One-Sided matching is not specified.", fixed_column))
+    }
 
     if (isTRUE(fixed_column == column1)) {
         fixed_column <- "col1_int"
@@ -527,13 +530,15 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = NUL
             df[[column_num]] = as.integer(df[[column_num]])
         }
         
-        if (is.null(fixed_column)) {
+        if (sorting_algorithm == 'greedy_WBLF') {
             # WBLF
             clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int', reordered_column = 'col2_int')
             clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather_tmp, stable_column = 'col2_int', reordered_column = 'col1_int')
-        } else {
+        } else if (sorting_algorithm == 'greedy_WOLF') {
             # WOLF
             clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = fixed_column, reordered_column = reordered_column)
+        } else {
+            clus_df_gather_tmp <- clus_df_gather
         }
 
         if (random_initializations > 1) {
