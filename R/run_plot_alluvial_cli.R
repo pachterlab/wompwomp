@@ -23,7 +23,11 @@ Optional:
   --column_weights               Comma-separated numbers (e.g. 1,2)
   --output_plot_path                  Path to save output
   --output_df_path               Path to save resulting edge table (e.g. df.csv)
-  --color_list                   Comma-separated hex codes
+  --color_list                   Comma-separated hex codes for nodes
+  --color_column                color column for edges
+  --sorting_algorithm           greedy_WBLF, greedy_WOLF, or None
+  --color_band_list             Comma-separated hex codes for edges
+  --set_seed                    seed for random initializations
 ")
     quit(save = "no", status = 0)
   }
@@ -81,6 +85,10 @@ Optional:
   output_plot_path       <- get_arg("--output_plot_path")
   output_df_path       <- get_arg("--output_df_path")
   color_list        <- get_list_arg("--color_list")
+  color_column       <- get_arg("--color_column")
+  sorting_algorithm       <- get_arg("--sorting_algorithm")
+  color_band_list       <- get_arg("--color_band_list")
+  set_seed       <- get_arg("--set_seed")
 
   result <- plot_alluvial(
     df = df,
@@ -100,6 +108,10 @@ Optional:
     output_plot_path = output_plot_path,
     output_df_path = output_df_path,
     color_list = color_list,
+    color_column=color_column,
+    sorting_algorithm=sorting_algorithm,
+    color_band_list=color_band_list,
+    set_seed=set_seed
   )
 
   if (!is.null(output_plot_path)) {

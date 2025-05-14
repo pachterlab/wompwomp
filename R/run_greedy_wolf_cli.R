@@ -14,6 +14,8 @@ Optional:
   --fixed_column                   Fix one column for one-layer free layout (1, 2, or column name)
   --random_initializations         Number of random WLF initializations to run (default: 1)
   --output_df_path                 Path to save resulting edge table (e.g. df.csv)
+  --sorting_algorithm           greedy_WBLF, greedy_WOLF, or None
+  --set_seed                    seed for random initializations
 ")
     quit(save = "no", status = 0)
   }
@@ -42,6 +44,8 @@ Optional:
   fixed_column    <- get_arg("--fixed_column")
   random_initializations <- get_numeric_arg("--random_initializations", 1)
   output_df_path <- get_arg("--output_df_path")
+  sorting_algorithm       <- get_arg("--sorting_algorithm")
+  set_seed       <- get_arg("--set_seed")
 
   if (is.null(df)) {
     cat("Error: --df is required.\n\n")
@@ -55,7 +59,9 @@ Optional:
     column_weights = column_weights,
     fixed_column = fixed_column,
     random_initializations = random_initializations,
-    output_df_path = output_df_path
+    output_df_path = output_df_path,
+    sorting_algorithm=sorting_algorithm,
+    set_seed=set_seed
   )
 
   print(result)

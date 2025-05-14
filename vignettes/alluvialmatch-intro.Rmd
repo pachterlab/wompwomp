@@ -37,6 +37,7 @@ df <- data.frame(
   )
 )
 
+# write.csv(df, file = "vignette_intro_df_ungrouped.csv", row.names = FALSE, quote = FALSE)
 head(df)
 ```
 
@@ -48,6 +49,7 @@ clus_df_gather <- df |>
     dplyr::count(name = "value")
 gather_set_data(clus_df_gather, 1:2)
 
+# write.csv(clus_df_gather, file = "vignette_intro_df_grouped.csv", row.names = FALSE, quote = FALSE)
 clus_df_gather
 ```
 
@@ -61,48 +63,61 @@ p1 <- ggplot(data = clus_df_gather, aes(axis1 = tissue, axis2 = cluster, y = val
     geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
     theme_minimal()
 p1
+
+# ggsave("ggalluvial.png", plot = p1, dpi = 300, bg = "white")
 ```
 Implementing a greedy heuristic for weighted one-layer free problem
 ```{r}
-clus_df_gather_sorted_wolf <- greedy_wolf(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "WOLF")
+clus_df_gather_sorted_wolf <- greedy_wolf(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF")
 clus_df_gather_sorted_wolf
 ```
 
 Plot the alluvial plot with sorting and color matching
 ```{r}
-p2 <- plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "WOLF", fixed_layer = 1)
-# alternatively: p2 <- plot_alluvial(df, column1="tissue", column2="cluster", sorting_algorithm = "WOLF", fixed_layer = 1)
+p2 <- plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF", fixed_column = 1)
+# alternatively: p2 <- plot_alluvial(df, column1="tissue", column2="cluster", sorting_algorithm = "greedy_WOLF", fixed_column = 1)
 p2
+
+# ggsave("alluvialmatch_WOLF.png", plot = p2, dpi = 300, bg = "white")
 ```
 
 Notice how, because we kept the left layer fixed, B cell and T cell are separated far apart, even though we would minimize edge crossings if they were next to each other - we can fix this with the weighted both-layers free heuristic
 ```{r}
-clus_df_gather_sorted_wblf <- greedy_wolf(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "WBLF")
+clus_df_gather_sorted_wblf <- greedy_wolf(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")  # output_df_path = "vignette_intro_df_cluster_wblf.csv"
 clus_df_gather_sorted_wblf
 ```
 
 ```{r}
-p3 <- plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "WBLF")
-# alternatively: p3 <- plot_alluvial(df, column1="tissue", column2="cluster", sorting_algorithm = "WBLF")
+p3 <- plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")  # output_plot_path = "vignette_intro_plot.png"
+# alternatively: p3 <- plot_alluvial(df, column1="tissue", column2="cluster", sorting_algorithm = "greedy_WBLF")
+p3
+
+# ggsave("alluvialmatch_WBLF.png", plot = p3, dpi = 300, bg = "white")
 ```
 
 What is our objective value on clus_df_gather_sorted_wolf and clus_df_gather_sorted_wblf, where our objective function is the sum of products of overlapping edge weights?
 ```{r}
-crossing_edges_wolf <- determine_crossing_edges(clus_df_gather_sorted_wolf, column1="tissue", column2="leiden", column_weights = "value")
-print(crossing_edges_wolf)
+clus_df_gather_ungrouped <- clus_df_gather %>% ungroup()
+crossing_edges_unsorted <- determine_crossing_edges(clus_df_gather_ungrouped, column1="tissue", column2="cluster", column_weights = "value")
+# str(crossing_edges_unsorted[1:3])
 
-crossing_edges_wblf <- determine_crossing_edges(clus_df_gather_sorted_wblf, column1="tissue", column2="leiden", column_weights = "value")
-print(crossing_edges_wblf)
+crossing_edges_wolf <- determine_crossing_edges(clus_df_gather_sorted_wolf, column1="tissue", column2="cluster", column_weights = "value")
+# str(crossing_edges_wolf[1:3])
+
+crossing_edges_wblf <- determine_crossing_edges(clus_df_gather_sorted_wblf, column1="tissue", column2="cluster", column_weights = "value")  # output_df_path = "vignette_intro_crossing_wblf.csv"
+str(crossing_edges_wblf[1:3])
 ```
 
 ```{r}
+objective_unsorted <- determine_weighted_layer_free_objective(crossing_edges_unsorted)
+print(paste0("Objective (unsorted): ", objective_unsorted))
+
 objective_wolf <- determine_weighted_layer_free_objective(crossing_edges_wolf)
-print(objective_wolf)
+print(paste0("Objective (greedy WOLF): ", objective_wolf))
 
 objective_wblf <- determine_weighted_layer_free_objective(crossing_edges_wblf)
-print(objective_wblf)
+print(paste0("Objective (greedy WBLF): ", objective_wblf))
 ```
-
 
 ```{r}
 sessioninfo::session_info()

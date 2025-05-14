@@ -8,11 +8,14 @@ plot_alluvial(
   df,
   column1 = NULL,
   column2 = NULL,
-  fixed_column = NULL,
+  fixed_column = 1,
+  color_column = NULL,
+  sorting_algorithm = "greedy_WBLF",
   random_initializations = 1,
-  show_group_2_box_labels_in_ascending = FALSE,
+  color_list = NULL,
   color_boxes = TRUE,
-  color_bands = TRUE,
+  color_bands = NULL,
+  color_band_list = NULL,
   match_colors = TRUE,
   alluvial_alpha = 0.5,
   include_labels_in_boxes = TRUE,
@@ -21,8 +24,8 @@ plot_alluvial(
   column_weights = NULL,
   output_plot_path = NULL,
   output_df_path = NULL,
-  color_list = NULL,
-  return_greedy_wolf = FALSE
+  return_greedy_wolf = FALSE,
+  set_seed = 42
 )
 }
 \arguments{
@@ -34,13 +37,19 @@ plot_alluvial(
 
 \item{fixed_column}{Character. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free.}
 
+\item{color_column}{Optional Character. Which column to use for coloring bands.}
+
+\item{sorting_algorithm}{Character. Must be greedy_WBLF, greedy_WOLF, or None.}
+
 \item{random_initializations}{Optional Integer. Number of random initializations of the WLF heuristic to perform.}
 
-\item{show_group_2_box_labels_in_ascending}{Logical. If \code{TRUE}, forces the group 2 axis to be displayed in ascending label order rather than greedy matching.}
+\item{color_list}{Optional named list or vector of colors to override default group colors.}
 
 \item{color_boxes}{Logical. Whether to color the rectangular strata boxes representing groups.}
 
 \item{color_bands}{Logical. Whether to color the alluvial bands connecting the groups.}
+
+\item{color_band_list}{Optional named list or vector of colors to override default band colors.}
 
 \item{match_colors}{Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.}
 
@@ -58,9 +67,7 @@ plot_alluvial(
 
 \item{output_df_path}{Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.}
 
-\item{color_list}{Optional named list or vector of colors to override default group colors.}
-
-\item{return_greedy_wolf}{Logical. If \code{TRUE}, returns the underlying bipartite match data frame instead of a ggplot object.}
+\item{set_seed}{Optional Integer. Seed for random initializations of the WLF heuristic to perform.}
 }
 \value{
 A \code{ggplot2} object representing the alluvial plot.

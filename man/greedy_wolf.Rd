@@ -9,8 +9,10 @@ greedy_wolf(
   column1 = NULL,
   column2 = NULL,
   column_weights = NULL,
-  fixed_column = NULL,
+  sorting_algorithm = "greedy_WBLF",
+  fixed_column = 1,
   random_initializations = 1,
+  set_seed = 42,
   output_df_path = NULL
 )
 }

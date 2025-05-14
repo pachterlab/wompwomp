@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_alluvial.R
 \name{determine_crossing_edges}
 \alias{determine_crossing_edges}
-\title{Determine overlapping edges of graph run through greedy_wolf or greedy_wblf}
+\title{Determine overlapping edges of graph run through greedy_wolf}
 \usage{
 determine_crossing_edges(
   df,
@@ -10,7 +10,7 @@ determine_crossing_edges(
   column2,
   column_weights = "value",
   minimum_edge_weight = 0,
-  output_path = NULL,
+  output_df_path = NULL,
   map_dict = NULL,
   return_weighted_layer_free_objective = FALSE
 )
@@ -26,20 +26,20 @@ determine_crossing_edges(
 
 \item{minimum_edge_weight}{Optional positive integer that represents the minimum edge weight to count an edge in the calculation.}
 
-\item{return_weighted_layer_free_objective}{Bool Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)}
-
 \item{output_df_path}{Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.}
+
+\item{return_weighted_layer_free_objective}{Bool Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)}
 }
 \value{
 A data frame.
 }
 \description{
-Determine overlapping edges of graph run through greedy_wolf or greedy_wblf
+Determine overlapping edges of graph run through greedy_wolf
 }
 \examples{
 \dontrun{
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-greedy_wolf(df)  # or greedy_wblf(df, column1, column2, column_weights)
+greedy_wolf(df)
 crossing_edges <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
 }
 

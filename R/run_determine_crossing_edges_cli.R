@@ -12,7 +12,7 @@ Required:
 Optional:
   --column_weights                 Comma-separated weights or column name (default: 'value')
   --minimum_edge_weight            Minimum edge weight to include (default: 0)
-  --output_path                 Path to save resulting edge table (e.g. df.csv)
+  --output_df_path                 Path to save resulting edge table (e.g. df.csv)
   --return_weighted_layer_free_objective  TRUE/FALSE (default: FALSE)
 ")
         quit(save = "no", status = 0)
@@ -42,7 +42,7 @@ Optional:
     column2        <- get_arg(c("--column2", "-c2"))
     column_weights <- get_arg("--column_weights", "value")
     min_edge_weight <- get_numeric_arg("--minimum_edge_weight", 0)
-    output_path <- get_arg("--output_path")
+    output_df_path <- get_arg("--output_df_path")
     return_objective <- get_bool_arg("--return_weighted_layer_free_objective", FALSE)
 
     if (is.null(df) || is.null(column1) || is.null(column2)) {
@@ -56,7 +56,7 @@ Optional:
         column2 = column2,
         column_weights = column_weights,
         minimum_edge_weight = min_edge_weight,
-        output_path = output_path,
+        output_df_path = output_df_path,
         return_weighted_layer_free_objective = return_objective
     )
 
