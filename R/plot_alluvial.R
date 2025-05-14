@@ -569,7 +569,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1, 
             clus_df_gather <- clus_df_gather %>%
                 ungroup() %>%
                 slice(1:(n() %/% 2)) %>%              # keep first half of rows
-                select(-id, -x, -y, -col1_int, -col2_int)
+                select(-id, -x, -y)
             clus_df_gather_already_modified_for_save_or_return <- TRUE
         }
 
@@ -582,7 +582,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1, 
             clus_df_gather <- clus_df_gather %>%
                 ungroup() %>%
                 slice(1:(n() %/% 2)) %>%              # keep first half of rows
-                select(-id, -x, -y, -col1_int, -col2_int)    # drop columns
+                select(-id, -x, -y)    # drop columns
             clus_df_gather_already_modified_for_save_or_return <- TRUE
         }
         return(clus_df_gather)
@@ -767,7 +767,7 @@ determine_weighted_layer_free_objective <- function(crossing_edges, minimum_edge
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, column1, column2, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, map_dict = NULL, return_weighted_layer_free_objective = FALSE) {
+determine_crossing_edges <- function(df, column1, column2, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, map_dict = NULL, fixed_column = NULL, return_weighted_layer_free_objective = FALSE) {
     # # set to factors if not already
     # if (!is.factor(df[[column1]])) df[[column1]] <- factor(df[[column1]])
     # if (!is.factor(df[[column2]])) df[[column2]] <- factor(df[[column2]])
@@ -796,7 +796,13 @@ determine_crossing_edges <- function(df, column1, column2, column_weights = "val
                y2 = 1)
 
     if (!is.null(map_dict)) {
-        df$x2 <- map_dict[as.character(df$x2)]
+        if (fixed_column == 1 || fixed_column == column1) {
+            df$x2 <- map_dict[as.character(df$x2)]
+        } else if (fixed_column == 2 || fixed_column == column2) {
+            df$x1 <- map_dict[as.character(df$x1)]
+        } else {
+            stop("`fixed_column` must be 1, 2, column1, or column2")
+        }
     }
 
     # Initialize result list and seen pair tracker

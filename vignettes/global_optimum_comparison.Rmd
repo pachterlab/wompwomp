@@ -42,23 +42,17 @@ head(df)
 
 Implementing a greedy heuristic for weighted one-layer free problem
 ```{r}
-clus_df_gather_sorted <- greedy_wolf(df, column1="tissue", column2="cluster")
-crossing_edges <- determine_crossing_edges(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster")
+clus_df_gather_sorted <- greedy_wolf(df, column1="tissue", column2="cluster", sorting_algorithm="greedy_WOLF", fixed_column = "tissue")
+crossing_edges <- determine_crossing_edges(clus_df_gather_sorted, column1 = "col1_int", column2 = "col2_int")
 alluvialmatch_objective <- determine_weighted_layer_free_objective(crossing_edges)
 print(alluvialmatch_objective)
 ```
 
 Plot the alluvial plot with sorting and color matching
 ```{r}
-p1 <- plot_alluvial(clus_df_gather_sorted, column1="tissue", column2="cluster", column_weights = "value", show_group_2_box_labels_in_ascending = FALSE)
+p1 <- plot_alluvial(clus_df_gather_sorted, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm="greedy_WOLF", fixed_column = "tissue")
 p1
 ```
-
-```{r}
-p1 <- plot_alluvial(clus_df_gather_sorted, column1="tissue", column2="cluster", column_weights = "value", show_group_2_box_labels_in_ascending = TRUE)
-p1
-```
-
 
 Repeat for all permutations of the right side, calculating objective for each one
 ```{r}
@@ -82,7 +76,7 @@ for (i in 1:nrow(perms)) {
   #   mutate(cluster = factor(cluster, levels = orig_levels, labels = new_labels))
 
   map_dict <- setNames(new_labels, orig_levels)
-  clus_permuted_objective <- determine_crossing_edges(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", map_dict = map_dict, return_weighted_layer_free_objective = TRUE)
+  clus_permuted_objective <- determine_crossing_edges(clus_df_gather_sorted, column1 = "col1_int", column2 = "col2_int", fixed_column = 1, map_dict = map_dict, return_weighted_layer_free_objective = TRUE)
   
   objectives[i] <- clus_permuted_objective
   

@@ -40,11 +40,6 @@ df <- data.frame(
 head(df)
 ```
 
-Implementing a greedy heuristic for weighted one-layer free problem
-```{r}
-clus_df_gather_sorted <- greedy_wolf(df, column1="tissue", column2="cluster")
-alluvialmatch_objective <- determine_crossing_edges(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", return_weighted_layer_free_objective = TRUE)
-```
 
 Neighbornet
 ```{r}
@@ -56,6 +51,18 @@ gather_set_data(clus_df_gather, 1:2)
 
 clus_df_gather
 ```
+
+Optimal
+```{r}
+plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")
+```
+
+Without sorting - happens to already be optimal - so I expect each graph to be [1, 2, 3, 4, 5]
+```{r}
+plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "None")
+```
+
+
 Build the bipartite graph
 ```{r}
 library(igraph)
@@ -70,18 +77,34 @@ g <- graph_from_data_frame(clus_df_gather, directed = FALSE)
 # Get all node names
 all_nodes <- sort(unique(c(clus_df_gather$tissue, clus_df_gather$cluster)))
 
-# Compute full distance matrix
-full_dist_matrix <- distances(g, v = all_nodes, to = all_nodes)
+# Compute full distance matrix based on 1 / (edge weight)
+# Initialize distance matrix
+full_dist_matrix <- matrix(Inf, nrow = length(all_nodes), ncol = length(all_nodes),
+                      dimnames = list(all_nodes, all_nodes))
 
-# Set Inf for same-side nodes
-for (i in seq_along(all_nodes)) {
-  for (j in seq_along(all_nodes)) {
-    if ((startsWith(all_nodes[i], "left_") && startsWith(all_nodes[j], "left_")) ||
-        (startsWith(all_nodes[i], "right_") && startsWith(all_nodes[j], "right_"))) {
-      full_dist_matrix[i, j] <- Inf
-    }
-  }
+# Fill in distances based on 1 / weight
+for (i in seq_len(nrow(clus_df_gather))) {
+  n1 <- clus_df_gather$tissue[i]
+  n2 <- as.character(clus_df_gather$cluster[i])  # ensure consistent type
+  w  <- clus_df_gather$value[i]
+
+  full_dist_matrix[n1, n2] <- 1 / w
+  full_dist_matrix[n2, n1] <- 1 / w  # symmetric since graph is undirected
 }
+
+
+
+# Compute full distance matrix based on path distance - WRONG
+# full_dist_matrix <- distances(g, v = all_nodes, to = all_nodes)
+# # Set Inf for same-side nodes
+# for (i in seq_along(all_nodes)) {
+#   for (j in seq_along(all_nodes)) {
+#     if ((startsWith(all_nodes[i], "left_") && startsWith(all_nodes[j], "left_")) ||
+#         (startsWith(all_nodes[i], "right_") && startsWith(all_nodes[j], "right_"))) {
+#       full_dist_matrix[i, j] <- Inf
+#     }
+#   }
+# }
 ```
 
 ```{r}
@@ -113,6 +136,95 @@ matrix = matrix.tolist()  # convert numpy matrix --> list of lists
 
 cycle, splits = neighbor_net(labels, matrix)
 ```
+
+Interpret this
+```{python}
+left_graph, right_graph = [], []
+
+valid_cycle = [i for i in cycle if i < len(labels)]  # because cycle had 11 elements but labels only had 10
+for i, node_index in enumerate(valid_cycle):
+    node = labels[node_index]
+    if i % 2 == 0:
+        left_graph.append(node)
+    else:
+        right_graph.append(node)
+
+print(left_graph)
+print(right_graph)
+```
+
+That didn't work so well - let's try something else
+```{r}
+# Step 1: Compute total weight per node (left and right)
+left_weights <- clus_df_gather %>%
+  group_by(tissue) %>%
+  summarise(total = sum(value), .groups = "drop")
+
+right_weights <- clus_df_gather %>%
+  group_by(cluster) %>%
+  summarise(total = sum(value), .groups = "drop")
+
+# Combine into named vector (dictionary)
+node_weights <- c(
+  setNames(left_weights$total, left_weights$tissue),
+  setNames(right_weights$total, right_weights$cluster)
+)
+
+# Step 2: Create full node list
+all_nodes <- sort(unique(c(clus_df_gather$tissue, clus_df_gather$cluster)))
+
+# Step 3: Initialize matrix
+dist_matrix <- matrix(Inf, nrow = length(all_nodes), ncol = length(all_nodes),
+                      dimnames = list(all_nodes, all_nodes))
+
+# Step 4: Fill with adjusted 1 / (w / (node1 + node2 total weight))
+for (i in seq_len(nrow(clus_df_gather))) {
+  n1 <- clus_df_gather$tissue[i]
+  n2 <- clus_df_gather$cluster[i]
+  w  <- clus_df_gather$value[i]
+
+  total_node_weight <- node_weights[n1] + node_weights[n2]
+  dist_matrix[n1, n2] <- total_node_weight / w
+  dist_matrix[n2, n1] <- total_node_weight / w  # symmetric
+}
+```
+
+```{python}
+from typing import Tuple
+from splitspy.nnet import nnet_cycle, nnet_splits
+import numpy as np
+
+def neighbor_net(labels: [str], mat: [float], cutoff=0.0001, constrained=True) -> Tuple[list, list]:
+    cycle = nnet_cycle.compute(labels, mat)
+
+    splits = nnet_splits.compute(len(labels), mat, cycle, cutoff, constrained)
+
+    return cycle, splits
+
+labels = r.all_nodes
+matrix = r.full_dist_matrix.copy()  # copy to avoid read-only
+matrix[np.isinf(matrix)] = 1e6  # replace inf with 1e6 to avoid error
+matrix = np.nan_to_num(matrix, nan=1e6)  # replace nan with 1e6 to avoid error
+matrix = matrix.tolist()  # convert numpy matrix --> list of lists
+
+cycle, splits = neighbor_net(labels, matrix)
+
+left_graph, right_graph = [], []
+
+valid_cycle = [i for i in cycle if i < len(labels)]  # because cycle had 11 elements but labels only had 10
+for i, node_index in enumerate(valid_cycle):
+    node = labels[node_index]
+    # if i % 2 == 0:
+    if node.startswith("left"):
+        left_graph.append(node)
+    else:
+        right_graph.append(node)
+
+print(left_graph)
+print(right_graph)
+```
+
+Same results... oh well
 
 ```{r}
 sessioninfo::session_info()
