@@ -537,6 +537,10 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1, 
             df[[column_num]] = as.factor(df[[column_num]])
             df[[column_num]] = factor(df[[column_num]], levels=sample(levels(df[[column_num]])))
             df[[column_num]] = as.integer(df[[column_num]])
+
+            # old_levels <- levels(df[[column_num]])
+            # new_labels <- sample(old_levels)
+            # df[[column_num]] <- factor(df[[column_num]], levels = old_levels, labels = new_labels)
         }
 
         if (sorting_algorithm == 'greedy_WBLF') {
@@ -551,7 +555,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1, 
         }
 
         if (random_initializations > 1) {
-            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, column1=column1, column2=column2, column_weights = "value", minimum_edge_weight = 0, output_plot_path = NULL, return_weighted_layer_free_objective = TRUE)
+            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, column1=column1, column2=column2, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, return_weighted_layer_free_objective = TRUE)
             if (crossing_edges_objective < crossing_edges_objective_minimum) {
                 crossing_edges_objective_minimum <- crossing_edges_objective
                 clus_df_gather_best <- clus_df_gather_tmp
@@ -767,7 +771,7 @@ determine_weighted_layer_free_objective <- function(crossing_edges, minimum_edge
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, column1, column2, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, map_dict = NULL, fixed_column = NULL, return_weighted_layer_free_objective = FALSE) {
+determine_crossing_edges <- function(df, column1, column2, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, map_dict = NULL, map_dict_1 = NULL, map_dict_2 = NULL, fixed_column = NULL, return_weighted_layer_free_objective = FALSE) {
     # # set to factors if not already
     # if (!is.factor(df[[column1]])) df[[column1]] <- factor(df[[column1]])
     # if (!is.factor(df[[column2]])) df[[column2]] <- factor(df[[column2]])
@@ -804,6 +808,11 @@ determine_crossing_edges <- function(df, column1, column2, column_weights = "val
             stop("`fixed_column` must be 1, 2, column1, or column2")
         }
     }
+
+    # if (!is.null(map_dict_1) && !is.null(map_dict_2)) {
+    #     df$x1 <- map_dict_1[as.character(df$x1)]
+    #     df$x2 <- map_dict_2[as.character(df$x2)]
+    # }
 
     # Initialize result list and seen pair tracker
     crossing_edges <- list()

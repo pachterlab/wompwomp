@@ -66,7 +66,7 @@ perms <- gtools::permutations(n, n)
 orig_levels <- levels(clus_df_gather_sorted$cluster)
 
 # Loop over permutations
-objective_minimum = 999999999
+objective_minimum = Inf
 objectives <- numeric(nrow(perms))
 for (i in 1:nrow(perms)) {
   new_labels <- perms[i, ]  # as.character(perms[i, ])
@@ -93,8 +93,8 @@ clus_permuted_best
 
 
 ```{r}
-p_best <- plot_alluvial(clus_permuted_best, column1="tissue", column2="cluster", column_weights = "value")
-p_best
+p_best_wolf <- plot_alluvial(clus_permuted_best, column1="col1_int", column2="col2_int", column_weights = "value", sorting_algorithm="None")
+p_best_wolf
 ```
 
 
@@ -113,6 +113,161 @@ ggplot(df_plot, aes(x = perm_id, y = objective)) +
   theme_minimal()
 
 ```
+
+Now do the same for WBLF
+```{r}
+clus_df_gather_sorted <- greedy_wolf(df, column1="tissue", column2="cluster", sorting_algorithm="greedy_WBLF", random_initializations = 10)
+crossing_edges <- determine_crossing_edges(clus_df_gather_sorted, column1 = "col1_int", column2 = "col2_int")
+alluvialmatch_objective <- determine_weighted_layer_free_objective(crossing_edges)
+print(alluvialmatch_objective)
+```
+
+```{r}
+p2 <- plot_alluvial(clus_df_gather_sorted, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm="greedy_WBLF")
+p2
+```
+
+```{r}
+# Get levels
+left_levels <- levels(clus_df_gather_sorted$col1_int)
+right_levels <- levels(clus_df_gather_sorted$col2_int)
+
+n_left <- length(left_levels)
+n_right <- length(right_levels)
+
+# Get all permutations of each side
+left_perms <- gtools::permutations(n_left, n_left)
+right_perms <- gtools::permutations(n_right, n_right)
+
+# Initialize tracking variables
+objective_minimum <- Inf
+objectives <- matrix(NA, nrow = nrow(left_perms), ncol = nrow(right_perms))
+best_left_map <- NULL
+best_right_map <- NULL
+
+# Loop through all left and right permutations
+for (i in 1:nrow(left_perms)) {
+  left_new_labels <- left_perms[i, ]
+  left_map <- setNames(left_new_labels, left_levels)
+  
+  for (j in 1:nrow(right_perms)) {
+    right_new_labels <- right_perms[j, ]
+    right_map <- setNames(right_new_labels, right_levels)
+
+    # Apply mappings (e.g., to integer relabels)
+    clus_permuted <- clus_df_gather_sorted %>%
+      mutate(
+        col1_int = left_map[as.character(col1_int)],
+        col2_int = right_map[as.character(col2_int)]
+      )
+
+    # Compute objective
+    obj <- determine_crossing_edges(
+      clus_permuted,
+      column1 = "col1_int",
+      column2 = "col2_int",
+      fixed_column = NULL,
+      return_weighted_layer_free_objective = TRUE
+    )
+
+    objectives[i, j] <- obj
+
+    # Update minimum if needed
+    if (obj < objective_minimum) {
+      objective_minimum <- obj
+      clus_permuted_best <- clus_permuted
+      best_left_map <- left_map
+      best_right_map <- right_map
+    }
+  }
+}
+
+```
+
+```{r}
+p_best_wblf <- plot_alluvial(clus_permuted_best, column1="col1_int", column2="col2_int", column_weights = "value", sorting_algorithm="None")
+p_best_wblf
+```
+
+
+```{r}
+df_plot <- data.frame(
+  perm_id = seq_along(objectives),
+  objective = sort(objectives)
+)
+
+ggplot(df_plot, aes(x = perm_id, y = objective)) +
+  geom_point() +
+  geom_hline(yintercept = alluvialmatch_objective, linetype = "dashed", color = "blue") +
+  annotate("text", x = Inf, y = alluvialmatch_objective, label = "alluvialmatch objective", 
+           hjust = 1.1, vjust = -0.5, color = "blue", size = 3) +
+  labs(x = "Permutation index", y = "Objective value") +
+  theme_minimal()
+```
+Let's compare neighbornet too
+```{r}
+run_neighbornet <- function(df) {
+    ...
+}
+
+# left_graph, right_graph = run_neighbornet(df)  #!!! get working
+left_graph <- c(3, 2, 5, 1, 4)  #!!! erase
+right_graph <- c(3, 2, 4, 1)  #!!! erase
+
+column1 <- "tissue"
+column2 <- "cluster"
+df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
+df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
+
+#factorize input columns
+df[[column1]] <- as.factor(as.character(df[[column1]]))
+df[[column2]] <- as.factor(as.character(df[[column2]]))
+    
+clus_df_gather_neighbornet <- df |>
+    dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+    dplyr::group_by_all() |>
+    dplyr::count(name = "value")
+clus_df_gather_neighbornet <- ggforce::gather_set_data(clus_df_gather_neighbornet, 1:2)
+clus_df_gather_neighbornet <- clus_df_gather_neighbornet %>%
+    ungroup() %>%
+    slice(1:(n() %/% 2)) %>%              # keep first half of rows
+    select(-id, -x, -y)
+
+clus_df_gather_neighbornet$col1_int <- match(
+  as.integer(as.character(clus_df_gather_neighbornet$col1_int)),
+  left_graph
+)
+clus_df_gather_neighbornet$col2_int <- match(
+  as.integer(as.character(clus_df_gather_neighbornet$col2_int)),
+  right_graph
+)
+
+p_best_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, column1="col1_int", column2="col2_int", column_weights = "value", sorting_algorithm="None")
+p_best_neighbornet
+
+neighbornet_objective <- determine_crossing_edges(
+      clus_df_gather_neighbornet,
+      column1 = "col1_int",
+      column2 = "col2_int",
+      fixed_column = NULL,
+      return_weighted_layer_free_objective = TRUE
+    )
+print(neighbornet_objective)
+```
+
+```{r}
+ggplot(df_plot, aes(x = perm_id, y = objective)) +
+  geom_point() +
+  geom_hline(yintercept = alluvialmatch_objective, linetype = "dashed", color = "blue") +
+  annotate("text", x = Inf, y = alluvialmatch_objective, label = "alluvialmatch objective", 
+           hjust = 1.1, vjust = -0.5, color = "blue", size = 3) +
+  geom_hline(yintercept = neighbornet_objective, linetype = "dashed", color = "orange") +
+  annotate("text", x = Inf, y = neighbornet_objective, label = "neighbornet objective", 
+           hjust = 1.1, vjust = -0.5, color = "orange", size = 3) +
+  labs(x = "Permutation index", y = "Objective value") +
+  theme_minimal()
+```
+
 
 ```{r}
 sessioninfo::session_info()
