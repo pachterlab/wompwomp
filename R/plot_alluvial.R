@@ -47,25 +47,6 @@ if (!exists("group2_color")) {
 
 StatStratum <- ggalluvial::StatStratum  # avoid the error Can't find stat called "stratum"
 
-reorder_clusters_descending <- function(clusters) {
-    # Count the size of each cluster
-    cluster_sizes <- table(clusters)
-
-    # Sort the clusters by size and get the ordered names
-    ordered_cluster_names <- names(sort(cluster_sizes, decreasing = TRUE))
-
-    # Create a mapping from old to new cluster numbers
-    cluster_mapping <- setNames(seq_along(ordered_cluster_names), ordered_cluster_names)
-
-    # Apply the mapping to renumber the clusters
-    renumbered_clusters <- cluster_mapping[as.character(clusters)]
-
-    # Convert the factor to numeric
-    renumbered_clusters_factor <- factor(as.numeric(as.character(renumbered_clusters)))
-
-    return(renumbered_clusters_factor)
-}
-
 
 increment_if_zeros <- function(clus_df_gather, column) {
     clus_df_gather <- clus_df_gather %>% mutate(group_numeric = as.numeric(as.character(.data[[column]])))
@@ -239,9 +220,6 @@ find_group2_colors <- function(clus_df_gather, ditto_colors,
 
 
     }
-    #group2_colors[(group2_colors == "")] <- remaining_colors[1:sum(group2_colors == "")]
-
-
     return (group2_colors)
 }
 
@@ -253,7 +231,8 @@ plot_alluvial_internal <- function(clus_df_gather,
                                    color_bands = FALSE, color_band_list = NULL,
                                    color_band_column=NULL, color_band_boundary=FALSE,
                                    alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
-                                   include_labels_in_boxes = FALSE, include_axis_titles = FALSE, include_group_sizes = FALSE
+                                   include_labels_in_boxes = FALSE, include_axis_titles = FALSE, 
+                                   include_group_sizes = FALSE
                                    ) {
     if (!is.null(color_list)){
         ditto_colors <- color_list
@@ -266,20 +245,15 @@ plot_alluvial_internal <- function(clus_df_gather,
 
     # Extract colors for each factor, assuming ditto_colors is long enough
     if (match_colors) {
-        if (is.null(fixed_column)) {
+        if (is.null(fixed_column) | fixed_column == group1_name) {
             colors_group1 <- ditto_colors[1:num_levels_group1]
             colors_group2 <- find_group2_colors(clus_df_gather, ditto_colors)
-            #color_column=group1_name
 
-        } else if (fixed_column==group2_name) {
+        } else {
             colors_group2 <- ditto_colors[1:num_levels_group2]
             colors_group1 <- find_group2_colors(clus_df_gather, ditto_colors,
                                                 group1_name = 'col2_int', group2_name = 'col1_int')
-        } else {
-            colors_group1 <- ditto_colors[1:num_levels_group1]
-            colors_group2 <- find_group2_colors(clus_df_gather, ditto_colors)
-            #color_column=group1_name
-        }
+        } 
     } else {
         colors_group1 <- ditto_colors[1:num_levels_group1]
         colors_group2 <- ditto_colors[(num_levels_group1+1):(num_levels_group1+num_levels_group2)]
@@ -289,16 +263,14 @@ plot_alluvial_internal <- function(clus_df_gather,
     colors_group2_reverse <- rev(colors_group2)
 
     # Combine the colors
-    combined_colors <- c(colors_group1, colors_group2)
     combined_colors_reverse <- c(colors_group1_reverse, colors_group2_reverse)
-    remaining_colors <- ditto_colors[!(ditto_colors %in% combined_colors)]
+    remaining_colors <- ditto_colors[!(ditto_colors %in% combined_colors_reverse)]
     
     temp_df <- clus_df_gather[1:as.integer(dim(clus_df_gather)[1]/2),1:dim(clus_df_gather)[2]]
     # uncomment to attempt mapping
     p <- ggplot(data = temp_df, aes(axis1 = !!sym('col1_int'),
                                            axis2 = !!sym('col2_int'), y = value),
                 )
-    # p <- ggplot(data = clus_df_gather, aes(axis1 = !!sym(group1_name), axis2 = !!sym(group2_name), y = value))
 
     if (color_bands) {
         if (!is.null(color_band_column)) {
@@ -307,7 +279,8 @@ plot_alluvial_internal <- function(clus_df_gather,
             }
             if (color_band_boundary){
                 p <- p +
-                    geom_alluvium(aes(fill = !!sym(color_band_column), color=!!sym(color_band_column)), alpha = alluvial_alpha) +
+                    geom_alluvium(aes(fill = !!sym(color_band_column), color=!!sym(color_band_column)), 
+                                  alpha = alluvial_alpha) +
                     scale_fill_manual(values = color_band_list) +
                     labs(fill = NULL)+guides(fill='none')
                 
@@ -400,7 +373,6 @@ plot_alluvial_internal <- function(clus_df_gather,
     }
 
     p <- p +
-        # geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
         theme_void() +
         theme(
             text = element_text(family = "sans"),
@@ -568,21 +540,26 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1,
                 df[[column_num]] = as.integer(df[[column_num]])
             }
             # WBLF
-            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int', reordered_column = 'col2_int')
-            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather_tmp, stable_column = 'col2_int', reordered_column = 'col1_int')
+            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int', 
+                                                             reordered_column = 'col2_int')
+            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather_tmp, stable_column = 'col2_int', 
+                                                             reordered_column = 'col1_int')
         } else if (sorting_algorithm == 'greedy_WOLF') {
             column_num = reordered_column
             df[[column_num]] = as.factor(df[[column_num]])
             df[[column_num]] = factor(df[[column_num]], levels=sample(levels(df[[column_num]])))
             df[[column_num]] = as.integer(df[[column_num]])
             # WOLF
-            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = fixed_column, reordered_column = reordered_column)
+            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = fixed_column, 
+                                                             reordered_column = reordered_column)
         } else {
             clus_df_gather_tmp <- clus_df_gather
         }
 
         if (random_initializations > 1) {
-            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, column1=column1, column2=column2, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, return_weighted_layer_free_objective = TRUE)
+            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, column1=column1, column2=column2, 
+                                                                 column_weights = "value", minimum_edge_weight = 0, 
+                                                                 output_df_path = NULL, return_weighted_layer_free_objective = TRUE)
             if (crossing_edges_objective < crossing_edges_objective_minimum) {
                 crossing_edges_objective_minimum <- crossing_edges_objective
                 clus_df_gather_best <- clus_df_gather_tmp
@@ -619,28 +596,6 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1,
         return(clus_df_gather)
     }
 
-    # clus_df_gather <- merge(
-    #     clus_df_gather,
-    #     adata_obs[, c(col1_int, column1)],
-    #     by.x = column1,
-    #     by.y = col1_int,
-    #     all.x = TRUE
-    # )
-    #
-    # clus_df_gather <- merge(
-    #     clus_df_gather,
-    #     adata_obs[, c(col2_int, column2)],
-    #     by.x = column2,
-    #     by.y = col2_int,
-    #     all.x = TRUE
-    # )
-    #
-    # clus_df_gather <- clus_df_gather %>%
-    #     mutate(
-    #         column1_mapping = factor(group1_column_original_clusters, levels = unique(group1_column_original_clusters[order(column1)])),
-    #         column2_mapping = factor(group2_column_original_clusters, levels = unique(group2_column_original_clusters[order(column2)]))
-    #     )
-
     alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = column1, group2_name = column2, fixed_column = fixed_column,
                                             group1_name_mapping = column1, group2_name_mapping = column2, 
                                             color_list = color_list, color_boxes = color_boxes,
@@ -674,8 +629,13 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1,
 #' }
 #'
 #' @export
-greedy_wolf <- function(df, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "greedy_WBLF", fixed_column = 1, random_initializations = 1, set_seed = 42, output_df_path = NULL) {
-    clus_df_gather <- plot_alluvial(df = df, column1 = column1, column2 = column2, column_weights = column_weights, sorting_algorithm = sorting_algorithm, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, output_df_path = output_df_path, return_greedy_wolf = TRUE)
+greedy_wolf <- function(df, column1 = NULL, column2 = NULL, column_weights = NULL, 
+                        sorting_algorithm = "greedy_WBLF", fixed_column = 1, 
+                        random_initializations = 1, set_seed = 42, output_df_path = NULL) {
+    clus_df_gather <- plot_alluvial(df = df, column1 = column1, column2 = column2, 
+                                    column_weights = column_weights, sorting_algorithm = sorting_algorithm, 
+                                    fixed_column = fixed_column, random_initializations = random_initializations, 
+                                    set_seed = set_seed, output_df_path = output_df_path, return_greedy_wolf = TRUE)
     return(clus_df_gather)
 }
 
@@ -799,10 +759,10 @@ determine_weighted_layer_free_objective <- function(crossing_edges, minimum_edge
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, column1, column2, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, map_dict = NULL, map_dict_1 = NULL, map_dict_2 = NULL, fixed_column = NULL, return_weighted_layer_free_objective = FALSE) {
-    # # set to factors if not already
-    # if (!is.factor(df[[column1]])) df[[column1]] <- factor(df[[column1]])
-    # if (!is.factor(df[[column2]])) df[[column2]] <- factor(df[[column2]])
+determine_crossing_edges <- function(df, column1, column2, column_weights = "value", 
+                                     minimum_edge_weight = 0, output_df_path = NULL, 
+                                     map_dict = NULL, map_dict_1 = NULL, map_dict_2 = NULL, 
+                                     fixed_column = NULL, return_weighted_layer_free_objective = FALSE) {
 
     col1_sym <- sym(column1)
     col2_sym <- sym(column2)
@@ -837,11 +797,6 @@ determine_crossing_edges <- function(df, column1, column2, column_weights = "val
         }
     }
 
-    # if (!is.null(map_dict_1) && !is.null(map_dict_2)) {
-    #     df$x1 <- map_dict_1[as.character(df$x1)]
-    #     df$x2 <- map_dict_2[as.character(df$x2)]
-    # }
-
     # Initialize result list and seen pair tracker
     crossing_edges <- list()
     n <- nrow(df)
@@ -868,8 +823,6 @@ determine_crossing_edges <- function(df, column1, column2, column_weights = "val
                         next
                     }
 
-                    # # Avoid duplicates using a symmetric key
-                    # key <- paste(sort(c(paste(edge1, collapse = "::"), paste(edge2, collapse = "::"))), collapse = "||")
                     crossing_edges <- append(crossing_edges, list(list(edge1, edge2)))
                 }
             }
@@ -884,7 +837,6 @@ determine_crossing_edges <- function(df, column1, column2, column_weights = "val
 
         df_out <- as.data.frame(df_out, stringsAsFactors = FALSE)
         write.csv(df_out, file = output_df_path, row.names = FALSE, quote = FALSE)
-        # write.table(df_out, file = output_df_path, sep="\t", row.names = FALSE, quote = FALSE)
     }
 
     if (return_weighted_layer_free_objective) {
