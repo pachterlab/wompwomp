@@ -316,7 +316,11 @@ plot_alluvial_internal <- function(clus_df_gather,
         }
     }
         } else {
-        p <- p + geom_alluvium(alpha = alluvial_alpha)
+            if (color_band_boundary){
+                p <- p + geom_alluvium(color='grey2',alpha = alluvial_alpha) 
+            } else{
+                p <- p + geom_alluvium(alpha = alluvial_alpha) 
+            }
     }
 
     if (color_boxes) {
