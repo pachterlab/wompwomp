@@ -6,14 +6,15 @@ Usage: alluvialmatch determine_crossing_edges --df FILE --column1 C1 --column2 C
 
 Required:
   --df                          CSV input file or RDS with 2–3 columns
-  --column1, -c1                   Name of first column
-  --column2, -c2                   Name of second column
 
 Optional:
+  --column1, -c1                   Name of first column
+  --column2, -c2                   Name of second column
   --column_weights                 Comma-separated weights or column name (default: 'value')
   --minimum_edge_weight            Minimum edge weight to include (default: 0)
   --output_df_path                 Path to save resulting edge table (e.g. df.csv)
   --return_weighted_layer_free_objective  TRUE/FALSE (default: FALSE)
+  --quiet                      don't show stdout
 ")
         quit(save = "no", status = 0)
     }
@@ -38,14 +39,15 @@ Optional:
     }
 
     df             <- get_arg("--df")
-    column1        <- get_arg(c("--column1", "-c1"))
-    column2        <- get_arg(c("--column2", "-c2"))
+    column1        <- get_arg(c("--column1", "-c1"), NULL)
+    column2        <- get_arg(c("--column2", "-c2"), NULL)
     column_weights <- get_arg("--column_weights", "value")
     min_edge_weight <- get_numeric_arg("--minimum_edge_weight", 0)
     output_df_path <- get_arg("--output_df_path")
     return_objective <- get_bool_arg("--return_weighted_layer_free_objective", FALSE)
+    quiet <- get_bool_arg("--quiet", FALSE)
 
-    if (is.null(df) || is.null(column1) || is.null(column2)) {
+    if (is.null(df)) {
         cat("\nError: --df, --column1, and --column2 are required.\n\n")
         show_help()
     }
@@ -66,5 +68,7 @@ Optional:
     } else {
         cat("Crossing edges - format list[((l1, r1, e1), (l2, r2, e2)), ...]:\n")
     }
-    print(result)
+    if (!quiet) {
+        print(result)
+    }
 }

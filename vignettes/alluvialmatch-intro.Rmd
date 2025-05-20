@@ -9,6 +9,14 @@ vignette: >
 
 ```{r}
 devtools::load_all()
+df1 <- determine_crossing_edges(df="/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/clus_df_gather_new2.csv", column1="tissue", column2="leiden", output_df_path="/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/crossing3.csv")
+df2 <- determine_crossing_edges(df="/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/clus_df_gather_new2.csv")
+df3 <- determine_crossing_edges(df="/Users/joeyrich/Desktop/local/alluvialmatch/tests/testthat/ground_truth/sorting_wblf_df.csv", column1="col1_int", column2="col2_int")
+```
+
+
+```{r}
+devtools::load_all()
 # library(alluvialmatch)
 library(dplyr)
 library(ggplot2)
@@ -18,15 +26,15 @@ library(igraph)
 library(tibble)
 ```
 
-We create a toy data frame that maps tissues (brain, stomach, heart, T cell, B cell) to clustering (1-4)
+We create a toy data frame that maps tissues (BRAIN, STOMACH, HEART, T CELL, B CELL) to clustering (1-4)
 ```{r}
 df <- data.frame(
   tissue = c(
-    "brain", "brain", "brain",
-    "stomach", "stomach", "stomach", "stomach", "stomach", "stomach",
-    "heart", "heart", "heart", "heart", "heart", "heart", "heart",
-    "T cell", "T cell",
-    "B cell", "B cell", "B cell", "B cell", "B cell", "B cell", "B cell", "B cell", "B cell"
+    "BRAIN", "BRAIN", "BRAIN",
+    "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+    "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+    "T CELL", "T CELL",
+    "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
   ),
   cluster = c(
     1, 1, 2,
@@ -54,7 +62,7 @@ clus_df_gather
 ```
 
 
-Plot with ggalluvial before sorting - notice especially how B cells cross down to cluster 4, and stomach crosses up to cluster 2 - we would like to straighten this out, and add colors to show corresponding groups
+Plot with ggalluvial before sorting - notice especially how B CELLs cross down to cluster 4, and STOMACH crosses up to cluster 2 - we would like to straighten this out, and add colors to show corresponding groups
 ```{r}
 p1 <- ggplot(data = clus_df_gather, aes(axis1 = tissue, axis2 = cluster, y = value)) +
     geom_alluvium() +
@@ -81,7 +89,7 @@ p2
 # ggsave("alluvialmatch_WOLF.png", plot = p2, dpi = 300, bg = "white")
 ```
 
-Notice how, because we kept the left layer fixed, B cell and T cell are separated far apart, even though we would minimize edge crossings if they were next to each other - we can fix this with the weighted both-layers free heuristic
+Notice how, because we kept the left layer fixed, B CELL and T CELL are separated far apart, even though we would minimize edge crossings if they were next to each other - we can fix this with the weighted both-layers free heuristic
 ```{r}
 clus_df_gather_sorted_wblf <- greedy_wolf(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")  # output_df_path = "vignette_intro_df_cluster_wblf.csv"
 clus_df_gather_sorted_wblf

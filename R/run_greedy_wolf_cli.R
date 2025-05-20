@@ -16,6 +16,7 @@ Optional:
   --output_df_path                 Path to save resulting edge table (e.g. df.csv)
   --sorting_algorithm           greedy_WBLF, greedy_WOLF, or None
   --set_seed                    seed for random initializations
+  --quiet                      don't show stdout
 ")
     quit(save = "no", status = 0)
   }
@@ -37,6 +38,12 @@ Optional:
     as.numeric(strsplit(val, ",")[[1]])
   }
 
+  get_bool_arg <- function(flag, default = FALSE) {
+      val <- get_arg(flag)
+      if (is.null(val)) return(default)
+      tolower(val) %in% c("true", "t", "1")
+  }
+
   df              <- get_arg("--df")
   column1         <- get_arg("--column1")
   column2         <- get_arg("--column2")
@@ -46,6 +53,7 @@ Optional:
   output_df_path <- get_arg("--output_df_path")
   sorting_algorithm       <- get_arg("--sorting_algorithm")
   set_seed       <- get_arg("--set_seed")
+  quiet <- get_bool_arg("--quiet", FALSE)
 
   if (is.null(df)) {
     cat("Error: --df is required.\n\n")
@@ -64,5 +72,7 @@ Optional:
     set_seed=set_seed
   )
 
-  print(result)
+  if (!quiet) {
+      print(result)
+  }
 }

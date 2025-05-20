@@ -9,6 +9,7 @@ Required:
 
 Optional:
   --minimum_edge_weight            Minimum edge weight to include (default: 0)
+  --quiet                      don't show stdout
 ")
         quit(save = "no", status = 0)
     }
@@ -34,6 +35,7 @@ Optional:
 
     df             <- get_arg("--df")
     min_edge_weight <- get_numeric_arg("--minimum_edge_weight", 0)
+    quiet <- get_bool_arg("--quiet", FALSE)
 
     if (is.null(df)) {
         cat("\nError: --df is required.\n\n")
@@ -45,5 +47,7 @@ Optional:
         minimum_edge_weight = min_edge_weight
     )
 
-    print(result)
+    if (!quiet) {
+        print(result)
+    }
 }

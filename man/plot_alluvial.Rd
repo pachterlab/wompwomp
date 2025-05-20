@@ -9,13 +9,14 @@ plot_alluvial(
   column1 = NULL,
   column2 = NULL,
   fixed_column = 1,
-  color_column = NULL,
   sorting_algorithm = "greedy_WBLF",
   random_initializations = 1,
   color_list = NULL,
   color_boxes = TRUE,
-  color_bands = NULL,
+  color_bands = FALSE,
   color_band_list = NULL,
+  color_band_column = NULL,
+  color_band_boundary = FALSE,
   match_colors = TRUE,
   alluvial_alpha = 0.5,
   include_labels_in_boxes = TRUE,
@@ -37,8 +38,6 @@ plot_alluvial(
 
 \item{fixed_column}{Character. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free.}
 
-\item{color_column}{Optional Character. Which column to use for coloring bands.}
-
 \item{sorting_algorithm}{Character. Must be greedy_WBLF, greedy_WOLF, or None.}
 
 \item{random_initializations}{Optional Integer. Number of random initializations of the WLF heuristic to perform.}
@@ -50,6 +49,10 @@ plot_alluvial(
 \item{color_bands}{Logical. Whether to color the alluvial bands connecting the groups.}
 
 \item{color_band_list}{Optional named list or vector of colors to override default band colors.}
+
+\item{color_band_column}{Optional Character. Which column to use for coloring bands.}
+
+\item{color_band_boundary}{Logical. Whether or not to color boundaries between bands}
 
 \item{match_colors}{Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.}
 

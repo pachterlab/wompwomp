@@ -24,10 +24,12 @@ Optional:
   --output_plot_path                  Path to save output
   --output_df_path               Path to save resulting edge table (e.g. df.csv)
   --color_list                   Comma-separated hex codes for nodes
-  --color_column                color column for edges
+  --color_band_column                color column for edges
+  --color_band_boundary                color column for boundaries
   --sorting_algorithm           greedy_WBLF, greedy_WOLF, or None
   --color_band_list             Comma-separated hex codes for edges
   --set_seed                    seed for random initializations
+  --quiet                      don't show stdout
 ")
     quit(save = "no", status = 0)
   }
@@ -71,23 +73,25 @@ Optional:
   # Optional args
   column1     <- get_arg("--column1")
   column2     <- get_arg("--column2")
-  fixed_column    <- get_arg("--fixed_column")
+  fixed_column    <- get_arg("--fixed_column", 1)
   random_initializations <- get_numeric_arg("--random_initializations", 1)
   color_boxes        <- get_bool_arg("--color_boxes", TRUE)
-  color_bands        <- get_bool_arg("--color_bands", TRUE)
+  color_bands        <- get_bool_arg("--color_bands", FALSE)
   match_colors       <- get_bool_arg("--match_colors", TRUE)
   alluvial_alpha     <- as.numeric(get_arg("--alluvial_alpha", 0.5))
   include_labels_in_boxes <- get_bool_arg("--include_labels_in_boxes", TRUE)
   include_axis_titles     <- get_bool_arg("--include_axis_titles", TRUE)
   include_group_sizes     <- get_bool_arg("--include_group_sizes", TRUE)
   column_weights    <- get_numeric_list_arg("--column_weights")
-  output_plot_path       <- get_arg("--output_plot_path")
+  output_plot_path       <- get_arg("--output_plot_path", "./alluvial.png")
   output_df_path       <- get_arg("--output_df_path")
   color_list        <- get_list_arg("--color_list")
-  color_column       <- get_arg("--color_column")
+  color_band_column       <- get_arg("--color_band_column")
+  color_band_boundary       <- get_bool_arg("--color_band_boundary", FALSE)
   sorting_algorithm       <- get_arg("--sorting_algorithm", "greedy_WBLF")
   color_band_list       <- get_arg("--color_band_list")
   set_seed       <- get_arg("--set_seed")
+  quiet <- get_bool_arg("--quiet", FALSE)
 
   result <- plot_alluvial(
     df = df,
@@ -106,13 +110,19 @@ Optional:
     output_plot_path = output_plot_path,
     output_df_path = output_df_path,
     color_list = color_list,
-    color_column=color_column,
+    color_band_column=color_band_column,
+    color_band_boundary=color_band_boundary,
     sorting_algorithm=sorting_algorithm,
     color_band_list=color_band_list,
     set_seed=set_seed
   )
 
-  if (!is.null(output_plot_path)) {
+
+  if (!quiet && !is.null(output_df_path)) {
+      message("Dataframe saved to ", output_df_path)
+  }
+
+  if (!quiet && !is.null(output_plot_path)) {
     message("Plot saved to ", output_plot_path)
   }
 }

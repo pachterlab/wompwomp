@@ -1,27 +1,182 @@
-test_that("CLI plot matches ground truth PNG", {
-    devtools::load_all()
+cli_cmd_path <- file.path(here::here(), "exec", "alluvialmatch")
 
-    # Paths
-    cli_cmd_path <- file.path(here::here(), "exec", "alluvialmatch")
-    command <- "plot_alluvial"
-    df_path <- file.path(here::here(), "tmp_files", "df_tmp.csv")
-    output_path <- tempfile(fileext = ".png")
-    # output_path <- file.path(here::here(), "tmp_files", "tmp_image11.png")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_none.png")
+type_checking_files <- function(output_path, truth_path, check = TRUE) {
+    # check for file path type
+    if (!is.character(output_path) || length(output_path) != 1) {
+        stop("`output_path` must be a character string representing a file path.")
+    }
+    if (!is.character(truth_path) || length(truth_path) != 1) {
+        stop("`truth_path` must be a character string representing a file path.")
+    }
 
-    # Run CLI
-    browser()
-    # cat(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path))
-    plot_alluvial(df=df_path, output_plot_path=output_path, sorting_algorithm="None")
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "None"))
+    # Check that output file exists
+    if (!file.exists(output_path)) {
+        stop(sprintf("Output file not found at: %s", output_path))
+    }
+
+    # If ground truth doesn't exist, initialize it
+    if (!file.exists(truth_path)) {
+        file.copy(output_path, truth_path)
+        message(sprintf("Ground truth image initialized at: %s", truth_path))
+        return(invisible(TRUE))  # No comparison needed on first run
+    }
+
+    if (!check) return(invisible(TRUE))  # Allow skipping comparison
+}
+
+compare_images <- function(output_path, truth_path, check = TRUE) {
+    type_checking_files(output_path=output_path, truth_path=truth_path, check=check)
 
     # Load and compare images
     img_new   <- magick::image_read(output_path)
     img_truth <- magick::image_read(truth_path)
 
-    # Compare (you can also set fuzz if small differences are tolerable)
-    diff <- magick::image_compare(img_new, img_truth, metric = "AE")  # Absolute Error
+    # Compare images using Absolute Error metric
+    diff <- magick::image_compare(img_new, img_truth, metric = "AE")
     diff_val <- as.numeric(attr(diff, "distortion"))
 
-    expect_true(diff_val == 0, info = sprintf("Images differ (distortion = %f)", diff_val))
+    testthat::expect_true(
+        diff_val == 0,
+        info = sprintf("Images differ (distortion = %f)", diff_val)
+    )
+
+    invisible(TRUE)
+}
+
+compare_csvs <- function(output_path, truth_path, check = TRUE) {
+    type_checking_files(output_path=output_path, truth_path=truth_path, check=check)
+
+    df_output <- read.csv(output_path, stringsAsFactors = FALSE)
+    df_truth <- read.csv(truth_path, stringsAsFactors = FALSE)
+
+    testthat::expect_equal(df_output, df_truth)
+
+    invisible(TRUE)
+}
+
+# ./exec/alluvialmatch plot_alluvial --df tests/testthat/ground_truth/df_tests_cli.csv --output_plot_path tests/testthat/ground_truth/sorting_none.png --sorting_algorithm None
+test_that("CLI plot_alluvial, no sort", {
+    # Paths
+    command <- "plot_alluvial"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    output_path <- tempfile(fileext = ".png")
+    # output_path <- file.path(here::here(), "tmp_files", "tmp_image21.png")
+    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_none.png")
+
+    # Run CLI
+    # browser()
+    # cat(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "None"))
+    # plot_alluvial(df=df_path, output_plot_path=output_path, sorting_algorithm="None")
+    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "None", "--quiet", "TRUE"))
+
+    compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
+
+test_that("CLI plot_alluvial, WOLF left fixed", {
+    # Paths
+    command <- "plot_alluvial"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    output_path <- tempfile(fileext = ".png")
+    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_left.png")
+
+    # Run CLI
+    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "greedy_WOLF", "--fixed_column", 1, "--quiet", "TRUE"))
+
+    compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
+})
+
+test_that("CLI plot_alluvial, WOLF right fixed", {
+    # Paths
+    command <- "plot_alluvial"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    output_path <- tempfile(fileext = ".png")
+    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_right.png")
+
+    # Run CLI
+    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "greedy_WOLF", "--fixed_column", 2, "--quiet", "TRUE"))
+
+    compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
+})
+
+test_that("CLI plot_alluvial, WBLF", {
+    # Paths
+    command <- "plot_alluvial"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    output_path <- tempfile(fileext = ".png")
+    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wblf.png")
+
+    # Run CLI
+    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "greedy_WBLF", "--quiet", "TRUE"))
+
+    compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
+})
+
+test_that("CLI greedy_wolf, WOLF left fixed", {
+    # Paths
+    command <- "greedy_wolf"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    output_path <- tempfile(fileext = ".csv")
+    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_left_df.csv")
+
+    # Run CLI
+    system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--sorting_algorithm", "greedy_WOLF", "--fixed_column", 1, "--quiet", "TRUE"))
+
+    compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
+})
+
+test_that("CLI greedy_wolf, WOLF right fixed", {
+    # Paths
+    command <- "greedy_wolf"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    output_path <- tempfile(fileext = ".csv")
+    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_right_df.csv")
+
+    # Run CLI
+    system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--sorting_algorithm", "greedy_WOLF", "--fixed_column", 2, "--quiet", "TRUE"))
+
+    compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
+})
+
+# ./exec/alluvialmatch greedy_wolf --df tests/testthat/ground_truth/df_tests_cli.csv --output_df_path tests/testthat/ground_truth/sorting_wblf_df.csv --sorting_algorithm greedy_WBLF
+test_that("CLI greedy_wolf, WBLF", {
+    # Paths
+    command <- "greedy_wolf"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    output_path <- tempfile(fileext = ".csv")
+    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wblf_df.csv")
+
+    # Run CLI
+    system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--sorting_algorithm", "greedy_WBLF", "--quiet", "TRUE"))
+
+    compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
+})
+
+# ./exec/alluvialmatch determine_crossing_edges --df tests/testthat/ground_truth/sorting_wblf_df.csv --output_df_path tests/testthat/ground_truth/crossing_wblf_df.csv --column1 col1_int --column2 col2_int
+test_that("CLI determine_crossing_edges", {
+    # Paths
+    command <- "determine_crossing_edges"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wblf_df.csv")
+    output_path <- tempfile(fileext = ".csv")
+    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "crossing_wblf_df.csv")
+
+    # Run CLI
+
+    system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--column1", "col1_int", "--column2", "col2_int", "--quiet", "TRUE"))
+
+    compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
+})
+
+# ./exec/alluvialmatch determine_weighted_layer_free_objective --df tests/testthat/ground_truth/crossing_wblf_df.csv
+test_that("CLI determine_weighted_layer_free_objective", {
+    # Paths
+    command <- "determine_weighted_layer_free_objective"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "crossing_wblf_df.csv")
+
+    # Run CLI
+    browser()
+    output <- system2(cli_cmd_path, args = c(command, "--df", df_path, "--output_df_path", output_path), stdout = TRUE)
+    num <- as.integer(gsub(".*\\s", "", output))
+
+    testthat::expect_equal(num, 14)
+})
+

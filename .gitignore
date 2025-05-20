@@ -6,3 +6,4 @@ tmp_files
 trash
 /doc/
 /Meta/
+*/.build.timestamp

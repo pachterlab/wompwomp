@@ -5,7 +5,7 @@
 #' @name alluvialmatch
 #'
 #' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter
-#' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave
+#' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave guides
 #' @importFrom ggalluvial geom_alluvium geom_stratum stat_stratum
 #' @importFrom ggforce gather_set_data
 #' @importFrom igraph max_bipartite_match V graph_from_data_frame
@@ -248,7 +248,7 @@ find_group2_colors <- function(clus_df_gather, ditto_colors,
 plot_alluvial_internal <- function(clus_df_gather,
                                    sorting_algorithm = NULL,
                                    group1_name = "A", group2_name = "B", fixed_column=NULL,
-                                   group1_name_mapping = "A", group2_name_mapping = "B", 
+                                   group1_name_mapping = "A", group2_name_mapping = "B",
                                    color_list = NULL, color_boxes = TRUE,
                                    color_bands = FALSE, color_band_list = NULL,
                                    color_band_column=NULL, color_band_boundary=FALSE,
@@ -292,7 +292,7 @@ plot_alluvial_internal <- function(clus_df_gather,
     combined_colors <- c(colors_group1, colors_group2)
     combined_colors_reverse <- c(colors_group1_reverse, colors_group2_reverse)
     remaining_colors <- ditto_colors[!(ditto_colors %in% combined_colors)]
-    
+
     temp_df <- clus_df_gather[1:as.integer(dim(clus_df_gather)[1]/2),1:dim(clus_df_gather)[2]]
     # uncomment to attempt mapping
     p <- ggplot(data = temp_df, aes(axis1 = !!sym('col1_int'),
@@ -310,7 +310,7 @@ plot_alluvial_internal <- function(clus_df_gather,
                     geom_alluvium(aes(fill = !!sym(color_band_column), color=!!sym(color_band_column)), alpha = alluvial_alpha) +
                     scale_fill_manual(values = color_band_list) +
                     labs(fill = NULL)+guides(fill='none')
-                
+
             } else{
                 p <- p +
                     geom_alluvium(aes(fill = !!sym(color_band_column)), alpha = alluvial_alpha) +
@@ -439,6 +439,7 @@ get_alluvial_df <- function(df) {
 #' @param random_initializations Optional Integer. Number of random initializations of the WLF heuristic to perform.
 #' @param set_seed Optional Integer. Seed for random initializations of the WLF heuristic to perform.
 #' @param color_band_column Optional Character. Which column to use for coloring bands.
+#' @param color_band_boundary Logical. Whether or not to color boundaries between bands
 #' @param sorting_algorithm Character. Must be greedy_WBLF, greedy_WOLF, or None.
 #' @param color_boxes Logical. Whether to color the rectangular strata boxes representing groups.
 #' @param color_bands Logical. Whether to color the alluvial bands connecting the groups.
@@ -462,10 +463,10 @@ get_alluvial_df <- function(df) {
 #' }
 #'
 #' @export
-plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1, 
+plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1,
                           sorting_algorithm = 'greedy_WBLF',random_initializations = 1, color_list = NULL,
                           color_boxes = TRUE,
-                          color_bands = FALSE, color_band_list = NULL, 
+                          color_bands = FALSE, color_band_list = NULL,
                           color_band_column=NULL, color_band_boundary=FALSE,
                           match_colors = TRUE, alluvial_alpha = 0.5,
                           include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
@@ -529,7 +530,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1,
         stop(sprintf("Invalid sorting_algorithm: '%s'. Must be one of: %s",
                      sorting_algorithm, paste(valid_algorithms, collapse = ", ")))
     }
-    
+
     if ((sorting_algorithm == 'None') & (random_initializations > 1)) {
         warning("random_initializations > 1 but sorting algorithm is None. Setting random_initializations to 1.")
         random_initializations=1
@@ -547,17 +548,21 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1,
         reordered_column <- "col1_int"
     }
 
-    df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
-    df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
+    # df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
+    # df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
+    df[['col1_int']] <- as.integer(factor(df[[column1]], levels = sort(unique(df[[column1]]), method = "radix")))
+    df[['col2_int']] <- as.integer(factor(df[[column2]], levels = sort(unique(df[[column2]]), method = "radix")))
 
     #factorize input columns
-    df[[column1]] <- as.factor(as.character(df[[column1]]))
-    df[[column2]] <- as.factor(as.character(df[[column2]]))
+    # df[[column1]] <- as.factor(as.character(df[[column1]]))
+    # df[[column2]] <- as.factor(as.character(df[[column2]]))
+    df[[column1]] <- factor(as.character(df[[column1]]), levels = sort(unique(as.character(df[[column1]])), method = "radix"))
+    df[[column2]] <- factor(as.character(df[[column2]]), levels = sort(unique(as.character(df[[column2]])), method = "radix"))
 
     clus_df_gather <- get_alluvial_df(df)
-    
+
     crossing_edges_objective_minimum <- Inf
-    
+
     set.seed(set_seed)
     for (i in seq_len(random_initializations)) {
         #!!! randomize clus_df_gather order
@@ -594,29 +599,19 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1,
 
     clus_df_gather <- clus_df_gather_best
 
-    clus_df_gather_already_modified_for_save_or_return <- NULL
-    if (is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) {
-        if(is.null(clus_df_gather_already_modified_for_save_or_return)) {
-            clus_df_gather <- clus_df_gather %>%
-                ungroup() %>%
-                slice(1:(n() %/% 2)) %>%              # keep first half of rows
-                select(-id, -x, -y)
-            clus_df_gather_already_modified_for_save_or_return <- TRUE
+    if ((is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) || return_greedy_wolf) {
+        clus_df_gather_to_save <- clus_df_gather %>%
+            ungroup() %>%
+            slice(1:(n() %/% 2)) %>%  # keep first half of rows
+            select(-id, -x, -y)       # drop columns
+
+        if (is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) {
+            write.csv(clus_df_gather_to_save, file = output_df_path, row.names = FALSE)
         }
 
-        write.csv(clus_df_gather, file = output_df_path, row.names = FALSE)
-        # message("Data frame written to ", output_df_path)
-    }
-
-    if (return_greedy_wolf) {
-        if(is.null(clus_df_gather_already_modified_for_save_or_return)) {
-            clus_df_gather <- clus_df_gather %>%
-                ungroup() %>%
-                slice(1:(n() %/% 2)) %>%              # keep first half of rows
-                select(-id, -x, -y)    # drop columns
-            clus_df_gather_already_modified_for_save_or_return <- TRUE
+        if (return_greedy_wolf) {
+            return(clus_df_gather_to_save)
         }
-        return(clus_df_gather)
     }
 
     # clus_df_gather <- merge(
@@ -642,7 +637,7 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1,
     #     )
 
     alluvial_plot <- plot_alluvial_internal(clus_df_gather, group1_name = column1, group2_name = column2, fixed_column = fixed_column,
-                                            group1_name_mapping = column1, group2_name_mapping = column2, 
+                                            group1_name_mapping = column1, group2_name_mapping = column2,
                                             color_list = color_list, color_boxes = color_boxes,
                                             color_bands = color_bands, color_band_list = color_band_list,
                                             color_band_column=color_band_column, color_band_boundary=color_band_boundary,
@@ -799,15 +794,7 @@ determine_weighted_layer_free_objective <- function(crossing_edges, minimum_edge
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, column1, column2, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, map_dict = NULL, map_dict_1 = NULL, map_dict_2 = NULL, fixed_column = NULL, return_weighted_layer_free_objective = FALSE) {
-    # # set to factors if not already
-    # if (!is.factor(df[[column1]])) df[[column1]] <- factor(df[[column1]])
-    # if (!is.factor(df[[column2]])) df[[column2]] <- factor(df[[column2]])
-
-    col1_sym <- sym(column1)
-    col2_sym <- sym(column2)
-    weight_sym <- sym(column_weights)
-
+determine_crossing_edges <- function(df, column1 = NULL, column2 = NULL, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, map_dict = NULL, map_dict_1 = NULL, map_dict_2 = NULL, fixed_column = NULL, return_weighted_layer_free_objective = FALSE) {
     if (is.character(df)) {
         if (grepl("\\.rds$", df, ignore.case = TRUE)) {
             df <- readRDS(df)
@@ -820,10 +807,44 @@ determine_crossing_edges <- function(df, column1, column2, column_weights = "val
         stop("Input must be a data frame or a file path to a .csv or .rds file.")
     }
 
+    if (!(column_weights %in% colnames(df))) {
+        stop(sprintf("column_weights '%s' is not a column in the dataframe.", column_weights))
+    }
+
+    cluster_cols <- setdiff(colnames(df), column_weights)
+
+    if (length(cluster_cols) <= 1) {
+        stop(sprintf("Dataframe has %d columns. It must have at least three columns.", ncol(df) + 1))
+    } else if (length(cluster_cols) == 2) {
+        if (is.null(column1) && is.null(column2)) {
+            column1 <- cluster_cols[1]
+            column2 <- cluster_cols[2]
+        } else if (is.null(column1)) {
+            column1 <- setdiff(cluster_cols, column2)
+        } else if (is.null(column2)) {
+            column2 <- setdiff(cluster_cols, column1)
+        }
+    } else {
+        if (is.null(column1) && is.null(column2)) {
+            stop(sprintf("Dataframe has more than three columns. Please specify column1 and column2"))
+        }
+    }
+
+    if (!(column1 %in% colnames(df))) {
+        stop(sprintf("column1 '%s' is not a column in the dataframe.", column1))
+    }
+    if (!(column2 %in% colnames(df))) {
+        stop(sprintf("column2 '%s' is not a column in the dataframe.", column2))
+    }
+
+    # # set to factors if not already
+    # if (!is.factor(df[[column1]])) df[[column1]] <- factor(df[[column1]])
+    # if (!is.factor(df[[column2]])) df[[column2]] <- factor(df[[column2]])
+
     # Assign fixed coordinates for bipartite layout
     df <- df %>%
-        mutate(x1 = as.integer(factor(!!col1_sym)),
-               x2 = as.integer(factor(!!col2_sym)),
+        mutate(x1 = as.integer(factor(!!sym(column1))),
+               x2 = as.integer(factor(!!sym(column2))),
                y1 = 0,
                y2 = 1)
 
