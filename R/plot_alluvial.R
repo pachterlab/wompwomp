@@ -245,7 +245,7 @@ plot_alluvial_internal <- function(clus_df_gather,
 
     # Extract colors for each factor, assuming ditto_colors is long enough
     if (match_colors) {
-        if (is.null(fixed_column) | fixed_column == group1_name) {
+        if (is.null(fixed_column) | fixed_column == 'col1_int') {
             colors_group1 <- ditto_colors[1:num_levels_group1]
             colors_group2 <- find_group2_colors(clus_df_gather, ditto_colors)
 
