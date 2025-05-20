@@ -73,7 +73,6 @@ Optional:
   column2     <- get_arg("--column2")
   fixed_column    <- get_arg("--fixed_column")
   random_initializations <- get_numeric_arg("--random_initializations", 1)
-  show_group_2_box_labels_in_ascending <- get_bool_arg("--show_group_2_box_labels_in_ascending", FALSE)
   color_boxes        <- get_bool_arg("--color_boxes", TRUE)
   color_bands        <- get_bool_arg("--color_bands", TRUE)
   match_colors       <- get_bool_arg("--match_colors", TRUE)
@@ -86,7 +85,7 @@ Optional:
   output_df_path       <- get_arg("--output_df_path")
   color_list        <- get_list_arg("--color_list")
   color_column       <- get_arg("--color_column")
-  sorting_algorithm       <- get_arg("--sorting_algorithm")
+  sorting_algorithm       <- get_arg("--sorting_algorithm", "greedy_WBLF")
   color_band_list       <- get_arg("--color_band_list")
   set_seed       <- get_arg("--set_seed")
 
@@ -96,7 +95,6 @@ Optional:
     column2 = column2,
     fixed_column = fixed_column,
     random_initializations = random_initializations,
-    show_group_2_box_labels_in_ascending = show_group_2_box_labels_in_ascending,
     color_boxes = color_boxes,
     color_bands = color_bands,
     match_colors = match_colors,

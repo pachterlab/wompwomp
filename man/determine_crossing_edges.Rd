@@ -12,6 +12,9 @@ determine_crossing_edges(
   minimum_edge_weight = 0,
   output_df_path = NULL,
   map_dict = NULL,
+  map_dict_1 = NULL,
+  map_dict_2 = NULL,
+  fixed_column = NULL,
   return_weighted_layer_free_objective = FALSE
 )
 }
