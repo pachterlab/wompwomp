@@ -281,7 +281,7 @@ plot_alluvial_internal <- function(clus_df_gather,
                 p <- p +
                     geom_alluvium(aes(fill = !!sym(color_band_column), color=!!sym(color_band_column)), 
                                   alpha = alluvial_alpha) +
-                    scale_fill_manual(values = color_band_list) +
+                    scale_fill_manual(values = color_band_list) + scale_color_manual(values = color_band_list)+
                     labs(fill = NULL)+guides(fill='none')
                 
             } else{
@@ -294,7 +294,7 @@ plot_alluvial_internal <- function(clus_df_gather,
             if (color_band_boundary){
                 p <- p +
                     geom_alluvium(aes(fill = !!sym('col1_int'), color = !!sym('col1_int')), alpha = alluvial_alpha) +
-                    scale_fill_manual(values = colors_group1) +
+                    scale_fill_manual(values = colors_group1) + scale_color_manual(values = colors_group1)+
                     labs(fill = NULL)+guides(fill='none')
             } else{
                 p <- p +
@@ -306,7 +306,7 @@ plot_alluvial_internal <- function(clus_df_gather,
             if (color_band_boundary){
                 p <- p +
                     geom_alluvium(aes(fill = !!sym('col2_int'), color=!!sym('col2_int')), alpha = alluvial_alpha) +
-                    scale_fill_manual(values = colors_group2) +
+                    scale_fill_manual(values = colors_group2) + scale_color_manual(values = colors_group2)+
                     labs(fill = NULL)
             } else{
                 p <- p +
