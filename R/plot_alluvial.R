@@ -529,6 +529,11 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1,
         stop(sprintf("Invalid sorting_algorithm: '%s'. Must be one of: %s",
                      sorting_algorithm, paste(valid_algorithms, collapse = ", ")))
     }
+    
+    if ((sorting_algorithm == 'None') & (random_initializations > 1)) {
+        warning("random_initializations > 1 but sorting algorithm is None. Setting random_initializations to 1.")
+        random_initializations=1
+    }
 
     if ((is.null(fixed_column)) && (sorting_algorithm=='greedy_WOLF')) {
         stop(sprintf("Column to fix for One-Sided matching is not specified.", fixed_column))
@@ -550,32 +555,26 @@ plot_alluvial <- function(df, column1 = NULL, column2 = NULL, fixed_column = 1,
     df[[column2]] <- as.factor(as.character(df[[column2]]))
 
     clus_df_gather <- get_alluvial_df(df)
-
-    # clus_df_gather <- clus_df_gather %>% mutate(
-    #     group1_column_original_clusters := as.character(.data[[column1]]),
-    #     group2_column_original_clusters := as.character(.data[[column2]])
-    # )
-
-    # clus_df_gather <- sort_clusters_by_agreement(clus_df_gather, stable_column = column1, reordered_column = column2)
+    
     crossing_edges_objective_minimum <- Inf
+    
     set.seed(set_seed)
     for (i in seq_len(random_initializations)) {
         #!!! randomize clus_df_gather order
-        for (column_num in c('col1_int', 'col2_int')){
-            df[[column_num]] = as.factor(df[[column_num]])
-            df[[column_num]] = factor(df[[column_num]], levels=sample(levels(df[[column_num]])))
-            df[[column_num]] = as.integer(df[[column_num]])
-
-            # old_levels <- levels(df[[column_num]])
-            # new_labels <- sample(old_levels)
-            # df[[column_num]] <- factor(df[[column_num]], levels = old_levels, labels = new_labels)
-        }
-
         if (sorting_algorithm == 'greedy_WBLF') {
+            for (column_num in c('col1_int', 'col2_int')){
+                df[[column_num]] = as.factor(df[[column_num]])
+                df[[column_num]] = factor(df[[column_num]], levels=sample(levels(df[[column_num]])))
+                df[[column_num]] = as.integer(df[[column_num]])
+            }
             # WBLF
             clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int', reordered_column = 'col2_int')
             clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather_tmp, stable_column = 'col2_int', reordered_column = 'col1_int')
         } else if (sorting_algorithm == 'greedy_WOLF') {
+            column_num = reordered_column
+            df[[column_num]] = as.factor(df[[column_num]])
+            df[[column_num]] = factor(df[[column_num]], levels=sample(levels(df[[column_num]])))
+            df[[column_num]] = as.integer(df[[column_num]])
             # WOLF
             clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = fixed_column, reordered_column = reordered_column)
         } else {
