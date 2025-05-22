@@ -18,24 +18,33 @@ library(igraph)
 library(tibble)
 ```
 
-We create a toy data frame that maps tissues (brain, stomach, heart, T cell, B cell) to clustering (1-4)
+```{r}
+library(reticulate)
+conda_env <- "seurat_vs_scanpy"
+Sys.setenv(RETICULATE_PYTHON = paste("/Users/joeyrich/miniconda3/envs", conda_env, "bin/python3.9", sep = "/"))
+use_condaenv("/Users/joeyrich/miniconda3/envs/seurat_vs_scanpy/bin/python3.9", required = TRUE)
+```
+
+We create a toy data frame that maps tissues (BRAIN, STOMACH, HEART, T cell, B CELL) to clustering (1-5)
 ```{r}
 df <- data.frame(
   tissue = c(
-    "brain", "brain", "brain",
-    "stomach", "stomach", "stomach", "stomach", "stomach", "stomach",
-    "heart", "heart", "heart", "heart", "heart", "heart", "heart",
-    "T cell", "T cell",
-    "B cell", "B cell", "B cell", "B cell", "B cell", "B cell", "B cell", "B cell", "B cell"
+    1, 1, 1,
+    2, 2, 2, 2, 2, 2,
+    3, 3, 3, 3, 3, 3, 3,
+    4, 4,
+    5, 5, 5, 5, 5, 5, 5, 5, 5
   ),
   cluster = c(
     2, 2, 1,
     2, 1, 1, 1, 1, 1,
     2, 3, 3, 3, 3, 3, 3,
     4, 4,
-    4, 4, 4, 4, 4, 4, 4, 4, 4
+    4, 4, 4, 4, 4, 4, 4, 4, 5
   )
 )
+column1 <- "tissue"
+column2 <- "cluster"
 
 head(df)
 ```
@@ -127,6 +136,8 @@ p2 <- plot_alluvial(clus_df_gather_sorted, column1="tissue", column2="cluster", 
 p2
 ```
 
+Note that, above, we would reach the optimal if we moved up the cyan's 1 notch up
+
 ```{r}
 # Get levels
 left_levels <- levels(clus_df_gather_sorted$col1_int)
@@ -204,55 +215,200 @@ ggplot(df_plot, aes(x = perm_id, y = objective)) +
   labs(x = "Permutation index", y = "Objective value") +
   theme_minimal()
 ```
+
 Let's compare neighbornet too
 ```{r}
-run_neighbornet <- function(df) {
-    ...
+clus_df_gather_raw <- df |>
+    dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+    dplyr::group_by_all() |>
+    dplyr::count(name = "value")
+gather_set_data(clus_df_gather_raw, 1:2)
+
+plot_alluvial(clus_df_gather_raw, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "None")
+```
+
+```{r}
+run_neighbornet <- function(df, column1, column2) {
+    # map from string to int if needed
+    was_integer1 <- is.numeric(df[[column1]])
+    was_integer2 <- is.numeric(df[[column2]])
+    
+    clus_df_gather <- df |>
+        dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+        dplyr::group_by_all() |>
+        dplyr::count(name = "value")
+    gather_set_data(clus_df_gather, 1:2)
+    
+    number_levels_col1 <- length(levels(clus_df_gather[[column1]]))
+    number_levels_col2 <- length(levels(clus_df_gather[[column2]]))
+    
+    if (number_levels_col1 != number_levels_col2) {
+        stop("Currently requires equal number of clusters on both sides for neighbornet")
+    }
+    number_clusters <- number_levels_col1
+    
+    # Add prefixes to distinguish node types
+    clus_df_gather[[column1]] <- paste0("left_", clus_df_gather[[column1]])
+    clus_df_gather[[column2]] <- paste0("right_", clus_df_gather[[column2]])
+    
+    # Build the graph
+    g <- graph_from_data_frame(clus_df_gather, directed = FALSE)
+    
+    # Get all node names
+    all_nodes <- sort(unique(c(clus_df_gather[[column1]], clus_df_gather[[column2]])))
+    
+    # Compute full distance matrix based on 1 / (edge weight)
+    # Initialize distance matrix
+    full_dist_matrix <- matrix(1e6, nrow = length(all_nodes), ncol = length(all_nodes),
+                          dimnames = list(all_nodes, all_nodes))
+    
+    # initialize all cross-nodes to 1000
+    n <- number_clusters
+    full_dist_matrix[1:n, (n+1):(2*n)] <- 1000
+    full_dist_matrix[(n+1):(2*n), 1:n] <- 1000
+    
+    # Fill in distances based on 1 / weight
+    for (i in seq_len(nrow(clus_df_gather))) {
+      n1 <- clus_df_gather[[column1]][i]
+      n2 <- as.character(clus_df_gather[[column2]][i])  # ensure consistent type
+      w  <- clus_df_gather$value[i]
+    
+      full_dist_matrix[n1, n2] <- 1 / w
+      full_dist_matrix[n2, n1] <- 1 / w  # symmetric since graph is undirected
+    }
+    
+    # Prepare data in R
+    labels <- all_nodes  # assuming this is a character vector
+    mat <- full_dist_matrix
+    mat[is.infinite(mat)] <- 1e6
+    mat[is.na(mat)] <- 1e6
+    mat_list <- split(mat, row(mat))  # convert R matrix to list of row-vectors
+    
+    # Call Python function
+    # result <- nn_mod$neighbor_net(labels, mat_list)
+    reticulate::source_python(file.path(here::here(), "scripts", "run_neighbornet.py"))
+    result <- neighbor_net(labels, mat)
+    cycle <- result[[1]]
+    splits <- result[[2]]
+    
+    left_graph <- c()
+    right_graph <- c()
+    
+    for (i in seq_along(cycle)) {
+      node_index <- cycle[[i]]
+      if (node_index == 0) next  # skip 0 (weird value)
+    
+      node <- labels[[node_index]]  # 1-indexed position
+    
+      if (i %% 2 == 0) {
+        # if (startsWith(node, "left")) {  # optional condition
+        left_graph <- c(left_graph, node)
+      } else {
+        right_graph <- c(right_graph, node)
+      }
+    }
+    
+    stopifnot(all(startsWith(left_graph, "left_")))
+    stopifnot(all(startsWith(right_graph, "right_")))
+    
+    left_graph <- sub("^left_", "", left_graph)
+    right_graph <- sub("^right_", "", right_graph)
+    
+    if (was_integer1) {
+      left_graph <- as.numeric(left_graph)
+    }
+    if (was_integer2) {
+        right_graph <- as.numeric(right_graph)
+    }
+    
+    return(list(left_graph = left_graph, right_graph = right_graph))
 }
+```
 
-# left_graph, right_graph = run_neighbornet(df)  #!!! get working
-left_graph <- c(3, 2, 5, 1, 4)  #!!! erase
-right_graph <- c(3, 2, 4, 1)  #!!! erase
+```{r}
+# # dummy data
+# df <- data.frame(
+#   tissue = c(
+#     1, 1, 1,
+#     2, 2, 2, 2, 2, 2,
+#     3, 3, 3, 3, 3, 3, 3,
+#     4, 4,
+#     5, 5, 5, 5, 5, 5, 5, 5, 5
+#   ),
+#   cluster = c(
+#     1, 1, 2,
+#     1, 2, 2, 2, 2, 2,
+#     1, 3, 3, 3, 3, 3, 3,
+#     4, 4,
+#     4, 4, 4, 4, 4, 4, 5, 5, 5
+#   )
+# )
+# column1 <- "tissue"
+# column2 <- "cluster"
 
-column1 <- "tissue"
-column2 <- "cluster"
-df[['col1_int']] <- as.integer(as.factor(df[[column1]]))
-df[['col2_int']] <- as.integer(as.factor(df[[column2]]))
+res <- run_neighbornet(df, column1=column1, column2=column2)
+left_graph <- res$left_graph
+right_graph <- res$right_graph
+
+# left_graph <- c(1, 3, 4, 5, 2)  # dummy data
+# right_graph <- c(1, 3, 4, 5, 2)  # dummy data
+
+rotate_left <- function(vec, k = 1) {
+  n <- length(vec)
+  k <- k %% n
+  if (k == 0) return(vec)
+  c(vec[(k + 1):n], vec[1:k])
+}
 
 #factorize input columns
 df[[column1]] <- as.factor(as.character(df[[column1]]))
 df[[column2]] <- as.factor(as.character(df[[column2]]))
+
+neighbornet_objective_minimum <- Inf
+p_best_neighbornet <- NULL
+left_graph_best <- NULL
+right_graph_best <- NULL
+plots <- list()
+for (i in 0:(length(left_graph) - 1)) {
+    left_graph_rotated <- rotate_left(left_graph, i)
+    right_graph_rotated <- rotate_left(right_graph, i)
     
-clus_df_gather_neighbornet <- df |>
-    dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
-    dplyr::group_by_all() |>
-    dplyr::count(name = "value")
-clus_df_gather_neighbornet <- ggforce::gather_set_data(clus_df_gather_neighbornet, 1:2)
-clus_df_gather_neighbornet <- clus_df_gather_neighbornet %>%
-    ungroup() %>%
-    slice(1:(n() %/% 2)) %>%              # keep first half of rows
-    select(-id, -x, -y)
+    clus_df_gather_neighbornet <- df |>
+        dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+        dplyr::group_by_all() |>
+        dplyr::count(name = "value")
+    clus_df_gather_neighbornet <- ggforce::gather_set_data(clus_df_gather_neighbornet, 1:2)
+    clus_df_gather_neighbornet <- clus_df_gather_neighbornet %>%
+        ungroup() %>%
+        slice(1:(n() %/% 2)) %>%              # keep first half of rows
+        select(-id, -x, -y)
+    
+    clus_df_gather_neighbornet[['col1_int']] <- match(clus_df_gather_neighbornet[[column1]], left_graph_rotated)
+    clus_df_gather_neighbornet[['col2_int']] <- match(clus_df_gather_neighbornet[[column2]], right_graph_rotated)
+    
+    p_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, column1="col1_int", column2="col2_int", column_weights = "value", sorting_algorithm="None", color_bands=TRUE)
+    plots[[i+1]] <- p_neighbornet
+    
+    neighbornet_objective <- determine_crossing_edges(
+          clus_df_gather_neighbornet,
+          column1 = "col1_int",
+          column2 = "col2_int",
+          fixed_column = NULL,
+          return_weighted_layer_free_objective = TRUE
+        )
+    print(neighbornet_objective)
+    if (neighbornet_objective < neighbornet_objective_minimum) {
+        neighbornet_objective_minimum <- neighbornet_objective
+        left_graph_best <- left_graph_rotated
+        right_graph_best <- right_graph_rotated
+        p_best_neighbornet <- p_neighbornet
+    }
+}
 
-clus_df_gather_neighbornet$col1_int <- match(
-  as.integer(as.character(clus_df_gather_neighbornet$col1_int)),
-  left_graph
-)
-clus_df_gather_neighbornet$col2_int <- match(
-  as.integer(as.character(clus_df_gather_neighbornet$col2_int)),
-  right_graph
-)
-
-p_best_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, column1="col1_int", column2="col2_int", column_weights = "value", sorting_algorithm="None")
+print(neighbornet_objective_minimum)
+print(left_graph_best)
+print(right_graph_best)
 p_best_neighbornet
-
-neighbornet_objective <- determine_crossing_edges(
-      clus_df_gather_neighbornet,
-      column1 = "col1_int",
-      column2 = "col2_int",
-      fixed_column = NULL,
-      return_weighted_layer_free_objective = TRUE
-    )
-print(neighbornet_objective)
 ```
 
 ```{r}
@@ -261,8 +417,8 @@ ggplot(df_plot, aes(x = perm_id, y = objective)) +
   geom_hline(yintercept = alluvialmatch_objective, linetype = "dashed", color = "blue") +
   annotate("text", x = Inf, y = alluvialmatch_objective, label = "alluvialmatch objective", 
            hjust = 1.1, vjust = -0.5, color = "blue", size = 3) +
-  geom_hline(yintercept = neighbornet_objective, linetype = "dashed", color = "orange") +
-  annotate("text", x = Inf, y = neighbornet_objective, label = "neighbornet objective", 
+  geom_hline(yintercept = neighbornet_objective_minimum, linetype = "dashed", color = "orange") +
+  annotate("text", x = Inf, y = neighbornet_objective_minimum, label = "neighbornet objective", 
            hjust = 1.1, vjust = -0.5, color = "orange", size = 3) +
   labs(x = "Permutation index", y = "Objective value") +
   theme_minimal()

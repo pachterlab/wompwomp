@@ -37,6 +37,25 @@ df <- data.frame(
   )
 )
 
+# df <- data.frame(
+#   tissue = c(
+#     1, 1, 1,
+#     2, 2, 2, 2, 2, 2,
+#     3, 3, 3, 3, 3, 3, 3,
+#     4, 4,
+#     5, 5, 5, 5, 5, 5, 5, 5, 5
+#   ),
+#   cluster = c(
+#     2, 2, 1,
+#     2, 1, 1, 1, 1, 1,
+#     2, 3, 3, 3, 3, 3, 3,
+#     4, 4,
+#     4, 4, 4, 4, 4, 4, 4, 4, 5
+#   )
+# )
+column1 <- "tissue"
+column2 <- "cluster"
+
 head(df)
 ```
 
@@ -54,7 +73,7 @@ clus_df_gather
 
 Optimal
 ```{r}
-plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")
+plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF", color_bands=TRUE)
 ```
 
 Without sorting - happens to already be optimal - so I expect each graph to be [1, 2, 3, 4, 5]
@@ -121,6 +140,11 @@ for (i in seq_len(nrow(clus_df_gather))) {
 ```
 
 ```{r}
+full_dist_matrix
+```
+
+
+```{r}
 conda_env <- "seurat_vs_scanpy"
 Sys.setenv(RETICULATE_PYTHON = paste("/Users/joeyrich/miniconda3/envs", conda_env, "bin/python3.9", sep = "/"))
 library(reticulate)
@@ -174,10 +198,11 @@ Interpret this
 ```{python}
 left_graph, right_graph = [], []
 
-valid_cycle = [i for i in cycle if i < len(labels)]  # because cycle had 11 elements but labels only had 10
-for i, node_index in enumerate(valid_cycle):
-    node = labels[node_index]
-    if i % 2 == 0:
+for i, node_index in enumerate(cycle):
+    if node_index == 0:  # skip 0 (weird value)
+        continue
+    node = labels[node_index-1]
+    if i % 2 != 0:
     # if node.startswith("left"):
         left_graph.append(node)
     else:
