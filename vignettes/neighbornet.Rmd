@@ -20,23 +20,6 @@ library(tibble)
 
 We create a toy data frame that maps tissues (brain, stomach, heart, T cell, B cell) to clustering (1-4)
 ```{r}
-df <- data.frame(
-  tissue = c(
-    1, 1, 1,
-    2, 2, 2, 2, 2, 2,
-    3, 3, 3, 3, 3, 3, 3,
-    4, 4,
-    5, 5, 5, 5, 5, 5, 5, 5, 5
-  ),
-  cluster = c(
-    1, 1, 2,
-    1, 2, 2, 2, 2, 2,
-    1, 3, 3, 3, 3, 3, 3,
-    4, 4,
-    4, 4, 4, 4, 4, 4, 5, 5, 5
-  )
-)
-
 # df <- data.frame(
 #   tissue = c(
 #     1, 1, 1,
@@ -46,13 +29,30 @@ df <- data.frame(
 #     5, 5, 5, 5, 5, 5, 5, 5, 5
 #   ),
 #   cluster = c(
-#     2, 2, 1,
-#     2, 1, 1, 1, 1, 1,
-#     2, 3, 3, 3, 3, 3, 3,
+#     1, 1, 2,
+#     1, 2, 2, 2, 2, 2,
+#     1, 3, 3, 3, 3, 3, 3,
 #     4, 4,
-#     4, 4, 4, 4, 4, 4, 4, 4, 5
+#     4, 4, 4, 4, 4, 4, 5, 5, 5
 #   )
 # )
+
+df <- data.frame(
+  tissue = c(
+    1, 1, 1,
+    2, 2, 2, 2, 2, 2,
+    3, 3, 3, 3, 3, 3, 3,
+    4, 4,
+    5, 5, 5, 5, 5, 5, 5, 5, 5
+  ),
+  cluster = c(
+    2, 2, 1,
+    2, 1, 1, 1, 1, 1,
+    2, 3, 3, 3, 3, 3, 3,
+    4, 4,
+    4, 4, 4, 4, 4, 4, 4, 4, 5
+  )
+)
 column1 <- "tissue"
 column2 <- "cluster"
 
@@ -193,6 +193,11 @@ matrix = matrix.tolist()  # convert numpy matrix --> list of lists
 
 cycle, splits = neighbor_net(labels, matrix)
 ```
+
+```{r}
+print(full_dist_matrix)
+```
+
 
 Interpret this
 ```{python}
