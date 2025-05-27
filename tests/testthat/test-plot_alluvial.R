@@ -91,7 +91,7 @@ test_that("VDIFFR - plot_alluvial works with 2 columns, column2 specified, colum
 
     set.seed(42)
     df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-    p <- plot_alluvial(df, column2 = "method2")
+    p <- plot_alluvial(df, column2 = "method2", sorting_algorithm = "greedy_WBLF")
     vdiffr::expect_doppelganger("basic alluvial plot", p)
 })
 
@@ -120,9 +120,7 @@ test_that("plot_alluvial works with a pre-aggregated df with weight column", {
     expect_s3_class(plot_alluvial(df, column1 = "method1", column2 = "method2", column_weights = "weight"), "ggplot")
 })
 
-test_that("VDIFFR - plot_alluvial works with a pre-aggregated df with weight column", {
-    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
-
+test_that("greedy_wolf works with unsorted algorithm", {
     set.seed(42)
     # Generate raw data
     raw_df <- data.frame(
@@ -133,8 +131,49 @@ test_that("VDIFFR - plot_alluvial works with a pre-aggregated df with weight col
     # Aggregate by combination
     df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "weight"))
 
-    p <- plot_alluvial(df, column1 = "method1", column2 = "method2", column_weights = "weight")
+    unsorted_df <- greedy_wolf(df, column1 = "method1", column2 = "method2", column_weights = "weight", sorting_algorithm = "None")
 
-    vdiffr::expect_doppelganger("basic alluvial plot weighted", p)
+    ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "unsorted_df.rds")
+    ground_truth_df <- readRDS(ground_truth_df_path)
+
+    expect_equal(unsorted_df, ground_truth_df)
+})
+
+test_that("greedy_wolf works with greedy_WOLF algorithm", {
+    set.seed(42)
+    # Generate raw data
+    raw_df <- data.frame(
+        method1 = sample(1:3, 100, TRUE),
+        method2 = sample(1:3, 100, TRUE)
+    )
+
+    # Aggregate by combination
+    df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "weight"))
+
+    greedy_wolf_df <- greedy_wolf(df, column1 = "method1", column2 = "method2", column_weights = "weight", sorting_algorithm = "greedy_WOLF")
+
+    ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "greedy_wolf_df.rds")
+    ground_truth_df <- readRDS(ground_truth_df_path)
+
+    expect_equal(greedy_wolf_df, ground_truth_df)
+})
+
+test_that("greedy_wolf works with greedy_WBLF algorithm", {
+    set.seed(42)
+    # Generate raw data
+    raw_df <- data.frame(
+        method1 = sample(1:3, 100, TRUE),
+        method2 = sample(1:3, 100, TRUE)
+    )
+
+    # Aggregate by combination
+    df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "weight"))
+
+    greedy_wblf_df <- greedy_wolf(df, column1 = "method1", column2 = "method2", column_weights = "weight", sorting_algorithm = "greedy_WBLF")
+
+    ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "greedy_wblf_df.rds")
+    ground_truth_df <- readRDS(ground_truth_df_path)
+
+    expect_equal(greedy_wblf_df, ground_truth_df)
 })
 

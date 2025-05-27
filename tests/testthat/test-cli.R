@@ -173,8 +173,7 @@ test_that("CLI determine_weighted_layer_free_objective", {
     df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "crossing_wblf_df.csv")
 
     # Run CLI
-    browser()
-    output <- system2(cli_cmd_path, args = c(command, "--df", df_path, "--output_df_path", output_path), stdout = TRUE)
+    output <- system2(cli_cmd_path, args = c(command, "--df", df_path), stdout = TRUE)
     num <- as.integer(gsub(".*\\s", "", output))
 
     testthat::expect_equal(num, 14)
