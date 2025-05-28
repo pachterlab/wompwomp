@@ -6,8 +6,8 @@
 \usage{
 determine_crossing_edges(
   df,
-  column1,
-  column2,
+  column1 = NULL,
+  column2 = NULL,
   column_weights = "value",
   minimum_edge_weight = 0,
   output_df_path = NULL,

@@ -6,6 +6,7 @@
 \usage{
 plot_alluvial(
   df,
+  graphing_columns = NULL,
   column1 = NULL,
   column2 = NULL,
   fixed_column = 1,
@@ -32,11 +33,13 @@ plot_alluvial(
 \arguments{
 \item{df}{A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).}
 
-\item{column1}{Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
+\item{graphing_columns}{Optional Character. List of columns to use. Incompatible with column1 and column2. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
 
-\item{column2}{Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
+\item{column1}{Optional Character. Name of the first column to plot. Incompatible with graphing_columns. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
 
-\item{fixed_column}{Character. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free.}
+\item{column2}{Optional Character. Name of the second column to plot. Incompatible with graphing_columns. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
+
+\item{fixed_column}{Optional Character or Integer. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free.}
 
 \item{sorting_algorithm}{Character. Must be greedy_WBLF, greedy_WOLF, or None.}
 

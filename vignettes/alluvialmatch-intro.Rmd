@@ -8,16 +8,8 @@ vignette: >
 ---
 
 ```{r}
-devtools::load_all()
-df1 <- determine_crossing_edges(df="/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/clus_df_gather_new2.csv", column1="tissue", column2="leiden", output_df_path="/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/crossing3.csv")
-df2 <- determine_crossing_edges(df="/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/clus_df_gather_new2.csv")
-df3 <- determine_crossing_edges(df="/Users/joeyrich/Desktop/local/alluvialmatch/tests/testthat/ground_truth/sorting_wblf_df.csv", column1="col1_int", column2="col2_int")
-```
-
-
-```{r}
-devtools::load_all()
-# library(alluvialmatch)
+# devtools::load_all()
+library(alluvialmatch)
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -82,8 +74,8 @@ clus_df_gather_sorted_wolf
 
 Plot the alluvial plot with sorting and color matching
 ```{r}
-p2 <- plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF", fixed_column = 1)
-# alternatively: p2 <- plot_alluvial(df, column1="tissue", column2="cluster", sorting_algorithm = "greedy_WOLF", fixed_column = 1)
+p2 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_WOLF", fixed_column = 1)
+# alternatively: p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster") sorting_algorithm = "greedy_WOLF", fixed_column = 1)
 p2
 
 # ggsave("alluvialmatch_WOLF.png", plot = p2, dpi = 300, bg = "white")
@@ -96,8 +88,8 @@ clus_df_gather_sorted_wblf
 ```
 
 ```{r}
-p3 <- plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")  # output_plot_path = "vignette_intro_plot.png"
-# alternatively: p3 <- plot_alluvial(df, column1="tissue", column2="cluster", sorting_algorithm = "greedy_WBLF")
+p3 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_WBLF")  # output_plot_path = "vignette_intro_plot.png"
+# alternatively: p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster"), sorting_algorithm = "greedy_WBLF")
 p3
 
 # ggsave("alluvialmatch_WBLF.png", plot = p3, dpi = 300, bg = "white")

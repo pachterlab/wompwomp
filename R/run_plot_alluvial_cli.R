@@ -8,6 +8,7 @@ Required:
   --df                         CSV input file
 
 Optional:
+  --grahing_columns             Name of columns
   --column1                       Name of first column
   --column2                       Name of second column
   --fixed_column                   Fix one column for one-layer free layout (1, 2, or column name)
@@ -101,6 +102,8 @@ Optional:
 
   # Optional args
   graphing_columns <- get_multi_arg("--graphing_columns")
+  column1       <- get_arg("--column1")
+  column2       <- get_arg("--column2")
   fixed_column    <- get_fixed_column("--fixed_column", 1)
   random_initializations <- get_numeric_arg("--random_initializations", 1)
   color_boxes        <- get_bool_arg("--color_boxes", TRUE)
