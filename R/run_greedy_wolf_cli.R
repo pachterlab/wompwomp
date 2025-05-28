@@ -44,11 +44,25 @@ Optional:
       tolower(val) %in% c("true", "t", "1")
   }
 
+  # --fixed_column abc --> "abc" (str); --fixed_column 123 --> 123 (int); --fixed_column "123" --> 123 (int); --fixed_column str:123 --> "123" (str)
+  get_fixed_column <- function(flag, default = 1) {
+      val <- get_arg(flag)
+      if (is.null(val)) return(default)
+
+      if (startsWith(val, "str:")) {
+          return(sub("^str:", "", val))
+      } else if (grepl("^\\d+$", val)) {
+          return(as.integer(val))
+      } else {
+          return(val)
+      }
+  }
+
   df              <- get_arg("--df")
   column1         <- get_arg("--column1")
   column2         <- get_arg("--column2")
   column_weights  <- get_numeric_list_arg("--column_weights")
-  fixed_column    <- get_arg("--fixed_column")
+  fixed_column    <- get_fixed_column("--fixed_column", 1)
   random_initializations <- get_numeric_arg("--random_initializations", 1)
   output_df_path <- get_arg("--output_df_path")
   sorting_algorithm       <- get_arg("--sorting_algorithm")

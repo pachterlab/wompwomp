@@ -63,6 +63,35 @@ Optional:
     as.numeric(val)
   }
 
+  get_multi_arg <- function(flag) {
+      i <- which(args == flag)
+      if (length(i) > 0) {
+          # Collect all values until the next flag (starting with "--") or end of args
+          vals <- character()
+          j <- i + 1
+          while (j <= length(args) && !grepl("^--", args[j])) {
+              vals <- c(vals, args[j])
+              j <- j + 1
+          }
+          return(vals)
+      }
+      return(NULL)
+  }
+
+  # --fixed_column abc --> "abc" (str); --fixed_column 123 --> 123 (int); --fixed_column "123" --> 123 (int); --fixed_column str:123 --> "123" (str)
+  get_fixed_column <- function(flag, default = 1) {
+      val <- get_arg(flag)
+      if (is.null(val)) return(default)
+
+      if (startsWith(val, "str:")) {
+          return(sub("^str:", "", val))
+      } else if (grepl("^\\d+$", val)) {
+          return(as.integer(val))
+      } else {
+          return(val)
+      }
+  }
+
   df          <- get_arg("--df")
 
   if (is.null(df)) {
@@ -71,9 +100,8 @@ Optional:
   }
 
   # Optional args
-  column1     <- get_arg("--column1")
-  column2     <- get_arg("--column2")
-  fixed_column    <- get_arg("--fixed_column", 1)
+  graphing_columns <- get_multi_arg("--graphing_columns")
+  fixed_column    <- get_fixed_column("--fixed_column", 1)
   random_initializations <- get_numeric_arg("--random_initializations", 1)
   color_boxes        <- get_bool_arg("--color_boxes", TRUE)
   color_bands        <- get_bool_arg("--color_bands", FALSE)
@@ -95,8 +123,7 @@ Optional:
 
   result <- plot_alluvial(
     df = df,
-    column1 = column1,
-    column2 = column2,
+    graphing_columns = graphing_columns,
     fixed_column = fixed_column,
     random_initializations = random_initializations,
     color_boxes = color_boxes,

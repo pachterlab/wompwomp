@@ -1,0 +1,134 @@
+---
+title: "Introduction to alluvialmatch"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to alluvialmatch}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+devtools::load_all()
+df1 <- determine_crossing_edges(df="/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/clus_df_gather_new2.csv", column1="tissue", column2="leiden", output_df_path="/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/crossing3.csv")
+df2 <- determine_crossing_edges(df="/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/clus_df_gather_new2.csv")
+df3 <- determine_crossing_edges(df="/Users/joeyrich/Desktop/local/alluvialmatch/tests/testthat/ground_truth/sorting_wblf_df.csv", column1="col1_int", column2="col2_int")
+```
+
+
+```{r}
+devtools::load_all()
+# library(alluvialmatch)
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+library(ggforce)
+library(igraph)
+library(tibble)
+```
+
+We create a toy data frame that maps tissues (BRAIN, STOMACH, HEART, T CELL, B CELL) to clustering (1-4)
+```{r}
+df <- data.frame(
+  tissue = c(
+    "BRAIN", "BRAIN", "BRAIN",
+    "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+    "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+    "T CELL", "T CELL",
+    "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+  ),
+  cluster = c(
+    1, 1, 2,
+    1, 2, 2, 2, 2, 2,
+    1, 3, 3, 3, 3, 3, 3,
+    4, 4,
+    4, 4, 4, 4, 4, 4, 4, 4, 4
+  )
+)
+
+# write.csv(df, file = "vignette_intro_df_ungrouped.csv", row.names = FALSE, quote = FALSE)
+head(df)
+```
+
+Group by tissue and cluster, counting the values in a new column value
+```{r}
+clus_df_gather <- df |>
+    dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+    dplyr::group_by_all() |>
+    dplyr::count(name = "value")
+gather_set_data(clus_df_gather, 1:2)
+
+# write.csv(clus_df_gather, file = "vignette_intro_df_grouped.csv", row.names = FALSE, quote = FALSE)
+clus_df_gather
+```
+
+
+Plot with ggalluvial before sorting - notice especially how B CELLs cross down to cluster 4, and STOMACH crosses up to cluster 2 - we would like to straighten this out, and add colors to show corresponding groups
+```{r}
+p1 <- ggplot(data = clus_df_gather, aes(axis1 = tissue, axis2 = cluster, y = value)) +
+    geom_alluvium() +
+    geom_stratum() +
+    scale_x_discrete(limits = c("tissue", "cluster"), expand = c(.2, .05)) +
+    geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+    theme_minimal()
+p1
+
+# ggsave("ggalluvial.png", plot = p1, dpi = 300, bg = "white")
+```
+Implementing a greedy heuristic for weighted one-layer free problem
+```{r}
+clus_df_gather_sorted_wolf <- greedy_wolf(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF")
+clus_df_gather_sorted_wolf
+```
+
+Plot the alluvial plot with sorting and color matching
+```{r}
+p2 <- plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF", fixed_column = 1)
+# alternatively: p2 <- plot_alluvial(df, column1="tissue", column2="cluster", sorting_algorithm = "greedy_WOLF", fixed_column = 1)
+p2
+
+# ggsave("alluvialmatch_WOLF.png", plot = p2, dpi = 300, bg = "white")
+```
+
+Notice how, because we kept the left layer fixed, B CELL and T CELL are separated far apart, even though we would minimize edge crossings if they were next to each other - we can fix this with the weighted both-layers free heuristic
+```{r}
+clus_df_gather_sorted_wblf <- greedy_wolf(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")  # output_df_path = "vignette_intro_df_cluster_wblf.csv"
+clus_df_gather_sorted_wblf
+```
+
+```{r}
+p3 <- plot_alluvial(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")  # output_plot_path = "vignette_intro_plot.png"
+# alternatively: p3 <- plot_alluvial(df, column1="tissue", column2="cluster", sorting_algorithm = "greedy_WBLF")
+p3
+
+# ggsave("alluvialmatch_WBLF.png", plot = p3, dpi = 300, bg = "white")
+```
+
+What is our objective value on clus_df_gather_sorted_wolf and clus_df_gather_sorted_wblf, where our objective function is the sum of products of overlapping edge weights?
+```{r}
+clus_df_gather_ungrouped <- clus_df_gather %>% ungroup()
+clus_df_gather_ungrouped[['col1_int']] <- as.integer(as.factor(clus_df_gather_ungrouped[["tissue"]]))
+clus_df_gather_ungrouped[['col2_int']] <- as.integer(as.factor(clus_df_gather_ungrouped[["cluster"]]))
+crossing_edges_unsorted <- determine_crossing_edges(clus_df_gather_ungrouped, column1="col1_int", column2="col2_int", column_weights = "value")
+# str(crossing_edges_unsorted[1:3])
+
+crossing_edges_wolf <- determine_crossing_edges(clus_df_gather_sorted_wolf, column1="col1_int", column2="col2_int", column_weights = "value")
+# str(crossing_edges_wolf[1:3])
+
+crossing_edges_wblf <- determine_crossing_edges(clus_df_gather_sorted_wblf, column1="col1_int", column2="col2_int", column_weights = "value")  # output_df_path = "vignette_intro_crossing_wblf.csv"
+str(crossing_edges_wblf[1:3])
+```
+
+```{r}
+objective_unsorted <- determine_weighted_layer_free_objective(crossing_edges_unsorted)
+print(paste0("Objective (unsorted): ", objective_unsorted))
+
+objective_wolf <- determine_weighted_layer_free_objective(crossing_edges_wolf)
+print(paste0("Objective (greedy WOLF): ", objective_wolf))
+
+objective_wblf <- determine_weighted_layer_free_objective(crossing_edges_wblf)
+print(paste0("Objective (greedy WBLF): ", objective_wblf))
+```
+
+```{r}
+sessioninfo::session_info()
+```
