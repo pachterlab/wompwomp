@@ -154,6 +154,8 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
     
     cycle_mapped <- labels[cycle]
     
+    # browser()
+    
     return(cycle_mapped)
 }
 
@@ -334,14 +336,15 @@ df <- data.frame(
   )
 )
 graphing_columns <- c("tissue", "cluster", "sex")
-optimize_column_order <- FALSE
 
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE)
 ```
 
 ```{r}
+optimize_column_order <- FALSE
+
 if (optimize_column_order) {
-    graphing_columns_ordered <- determine_column_order(df, graphing_columns = c("tissue", "cluster", "sex"))    
+    graphing_columns_ordered <- determine_column_order(df, graphing_columns = graphing_columns)    
 } else {
     graphing_columns_ordered <- graphing_columns
 }
@@ -384,7 +387,7 @@ p_neighbornet
 optimize_column_order <- TRUE
 
 if (optimize_column_order) {
-    graphing_columns_ordered <- determine_column_order(df, graphing_columns = c("tissue", "cluster", "sex"))    
+    graphing_columns_ordered <- determine_column_order(df, graphing_columns = graphing_columns)    
 } else {
     graphing_columns_ordered <- graphing_columns
 }
@@ -403,4 +406,74 @@ p_neighbornet
 
 ```{r}
 sessioninfo::session_info()
+```
+
+
+
+BONUS: Let's try on an extreme example
+```{r}
+df <- data.frame(
+  tissue = c(
+    "BRAIN", "BRAIN", "BRAIN",
+    "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+    "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+    "T CELL", "T CELL",
+    "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+  ),
+  sex = c(
+    "male", "female", "male",
+    "female", "male", "female", "female", "male", "female",
+    "male", "female", "male", "female", "male", "female", "male",
+    "female", "male",
+    "female", "male", "female", "male", "female", "male", "female", "female", "male"
+  ),
+  cluster = c(
+    "BRAIN", "BRAIN", "BRAIN",
+    "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+    "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+    "T CELL", "T CELL",
+    "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+  )
+)
+graphing_columns <- c("tissue", "sex", "cluster")
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE)
+```
+
+```{r}
+optimize_column_order <- FALSE
+
+if (optimize_column_order) {
+    graphing_columns_ordered <- determine_column_order(df, graphing_columns = graphing_columns)    
+} else {
+    graphing_columns_ordered <- graphing_columns
+}
+
+cycle <- run_neighbornet(df, graphing_columns=graphing_columns_ordered)
+res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns_ordered)
+clus_df_gather_neighbornet <- res$clus_df_gather
+
+graphing_columns_int <- c("col1_int", "col2_int", "col3_int")  #!!! un-harcode
+p_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, graphing_columns = graphing_columns_int, column_weights = "value", sorting_algorithm="None", color_bands=TRUE)
+print(res$individual_graphs)
+p_neighbornet
+```
+
+```{r}
+optimize_column_order <- TRUE
+
+if (optimize_column_order) {
+    graphing_columns_ordered <- determine_column_order(df, graphing_columns = graphing_columns)    
+} else {
+    graphing_columns_ordered <- graphing_columns
+}
+
+cycle <- run_neighbornet(df, graphing_columns=graphing_columns_ordered)
+res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns_ordered)
+clus_df_gather_neighbornet <- res$clus_df_gather
+
+graphing_columns_int <- c("col1_int", "col2_int", "col3_int")  #!!! un-harcode
+p_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, graphing_columns = graphing_columns_int, column_weights = "value", sorting_algorithm="None", color_bands=TRUE)
+print(res$individual_graphs)
+p_neighbornet
 ```
