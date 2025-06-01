@@ -565,22 +565,27 @@ add_int_columns <- function(df, graphing_columns) {
     for (col in graphing_columns) {
         col_int_name <- paste0('col', n, '_int')
         n <- n+1
-        # make columns integer for sorting
-        df[[col_int_name]] <- as.integer(factor(df[[col]], levels = sort(unique(df[[col]]), method = "radix")))
 
         #factorize input columns
         df[[col]] <- factor(as.character(df[[col]]), levels = sort(unique(as.character(df[[col]])), method = "radix"))
+
+        if (!(col_int_name %in% colnames(df))) {
+            # make columns integer for sorting
+            df[[col_int_name]] <- as.integer(factor(df[[col]], levels = sort(unique(df[[col]]), method = "radix")))
+        }
     }
     return(df)
 }
 
-get_alluvial_df <- function(df) {
+get_alluvial_df <- function(df, do_gather_set_data = FALSE) {
     # Convert numeric clustering columns to ordered factors
     df <- df |>
         dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
         dplyr::group_by_all() |>
         dplyr::count(name = "value")
-    # df <- ggforce::gather_set_data(df, 1:2)
+    if (do_gather_set_data) {
+        df <- ggforce::gather_set_data(df, 1:2)
+    }
     return(df)
 }
 
@@ -604,22 +609,22 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
         if (!(col %in% colnames(df))) {
             stop(sprintf("column '%s' is not a column in the dataframe.", col))
         }
+        # convert to factor
         if (!is.factor(df[[col]])) {
             df[[col]] <- as.factor(df[[col]])
         }
-
-        # convert to factor
     }
 
     return(df)
 }
 
-#' 1 line description
+#' Preprocess data
 #'
-#' Multiline
-#' Description
+#' Preprocess data (load in, add integer columns, and group as needed)
 #'
 #' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
+#' @param graphing_columns Optional Character. List of columns to use. Incompatible with column1 and column2. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
+#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
 #'
 #' @return A data frame where each row provides the weight in the 'value' column that connects a given combination of values in graphing_columns.
 #'
@@ -630,12 +635,17 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
 #' }
 #'
 #' @export
-data_preprocess <- function(df, graphing_columns = NULL, column_weights = NULL, load_df = TRUE) {
+data_preprocess <- function(df, graphing_columns = NULL, column_weights = NULL, load_df = TRUE, do_gather_set_data = FALSE) {
     if (load_df) {
         df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
     }
     df <- add_int_columns(df, graphing_columns = graphing_columns)
-    clus_df_gather <- get_alluvial_df(df)
+
+    if (is.null(column_weights) || !(column_weights %in% colnames(df))) {
+        clus_df_gather <- get_alluvial_df(df, do_gather_set_data = do_gather_set_data)
+    } else {
+        clus_df_gather <- df
+    }
 
     return(clus_df_gather)
 }
@@ -729,10 +739,9 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
     return(clus_df_gather_best)
 }
 
-#' Sorts a dataframe (e.g., the output of )
+#' Sorts a dataframe (e.g., the output of data_preprocess)
 #'
-#' Multiline
-#' Description
+#' Maps the integers in integer columns corresponding to graphing_columns such that the alluvial plot will be sorted correctly.
 #'
 #' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
 #'
@@ -741,7 +750,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @examples
 #' \dontrun{
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' plot_alluvial(df)
+#' data_sort(df)
 #' }
 #'
 #' @export
@@ -777,7 +786,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     #* Type Checking End
 
     # Preprocess (i.e., add int columns and do the grouping)
-    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = load_df)
+    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = load_df, do_gather_set_data = FALSE)
 
     if (sorting_algorithm == "neighbornet") {
         clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order)
@@ -859,7 +868,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
     if (ncol(df) < 2) {
         stop("Dataframe must have at least 2 columns when column_weights is NULL.")
     } else if (ncol(df) > 2) {
-        if (is.null(graphing_columns)) {
+        if (is.null(graphing_columns) && is.null(column1) && is.null(column2)) {
             stop("graphing_columns must be specified when dataframe has more than 2 columns and column_weights is NULL.")
         }
     } else {  # length 2
