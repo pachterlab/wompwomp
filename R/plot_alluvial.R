@@ -618,6 +618,36 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
     return(df)
 }
 
+reorder_and_rename_columns <- function(df, graphing_columns) {
+    # Find the order in df of the columns listed in graphing_columns
+    original_graphing_columns <- intersect(colnames(df), graphing_columns)
+
+    # Get original colX_int names based on original order
+    original_int_cols <- paste0("col", seq_along(original_graphing_columns), "_int")
+
+    # Target int column names based on desired new graphing order
+    new_int_cols <- paste0("col", seq_along(graphing_columns), "_int")
+
+    # Fix: old col name → new col name
+    old_int_cols <- original_int_cols[match(graphing_columns, original_graphing_columns)]
+    old_to_new_int_names <- setNames(new_int_cols, old_int_cols)
+
+    # Rename df
+    names(df)[names(df) %in% names(old_to_new_int_names)] <-
+        old_to_new_int_names[names(df)[names(df) %in% names(old_to_new_int_names)]]
+
+    # Final column order
+    everything_else <- setdiff(names(df), c(graphing_columns, new_int_cols))
+    df <- df[, c(graphing_columns, new_int_cols, everything_else)]
+
+    return(df)
+}
+
+
+
+
+
+
 #' Preprocess data
 #'
 #' Preprocess data (load in, add integer columns, and group as needed)
@@ -640,6 +670,10 @@ data_preprocess <- function(df, graphing_columns = NULL, column_weights = NULL, 
         df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
     }
     df <- add_int_columns(df, graphing_columns = graphing_columns)
+
+    # sort columns according to graphing_columns
+    # browser()
+    df <- reorder_and_rename_columns(df, graphing_columns)
 
     if (is.null(column_weights) || !(column_weights %in% colnames(df))) {
         clus_df_gather <- get_alluvial_df(df, do_gather_set_data = do_gather_set_data)
