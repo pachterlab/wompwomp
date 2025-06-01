@@ -20,6 +20,8 @@ utils::globalVariables(c(
     ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement"
 ))
 
+StatStratum <- ggalluvial::StatStratum  # avoid the error Can't find stat called "stratum"
+
 # library(dplyr)
 # library(ggplot2)
 # library(ggalluvial)
@@ -36,17 +38,6 @@ default_colors <- c(
     "#2CFFC6", "#F6EF8E", "#38B7FF", "#FF9B4D", "#E0AFCA", "#A3A3A3", "#8A5F00", "#1674A9", "#005F45", "#AA9F0D", "#00446B", "#803800", "#8D3666",
     "#3D3D3D"
 )
-
-if (!exists("group1_color")) {
-    group1_color <- "#D55E00"
-}
-
-if (!exists("group2_color")) {
-    group2_color <- "#56B4E9"
-}
-
-StatStratum <- ggalluvial::StatStratum  # avoid the error Can't find stat called "stratum"
-
 
 increment_if_zeros <- function(clus_df_gather, column) {
     clus_df_gather <- clus_df_gather %>% mutate(group_numeric = as.numeric(as.character(.data[[column]])))
@@ -224,15 +215,19 @@ find_group2_colors <- function(clus_df_gather, ditto_colors,
 }
 
 plot_alluvial_internal_2col <- function(clus_df_gather,
-                                   sorting_algorithm = NULL,
-                                   group1_name = "A", group2_name = "B", fixed_column=NULL,
-                                   color_list = NULL, color_boxes = TRUE,
-                                   color_bands = FALSE, color_band_list = NULL,
-                                   color_band_column=NULL, color_band_boundary=FALSE,
-                                   alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
-                                   include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
-                                   include_group_sizes = FALSE
-                                   ) {
+                                        sorting_algorithm = NULL,
+                                        group1_name = "A", group2_name = "B", fixed_column=NULL,
+                                        color_list = NULL, color_boxes = TRUE,
+                                        color_bands = FALSE, color_band_list = NULL,
+                                        color_band_column=NULL, color_band_boundary=FALSE,
+                                        alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
+                                        include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
+                                        include_group_sizes = FALSE
+) {
+    if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather))) > 0) {
+        clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
+    }
+
     if (!is.null(color_list)){
         ditto_colors <- color_list
     } else{
@@ -268,8 +263,8 @@ plot_alluvial_internal_2col <- function(clus_df_gather,
     temp_df <- clus_df_gather[1:as.integer(dim(clus_df_gather)[1]/2),1:dim(clus_df_gather)[2]]
     # uncomment to attempt mapping
     p <- ggplot(data = temp_df, aes(axis1 = !!sym('col1_int'),
-                                           axis2 = !!sym('col2_int'), y = value),
-                )
+                                    axis2 = !!sym('col2_int'), y = value),
+    )
 
     if (color_bands) {
         if (!is.null(color_band_column)) {
@@ -312,19 +307,19 @@ plot_alluvial_internal_2col <- function(clus_df_gather,
                     geom_alluvium(aes(fill = !!sym('col2_int')), alpha = alluvial_alpha) +
                     scale_fill_manual(values = colors_group2) +
                     labs(fill = NULL)
-        }
-    }
-        } else {
-            if (color_band_boundary){
-                p <- p + geom_alluvium(color='grey2',alpha = alluvial_alpha)
-            } else{
-                p <- p + geom_alluvium(alpha = alluvial_alpha)
             }
+        }
+    } else {
+        if (color_band_boundary){
+            p <- p + geom_alluvium(color='grey2',alpha = alluvial_alpha)
+        } else{
+            p <- p + geom_alluvium(alpha = alluvial_alpha)
+        }
     }
 
     if (color_boxes) {
         p <- p + geom_stratum(fill = combined_colors_reverse,
-                              )
+        )
     } else {
         p <- p + geom_stratum()
     }
@@ -391,524 +386,19 @@ plot_alluvial_internal_2col <- function(clus_df_gather,
     return(p)
 }
 
-
-get_alluvial_df <- function(df) {
-    # Convert numeric clustering columns to ordered factors
-    df <- df |>
-        dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
-        dplyr::group_by_all() |>
-        dplyr::count(name = "value")
-    ggforce::gather_set_data(df, 1:2)
-}
-
-
-#' Generate an Alluvial Plot with Minimal Cluster Cross-over
-#'
-#' Creates a two-axis alluvial plot to visualize the relationship between two categorical groupings (e.g., cluster assignments from different methods),
-#' minimizing crossover and aligning clusters based on agreement.
-#'
-#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
-#' @param graphing_columns Optional Character. List of columns to use. Incompatible with column1 and column2. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
-#' @param column1 Optional Character. Name of the first column to plot. Incompatible with graphing_columns. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
-#' @param column2 Optional Character. Name of the second column to plot. Incompatible with graphing_columns. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
-#' @param fixed_column Optional Character or Integer. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free.
-#' @param random_initializations Optional Integer. Number of random initializations of the WLF heuristic to perform.
-#' @param set_seed Optional Integer. Seed for random initializations of the WLF heuristic to perform.
-#' @param color_band_column Optional Character. Which column to use for coloring bands.
-#' @param color_band_boundary Logical. Whether or not to color boundaries between bands
-#' @param sorting_algorithm Character. Must be greedy_WBLF, greedy_WOLF, or None.
-#' @param color_boxes Logical. Whether to color the rectangular strata boxes representing groups.
-#' @param color_bands Logical. Whether to color the alluvial bands connecting the groups.
-#' @param match_colors Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.
-#' @param alluvial_alpha Numeric between 0 and 1. Transparency level for the alluvial bands.
-#' @param include_labels_in_boxes Logical. Whether to include text labels inside the rectangular group boxes.
-#' @param include_axis_titles Logical. Whether to display axis titles for column1 and column2.
-#' @param include_group_sizes Logical. If \code{TRUE}, includes group sizes in the labels (e.g., "Group A (42)").
-#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
-#' @param output_plot_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.
-#' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
-#' @param color_list Optional named list or vector of colors to override default group colors.
-#' @param color_band_list Optional named list or vector of colors to override default band colors.
-#'
-#' @return A \code{ggplot2} object representing the alluvial plot.
-#'
-#' @examples
-#' \dontrun{
-#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' plot_alluvial(df)
-#' }
-#'
-#' @export
-plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, fixed_column = 1,
-                          sorting_algorithm = 'greedy_WBLF',random_initializations = 1, color_list = NULL,
-                          color_boxes = TRUE,
-                          color_bands = FALSE, color_band_list = NULL,
-                          color_band_column=NULL, color_band_boundary=FALSE,
-                          match_colors = TRUE, alluvial_alpha = 0.5,
-                          include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
-                          column_weights = NULL, output_plot_path = NULL, output_df_path = NULL,
-                          return_greedy_wolf = FALSE, set_seed=42) {
-    if (is.character(df) && grepl("\\.csv$", df)) {
-        df <- read.csv(df)  # load in CSV as dataframe
-    } else if (tibble::is_tibble(df)) {
-        df <- as.data.frame(df)  # convert tibble to dataframe
-    } else if (!is.data.frame(df)) {
-        stop("Input must be a data frame, tibble, or CSV file path.")
-    }
-
-    if (!is.null(column_weights)) {
-        if (!(column_weights %in% colnames(df))) {
-            stop(sprintf("column_weights '%s' is not a column in the dataframe.", column_weights))
-        }
-        df <- tidyr::uncount(df, weights = !!rlang::sym(column_weights))
-    }
-
-    if (!is.null(color_band_column)) {
-        color_bands <- TRUE
-    }
-
-    # ensure someone doesn't specify both graphing_columns and column1/2
-    if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
-        stop("Specify either graphing_columns or column1/column2, not both.")
-    }
-    # if someone specifies column1/2, then use it
-    if (is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
-        graphing_columns <- c(column1, column2)
-    }
-
-    if (ncol(df) <= 1) {
-        stop(sprintf("Dataframe has %d columns. It must have at least two columns.", ncol(df)))
-    } else if (ncol(df) < length(graphing_columns)) {
-        stop("There are more graphing columns than columns in the dataframe.")
-
-    } else if (ncol(df) == 2) {
-        if (is.null(graphing_columns)) {
-            column1 <- colnames(df)[1]
-            column2 <- colnames(df)[2]
-            graphing_columns <- c(column1, column2)
-        } else {
-            column1 <- graphing_columns[1]
-            column2 <- graphing_columns[2]
-        }
-    } else if (ncol(df) > 2) {
-        if (is.null(graphing_columns)) {
-            stop("Dataframe has more than two columns. Please specify column1 and column2 for the plot.")
-        }
-    }
-
-    for (col in graphing_columns) {
-        if (!(col %in% colnames(df))) {
-            stop(sprintf("column '%s' is not a column in the dataframe.", col))
-        }
-    }
-
-    valid_algorithms <- c("greedy_WOLF", "greedy_WBLF", "None")
-    if (!(sorting_algorithm %in% valid_algorithms)) {
-        stop(sprintf("Invalid sorting_algorithm: '%s'. Must be one of: %s",
-                     sorting_algorithm, paste(valid_algorithms, collapse = ", ")))
-    }
-
-    if ((sorting_algorithm == 'None') & (random_initializations > 1)) {
-        warning("random_initializations > 1 but sorting algorithm is None. Setting random_initializations to 1.")
-        random_initializations=1
-    }
-
-    if ((is.null(fixed_column)) && (sorting_algorithm=='greedy_WOLF')) {
-        stop(sprintf("Column to fix for One-Sided matching is not specified.", fixed_column))
-    }
-
-    if (is.null(fixed_column)) {
-        fixed_column <- column1
-    } else if ((is.integer(fixed_column) | (is.double(fixed_column)))) {
-        if (fixed_column > length(colnames(df))){
-            stop(sprintf("fixed_column index '%s' is not a column in the dataframe.", fixed_column))
-        } else{
-            fixed_column <- colnames(df)[fixed_column]
-        }
-    } else if (!(fixed_column %in% colnames(df))) {
-        stop(sprintf("fixed_column '%s' is not a column in the dataframe.", fixed_column))
-    }
-
-
-    n<-1
-    for (col in graphing_columns) {
-        col_int_name <- paste0('col', n, '_int')
-        n <- n+1
-        # make columns integer for sorting
-        df[[col_int_name]] <- as.integer(factor(df[[col]], levels = sort(unique(df[[col]]), method = "radix")))
-
-        #factorize input columns
-        df[[col]] <- factor(as.character(df[[col]]), levels = sort(unique(as.character(df[[col]])), method = "radix"))
-    }
-
-    clus_df_gather <- get_alluvial_df(df)
-
-
-    # NOTE: Following sorting only works for 2-column case
-    if (length(graphing_columns) == 2) {
-        column1 <- graphing_columns[1]
-        column2 <- graphing_columns[2]
-        if (isTRUE(fixed_column == column1)) {
-            fixed_column <- "col1_int"
-            reordered_column <- "col2_int"
-        } else if (isTRUE(fixed_column == column2)) {
-            fixed_column <- "col2_int"
-            reordered_column <- "col1_int"
-        }
-        crossing_edges_objective_minimum <- Inf
-        set.seed(set_seed)
-        for (i in seq_len(random_initializations)) {
-            #!!! randomize clus_df_gather order
-            if (sorting_algorithm == 'greedy_WBLF') {
-                for (column_num in c('col1_int', 'col2_int')){
-                    df[[column_num]] = as.factor(df[[column_num]])
-                    df[[column_num]] = factor(df[[column_num]], levels=sample(levels(df[[column_num]])))
-                    df[[column_num]] = as.integer(df[[column_num]])
-                }
-                # WBLF
-                clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = 'col1_int',
-                                                                 reordered_column = 'col2_int')
-                clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather_tmp, stable_column = 'col2_int',
-                                                                 reordered_column = 'col1_int')
-            } else if (sorting_algorithm == 'greedy_WOLF') {
-                column_num = reordered_column
-                df[[column_num]] = as.factor(df[[column_num]])
-                df[[column_num]] = factor(df[[column_num]], levels=sample(levels(df[[column_num]])))
-                df[[column_num]] = as.integer(df[[column_num]])
-                # WOLF
-                clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather, stable_column = fixed_column,
-                                                                 reordered_column = reordered_column)
-            } else {
-                clus_df_gather_tmp <- clus_df_gather
-            }
-
-            if (random_initializations > 1) {
-                crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, column1=column1, column2=column2,
-                                                                     column_weights = "value", minimum_edge_weight = 0,
-                                                                     output_df_path = NULL, return_weighted_layer_free_objective = TRUE)
-                if (crossing_edges_objective < crossing_edges_objective_minimum) {
-                    crossing_edges_objective_minimum <- crossing_edges_objective
-                    clus_df_gather_best <- clus_df_gather_tmp
-                }
-            } else {
-                clus_df_gather_best <- clus_df_gather_tmp
-            }
-        }
-    clus_df_gather <- clus_df_gather_best
-    }
-
-
-    if ((is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) || return_greedy_wolf) {
-        clus_df_gather_to_save <- clus_df_gather %>%
-            ungroup() %>%
-            slice(1:(n() %/% 2)) %>%  # keep first half of rows
-            select(-id, -x, -y)       # drop columns
-
-        if (is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) {
-            write.csv(clus_df_gather_to_save, file = output_df_path, row.names = FALSE)
-        }
-
-        if (return_greedy_wolf) {
-            return(clus_df_gather_to_save)
-        }
-    }
-    if (length(graphing_columns) == 2) {
-        alluvial_plot <- plot_alluvial_internal_2col(clus_df_gather, group1_name = column1, group2_name = column2, fixed_column = fixed_column,
-                                            color_list = color_list, color_boxes = color_boxes,
-                                            color_bands = color_bands, color_band_list = color_band_list,
-                                            color_band_column=color_band_column, color_band_boundary=color_band_boundary,
-                                            match_colors = match_colors, alluvial_alpha = alluvial_alpha,
-                                            include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
-                                            include_group_sizes = include_group_sizes,
-                                            output_plot_path = output_plot_path)
-    } else {
-        alluvial_plot <- plot_alluvial_internal_multicol(clus_df_gather, graphing_columns=graphing_columns, fixed_column = fixed_column,
-                                                     color_list = color_list, color_boxes = color_boxes,
-                                                     color_bands = color_bands, color_band_list = color_band_list,
-                                                     color_band_column=color_band_column, color_band_boundary=color_band_boundary,
-                                                     match_colors = match_colors, alluvial_alpha = alluvial_alpha,
-                                                     include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
-                                                     include_group_sizes = include_group_sizes,
-                                                     output_plot_path = output_plot_path)
-    }
-
-    return(alluvial_plot)
-}
-
-
-#' Perform a greedy algorithm heuristic for the Weighted One Layer Free problem
-#'
-#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
-#' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
-#' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}
-#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
-#' @param fixed_column Optional Character or Integer. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free. If 1, then will fix column1; if 2, then will fix column2
-#' @param random_initializations Optional Integer. Number of random initializations of the WLF heuristic to perform.
-#' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
-#'
-#' @return A data frame.
-#'
-#' @examples
-#' \dontrun{
-#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' greedy_wolf(df)
-#' }
-#'
-#' @export
-greedy_wolf <- function(df, column1 = NULL, column2 = NULL, column_weights = NULL,
-                        sorting_algorithm = "greedy_WBLF", fixed_column = 1,
-                        random_initializations = 1, set_seed = 42, output_df_path = NULL) {
-    clus_df_gather <- plot_alluvial(df = df, graphing_columns = c(column1, column2),
-                                    column_weights = column_weights, sorting_algorithm = sorting_algorithm,
-                                    fixed_column = fixed_column, random_initializations = random_initializations,
-                                    set_seed = set_seed, output_df_path = output_df_path, return_greedy_wolf = TRUE)
-    return(clus_df_gather)
-}
-
-
-
-determine_number_of_crossing_edges <- function(crossing_edges) {
-    return(length(crossing_edges))
-}
-
-load_crossing_edges <- function(input) {
-    # Case 1: If input is a character path to a CSV/TSV file
-    if (is.character(input) && length(input) == 1 && file.exists(input)) {
-        df_in <- read.table(input, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
-
-        if (ncol(df_in) != 6) {
-            stop("File must contain exactly 6 columns: left1, right1, weight1, left2, right2, weight2")
-        }
-
-        crossing_edges <- apply(df_in, 1, function(row) {
-            edge1 <- as.character(row[1:3])
-            edge2 <- as.character(row[4:6])
-            list(edge1, edge2)
-        })
-
-        return(unname(as.list(crossing_edges)))
-
-        # Case 2: Already a list of edge pairs
-    } else if (is.list(input) && all(sapply(input, function(x) {
-        is.list(x) && length(x) == 2 &&
-            all(sapply(x, function(e) is.character(e) && length(e) == 3))
-    }))) {
-        return(input)
-
-        # Otherwise: invalid input
-    } else {
-        stop("Input must be a path to a crossing edge CSV/TSV file or a list of edge pairs.")
-    }
-}
-
-
-#' Determine sum of products of overlapping edges
-#'
-#' @param crossing_edges A CSV path or list as outputted from determine_crossing_edges.
-#' @param minimum_edge_weight Optional positive integer that represents the minimum edge weight to count an edge in the calculation.
-#'
-#' @return A data frame.
-#'
-#' @examples
-#' \dontrun{
-#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' greedy_wolf(df)
-#' crossing_edges <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
-#' objective <- determine_weighted_layer_free_objective(crossing_edges)
-#' }
-#'
-#' @export
-determine_weighted_layer_free_objective <- function(crossing_edges, minimum_edge_weight = 0) {
-    # Read the file (tab-separated or CSV)
-    if (is.character(crossing_edges) && length(crossing_edges) == 1 && file.exists(crossing_edges)) {
-        # df_in <- read.table(crossing_edges, sep="\t", header = TRUE, stringsAsFactors = FALSE)
-        df_in <- read.csv(crossing_edges, stringsAsFactors = FALSE)
-
-        if (ncol(df_in) != 6) {
-            stop("File must contain exactly 6 columns: left1, right1, weight1, left2, right2, weight2")
-        }
-
-        crossing_edges <- apply(df_in, 1, function(row) {
-            edge1 <- as.character(row[1:3])
-            edge2 <- as.character(row[4:6])
-            list(edge1, edge2)
-        })
-
-        crossing_edges <- unname(as.list(crossing_edges))
-
-        # Case 2: Already a list of edge pairs
-    } else if (is.list(crossing_edges)) {
-        # do nothing
-    } else
-        stop("Input must be either a file path or a list.")
-
-    total_weighted_crossings <- 0
-    for (pair in crossing_edges) {
-        w1 <- as.numeric(pair[[1]][3])
-        w2 <- as.numeric(pair[[2]][3])
-
-        if (is.na(w1) || is.na(w2) || w1 < minimum_edge_weight || w2 < minimum_edge_weight) {
-            next
-        }
-
-        total_weighted_crossings <- total_weighted_crossings + w1 * w2
-    }
-
-    # Correct for double-counting
-    total_weighted_crossings <- total_weighted_crossings / 2
-
-    return(total_weighted_crossings)
-}
-
-
-# list(
-#    list(c(l1, r1, e1), c(l2, r2, e2)),
-#    ...
-# )
-#' Determine overlapping edges of graph run through greedy_wolf
-#'
-#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
-#' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
-#' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}
-#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
-#' @param minimum_edge_weight Optional positive integer that represents the minimum edge weight to count an edge in the calculation.
-#' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
-#' @param return_weighted_layer_free_objective Bool Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
-#'
-#' @return A data frame.
-#'
-#' @examples
-#' \dontrun{
-#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' greedy_wolf(df)
-#' crossing_edges <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
-#' }
-#'
-#' @export
-determine_crossing_edges <- function(df, column1 = NULL, column2 = NULL, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, map_dict = NULL, map_dict_1 = NULL, map_dict_2 = NULL, fixed_column = NULL, return_weighted_layer_free_objective = FALSE) {
-    if (is.character(df)) {
-        if (grepl("\\.rds$", df, ignore.case = TRUE)) {
-            df <- readRDS(df)
-        } else if (grepl("\\.csv$", df, ignore.case = TRUE)) {
-            df <- read.csv(df)
-        } else {
-            stop("Input path must be a .csv or .rds file.")
-        }
-    } else if (!is.data.frame(df)) {
-        stop("Input must be a data frame or a file path to a .csv or .rds file.")
-    }
-
-    if (!(column_weights %in% colnames(df))) {
-        stop(sprintf("column_weights '%s' is not a column in the dataframe.", column_weights))
-    }
-
-    cluster_cols <- setdiff(colnames(df), column_weights)
-
-    if (length(cluster_cols) <= 1) {
-        stop(sprintf("Dataframe has %d columns. It must have at least three columns.", ncol(df) + 1))
-    } else if (length(cluster_cols) == 2) {
-        if (is.null(column1) && is.null(column2)) {
-            column1 <- cluster_cols[1]
-            column2 <- cluster_cols[2]
-        } else if (is.null(column1)) {
-            column1 <- setdiff(cluster_cols, column2)
-        } else if (is.null(column2)) {
-            column2 <- setdiff(cluster_cols, column1)
-        }
-    } else {
-        if (is.null(column1) && is.null(column2)) {
-            stop(sprintf("Dataframe has more than three columns. Please specify column1 and column2"))
-        }
-    }
-
-    if (!(column1 %in% colnames(df))) {
-        stop(sprintf("column1 '%s' is not a column in the dataframe.", column1))
-    }
-    if (!(column2 %in% colnames(df))) {
-        stop(sprintf("column2 '%s' is not a column in the dataframe.", column2))
-    }
-
-    # # set to factors if not already
-    # if (!is.factor(df[[column1]])) df[[column1]] <- factor(df[[column1]])
-    # if (!is.factor(df[[column2]])) df[[column2]] <- factor(df[[column2]])
-
-    # Assign fixed coordinates for bipartite layout
-    df <- df %>%
-        mutate(x1 = as.integer(factor(!!sym(column1))),
-               x2 = as.integer(factor(!!sym(column2))),
-               y1 = 0,
-               y2 = 1)
-
-    if (!is.null(map_dict)) {
-        if (fixed_column == 1 || fixed_column == column1) {
-            df$x2 <- map_dict[as.character(df$x2)]
-        } else if (fixed_column == 2 || fixed_column == column2) {
-            df$x1 <- map_dict[as.character(df$x1)]
-        } else {
-            stop("`fixed_column` must be 1, 2, column1, or column2")
-        }
-    }
-
-    # Initialize result list and seen pair tracker
-    crossing_edges <- list()
-    n <- nrow(df)
-
-    # Compare each pair of edges
-    for (i in 1:n) {
-        for (j in 1:n) {
-            if (i != j) {
-                if ((df$x1[i] < df$x1[j] && df$x2[i] > df$x2[j]) | (df$x1[i] > df$x1[j] && df$x2[i] < df$x2[j])) {
-                    edge1 <- c(
-                        as.character(df[[column1]][i]),
-                        as.character(df[[column2]][i]),
-                        as.character(df[[column_weights]][i])
-                    )
-                    edge2 <- c(
-                        as.character(df[[column1]][j]),
-                        as.character(df[[column2]][j]),
-                        as.character(df[[column_weights]][j])
-                    )
-
-                    w1 <- as.numeric(edge1[3])
-                    w2 <- as.numeric(edge2[3])
-                    if (w1 < minimum_edge_weight || w2 < minimum_edge_weight) {
-                        next
-                    }
-
-                    crossing_edges <- append(crossing_edges, list(list(edge1, edge2)))
-                }
-            }
-        }
-    }
-
-    if (is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) {
-        df_out <- do.call(rbind, lapply(crossing_edges, function(pair) {
-            c(pair[[1]], pair[[2]])
-        }))
-        colnames(df_out) <- c("left1", "right1", "weight1", "left2", "right2", "weight2")
-
-        df_out <- as.data.frame(df_out, stringsAsFactors = FALSE)
-        write.csv(df_out, file = output_df_path, row.names = FALSE, quote = FALSE)
-    }
-
-    if (return_weighted_layer_free_objective) {
-        WLF_objective <- determine_weighted_layer_free_objective(crossing_edges)
-        return(WLF_objective)
-    }
-
-    return(crossing_edges)
-}
-
-
 plot_alluvial_internal_multicol <- function(clus_df_gather,graphing_columns,
-                                        sorting_algorithm = NULL,fixed_column=NULL,
-                                        color_list = NULL, color_boxes = TRUE,
-                                        color_bands = FALSE, color_band_list = NULL,
-                                        color_band_column=NULL, color_band_boundary=FALSE,
-                                        alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
-                                        include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
-                                        include_group_sizes = FALSE
+                                            sorting_algorithm = NULL,fixed_column=NULL,
+                                            color_list = NULL, color_boxes = TRUE,
+                                            color_bands = FALSE, color_band_list = NULL,
+                                            color_band_column=NULL, color_band_boundary=FALSE,
+                                            alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
+                                            include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
+                                            include_group_sizes = FALSE
 ) {
+    if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather))) > 0) {
+        clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
+    }
+
     if (!is.null(color_list)){
         ditto_colors <- color_list
     } else{
@@ -928,7 +418,7 @@ plot_alluvial_internal_multicol <- function(clus_df_gather,graphing_columns,
                 final_colors <- c(final_colors, rev(old_colors))
             } else {
                 temp_colors <- find_group2_colors(clus_df_gather, remaining_colors,
-                                                 group_1_name = paste0('col',n-1,'_int'), group_2_name = paste0('col',n,'_int'))
+                                                  group_1_name = paste0('col',n-1,'_int'), group_2_name = paste0('col',n,'_int'))
                 remaining_colors <- remaining_colors[1:length(old_colors)]
                 old_colors <- temp_colors
                 final_colors <- c(final_colors, rev(old_colors))
@@ -1051,7 +541,7 @@ plot_alluvial_internal_multicol <- function(clus_df_gather,graphing_columns,
                 annotate("text", x = x, y = -offset_below, label = length(levels(clus_df_gather[[col_group]])), hjust = 0.5, size = 5) # Adjust x, y for Scanpy
             x <- x+1
         }
- }
+    }
 
     p <- p +
         theme_void() +
@@ -1067,6 +557,375 @@ plot_alluvial_internal_multicol <- function(clus_df_gather,graphing_columns,
     }
 
     return(p)
+}
+
+
+add_int_columns <- function(df, graphing_columns) {
+    n<-1
+    for (col in graphing_columns) {
+        col_int_name <- paste0('col', n, '_int')
+        n <- n+1
+        # make columns integer for sorting
+        df[[col_int_name]] <- as.integer(factor(df[[col]], levels = sort(unique(df[[col]]), method = "radix")))
+
+        #factorize input columns
+        df[[col]] <- factor(as.character(df[[col]]), levels = sort(unique(as.character(df[[col]])), method = "radix"))
+    }
+    return(df)
+}
+
+get_alluvial_df <- function(df) {
+    # Convert numeric clustering columns to ordered factors
+    df <- df |>
+        dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+        dplyr::group_by_all() |>
+        dplyr::count(name = "value")
+    # df <- ggforce::gather_set_data(df, 1:2)
+    return(df)
+}
+
+load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
+    if (is.character(df) && grepl("\\.csv$", df)) {
+        df <- read.csv(df)  # load in CSV as dataframe
+    } else if (tibble::is_tibble(df)) {
+        df <- as.data.frame(df)  # convert tibble to dataframe
+    } else if (!is.data.frame(df)) {
+        stop("Input must be a data frame, tibble, or CSV file path.")
+    }
+
+    if (!is.null(column_weights)) {
+        if (!(column_weights %in% colnames(df))) {
+            stop(sprintf("column_weights '%s' is not a column in the dataframe.", column_weights))
+        }
+        df <- tidyr::uncount(df, weights = !!rlang::sym(column_weights))
+    }
+
+    for (col in graphing_columns) {
+        if (!(col %in% colnames(df))) {
+            stop(sprintf("column '%s' is not a column in the dataframe.", col))
+        }
+        if (!is.factor(df[[col]])) {
+            df[[col]] <- as.factor(df[[col]])
+        }
+
+        # convert to factor
+    }
+
+    return(df)
+}
+
+#' 1 line description
+#'
+#' Multiline
+#' Description
+#'
+#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
+#'
+#' @return A data frame where each row provides the weight in the 'value' column that connects a given combination of values in graphing_columns.
+#'
+#' @examples
+#' \dontrun{
+#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' clus_df_gather <- data_preprocess(df, graphing_columns = c('method1', 'method2'))
+#' }
+#'
+#' @export
+data_preprocess <- function(df, graphing_columns = NULL, column_weights = NULL, load_df = TRUE) {
+    if (load_df) {
+        df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
+    }
+    df <- add_int_columns(df, graphing_columns = graphing_columns)
+    clus_df_gather <- get_alluvial_df(df)
+
+    return(clus_df_gather)
+}
+
+
+
+sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, optimize_column_order = TRUE) {
+    cycle <- run_neighbornet(clus_df_gather, graphing_columns=graphing_columns)
+    res <- determine_optimal_cycle_start(clus_df_gather, cycle, graphing_columns=graphing_columns, optimize_column_order = optimize_column_order)
+    clus_df_gather_neighbornet <- res$clus_df_gather
+    return(clus_df_gather_neighbornet)
+}
+
+sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = NULL, column2 = NULL, fixed_column = 1, random_initializations = 1, set_seed = 42, column_weights = "value", sorting_algorithm = "greedy_WBLF") {
+    if (length(graphing_columns) != 2) {
+        stop(sprintf("graphing_columns must be of length 2 for greedy_wblf/greedy_wolf"))
+    }
+
+    if (is.null(fixed_column)) {
+        fixed_column <- column1
+    } else if ((is.integer(fixed_column) | (is.double(fixed_column)))) {
+        if (fixed_column > length(colnames(clus_df_gather))){
+            stop(sprintf("fixed_column index '%s' is not a column in the dataframe.", fixed_column))
+        } else{
+            fixed_column <- colnames(clus_df_gather)[fixed_column]
+        }
+    } else if (!(fixed_column %in% colnames(clus_df_gather))) {
+        stop(sprintf("fixed_column '%s' is not a column in the dataframe.", fixed_column))
+    }
+
+    if (isTRUE(fixed_column == column1)) {
+        fixed_column <- "col1_int"
+        reordered_column <- "col2_int"
+    } else if (isTRUE(fixed_column == column2)) {
+        fixed_column <- "col2_int"
+        reordered_column <- "col1_int"
+    }
+    crossing_edges_objective_minimum <- Inf
+    set.seed(set_seed)
+
+
+    if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather))) > 0) {
+        clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
+    }
+
+    for (i in seq_len(random_initializations)) {
+        if (sorting_algorithm == 'greedy_WBLF') {
+            # randomize clus_df_gather order
+            for (column_num in c('col1_int', 'col2_int')){
+                clus_df_gather_tmp[[column_num]] = as.factor(clus_df_gather_tmp[[column_num]])
+                clus_df_gather_tmp[[column_num]] = factor(clus_df_gather_tmp[[column_num]], levels=sample(levels(clus_df_gather_tmp[[column_num]])))
+                # clus_df_gather_tmp[[column_num]] = as.integer(clus_df_gather_tmp[[column_num]])
+            }
+            # WBLF
+            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather_tmp, stable_column = 'col1_int',
+                                                             reordered_column = 'col2_int')
+            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather_tmp, stable_column = 'col2_int',
+                                                             reordered_column = 'col1_int')
+        } else if (sorting_algorithm == 'greedy_WOLF') {
+            # randomize clus_df_gather order
+            column_num = reordered_column
+            clus_df_gather_tmp[[column_num]] = as.factor(clus_df_gather_tmp[[column_num]])
+            clus_df_gather_tmp[[column_num]] = factor(clus_df_gather_tmp[[column_num]], levels=sample(levels(clus_df_gather_tmp[[column_num]])))
+            # clus_df_gather_tmp[[column_num]] = as.integer(clus_df_gather_tmp[[column_num]])
+            # WOLF
+
+            # browser()
+            clus_df_gather_tmp <- sort_clusters_by_agreement(clus_df_gather_tmp, stable_column = fixed_column,
+                                                             reordered_column = reordered_column)
+        }
+        if (random_initializations > 1) {
+            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, column1=column1, column2=column2,
+                                                                 column_weights = column_weights, minimum_edge_weight = 0,
+                                                                 output_df_path = NULL, return_weighted_layer_free_objective = TRUE)
+            if (crossing_edges_objective < crossing_edges_objective_minimum) {
+                crossing_edges_objective_minimum <- crossing_edges_objective
+                clus_df_gather_best <- clus_df_gather_tmp
+            }
+        } else {
+            clus_df_gather_best <- clus_df_gather_tmp
+        }
+    }
+
+    if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather_best))) > 0) {
+        clus_df_gather_best <- clus_df_gather_best %>%
+            ungroup() %>%
+            slice(1:(n() %/% 2)) %>%  # keep first half of rows
+            select(-id, -x, -y)       # drop columns
+    }
+
+    return(clus_df_gather_best)
+}
+
+#' Sorts a dataframe (e.g., the output of )
+#'
+#' Multiline
+#' Description
+#'
+#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
+#'
+#' @return A \code{ggplot2} object representing the alluvial plot.
+#'
+#' @examples
+#' \dontrun{
+#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' plot_alluvial(df)
+#' }
+#'
+#' @export
+data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, fixed_column = 1, random_initializations = 1, set_seed = 42, output_df_path = NULL, load_df = TRUE) {
+    #* Type Checking Start
+    valid_algorithms <- c("neighbornet", "greedy_WOLF", "greedy_WBLF", "None")
+    if (!(sorting_algorithm %in% valid_algorithms)) {
+        stop(sprintf("Invalid sorting_algorithm: '%s'. Must be one of: %s",
+                     sorting_algorithm, paste(valid_algorithms, collapse = ", ")))
+    }
+
+    if ((sorting_algorithm == 'None') & (random_initializations > 1)) {
+        warning("random_initializations > 1 but sorting algorithm is None. Setting random_initializations to 1.")
+        random_initializations=1
+    }
+
+    if ((is.null(fixed_column)) && (sorting_algorithm=='greedy_WOLF')) {
+        stop(sprintf("Column to fix for One-Sided matching is not specified.", fixed_column))
+    }
+
+    if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
+        stop("Specify either graphing_columns or column1/column2, not both.")
+    }
+
+    if (length(graphing_columns) == 2) {
+        column1 <- graphing_columns[1]
+        column2 <- graphing_columns[2]
+    }
+
+    if (is.null(graphing_columns)) {
+        graphing_columns <- c(column1, column2)
+    }
+    #* Type Checking End
+
+    # Preprocess (i.e., add int columns and do the grouping)
+    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = load_df)
+
+    if (sorting_algorithm == "neighbornet") {
+        clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order)
+    } else if (sorting_algorithm == "greedy_WBLF" || sorting_algorithm == "greedy_WOLF") {
+        clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, sorting_algorithm = sorting_algorithm)
+    } else if (sorting_algorithm == "None") {
+        clus_df_gather_sorted <- clus_df_gather
+    } else {
+        stop(sprintf("Invalid sorting_algorithm: '%s'. Must be one of: %s", sorting_algorithm, paste(valid_algorithms, collapse = ", ")))
+    }
+
+    # Save if desired
+    if ((is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE))) {
+        write.csv(clus_df_gather_to_save, file = output_df_path, row.names = FALSE)
+    }
+
+    return(clus_df_gather_sorted)
+}
+
+#' Generate an Alluvial Plot with Minimal Cluster Cross-over
+#'
+#' Creates a two-axis alluvial plot to visualize the relationship between two categorical groupings (e.g., cluster assignments from different methods),
+#' minimizing crossover and aligning clusters based on agreement.
+#'
+#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
+#' @param graphing_columns Optional Character. List of columns to use. Incompatible with column1 and column2. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
+#' @param column1 Optional Character. Name of the first column to plot. Incompatible with graphing_columns. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
+#' @param column2 Optional Character. Name of the second column to plot. Incompatible with graphing_columns. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
+#' @param fixed_column Optional Character or Integer. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free.
+#' @param random_initializations Optional Integer. Number of random initializations of the WLF heuristic to perform.
+#' @param set_seed Optional Integer. Seed for random initializations of the WLF heuristic to perform.
+#' @param color_band_column Optional Character. Which column to use for coloring bands.
+#' @param color_band_boundary Logical. Whether or not to color boundaries between bands
+#' @param sorting_algorithm Character. Must be neighbornet, greedy_WBLF, greedy_WOLF, or None.
+#' @param optimize_column_order Logical. Only used for neighbornet.
+#' @param color_boxes Logical. Whether to color the rectangular strata boxes representing groups.
+#' @param color_bands Logical. Whether to color the alluvial bands connecting the groups.
+#' @param match_colors Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.
+#' @param alluvial_alpha Numeric between 0 and 1. Transparency level for the alluvial bands.
+#' @param include_labels_in_boxes Logical. Whether to include text labels inside the rectangular group boxes.
+#' @param include_axis_titles Logical. Whether to display axis titles for column1 and column2.
+#' @param include_group_sizes Logical. If \code{TRUE}, includes group sizes in the labels (e.g., "Group A (42)").
+#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
+#' @param output_plot_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.
+#' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
+#' @param color_list Optional named list or vector of colors to override default group colors.
+#' @param color_band_list Optional named list or vector of colors to override default band colors.
+#'
+#' @return A \code{ggplot2} object representing the alluvial plot.
+#'
+#' @examples
+#' \dontrun{
+#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' plot_alluvial(df)
+#' }
+#'
+#' @export
+plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, fixed_column = 1,
+                          sorting_algorithm = 'neighbornet',random_initializations = 1, color_list = NULL,
+                          color_boxes = TRUE,
+                          color_bands = FALSE, color_band_list = NULL,
+                          color_band_column=NULL, color_band_boundary=FALSE,
+                          match_colors = TRUE, alluvial_alpha = 0.5,
+                          include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
+                          column_weights = NULL, output_plot_path = NULL, output_df_path = NULL,
+                          set_seed=42, optimize_column_order=TRUE) {
+    #* Type Checking Start
+    if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
+        stop("Some graphing_columns are not present in the dataframe.")
+    }
+
+    # ensure someone doesn't specify both graphing_columns and column1/2
+    if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
+        stop("Specify either graphing_columns or column1/column2, not both.")
+    }
+
+    df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
+
+    if (ncol(df) < 2) {
+        stop("Dataframe must have at least 2 columns when column_weights is NULL.")
+    } else if (ncol(df) > 2) {
+        if (is.null(graphing_columns)) {
+            stop("graphing_columns must be specified when dataframe has more than 2 columns and column_weights is NULL.")
+        }
+    } else {  # length 2
+        if (is.null(column1) && !is.null(column2)) {
+            column1 <- setdiff(colnames(df), column2)
+        } else if (is.null(column2) && !is.null(column1)) {
+            column2 <- setdiff(colnames(df), column1)
+        } else if (is.null(column1) && is.null(column2)) {
+            column1 <- colnames(df)[1]
+            column2 <- colnames(df)[2]
+        }
+    }
+
+    # if someone specifies column1/2, then use it
+    if (length(graphing_columns) == 2) {
+        column1 <- graphing_columns[1]
+        column2 <- graphing_columns[2]
+    }
+
+    if (is.null(graphing_columns)) {
+        graphing_columns <- c(column1, column2)
+    }
+
+    if (is.null(fixed_column)) {
+        fixed_column <- column1
+    } else if ((is.integer(fixed_column) | (is.double(fixed_column)))) {
+        if (fixed_column > length(colnames(df))){
+            stop(sprintf("fixed_column index '%s' is not a column in the dataframe.", fixed_column))
+        } else{
+            fixed_column <- colnames(df)[fixed_column]
+        }
+    } else if (!(fixed_column %in% colnames(df))) {
+        stop(sprintf("fixed_column '%s' is not a column in the dataframe.", fixed_column))
+    }
+
+    if (!is.null(color_band_column)) {
+        color_bands <- TRUE
+    }
+    #* Type Checking End
+
+    # Sort
+    clus_df_gather <- data_sort(df = df, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = sorting_algorithm, optimize_column_order = optimize_column_order, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, output_df_path = output_df_path, load_df = FALSE)
+
+    # Plot
+    # alluvial_plot <- plot_alluvial_internal()
+    if (length(graphing_columns) == 2) {
+        alluvial_plot <- plot_alluvial_internal_2col(clus_df_gather, group1_name = column1, group2_name = column2, fixed_column = fixed_column,
+                                                     color_list = color_list, color_boxes = color_boxes,
+                                                     color_bands = color_bands, color_band_list = color_band_list,
+                                                     color_band_column=color_band_column, color_band_boundary=color_band_boundary,
+                                                     match_colors = match_colors, alluvial_alpha = alluvial_alpha,
+                                                     include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
+                                                     include_group_sizes = include_group_sizes,
+                                                     output_plot_path = output_plot_path)
+    } else {
+        alluvial_plot <- plot_alluvial_internal_multicol(clus_df_gather, graphing_columns=graphing_columns, fixed_column = fixed_column,
+                                                         color_list = color_list, color_boxes = color_boxes,
+                                                         color_bands = color_bands, color_band_list = color_band_list,
+                                                         color_band_column=color_band_column, color_band_boundary=color_band_boundary,
+                                                         match_colors = match_colors, alluvial_alpha = alluvial_alpha,
+                                                         include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
+                                                         include_group_sizes = include_group_sizes,
+                                                         output_plot_path = output_plot_path)
+    }
+
+    return(alluvial_plot)
 }
 
 

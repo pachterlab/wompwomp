@@ -26,6 +26,7 @@ use_condaenv("/Users/joeyrich/miniconda3/envs/seurat_vs_scanpy/bin/python3.9", r
 ```
 
 ```{r}
+# # OLD: did neighbornet for each pair of columns and used this as my matrix entries - but this doesn't consider that node orders likely differ, and thus it's not a great comparison
 determine_column_order <- function(df, graphing_columns) {
     # this doesn't strictly need its own condition (2 choose 2 is 1 anyways), but does avoid a little overhead
     if (length(graphing_columns) == 2) {
@@ -182,7 +183,7 @@ get_graph_groups <- function(cycle) {
   return(groups)
 }
 
-determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, column1 = NULL, column2 = NULL) {
+determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, column1 = NULL, column2 = NULL, optimize_column_order = TRUE) {
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
@@ -190,6 +191,12 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
     # if someone specifies column1/2, then use it
     if (is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         graphing_columns <- c(column1, column2)
+    }
+
+    if (optimize_column_order) {
+        graphing_columns <- determine_column_order(df, graphing_columns = graphing_columns)    
+    } else {
+        graphing_columns <- graphing_columns
     }
     
     #factorize input columns
@@ -261,7 +268,6 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             neighbornet_objective_minimum <- neighbornet_objective
             cycle_best <- cycle_shifted
             individual_graphs <- graphs_list_stripped
-            right_graph_best <- right_graph_rotated
             # p_best_neighbornet <- p_neighbornet
             clus_df_gather_best <- clus_df_gather_neighbornet
         }
@@ -343,14 +349,8 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```{r}
 optimize_column_order <- FALSE
 
-if (optimize_column_order) {
-    graphing_columns_ordered <- determine_column_order(df, graphing_columns = graphing_columns)    
-} else {
-    graphing_columns_ordered <- graphing_columns
-}
-
-cycle <- run_neighbornet(df, graphing_columns=graphing_columns_ordered)
-res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns_ordered)
+cycle <- run_neighbornet(df, graphing_columns=graphing_columns)
+res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns, optimize_column_order=optimize_column_order)
 clus_df_gather_neighbornet <- res$clus_df_gather
 
 graphing_columns_int <- c("col1_int", "col2_int", "col3_int")  #!!! un-harcode
@@ -386,14 +386,8 @@ p_neighbornet
 ```{r}
 optimize_column_order <- TRUE
 
-if (optimize_column_order) {
-    graphing_columns_ordered <- determine_column_order(df, graphing_columns = graphing_columns)    
-} else {
-    graphing_columns_ordered <- graphing_columns
-}
-
-cycle <- run_neighbornet(df, graphing_columns=graphing_columns_ordered)
-res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns_ordered)
+cycle <- run_neighbornet(df, graphing_columns=graphing_columns)
+res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns, optimize_column_order=optimize_column_order)
 clus_df_gather_neighbornet <- res$clus_df_gather
 
 graphing_columns_int <- c("col1_int", "col2_int", "col3_int")  #!!! un-harcode
@@ -443,14 +437,8 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```{r}
 optimize_column_order <- FALSE
 
-if (optimize_column_order) {
-    graphing_columns_ordered <- determine_column_order(df, graphing_columns = graphing_columns)    
-} else {
-    graphing_columns_ordered <- graphing_columns
-}
-
-cycle <- run_neighbornet(df, graphing_columns=graphing_columns_ordered)
-res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns_ordered)
+cycle <- run_neighbornet(df, graphing_columns=graphing_columns)
+res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns, optimize_column_order=optimize_column_order)
 clus_df_gather_neighbornet <- res$clus_df_gather
 
 graphing_columns_int <- c("col1_int", "col2_int", "col3_int")  #!!! un-harcode
@@ -462,14 +450,8 @@ p_neighbornet
 ```{r}
 optimize_column_order <- TRUE
 
-if (optimize_column_order) {
-    graphing_columns_ordered <- determine_column_order(df, graphing_columns = graphing_columns)    
-} else {
-    graphing_columns_ordered <- graphing_columns
-}
-
-cycle <- run_neighbornet(df, graphing_columns=graphing_columns_ordered)
-res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns_ordered)
+cycle <- run_neighbornet(df, graphing_columns=graphing_columns)
+res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns, optimize_column_order=optimize_column_order)
 clus_df_gather_neighbornet <- res$clus_df_gather
 
 graphing_columns_int <- c("col1_int", "col2_int", "col3_int")  #!!! un-harcode
@@ -477,3 +459,5 @@ p_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, graphing_columns = gr
 print(res$individual_graphs)
 p_neighbornet
 ```
+
+

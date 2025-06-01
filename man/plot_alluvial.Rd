@@ -10,7 +10,7 @@ plot_alluvial(
   column1 = NULL,
   column2 = NULL,
   fixed_column = 1,
-  sorting_algorithm = "greedy_WBLF",
+  sorting_algorithm = "neighbornet",
   random_initializations = 1,
   color_list = NULL,
   color_boxes = TRUE,
@@ -26,8 +26,8 @@ plot_alluvial(
   column_weights = NULL,
   output_plot_path = NULL,
   output_df_path = NULL,
-  return_greedy_wolf = FALSE,
-  set_seed = 42
+  set_seed = 42,
+  optimize_column_order = TRUE
 )
 }
 \arguments{
@@ -41,7 +41,7 @@ plot_alluvial(
 
 \item{fixed_column}{Optional Character or Integer. Name of the column to fix, if desiring a one-layer free algorithm. If NULL, then implement both layers free.}
 
-\item{sorting_algorithm}{Character. Must be greedy_WBLF, greedy_WOLF, or None.}
+\item{sorting_algorithm}{Character. Must be neighbornet, greedy_WBLF, greedy_WOLF, or None.}
 
 \item{random_initializations}{Optional Integer. Number of random initializations of the WLF heuristic to perform.}
 
@@ -74,6 +74,8 @@ plot_alluvial(
 \item{output_df_path}{Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.}
 
 \item{set_seed}{Optional Integer. Seed for random initializations of the WLF heuristic to perform.}
+
+\item{optimize_column_order}{Logical. Only used for neighbornet.}
 }
 \value{
 A \code{ggplot2} object representing the alluvial plot.

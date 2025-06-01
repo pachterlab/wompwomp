@@ -8,8 +8,8 @@ vignette: >
 ---
 
 ```{r}
-# devtools::load_all()
-library(alluvialmatch)
+devtools::load_all()
+# library(alluvialmatch)
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -47,7 +47,6 @@ clus_df_gather <- df |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
-gather_set_data(clus_df_gather, 1:2)
 
 # write.csv(clus_df_gather, file = "vignette_intro_df_grouped.csv", row.names = FALSE, quote = FALSE)
 clus_df_gather
@@ -68,7 +67,7 @@ p1
 ```
 Implementing a greedy heuristic for weighted one-layer free problem
 ```{r}
-clus_df_gather_sorted_wolf <- greedy_wolf(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF")
+clus_df_gather_sorted_wolf <- data_sort(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF")
 clus_df_gather_sorted_wolf
 ```
 
@@ -83,7 +82,7 @@ p2
 
 Notice how, because we kept the left layer fixed, B CELL and T CELL are separated far apart, even though we would minimize edge crossings if they were next to each other - we can fix this with the weighted both-layers free heuristic
 ```{r}
-clus_df_gather_sorted_wblf <- greedy_wolf(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")  # output_df_path = "vignette_intro_df_cluster_wblf.csv"
+clus_df_gather_sorted_wblf <- data_sort(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")  # output_df_path = "vignette_intro_df_cluster_wblf.csv"
 clus_df_gather_sorted_wblf
 ```
 

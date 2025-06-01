@@ -8,8 +8,8 @@ vignette: >
 ---
 
 ```{r}
-# devtools::load_all()
-library(alluvialmatch)
+devtools::load_all()
+# library(alluvialmatch)
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -67,12 +67,12 @@ p2
 
 Now with sorting
 ```{r}
-p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex", "special"), sorting_algorithm = "greedy_WBLF")
+p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex", "special"), sorting_algorithm = "neighbornet")
 p3
 ```
 
 ```{r}
-p4 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), color_band_column="special", sorting_algorithm = "greedy_WBLF")
+p4 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), color_band_column="special", sorting_algorithm = "neighbornet")
 p4
 ```
 
