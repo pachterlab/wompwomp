@@ -26,7 +26,6 @@ use_condaenv("/Users/joeyrich/miniconda3/envs/seurat_vs_scanpy/bin/python3.9", r
 ```
 
 ```{r}
-# # OLD: did neighbornet for each pair of columns and used this as my matrix entries - but this doesn't consider that node orders likely differ, and thus it's not a great comparison
 determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns) {
     # this doesn't strictly need its own condition (2 choose 2 is 1 anyways), but does avoid a little overhead
     if (length(graphing_columns) == 2) {
@@ -306,6 +305,8 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             clus_df_gather_best <- clus_df_gather_neighbornet
         }
     }
+    
+    clus_df_gather_best <- reorder_and_rename_columns(clus_df_gather_best, graphing_columns_best)
     
     # browser()
     return(list(cycle = cycle_best, individual_graphs = individual_graphs, neighbornet_objective = neighbornet_objective_minimum, clus_df_gather = clus_df_gather_best, graphing_columns = graphing_columns_best))

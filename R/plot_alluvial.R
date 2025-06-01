@@ -39,6 +39,293 @@ default_colors <- c(
     "#3D3D3D"
 )
 
+
+determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns) {
+    # this doesn't strictly need its own condition (2 choose 2 is 1 anyways), but does avoid a little overhead
+    if (length(graphing_columns) == 2) {
+        return(graphing_columns)
+    }
+
+    column_dist_matrix <- matrix(1e6, nrow = length(graphing_columns), ncol = length(graphing_columns),
+                                 dimnames = list(graphing_columns, graphing_columns))
+
+    pairs <- combn(graphing_columns, 2)
+    for (i in 1:ncol(pairs)) {
+        column1 <- pairs[1, i]
+        column2 <- pairs[2, i]
+        neighbornet_objective <- determine_crossing_edges(
+            clus_df_gather_neighbornet,
+            column1 = column1,
+            column2 = column2,
+            fixed_column = NULL,
+            return_weighted_layer_free_objective = TRUE
+        )
+        neighbornet_objective <- log1p(neighbornet_objective)  # log1p to avoid issue of log(0)
+
+        column_dist_matrix[column1, column2] <- neighbornet_objective
+        column_dist_matrix[column2, column1] <- neighbornet_objective
+    }
+    # Prepare data in R
+    labels <- graphing_columns  # assuming this is a character vector
+    column_dist_matrix <- column_dist_matrix
+    mat_list <- split(column_dist_matrix, row(column_dist_matrix))  # convert R matrix to list of row-vectors
+    reticulate::source_python(file.path(here::here(), "scripts", "run_neighbornet.py"))
+    result <- neighbor_net(labels, column_dist_matrix)
+    cycle <- result[[1]]
+    cycle_mapped <- labels[cycle]
+
+    # determine the optimal starting point for cycle
+    adj_distances <- sapply(seq_len(length(cycle_mapped)), function(i) {
+        from <- cycle_mapped[i]
+        to <- cycle_mapped[(i %% length(cycle_mapped)) + 1]  # wraps around
+        column_dist_matrix[from, to]
+    })
+    max_index <- which.max(adj_distances)
+
+    cycle_mapped_optimal_start <- rotate_left(cycle_mapped, max_index)
+    return(cycle_mapped_optimal_start)
+}
+
+run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value") {
+    # ensure someone doesn't specify both graphing_columns and column1/2
+    if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
+        stop("Specify either graphing_columns or column1/column2, not both.")
+    }
+    # if someone specifies column1/2, then use it
+    if (is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
+        graphing_columns <- c(column1, column2)
+    }
+
+    # map from string to int if needed
+    if (is.null(column_weights) || !(column_weights %in% colnames(df))) {
+        clus_df_gather <- get_alluvial_df(df)
+    } else {
+        clus_df_gather <- df
+    }
+
+    # Add prefixes to distinguish node types
+
+    # prefix is "tissue_"
+    for (col in graphing_columns) {
+        clus_df_gather[[col]] <- paste0(col, "_", clus_df_gather[[col]])
+    }
+
+    # prefix is "column1_"
+    # for (i in seq_along(graphing_columns)) {
+    #     col <- graphing_columns[i]
+    #     clus_df_gather[[col]] <- paste0("column", i, "_", clus_df_gather[[col]])
+    # }
+
+    # Get all node names
+    all_nodes <- sort(unique(unlist(clus_df_gather[graphing_columns])))
+
+    # Compute full distance matrix based on -log(edge weight)
+    # Initialize distance matrix
+    full_dist_matrix <- matrix(1e6, nrow = length(all_nodes), ncol = length(all_nodes),
+                               dimnames = list(all_nodes, all_nodes))
+
+    # Get all 2-column combinations
+    pairwise_groupings <- combn(graphing_columns, 2, simplify = FALSE)
+
+    # For each combination, group and summarize
+    summarized_results <- purrr::map(pairwise_groupings, function(cols) {
+        clus_df_gather %>%
+            group_by(across(all_of(cols))) %>%
+            summarise(total_value = sum(value), .groups = "drop") %>%
+            mutate(grouping = paste(cols, collapse = "+"))
+    })
+
+    # Combine into a single data frame
+    final_result <- bind_rows(summarized_results)
+
+    for (i in seq_len(nrow(final_result))) {
+        grouping_str <- final_result$grouping[i]
+        parts <- strsplit(grouping_str, "\\+")[[1]]
+        column1_tmp <- parts[1]
+        column2_tmp <- parts[2]
+
+        n1 <- as.character(final_result[[column1_tmp]][i])
+        n2 <- as.character(final_result[[column2_tmp]][i])
+        w <- final_result$total_value[i]
+
+        if (w > 0) {
+            full_dist_matrix[n1, n2] <- -log(w)
+            full_dist_matrix[n2, n1] <- -log(w)  # symmetric since graph is undirected
+        }
+    }
+
+    # make sure all numbers are positive for neighbornet
+    min_val_abs <- abs(min(full_dist_matrix))
+    full_dist_matrix <- full_dist_matrix + (min_val_abs + 1)
+
+    # Prepare data in R
+    labels <- all_nodes  # assuming this is a character vector
+    mat <- full_dist_matrix
+    mat[is.infinite(mat)] <- 1e6
+    mat[is.na(mat)] <- 1e6
+    mat_list <- split(mat, row(mat))  # convert R matrix to list of row-vectors
+
+    # Call Python function
+    # result <- nn_mod$neighbor_net(labels, mat_list)
+    reticulate::source_python(file.path(here::here(), "scripts", "run_neighbornet.py"))
+    result <- neighbor_net(labels, mat)
+    cycle <- result[[1]]
+    splits <- result[[2]]
+
+    cycle_mapped <- labels[cycle]
+
+    return(cycle_mapped)
+}
+
+rotate_left <- function(vec, k = 1) {
+    n <- length(vec)
+    k <- k %% n
+    if (k == 0) return(vec)
+    c(vec[(k + 1):n], vec[1:k])
+}
+
+get_graph_groups <- function(cycle) {
+    groups <- list()
+
+    for (node in cycle) {
+        prefix <- sub("_.*", "", node)  # Extract everything before the first underscore
+
+        if (!prefix %in% names(groups)) {
+            groups[[prefix]] <- c()
+        }
+
+        groups[[prefix]] <- c(groups[[prefix]], node)
+    }
+
+    return(groups)
+}
+
+# swap_columns_in_clus_df_gather <- function(clus_df_gather, graphing_columns_int) {
+#   # Find all *_int columns in the dataframe
+#   original_int_cols <- grep("^col[0-9]+_int$", names(clus_df_gather), value = TRUE)
+#
+#   # Create new names in the desired order
+#   new_names <- paste0("col", seq_along(graphing_columns_int), "_int")
+#
+#   # Map from current column name -> new column name
+#   names_map <- setNames(new_names, graphing_columns_int)
+#
+#   # Rename the columns accordingly
+#   matched_cols <- names(clus_df_gather) %in% names_map
+#   names(clus_df_gather)[matched_cols] <- names_map[names(clus_df_gather)[matched_cols]]
+#
+#   return(clus_df_gather)
+# }
+
+swap_graphing_column_order_based_on_graphing_column_int_order <- function(graphing_columns, graphing_columns_int) {
+    # Get the index of each graphing_columns_int entry (e.g., "col2_int" → 2)
+    int_positions <- as.integer(gsub("col([0-9]+)_int", "\\1", graphing_columns_int))
+
+    # Create an empty character vector of the correct length
+    reordered_graphing_columns <- character(length(graphing_columns))
+
+    # Place each graphing column at its new position
+    reordered_graphing_columns[int_positions] <- graphing_columns
+
+    return(reordered_graphing_columns)
+}
+
+determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", optimize_column_order = TRUE) {
+    # ensure someone doesn't specify both graphing_columns and column1/2
+    if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
+        stop("Specify either graphing_columns or column1/column2, not both.")
+    }
+    # if someone specifies column1/2, then use it
+    if (is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
+        graphing_columns <- c(column1, column2)
+    }
+
+    #factorize input columns
+    for (col in graphing_columns) {
+        df[[col]] <- as.factor(as.character(df[[col]]))
+    }
+
+    # graphing_columns_original <- graphing_columns
+
+    neighbornet_objective_minimum <- Inf
+    p_best_neighbornet <- NULL
+    cycle_best <- NULL
+    clus_df_gather_best <- NULL
+    graphing_columns_best <- NULL
+    plots <- list()
+
+    n <- length(cycle)
+    for (i in 0:(n - 1)) {
+        cycle_shifted <- rotate_left(cycle, i)
+        graphs_list <- get_graph_groups(cycle_shifted)
+
+        # remove prefix (column1_, etc)
+        graphs_list_stripped <- lapply(graphs_list, function(x) {
+            sub("^[^_]+_", "", x)
+        })
+
+        if (is.null(column_weights) || !(column_weights %in% colnames(df))) {
+            clus_df_gather_neighbornet <- get_alluvial_df(df)
+        } else {
+            clus_df_gather_neighbornet <- df
+        }
+
+        graphing_columns_int <- c()
+        for (j in seq_along(graphing_columns)) {
+            col_name <- graphing_columns[j]
+            int_col_name <- paste0("col", j, "_int")
+            graph <- graphs_list_stripped[[col_name]]
+
+            # Assign the new integer-mapped column
+            clus_df_gather_neighbornet[[int_col_name]] <- match(clus_df_gather_neighbornet[[col_name]], graph)
+
+            # Collect the new column name
+            graphing_columns_int <- c(graphing_columns_int, int_col_name)
+        }
+
+        if (optimize_column_order) {
+            graphing_columns_int <- determine_column_order(clus_df_gather_neighbornet, graphing_columns = graphing_columns_int)
+        }
+
+        # go through each adjacent pair of columns and sum up their objectives
+        neighbornet_objective <- 0
+        for (j in seq_len(length(graphing_columns_int) - 1)) {
+            col_a <- graphing_columns_int[j]
+            col_b <- graphing_columns_int[j + 1]
+
+            neighbornet_objective_sub <- determine_crossing_edges(
+                clus_df_gather_neighbornet,
+                column1 = col_a,
+                column2 = col_b,
+                fixed_column = NULL,
+                return_weighted_layer_free_objective = TRUE
+            )
+            neighbornet_objective <- neighbornet_objective + neighbornet_objective_sub
+        }
+
+        # # swap col_ints
+        # clus_df_gather_neighbornet <- swap_columns_in_clus_df_gather(clus_df_gather_neighbornet, graphing_columns_int)
+        graphing_columns <- swap_graphing_column_order_based_on_graphing_column_int_order(graphing_columns=graphing_columns, graphing_columns_int=graphing_columns_int)
+
+        # # print(neighbornet_objective)
+        if (neighbornet_objective < neighbornet_objective_minimum) {
+            # browser()
+
+            neighbornet_objective_minimum <- neighbornet_objective
+            cycle_best <- cycle_shifted
+            individual_graphs <- graphs_list_stripped
+            # p_best_neighbornet <- p_neighbornet
+            graphing_columns_best <- graphing_columns
+            clus_df_gather_best <- clus_df_gather_neighbornet
+        }
+    }
+
+    clus_df_gather_best <- reorder_and_rename_columns(clus_df_gather_best, graphing_columns_best)
+
+    # browser()
+    return(list(cycle = cycle_best, individual_graphs = individual_graphs, neighbornet_objective = neighbornet_objective_minimum, clus_df_gather = clus_df_gather_best, graphing_columns = graphing_columns_best))
+}
+
 increment_if_zeros <- function(clus_df_gather, column) {
     clus_df_gather <- clus_df_gather %>% mutate(group_numeric = as.numeric(as.character(.data[[column]])))
 
@@ -673,7 +960,9 @@ data_preprocess <- function(df, graphing_columns = NULL, column_weights = NULL, 
 
     # sort columns according to graphing_columns
     # browser()
-    df <- reorder_and_rename_columns(df, graphing_columns)
+    if (!all(intersect(colnames(df), graphing_columns) == graphing_columns)) {
+        df <- reorder_and_rename_columns(df, graphing_columns)
+    }
 
     if (is.null(column_weights) || !(column_weights %in% colnames(df))) {
         clus_df_gather <- get_alluvial_df(df, do_gather_set_data = do_gather_set_data)
