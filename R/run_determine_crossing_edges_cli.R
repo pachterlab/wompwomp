@@ -48,7 +48,7 @@ Optional:
     quiet <- get_bool_arg("--quiet", FALSE)
 
     if (is.null(df)) {
-        cat("\nError: --df, --column1, and --column2 are required.\n\n")
+        cat("\nError: --df is required.\n\n")
         show_help()
     }
 
@@ -63,12 +63,13 @@ Optional:
     )
 
     # Output logic
-    if (return_objective) {
-        cat("Weighted layer-free objective:\n")
-    } else {
-        cat("Crossing edges - format list[((l1, r1, e1), (l2, r2, e2)), ...]:\n")
-    }
     if (!quiet) {
-        print(result)
+        if (return_objective) {
+            cat("Weighted layer-free objective:\n")
+            print(result$WLF_objective)
+        } else {
+            cat("Crossing edges - format list[((l1, r1, e1), (l2, r2, e2)), ...]:\n")
+            print(result$crossing_edges_df)
+        }
     }
 }

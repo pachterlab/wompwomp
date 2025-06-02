@@ -5,6 +5,7 @@
 #' @name alluvialmatch
 #'
 #' @importFrom dplyr mutate group_by summarise arrange desc ungroup slice n pull filter
+#' @importFrom tidyr pivot_wider
 #' @importFrom tibble is_tibble
 #' @importFrom utils read.csv
 #' @importFrom rlang sym .data
@@ -27,50 +28,23 @@ utils::globalVariables(c(
 #' \dontrun{
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' greedy_wolf(df)
-#' crossing_edges <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
-#' objective <- determine_weighted_layer_free_objective(crossing_edges)
+#' crossing_edges_output <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
+#' objective <- determine_weighted_layer_free_objective(crossing_edges_output$crossing_edges_df)
 #' }
 #'
 #' @export
-determine_weighted_layer_free_objective <- function(crossing_edges, minimum_edge_weight = 0) {
-    # Read the file (tab-separated or CSV)
-    if (is.character(crossing_edges) && length(crossing_edges) == 1 && file.exists(crossing_edges)) {
-        # df_in <- read.table(crossing_edges, sep="\t", header = TRUE, stringsAsFactors = FALSE)
-        df_in <- read.csv(crossing_edges, stringsAsFactors = FALSE)
-
-        if (ncol(df_in) != 6) {
-            stop("File must contain exactly 6 columns: left1, right1, weight1, left2, right2, weight2")
-        }
-
-        crossing_edges <- apply(df_in, 1, function(row) {
-            edge1 <- as.character(row[1:3])
-            edge2 <- as.character(row[4:6])
-            list(edge1, edge2)
-        })
-
-        crossing_edges <- unname(as.list(crossing_edges))
-
-        # Case 2: Already a list of edge pairs
-    } else if (is.list(crossing_edges)) {
+determine_weighted_layer_free_objective <- function(crossing_edges_df) {
+    # Case 1: CSV
+    if (is.character(crossing_edges_df) && length(crossing_edges_df) == 1 && file.exists(crossing_edges_df)) {
+        # Read the file
+        df_in <- read.csv(crossing_edges_df, stringsAsFactors = FALSE)
+    # Case 2: Already a list of edge pairs
+    } else if (is.data.frame(crossing_edges_df)) {
         # do nothing
     } else
         stop("Input must be either a file path or a list.")
 
-    total_weighted_crossings <- 0
-    for (pair in crossing_edges) {
-        w1 <- as.numeric(pair[[1]][3])
-        w2 <- as.numeric(pair[[2]][3])
-
-        if (is.na(w1) || is.na(w2) || w1 < minimum_edge_weight || w2 < minimum_edge_weight) {
-            next
-        }
-
-        total_weighted_crossings <- total_weighted_crossings + w1 * w2
-    }
-
-    # Correct for double-counting
-    total_weighted_crossings <- total_weighted_crossings / 2
-
+    total_weighted_crossings <- sum(crossing_edges_df$weight1 * crossing_edges_df$weight2) / 2  # Correct for double-counting
     return(total_weighted_crossings)
 }
 
@@ -95,292 +69,155 @@ determine_weighted_layer_free_objective <- function(crossing_edges, minimum_edge
 #' \dontrun{
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' df <- data_sort(df)
-#' crossing_edges <- determine_crossing_edges(df, column1 = "col1_int", column2 = "col2_int")
+#' result <- determine_crossing_edges(df, column1 = "col1_int", column2 = "col2_int")
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, column1 = NULL, column2 = NULL, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, map_dict = NULL, map_dict_1 = NULL, map_dict_2 = NULL, fixed_column = NULL, return_weighted_layer_free_objective = FALSE) {
-    if (is.character(df)) {
-        if (grepl("\\.rds$", df, ignore.case = TRUE)) {
-            df <- readRDS(df)
-        } else if (grepl("\\.csv$", df, ignore.case = TRUE)) {
-            df <- read.csv(df)
-        } else {
-            stop("Input path must be a .csv or .rds file.")
-        }
-    } else if (!is.data.frame(df)) {
-        stop("Input must be a data frame or a file path to a .csv or .rds file.")
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, output_lode_df_path = NULL,  return_weighted_layer_free_objective = FALSE) {
+    #* Type Checking Start
+    # ensure someone doesn't specify both graphing_columns and column1/2
+    if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
+        stop("Specify either graphing_columns or column1/column2, not both.")
     }
 
-    if (!(column_weights %in% colnames(df))) {
-        stop(sprintf("column_weights '%s' is not a column in the dataframe.", column_weights))
+    df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
+
+    if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
+        stop("Some graphing_columns are not present in the dataframe.")
     }
 
-    cluster_cols <- setdiff(colnames(df), column_weights)
-
-    if (length(cluster_cols) <= 1) {
-        stop(sprintf("Dataframe has %d columns. It must have at least three columns.", ncol(df) + 1))
-    } else if (length(cluster_cols) == 2) {
-        if (is.null(column1) && is.null(column2)) {
-            column1 <- cluster_cols[1]
-            column2 <- cluster_cols[2]
-        } else if (is.null(column1)) {
-            column1 <- setdiff(cluster_cols, column2)
-        } else if (is.null(column2)) {
-            column2 <- setdiff(cluster_cols, column1)
+    if (ncol(df) < 2) {
+        stop("Dataframe must have at least 2 columns when column_weights is NULL.")
+    } else if (ncol(df) > 2) {
+        if (is.null(graphing_columns) && is.null(column1) && is.null(column2)) {
+            stop("graphing_columns must be specified when dataframe has more than 2 columns and column_weights is NULL.")
         }
-    } else {
-        if (is.null(column1) && is.null(column2)) {
-            stop(sprintf("Dataframe has more than three columns. Please specify column1 and column2"))
+    } else {  # length 2
+        if (is.null(column1) && !is.null(column2)) {
+            column1 <- setdiff(colnames(df), column2)
+        } else if (is.null(column2) && !is.null(column1)) {
+            column2 <- setdiff(colnames(df), column1)
+        } else if (is.null(column1) && is.null(column2)) {
+            column1 <- colnames(df)[1]
+            column2 <- colnames(df)[2]
         }
     }
 
-    if (!(column1 %in% colnames(df))) {
-        stop(sprintf("column1 '%s' is not a column in the dataframe.", column1))
+    # if someone specifies column1/2, then use it
+    if (length(graphing_columns) == 2) {
+        column1 <- graphing_columns[1]
+        column2 <- graphing_columns[2]
     }
-    if (!(column2 %in% colnames(df))) {
-        stop(sprintf("column2 '%s' is not a column in the dataframe.", column2))
+
+    if (is.null(graphing_columns)) {
+        graphing_columns <- c(column1, column2)
     }
 
     # # set to factors if not already
     # if (!is.factor(df[[column1]])) df[[column1]] <- factor(df[[column1]])
     # if (!is.factor(df[[column2]])) df[[column2]] <- factor(df[[column2]])
 
-    # Assign fixed coordinates for bipartite layout
-    df <- df %>%
-        mutate(x1 = as.integer(!!sym(column1)),
-               x2 = as.integer(!!sym(column2)),
-               y1 = 0,
-               y2 = 1)
+    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, do_gather_set_data = FALSE)
 
-    if (!is.null(map_dict)) {
-        if (fixed_column == 1 || fixed_column == column1) {
-            df$x2 <- map_dict[as.character(df$x2)]
-        } else if (fixed_column == 2 || fixed_column == column2) {
-            df$x1 <- map_dict[as.character(df$x1)]
-        } else {
-            stop("`fixed_column` must be 1, 2, column1, or column2")
-        }
+    p <- ggplot(data = clus_df_gather, aes(y = value),
+    )
+    for (x in seq_along(graphing_columns)) {
+        p$mapping[[paste0('axis',x)]] = sym(paste0('col', x,'_int'))
     }
+    p <- p + stat_alluvium(geom = "blank")
+
+    columns_to_keep <- c("alluvium", "x", "y", "stratum", "count")
+    lode_df_long_full <- ggplot_build(p)$data[[1]][columns_to_keep]
 
     # Initialize result list and seen pair tracker
     crossing_edges <- list()
-    n <- nrow(df)
+    row_index <- 1
 
-    # Compare each pair of edges
-    for (i in 1:n) {
-        for (j in 1:n) {
-            if (i != j) {
-                if ((df$x1[i] < df$x1[j] && df$x2[i] > df$x2[j]) | (df$x1[i] > df$x1[j] && df$x2[i] < df$x2[j])) {
-                    edge1 <- c(
-                        as.character(df[[column1]][i]),
-                        as.character(df[[column2]][i]),
-                        as.character(df[[column_weights]][i])
-                    )
-                    edge2 <- c(
-                        as.character(df[[column1]][j]),
-                        as.character(df[[column2]][j]),
-                        as.character(df[[column_weights]][j])
-                    )
+    # Get unique x values, sorted
+    x_vals <- sort(unique(lode_df_long_full$x))
+    n_x <- length(x_vals)
 
-                    w1 <- as.numeric(edge1[3])
-                    w2 <- as.numeric(edge2[3])
-                    if (w1 < minimum_edge_weight || w2 < minimum_edge_weight) {
-                        next
+    for (h in 1:(n_x - 1)) {
+        x1 <- h
+        x2 <- h + 1
+
+        lode_df_long <- lode_df_long_full %>% filter(x == x1 | x == x2)
+
+        # Sort by alluvium and x to ensure consistent ordering
+        lode_df_long_sorted <- lode_df_long %>%
+            arrange(alluvium, x)
+
+        # Create index within each alluvium group to track position (1, 2, ..., n)
+        lode_df_long_indexed <- lode_df_long_sorted %>%
+            group_by(alluvium) %>%
+            mutate(pos = row_number()) %>%
+            ungroup()
+
+        # Pivot each of x, y, stratum into wide format
+        lode_df <- lode_df_long_indexed %>%
+            select(alluvium, pos, x, y, stratum, count) %>%
+            pivot_wider(
+                id_cols = c(alluvium, count),
+                names_from = pos,
+                values_from = c(x, y, stratum),
+                names_glue = "{.value}{pos}"
+            )
+
+        # browser()
+
+        lode_df_length <- nrow(lode_df)
+
+        # Compare each pair of edges
+        for (i in 1:lode_df_length) {
+            for (j in 1:lode_df_length) {
+                # only look at rows where i's stratum is immediately adjacent to left of j's stratum
+                if (i != j) {
+                    if ((lode_df$y1[i] < lode_df$y1[j] && lode_df$y2[i] > lode_df$y2[j]) | (lode_df$y1[i] > lode_df$y1[j] && lode_df$y2[i] < lode_df$y2[j])) {
+                        id1 <- lode_df$alluvium[i]
+                        id2 <- lode_df$alluvium[j]
+
+                        strat_layer <- lode_df$x1[i]  # will be same for i and j
+                        # stratum1_left <- load_df$stratum1[i]
+                        # stratum1_right <- load_df$stratum2[i]  # apologies for the i/j and 1/2 confusion - this is correct though
+                        # stratum2_left <- load_df$stratum1[j]
+                        # stratum2_right <- load_df$stratum2[j]
+                        w1 <- lode_df$count[i]
+                        w2 <- lode_df$count[j]
+
+                        if (minimum_edge_weight > 0 && (w1 < minimum_edge_weight || w2 < minimum_edge_weight)) {
+                            next
+                        }
+
+                        new_row <- data.frame(id1 = id1, id2 = id2, strat_layer = strat_layer, weight1 = w1, weight2 = w2)
+                        crossing_edges[[row_index]] <- new_row
+                        row_index <- row_index + 1
                     }
-
-                    crossing_edges <- append(crossing_edges, list(list(edge1, edge2)))
                 }
             }
         }
     }
 
-    if (is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) {
-        df_out <- do.call(rbind, lapply(crossing_edges, function(pair) {
-            c(pair[[1]], pair[[2]])
-        }))
-        colnames(df_out) <- c("left1", "right1", "weight1", "left2", "right2", "weight2")
-
-        df_out <- as.data.frame(df_out, stringsAsFactors = FALSE)
-        write.csv(df_out, file = output_df_path, row.names = FALSE, quote = FALSE)
+    if (length(crossing_edges) > 0) {
+        crossing_edges_df <- do.call(rbind, crossing_edges)
+    } else {
+        crossing_edges_df <- data.frame(id1 = numeric(), id2 = numeric(), strat_layer = numeric(), weight1 = numeric(), weight2 = numeric())
     }
 
+    if (is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) {
+        write.csv(crossing_edges_df, file = output_df_path, row.names = FALSE, quote = FALSE)
+
+        if (is.null(output_lode_df_path)) {
+            output_lode_df_path <- sub("\\.csv$", "_lodes.csv", output_df_path)
+        }
+        write.csv(lode_df, file = output_lode_df_path, row.names = FALSE, quote = FALSE)
+    }
+
+    WLF_objective <- NULL
     if (return_weighted_layer_free_objective) {
-        WLF_objective <- determine_weighted_layer_free_objective(crossing_edges)
+        # browser()
+        WLF_objective <- determine_weighted_layer_free_objective(crossing_edges_df)
         return(WLF_objective)
     }
 
-    return(crossing_edges)
+    return(list(crossing_edges_df = crossing_edges_df, lode_df = lode_df))
 }
-
-
-plot_alluvial_internal_multicol <- function(clus_df_gather,graphing_columns,
-                                            sorting_algorithm = NULL,fixed_column=NULL,
-                                            color_list = NULL, color_boxes = TRUE,
-                                            color_bands = FALSE, color_band_list = NULL,
-                                            color_band_column=NULL, color_band_boundary=FALSE,
-                                            alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
-                                            include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
-                                            include_group_sizes = FALSE
-) {
-    if (!is.null(color_list)){
-        ditto_colors <- color_list
-    } else{
-        ditto_colors <- default_colors
-    }
-
-    # Extract colors for each factor, assuming ditto_colors is long enough
-    if (match_colors) {
-        remaining_colors <- ditto_colors
-        first <- TRUE
-        final_colors <- c()
-        n <- 1
-        for (col_group in graphing_columns) {
-            num_levels <- length(levels(clus_df_gather[[col_group]]))
-            if (first) {
-                old_colors <- remaining_colors[1:num_levels]
-                final_colors <- c(final_colors, rev(old_colors))
-            } else {
-                temp_colors <- find_group2_colors(clus_df_gather, remaining_colors,
-                                                  group_1_name = paste0('col',n-1,'_int'), group_2_name = paste0('col',n,'_int'))
-                remaining_colors <- remaining_colors[1:length(old_colors)]
-                old_colors <- temp_colors
-                final_colors <- c(final_colors, rev(old_colors))
-
-            }
-            n <- n+1
-        }
-    } else {
-        remaining_colors <- ditto_colors
-        final_colors <- c()
-        for (col_group in graphing_columns) {
-            num_levels <- length(levels(clus_df_gather[[col_group]]))
-            old_colors <- remaining_colors[1:num_levels]
-            final_colors <- c(final_colors, rev(old_colors))
-            remaining_colors <- remaining_colors[num_levels:length(remaining_colors)]
-        }
-    }
-
-    remaining_colors <- ditto_colors[!(ditto_colors %in% final_colors)]
-
-    # remove duplicate dims
-    temp_df <- clus_df_gather[1:as.integer(dim(clus_df_gather)[1]/2),1:dim(clus_df_gather)[2]]
-
-    # uncomment to attempt mapping
-    p <- ggplot(data = temp_df, aes(y = value),
-    )
-    for (x in seq_along(graphing_columns)) {
-        p$mapping[[paste0('axis',x)]] = sym(paste0('col', x,'_int'))
-    }
-
-    if (color_bands) {
-        if (!is.null(color_band_column)) {
-            if (is.null(color_band_list)) {
-                color_band_list <- final_colors
-            }
-            if (color_band_boundary){
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym(color_band_column), color=!!sym(color_band_column)),
-                                  alpha = alluvial_alpha) +
-                    scale_fill_manual(values = color_band_list) + scale_color_manual(values = color_band_list)+
-                    labs(fill = NULL)+guides(fill='none')
-
-            } else{
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym(color_band_column)), alpha = alluvial_alpha) +
-                    scale_fill_manual(values = color_band_list) +
-                    labs(fill = NULL)+guides(fill='none')
-            }
-        } else {
-            colors_group1 <- rev(final_colors[1:length(levels(clus_df_gather[['col1_int']]))])
-            if (color_band_boundary){
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym('col1_int'), color = !!sym('col1_int')), alpha = alluvial_alpha) +
-                    scale_fill_manual(values = colors_group1) + scale_color_manual(values = colors_group1)+
-                    labs(fill = NULL)+guides(fill='none')
-            } else{
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym('col1_int')), alpha = alluvial_alpha) +
-                    scale_fill_manual(values = colors_group1) +
-                    labs(fill = NULL)+guides(fill='none')
-            }
-        }
-    } else {
-        if (color_band_boundary){
-            p <- p + geom_alluvium(color='grey2',alpha = alluvial_alpha)
-        } else{
-            p <- p + geom_alluvium(alpha = alluvial_alpha)
-        }
-    }
-
-    if (color_boxes) {
-        p <- p + geom_stratum(fill = final_colors)
-    } else {
-        p <- p + geom_stratum()
-    }
-
-    if (!(include_labels_in_boxes==FALSE)) {
-        final_label_names <- c()
-        for (col_int in seq_along(graphing_columns)) {
-            int_name <- paste0('col', col_int, '_int')
-            group_name <- graphing_columns[[col_int]]
-
-            curr_label <- as.character(unique(clus_df_gather[order(clus_df_gather[[int_name]]),][[group_name]]))
-
-            final_label_names <- c(final_label_names, rev(curr_label))
-        }
-        p <- p +
-            geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))
-    }
-
-    top_y = 0
-    for (test_x in unique(clus_df_gather$x)) {
-        curr_y <- clus_df_gather %>%
-            filter(x == test_x) %>%
-            group_by(y) %>%
-            summarise(total = sum(value), .groups = "drop") %>%
-            arrange(desc(total)) %>%
-            mutate(cum_y = cumsum(total)) %>%
-            pull(cum_y) %>%
-            max()
-        top_y <- max(curr_y/2, top_y/2)
-    }# top_y1 and top_y2 are probably the same
-
-    if (include_axis_titles) {
-        # Offset to place labels a bit above
-        offset <- 1.1 * top_y
-        x<-1
-        for (col_group in graphing_columns) {
-            p <- p +
-                annotate("text", x = x, y = top_y + offset, label = col_group, size = 5, hjust = 0.5)
-            x <- x+1
-        }
-    }
-
-    if (include_group_sizes) {
-        offset_below <- top_y * 0.075
-        x<-1
-        for (col_group in graphing_columns) {
-            p <- p +
-                annotate("text", x = x, y = -offset_below, label = length(levels(clus_df_gather[[col_group]])), hjust = 0.5, size = 5) # Adjust x, y for Scanpy
-            x <- x+1
-        }
-    }
-
-    p <- p +
-        theme_void() +
-        theme(
-            text = element_text(family = "sans"),
-            legend.text = element_text(size = rel(axis_text_size))
-        )
-
-    p <- p + theme(legend.position = "none")  # to hide legend
-
-    if (!is.null(output_plot_path)) {
-        ggsave(output_plot_path, plot = p, dpi = 300, bg = "white")
-    }
-
-    return(p)
-}
-
-

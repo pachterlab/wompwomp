@@ -16,6 +16,7 @@ library(ggalluvial)
 library(ggforce)
 library(igraph)
 library(tibble)
+library(tidyr)
 ```
 
 ```{r}
@@ -43,7 +44,6 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns)
             clus_df_gather_neighbornet,
             column1 = column1,
             column2 = column2,
-            fixed_column = NULL,
             return_weighted_layer_free_objective = TRUE
         )
         neighbornet_objective <- log1p(neighbornet_objective)  # log1p to avoid issue of log(0)
@@ -279,11 +279,11 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             col_a <- graphing_columns_int[j]
             col_b <- graphing_columns_int[j + 1]
           
+            # browser()
             neighbornet_objective_sub <- determine_crossing_edges(
                 clus_df_gather_neighbornet,
                 column1 = col_a,
                 column2 = col_b,
-                fixed_column = NULL,
                 return_weighted_layer_free_objective = TRUE
             )
             neighbornet_objective <- neighbornet_objective + neighbornet_objective_sub
@@ -291,7 +291,9 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         
         # # swap col_ints
         # clus_df_gather_neighbornet <- swap_columns_in_clus_df_gather(clus_df_gather_neighbornet, graphing_columns_int)
-        graphing_columns <- swap_graphing_column_order_based_on_graphing_column_int_order(graphing_columns=graphing_columns, graphing_columns_int=graphing_columns_int)
+        graphing_columns_tmp <- swap_graphing_column_order_based_on_graphing_column_int_order(graphing_columns=graphing_columns, graphing_columns_int=graphing_columns_int)
+        
+        # browser()
     
         # # print(neighbornet_objective)
         if (neighbornet_objective < neighbornet_objective_minimum) {
@@ -301,7 +303,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             cycle_best <- cycle_shifted
             individual_graphs <- graphs_list_stripped
             # p_best_neighbornet <- p_neighbornet
-            graphing_columns_best <- graphing_columns
+            graphing_columns_best <- graphing_columns_tmp
             clus_df_gather_best <- clus_df_gather_neighbornet
         }
     }
@@ -344,14 +346,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
-cycle <- run_neighbornet(df, graphing_columns = graphing_columns)
-res <- determine_optimal_cycle_start(df, cycle, graphing_columns = graphing_columns)
-clus_df_gather_neighbornet <- res$clus_df_gather
-
-
-p_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm="None", color_bands=TRUE)
-print(res$individual_graphs)
-p_neighbornet
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE)
 ```
 
 3+ columns
@@ -385,56 +380,12 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
-optimize_column_order <- FALSE
-
-cycle <- run_neighbornet(df, graphing_columns=graphing_columns)
-res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns, optimize_column_order=optimize_column_order)
-clus_df_gather_neighbornet <- res$clus_df_gather
-graphing_columns_neighbornet <- res$graphing_columns
-
-p_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, graphing_columns = graphing_columns_neighbornet, column_weights = "value", sorting_algorithm="None", color_bands=TRUE)
-print(res$individual_graphs)
-p_neighbornet
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE)
 ```
 
 ```{r}
-# objective_original <- determine_crossing_edges(
-#     clus_df_gather_neighbornet,
-#     column1 = "col2_int",
-#     column2 = "col3_int",
-#     fixed_column = NULL,
-#     return_weighted_layer_free_objective = TRUE
-# )
-# 
-# clus_df_flipped <- clus_df_gather_neighbornet
-# clus_df_flipped$col3_int <- ifelse(clus_df_flipped$col3_int == 1, 2, 1)
-# 
-# objective_flipped <- determine_crossing_edges(
-#     clus_df_flipped,
-#     column1 = "col2_int",
-#     column2 = "col3_int",
-#     fixed_column = NULL,
-#     return_weighted_layer_free_objective = TRUE
-# )
-# 
-# print(objective_original)
-# print(objective_flipped)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE)
 ```
-
-```{r}
-optimize_column_order <- TRUE
-
-cycle <- run_neighbornet(df, graphing_columns=graphing_columns)
-res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns, optimize_column_order=optimize_column_order)
-clus_df_gather_neighbornet <- res$clus_df_gather
-graphing_columns_neighbornet <- res$graphing_columns
-
-p_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, graphing_columns = graphing_columns_neighbornet, column_weights = "value", sorting_algorithm="None", color_bands=TRUE)
-print(res$individual_graphs)
-p_neighbornet
-```
-
-
 
 ```{r}
 sessioninfo::session_info()
@@ -473,29 +424,9 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
-optimize_column_order <- FALSE
-
-cycle <- run_neighbornet(df, graphing_columns=graphing_columns)
-res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns, optimize_column_order=optimize_column_order)
-clus_df_gather_neighbornet <- res$clus_df_gather
-graphing_columns_neighbornet <- res$graphing_columns
-
-p_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, graphing_columns = graphing_columns_neighbornet, column_weights = "value", sorting_algorithm="None", color_bands=TRUE)
-print(res$individual_graphs)
-p_neighbornet
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE)
 ```
 
 ```{r}
-optimize_column_order <- TRUE
-
-cycle <- run_neighbornet(df, graphing_columns=graphing_columns)
-res <- determine_optimal_cycle_start(df, cycle, graphing_columns=graphing_columns, optimize_column_order=optimize_column_order)
-clus_df_gather_neighbornet <- res$clus_df_gather
-graphing_columns_neighbornet <- res$graphing_columns
-
-p_neighbornet <- plot_alluvial(clus_df_gather_neighbornet, graphing_columns = graphing_columns_neighbornet, column_weights = "value", sorting_algorithm="None", color_bands=TRUE)
-print(res$individual_graphs)
-p_neighbornet
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE)
 ```
-
-

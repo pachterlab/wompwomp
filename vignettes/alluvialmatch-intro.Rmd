@@ -115,15 +115,20 @@ What is our objective value on clus_df_gather_sorted_wolf and clus_df_gather_sor
 clus_df_gather_ungrouped <- clus_df_gather %>% ungroup()
 clus_df_gather_ungrouped[['col1_int']] <- as.integer(as.factor(clus_df_gather_ungrouped[["tissue"]]))
 clus_df_gather_ungrouped[['col2_int']] <- as.integer(as.factor(clus_df_gather_ungrouped[["cluster"]]))
-crossing_edges_unsorted <- determine_crossing_edges(clus_df_gather_ungrouped, column1="col1_int", column2="col2_int", column_weights = "value")
+crossing_edges_output_unsorted <- determine_crossing_edges(clus_df_gather_ungrouped, column1="col1_int", column2="col2_int", column_weights = "value")
+crossing_edges_unsorted <- crossing_edges_output_unsorted$crossing_edges_df
 # str(crossing_edges_unsorted[1:3])
 
-crossing_edges_wolf <- determine_crossing_edges(clus_df_gather_sorted_wolf, column1="col1_int", column2="col2_int", column_weights = "value")
+crossing_edges_output_wolf <- determine_crossing_edges(clus_df_gather_sorted_wolf, column1="col1_int", column2="col2_int", column_weights = "value")
+crossing_edges_wolf <- crossing_edges_output_wolf$crossing_edges_df
 # str(crossing_edges_wolf[1:3])
 
-crossing_edges_wblf <- determine_crossing_edges(clus_df_gather_sorted_wblf, column1="col1_int", column2="col2_int", column_weights = "value")  # output_df_path = "vignette_intro_crossing_wblf.csv"
+crossing_edges_output_wblf <- determine_crossing_edges(clus_df_gather_sorted_wblf, column1="col1_int", column2="col2_int", column_weights = "value")  # output_df_path = "vignette_intro_crossing_wblf.csv"
+crossing_edges_wblf <- crossing_edges_output_wblf$crossing_edges_df
+# str(crossing_edges_wblf[1:3])
 
-crossing_edges_nn <- determine_crossing_edges(clus_df_gather_sorted_nn, column1="col1_int", column2="col2_int", column_weights = "value")  # output_df_path = "vignette_intro_crossing_nn.csv"
+crossing_edges_output_nn <- determine_crossing_edges(clus_df_gather_sorted_nn, column1="col1_int", column2="col2_int", column_weights = "value")  # output_df_path = "vignette_intro_crossing_nn.csv"
+crossing_edges_nn <- crossing_edges_output_nn$crossing_edges_df
 str(crossing_edges_nn[1:3])
 ```
 

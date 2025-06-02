@@ -57,7 +57,6 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns)
             clus_df_gather_neighbornet,
             column1 = column1,
             column2 = column2,
-            fixed_column = NULL,
             return_weighted_layer_free_objective = TRUE
         )
         neighbornet_objective <- log1p(neighbornet_objective)  # log1p to avoid issue of log(0)
@@ -297,7 +296,6 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
                 clus_df_gather_neighbornet,
                 column1 = col_a,
                 column2 = col_b,
-                fixed_column = NULL,
                 return_weighted_layer_free_objective = TRUE
             )
             neighbornet_objective <- neighbornet_objective + neighbornet_objective_sub
@@ -305,7 +303,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
 
         # # swap col_ints
         # clus_df_gather_neighbornet <- swap_columns_in_clus_df_gather(clus_df_gather_neighbornet, graphing_columns_int)
-        graphing_columns <- swap_graphing_column_order_based_on_graphing_column_int_order(graphing_columns=graphing_columns, graphing_columns_int=graphing_columns_int)
+        graphing_columns_tmp <- swap_graphing_column_order_based_on_graphing_column_int_order(graphing_columns=graphing_columns, graphing_columns_int=graphing_columns_int)
 
         # # print(neighbornet_objective)
         if (neighbornet_objective < neighbornet_objective_minimum) {
@@ -315,12 +313,18 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             cycle_best <- cycle_shifted
             individual_graphs <- graphs_list_stripped
             # p_best_neighbornet <- p_neighbornet
-            graphing_columns_best <- graphing_columns
+            graphing_columns_best <- graphing_columns_tmp
             clus_df_gather_best <- clus_df_gather_neighbornet
         }
     }
 
     clus_df_gather_best <- reorder_and_rename_columns(clus_df_gather_best, graphing_columns_best)
+
+    # make factors
+    for (j in seq_along(graphing_columns_best)) {
+        int_col_name <- paste0("col", j, "_int")
+        clus_df_gather_best[[int_col_name]] <- factor(clus_df_gather_best[[int_col_name]])
+    }
 
     # browser()
     return(list(cycle = cycle_best, individual_graphs = individual_graphs, neighbornet_objective = neighbornet_objective_minimum, clus_df_gather = clus_df_gather_best, graphing_columns = graphing_columns_best))
@@ -892,13 +896,15 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
         df <- tidyr::uncount(df, weights = !!rlang::sym(column_weights))
     }
 
-    for (col in graphing_columns) {
-        if (!(col %in% colnames(df))) {
-            stop(sprintf("column '%s' is not a column in the dataframe.", col))
-        }
-        # convert to factor
-        if (!is.factor(df[[col]])) {
-            df[[col]] <- as.factor(df[[col]])
+    if (!(is.null(graphing_columns))) {
+        for (col in graphing_columns) {
+            if (!(col %in% colnames(df))) {
+                stop(sprintf("column '%s' is not a column in the dataframe.", col))
+            }
+            # convert to factor
+            if (!is.factor(df[[col]])) {
+                df[[col]] <- as.factor(df[[col]])
+            }
         }
     }
 
@@ -1111,6 +1117,11 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 
     # Preprocess (i.e., add int columns and do the grouping)
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = load_df, do_gather_set_data = FALSE)
+    if (is.null(column_weights)) {
+        column_weights <- "value"  # is set during data_preprocess
+    }
+
+    # browser()
 
     if (sorting_algorithm == "neighbornet") {
         clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order)
@@ -1178,16 +1189,16 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           column_weights = NULL, output_plot_path = NULL, output_df_path = NULL,
                           set_seed=42, optimize_column_order=TRUE) {
     #* Type Checking Start
-    if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
-        stop("Some graphing_columns are not present in the dataframe.")
-    }
-
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
     }
 
     df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
+
+    if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
+        stop("Some graphing_columns are not present in the dataframe.")
+    }
 
     if (ncol(df) < 2) {
         stop("Dataframe must have at least 2 columns when column_weights is NULL.")
@@ -1235,6 +1246,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
 
     # Sort
     clus_df_gather <- data_sort(df = df, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = sorting_algorithm, optimize_column_order = optimize_column_order, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, output_df_path = output_df_path, load_df = FALSE)
+    graphing_columns <- graphing_columns[order(match(graphing_columns, names(clus_df_gather)))]  # reorder graphing_columns to match any changed order in data_sort
 
     # Plot
     # alluvial_plot <- plot_alluvial_internal()
@@ -1248,6 +1260,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                                                      include_group_sizes = include_group_sizes,
                                                      output_plot_path = output_plot_path)
     } else {
+        # browser()
         alluvial_plot <- plot_alluvial_internal_multicol(clus_df_gather, graphing_columns=graphing_columns, fixed_column = fixed_column,
                                                          color_list = color_list, color_boxes = color_boxes,
                                                          color_bands = color_bands, color_band_list = color_band_list,

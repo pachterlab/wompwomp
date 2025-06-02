@@ -61,6 +61,14 @@ p1
 ```
 
 ```{r}
+devtools::load_all()
+p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), color_band_column="special", sorting_algorithm = "None")
+p2
+```
+
+#!!! TEMP
+```{r}
+devtools::load_all()
 p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), color_band_column="special", sorting_algorithm = "None")
 p2
 ```
@@ -79,3 +87,8 @@ p4
 ```{r}
 sessioninfo::session_info()
 ```
+
+```{r}
+
+```
+
