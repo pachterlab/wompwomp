@@ -2,19 +2,12 @@
 
 args <- commandArgs(trailingOnly = TRUE)
 
-# Install devtools if needed
-if (!requireNamespace("devtools", quietly = TRUE)) {
-  if (interactive()) {
-    install <- askYesNo("The 'devtools' package is required but not installed. Install it now?")
-    if (isTRUE(install)) {
-      install.packages("devtools", repos = "https://cloud.r-project.org")
-    } else {
-      stop("Aborted. Please install 'devtools' manually with install.packages('devtools').")
-    }
-  } else {
-    stop("The 'devtools' package is required. Please install it with install.packages('devtools').")
-  }
+# if doing development, then comment this out, and uncomment the package installation and devtools thing
+if (!requireNamespace("alluvialmatch", quietly = TRUE)) {
+  message("alluvialmatch not installed. Installing now...")
+  install.packages("alluvialmatch")
 }
+
 
 # Install your package's runtime dependencies if missing
 required_pkgs <- c(
@@ -32,13 +25,48 @@ if (length(missing) > 0) {
     if (isTRUE(install)) {
       install.packages(missing, repos = "https://cloud.r-project.org")
     } else {
-      stop("Aborted. Please install the missing packages manually.")
+      stop(
+        paste0(
+            "Aborted. Please install the missing packages manually:\n",
+            "Rscript -e 'install.packages(c(", 
+            paste0(sprintf('\"%s\"', missing), collapse = ", "), 
+            "))'\n"
+        )
+    )
+
     }
   } else {
-    stop("Missing packages: ", paste(missing, collapse = ", "),
-         "\nPlease install them with install.packages().")
+    stop(
+        paste0(
+            "Missing packages: ", paste(missing, collapse = ", "), "\n",
+            "To install them, run:\n",
+            "Rscript install.R",
+            "or",
+            "Rscript -e 'install.packages(c(", 
+            paste0(sprintf('\"%s\"', missing), collapse = ", "), 
+            "))'\n"
+        )
+    )
   }
 }
+
+
+## Install devtools if needed for active development
+#if (!requireNamespace("devtools", quietly = TRUE)) {
+#  if (interactive()) {
+#    install <- askYesNo("The 'devtools' package is required but not installed. Install it now?")
+#    if (isTRUE(install)) {
+#      install.packages("devtools", repos = "https://cloud.r-project.org")
+#    } else {
+#      stop("Aborted. Please install 'devtools' manually with install.packages('devtools').")
+#    }
+#  } else {
+#    stop("The 'devtools' package is required. Please install it with install.packages('devtools').")
+#  }
+#}
+# Rscript -e 'install.packages(c("devtools"), repos="https://cloud.r-project.org")'
+
+# devtools::load_all(".")
 
 # Load the package from the local directory
 args_full <- commandArgs(trailingOnly = FALSE)
@@ -47,5 +75,4 @@ if (length(script_path) == 0) stop("Failed to detect script path.")
 package_root <- dirname(dirname(script_path))
 setwd(package_root)
 
-devtools::load_all(".")
 alluvialmatch::run_cli(args)

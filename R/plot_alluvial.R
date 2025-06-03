@@ -910,6 +910,7 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
     return(df)
 }
 
+# reorders int columns to match graphing_columns
 reorder_and_rename_columns <- function(df, graphing_columns) {
     # Find the order in df of the columns listed in graphing_columns
     original_graphing_columns <- intersect(colnames(df), graphing_columns)

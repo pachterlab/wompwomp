@@ -13,7 +13,7 @@ setup_python_env <- function(envname = "alluvialmatch_env", packages = c("numpy=
     envs <- reticulate::conda_list()$name
     if (!(envname %in% envs)) {
         message("Creating conda environment '", envname, "'...")
-        reticulate::conda_create(envname, packages = "python")  # base env only
+        reticulate::conda_create(envname, python_version = "3.10")
     }
 
     reticulate::use_condaenv(envname, required = TRUE)
