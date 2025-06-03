@@ -39,9 +39,6 @@ default_colors <- c(
     "#3D3D3D"
 )
 
-print_verbose
-
-
 determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns) {
     # this doesn't strictly need its own condition (2 choose 2 is 1 anyways), but does avoid a little overhead
     if (length(graphing_columns) == 2) {
@@ -1134,8 +1131,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     # browser()
 
     if (sorting_algorithm == "neighbornet") {
-        clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order)
-    } else if (sorting_algorithm == "greedy_WBLF" || sorting_algorithm == "greedy_WOLF", verbose = verbose) {
+        clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order, verbose = verbose)
+    } else if (sorting_algorithm == "greedy_WBLF" || sorting_algorithm == "greedy_WOLF") {
         clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, sorting_algorithm = sorting_algorithm, verbose = verbose)
     } else if (sorting_algorithm == "None") {
         clus_df_gather_sorted <- clus_df_gather
