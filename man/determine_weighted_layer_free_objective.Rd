@@ -4,7 +4,7 @@
 \alias{determine_weighted_layer_free_objective}
 \title{Determine sum of products of overlapping edges}
 \usage{
-determine_weighted_layer_free_objective(crossing_edges_df)
+determine_weighted_layer_free_objective(crossing_edges_df, verbose = FALSE)
 }
 \arguments{
 \item{crossing_edges}{A CSV path or list as outputted from determine_crossing_edges.}

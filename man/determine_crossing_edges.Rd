@@ -13,7 +13,8 @@ determine_crossing_edges(
   minimum_edge_weight = 0,
   output_df_path = NULL,
   output_lode_df_path = NULL,
-  return_weighted_layer_free_objective = FALSE
+  return_weighted_layer_free_objective = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{

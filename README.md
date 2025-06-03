@@ -15,7 +15,7 @@ Make alluvial plots with node order and colors optimized to minimize edge crossi
 ### R
 ```
 remotes::install_github("pachterlab/alluvialmatch")
-alluvialmatch::setup_mypackage_python()
+alluvialmatch::setup_python_env()
 ```
 
 ### Command line

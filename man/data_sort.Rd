@@ -16,7 +16,8 @@ data_sort(
   random_initializations = 1,
   set_seed = 42,
   output_df_path = NULL,
-  load_df = TRUE
+  load_df = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{

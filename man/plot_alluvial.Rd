@@ -27,7 +27,8 @@ plot_alluvial(
   output_plot_path = NULL,
   output_df_path = NULL,
   set_seed = 42,
-  optimize_column_order = TRUE
+  optimize_column_order = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{

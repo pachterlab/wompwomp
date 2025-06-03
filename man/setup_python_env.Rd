@@ -4,7 +4,10 @@
 \alias{setup_python_env}
 \title{Setup Python environment for this package}
 \usage{
-setup_python_env(envname = "alluvialmatch_env", packages = c("splitspy"))
+setup_python_env(
+  envname = "alluvialmatch_env",
+  packages = c("numpy==1.23.5", "splitspy")
+)
 }
 \description{
 This function installs Miniconda if needed, creates a dedicated environment,
