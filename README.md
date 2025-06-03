@@ -11,22 +11,23 @@ Make alluvial plots with node order and colors optimized to minimize edge crossi
 ![alt text](https://github.com/pachterlab/alluvialmatch/blob/main/figures/schematic.png)
 
 
-## Installation - Requires [R](https://www.r-project.org/) to be installed:
-### R
+## Installation:
+### R - Requires [R](https://www.r-project.org/) to be installed
 ```
 remotes::install_github("pachterlab/alluvialmatch")
 alluvialmatch::setup_python_env()
 ```
 
-### Command line
+### Command line - Does not require R to be installed if using conda and environment.yml.
 ```
 git clone https://github.com/pachterlab/alluvialmatch
 cd alluvialmatch
 conda env create -f environment.yml && conda activate alluvialmatch_env
 ```
+As an alternative to conda: `Rscript install.R`
+
 The first time any command is run on the command line, a prompt will appear asking to install any missing R dependencies.
 
-As an alternative to conda: `Rscript install.R`
 
 ## Usage
 The alluvialmatch library has four functions: plot_alluvial, greedy_wolf, determine_crossing_edges, and determine_weighted_layer_free_objective. plot_alluvial plots data as an alluvial plot using ggalluvial as a framework, running maximum weighted matching to maximize color concordance and optionally running a greedy_wolf sorting algorithm implementation of the weighted one-layer free problem. greedy_wolf runs the sorting algorithm and returns the dataframe object without plotting. determine_crossing_edges determines the edges of a graph structure that cross. determine_weighted_layer_free_objective returns the sum of products of crossing edge weights from the output of determine_crossing_edges.
