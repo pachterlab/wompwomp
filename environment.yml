@@ -1,10 +1,30 @@
 name: alluvialmatch_env
 channels:
-  - defaults
   - conda-forge
+  - defaults
   - bioconda
   - r
 dependencies:
+  - r-base>=3.5.0
+  - r-dplyr
+  - r-ggplot2
+  - r-ggforce
+  - r-ggalluvial
+  - r-igraph
+  - r-tibble
+  - r-rlang
+  - r-tidyr
+  - r-magrittr
+  - r-data.table
+  - r-reticulate
+  - r-testthat>=3.0.0
+  - r-vdiffr
+  - r-magick
+  - r-knitr
+  - r-rmarkdown
+  - r-gtools
+  - r-mclust
+  - r-sessioninfo
   - bzip2=1.0.8
   - ca-certificates=2025.2.25
   - libffi=3.4.4
@@ -24,4 +44,3 @@ dependencies:
       - numpy==1.23.5
       - pillow==11.2.1
       - splitspy==0.0.10
-prefix: /Users/joeyrich/miniconda3/envs/alluvialmatch_env

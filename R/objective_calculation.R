@@ -17,20 +17,20 @@ utils::globalVariables(c(
 ))
 
 
-#' Determine sum of products of overlapping edges
+#' Compute crossing objective
 #'
-#' @param crossing_edges A CSV path or list as outputted from determine_crossing_edges.
-#' @param minimum_edge_weight Optional positive integer that represents the minimum edge weight to count an edge in the calculation.
+#' Determine the sum of products of overlapping edge weights.
 #'
-#' @return A data frame.
+#' @param crossing_edges_df A CSV path or data frame as outputted with \code{crossing_edges_df} (in R) or \code{output_df_path} (as a file) from \code{determine_crossing_edges}.
+#' @param verbose Optional logical. If TRUE, will display messages during the function.
+#'
+#' @return A non-negative integer.
 #'
 #' @examples
-#' \dontrun{
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' greedy_wolf(df)
-#' crossing_edges_output <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
+#' clus_df_gather <- data_sort(df, graphing_columns = c('method1', 'method2'))
+#' crossing_edges_output <- determine_crossing_edges(clus_df_gather, column1 = "method1", column2 = "method2")
 #' objective <- determine_weighted_layer_free_objective(crossing_edges_output$crossing_edges_df)
-#' }
 #'
 #' @export
 determine_weighted_layer_free_objective <- function(crossing_edges_df, verbose = FALSE) {
