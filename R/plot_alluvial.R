@@ -39,6 +39,8 @@ default_colors <- c(
     "#3D3D3D"
 )
 
+print_verbose
+
 
 determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns) {
     # this doesn't strictly need its own condition (2 choose 2 is 1 anyways), but does avoid a little overhead
@@ -85,7 +87,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns)
     return(cycle_mapped_optimal_start)
 }
 
-run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value") {
+run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", verbose = FALSE) {
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
@@ -229,7 +231,7 @@ swap_graphing_column_order_based_on_graphing_column_int_order <- function(graphi
     return(reordered_graphing_columns)
 }
 
-determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", optimize_column_order = TRUE) {
+determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", optimize_column_order = TRUE, verbose = FALSE) {
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
@@ -513,7 +515,7 @@ plot_alluvial_internal_2col <- function(clus_df_gather,
                                         color_band_column=NULL, color_band_boundary=FALSE,
                                         alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
                                         include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
-                                        include_group_sizes = FALSE
+                                        include_group_sizes = FALSE, verbose = FALSE
 ) {
     if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather))) > 0) {
         clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
@@ -684,7 +686,7 @@ plot_alluvial_internal_multicol <- function(clus_df_gather,graphing_columns,
                                             color_band_column=NULL, color_band_boundary=FALSE,
                                             alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
                                             include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
-                                            include_group_sizes = FALSE
+                                            include_group_sizes = FALSE, verbose = FALSE
 ) {
     if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather))) > 0) {
         clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
@@ -981,17 +983,19 @@ data_preprocess <- function(df, graphing_columns = NULL, column_weights = NULL, 
 
 
 
-sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_weights = "value", optimize_column_order = TRUE) {
+sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_weights = "value", optimize_column_order = TRUE, verbose = FALSE) {
     if (!reticulate::py_module_available("splitspy")) {
         stop("Python module 'splitspy' is not available, which is required for the neighbornet algorithm (default). Please run alluvialmatch::setup_python_env().")
     }
-    cycle <- run_neighbornet(clus_df_gather, graphing_columns=graphing_columns, column_weights=column_weights)
-    res <- determine_optimal_cycle_start(clus_df_gather, cycle, graphing_columns=graphing_columns, column_weights=column_weights, optimize_column_order = optimize_column_order)
+    if (verbose) message("Running neighbornet")
+    cycle <- run_neighbornet(clus_df_gather, graphing_columns=graphing_columns, column_weights=column_weights, verbose=verbose)
+    if (verbose) message("Determining optimal cycle start")
+    res <- determine_optimal_cycle_start(clus_df_gather, cycle, graphing_columns=graphing_columns, column_weights=column_weights, optimize_column_order = optimize_column_order, verbose=verbose)
     clus_df_gather_neighbornet <- res$clus_df_gather
     return(clus_df_gather_neighbornet)
 }
 
-sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = NULL, column2 = NULL, fixed_column = 1, random_initializations = 1, set_seed = 42, column_weights = "value", sorting_algorithm = "greedy_WBLF") {
+sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = NULL, column2 = NULL, fixed_column = 1, random_initializations = 1, set_seed = 42, column_weights = "value", sorting_algorithm = "greedy_WBLF", sort_greedy_wolf = FALSE, verbose = FALSE) {
     if (length(graphing_columns) != 2) {
         stop(sprintf("graphing_columns must be of length 2 for greedy_wblf/greedy_wolf"))
     }
@@ -1057,6 +1061,8 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
                 crossing_edges_objective_minimum <- crossing_edges_objective
                 clus_df_gather_best <- clus_df_gather_tmp
             }
+            if (verbose) message(sprintf("Complete with iteration=%d", i))
+
         } else {
             clus_df_gather_best <- clus_df_gather_tmp
         }
@@ -1087,7 +1093,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' }
 #'
 #' @export
-data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, fixed_column = 1, random_initializations = 1, set_seed = 42, output_df_path = NULL, load_df = TRUE) {
+data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, fixed_column = 1, random_initializations = 1, set_seed = 42, output_df_path = NULL, load_df = TRUE, verbose = FALSE) {
     #* Type Checking Start
     valid_algorithms <- c("neighbornet", "greedy_WOLF", "greedy_WBLF", "None")
     if (!(sorting_algorithm %in% valid_algorithms)) {
@@ -1119,6 +1125,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     #* Type Checking End
 
     # Preprocess (i.e., add int columns and do the grouping)
+    if (verbose) message("Preprocessing data before sorting")
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = load_df, do_gather_set_data = FALSE)
     if (is.null(column_weights)) {
         column_weights <- "value"  # is set during data_preprocess
@@ -1128,16 +1135,19 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 
     if (sorting_algorithm == "neighbornet") {
         clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order)
-    } else if (sorting_algorithm == "greedy_WBLF" || sorting_algorithm == "greedy_WOLF") {
-        clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, sorting_algorithm = sorting_algorithm)
+    } else if (sorting_algorithm == "greedy_WBLF" || sorting_algorithm == "greedy_WOLF", verbose = verbose) {
+        clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, sorting_algorithm = sorting_algorithm, verbose = verbose)
     } else if (sorting_algorithm == "None") {
         clus_df_gather_sorted <- clus_df_gather
     } else {
         stop(sprintf("Invalid sorting_algorithm: '%s'. Must be one of: %s", sorting_algorithm, paste(valid_algorithms, collapse = ", ")))
     }
 
+    if (verbose) message("Complete with sorting")
+
     # Save if desired
     if ((is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE))) {
+        if (verbose) message(sprintf("Saving sorted dataframe to=%s", output_df_path))
         write.csv(clus_df_gather_to_save, file = output_df_path, row.names = FALSE)
     }
 
@@ -1190,13 +1200,14 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           match_colors = TRUE, alluvial_alpha = 0.5,
                           include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
                           column_weights = NULL, output_plot_path = NULL, output_df_path = NULL,
-                          set_seed=42, optimize_column_order=TRUE) {
+                          set_seed=42, optimize_column_order=TRUE, verbose=FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
     }
 
+    if (verbose) message("Loading in data")
     df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
 
     if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
@@ -1248,10 +1259,12 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
     #* Type Checking End
 
     # Sort
-    clus_df_gather <- data_sort(df = df, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = sorting_algorithm, optimize_column_order = optimize_column_order, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, output_df_path = output_df_path, load_df = FALSE)
+    if (verbose) message(sprintf("Sorting data with sorting_algorithm=%s", sorting_algorithm))
+    clus_df_gather <- data_sort(df = df, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = sorting_algorithm, optimize_column_order = optimize_column_order, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, output_df_path = output_df_path, load_df = FALSE, verbose = verbose)
     graphing_columns <- graphing_columns[order(match(graphing_columns, names(clus_df_gather)))]  # reorder graphing_columns to match any changed order in data_sort
 
     # Plot
+    if (verbose) message("Plotting data")
     # alluvial_plot <- plot_alluvial_internal()
     if (length(graphing_columns) == 2) {
         alluvial_plot <- plot_alluvial_internal_2col(clus_df_gather, group1_name = column1, group2_name = column2, fixed_column = fixed_column,
@@ -1261,7 +1274,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                                                      match_colors = match_colors, alluvial_alpha = alluvial_alpha,
                                                      include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
                                                      include_group_sizes = include_group_sizes,
-                                                     output_plot_path = output_plot_path)
+                                                     output_plot_path = output_plot_path, verbose = verbose)
     } else {
         # browser()
         alluvial_plot <- plot_alluvial_internal_multicol(clus_df_gather, graphing_columns=graphing_columns, fixed_column = fixed_column,
@@ -1271,7 +1284,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                                                          match_colors = match_colors, alluvial_alpha = alluvial_alpha,
                                                          include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
                                                          include_group_sizes = include_group_sizes,
-                                                         output_plot_path = output_plot_path)
+                                                         output_plot_path = output_plot_path, verbose = verbose)
     }
 
     return(alluvial_plot)

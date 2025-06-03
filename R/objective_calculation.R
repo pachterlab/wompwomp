@@ -33,7 +33,7 @@ utils::globalVariables(c(
 #' }
 #'
 #' @export
-determine_weighted_layer_free_objective <- function(crossing_edges_df) {
+determine_weighted_layer_free_objective <- function(crossing_edges_df, verbose = FALSE) {
     # Case 1: CSV
     if (is.character(crossing_edges_df) && length(crossing_edges_df) == 1 && file.exists(crossing_edges_df)) {
         # Read the file
@@ -73,7 +73,7 @@ determine_weighted_layer_free_objective <- function(crossing_edges_df) {
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, output_lode_df_path = NULL,  return_weighted_layer_free_objective = FALSE) {
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, output_lode_df_path = NULL,  return_weighted_layer_free_objective = FALSE, verbose = FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -117,6 +117,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     # if (!is.factor(df[[column1]])) df[[column1]] <- factor(df[[column1]])
     # if (!is.factor(df[[column2]])) df[[column2]] <- factor(df[[column2]])
 
+    if (verbose) message("Preprocessing data")
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, do_gather_set_data = FALSE)
 
     p <- ggplot(data = clus_df_gather, aes(y = value),
@@ -137,6 +138,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     x_vals <- sort(unique(lode_df_long_full$x))
     n_x <- length(x_vals)
 
+    if (verbose) message("Beginning loop through layers")
     for (h in 1:(n_x - 1)) {
         x1 <- h
         x2 <- h + 1
@@ -144,6 +146,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         lode_df_long <- lode_df_long_full %>% filter(x == x1 | x == x2)
 
         # Sort by alluvium and x to ensure consistent ordering
+        if (verbose) message("Filtering, grouping, and widening lode_df")
         lode_df_long_sorted <- lode_df_long %>%
             arrange(alluvium, x)
 
@@ -168,6 +171,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         lode_df_length <- nrow(lode_df)
 
         # Compare each pair of edges
+        if (verbose) message("Looping through alluvia")
         for (i in 1:lode_df_length) {
             for (j in 1:lode_df_length) {
                 # only look at rows where i's stratum is immediately adjacent to left of j's stratum
@@ -195,6 +199,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 }
             }
         }
+        if (verbose) message(sprintf("Complete with iteration=%s", h))
     }
 
     if (length(crossing_edges) > 0) {
@@ -204,17 +209,19 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     }
 
     if (is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE)) {
+        if (verbose) message(sprintf("Saving crossing_edges_df dataframe to=%s", output_df_path))
         write.csv(crossing_edges_df, file = output_df_path, row.names = FALSE, quote = FALSE)
 
         if (is.null(output_lode_df_path)) {
             output_lode_df_path <- sub("\\.csv$", "_lodes.csv", output_df_path)
         }
+        if (verbose) message(sprintf("Saving lode_df dataframe to=%s", output_lode_df_path))
         write.csv(lode_df, file = output_lode_df_path, row.names = FALSE, quote = FALSE)
     }
 
     WLF_objective <- NULL
     if (return_weighted_layer_free_objective) {
-        # browser()
+        if (verbose) message("Calculating WLF objective")
         WLF_objective <- determine_weighted_layer_free_objective(crossing_edges_df)
         return(WLF_objective)
     }
