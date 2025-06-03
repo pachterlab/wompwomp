@@ -5,7 +5,7 @@ Make alluvial plots with node order and colors optimized to minimize edge crossi
 ![alt text](https://github.com/pachterlab/alluvialmatch/blob/main/figures/alluvialmatch_unsorted.png)
 
 ## After alluvialmatch
-![alt text](https://github.com/pachterlab/alluvialmatch/blob/main/figures/alluvialmatch_WBLF.png)
+![alt text](https://github.com/pachterlab/alluvialmatch/blob/main/figures/alluvialmatch_NN.png)
 
 ## alluvialmatch functions/commands
 ![alt text](https://github.com/pachterlab/alluvialmatch/blob/main/figures/schematic.png)
