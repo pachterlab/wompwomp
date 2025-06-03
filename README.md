@@ -13,12 +13,16 @@ Make alluvial plots with node order and colors optimized to minimize edge crossi
 
 ## Installation - Requires [R](https://www.r-project.org/) to be installed:
 ### R
-`remotes::install_github("pachterlab/alluvialmatch")`
+```
+remotes::install_github("pachterlab/alluvialmatch")
+alluvialmatch::setup_mypackage_python()
+```
 
 ### Command line
 ```
 git clone https://github.com/pachterlab/alluvialmatch
 cd alluvialmatch
+conda env create -f environment.yml && conda activate alluvialmatch_env
 ```
 The first time any command is run on the command line, a prompt will appear asking to install any missing R dependencies.
 

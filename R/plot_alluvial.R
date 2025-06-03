@@ -982,6 +982,9 @@ data_preprocess <- function(df, graphing_columns = NULL, column_weights = NULL, 
 
 
 sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_weights = "value", optimize_column_order = TRUE) {
+    if (!reticulate::py_module_available("splitspy")) {
+        stop("Python module 'splitspy' is not available, which is required for the neighbornet algorithm (default). Please run alluvialmatch::setup_python_env().")
+    }
     cycle <- run_neighbornet(clus_df_gather, graphing_columns=graphing_columns, column_weights=column_weights)
     res <- determine_optimal_cycle_start(clus_df_gather, cycle, graphing_columns=graphing_columns, column_weights=column_weights, optimize_column_order = optimize_column_order)
     clus_df_gather_neighbornet <- res$clus_df_gather

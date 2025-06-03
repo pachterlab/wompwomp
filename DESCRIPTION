@@ -21,7 +21,8 @@ Imports:
     rlang,
     tidyr,
     magrittr,
-    data.table
+    data.table,
+    reticulate
 Depends: R (>= 3.5.0)
 Suggests: 
     testthat (>= 3.0.0),

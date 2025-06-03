@@ -4,10 +4,7 @@
 \alias{determine_weighted_layer_free_objective}
 \title{Determine sum of products of overlapping edges}
 \usage{
-determine_weighted_layer_free_objective(
-  crossing_edges,
-  minimum_edge_weight = 0
-)
+determine_weighted_layer_free_objective(crossing_edges_df)
 }
 \arguments{
 \item{crossing_edges}{A CSV path or list as outputted from determine_crossing_edges.}
@@ -24,8 +21,8 @@ Determine sum of products of overlapping edges
 \dontrun{
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 greedy_wolf(df)
-crossing_edges <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
-objective <- determine_weighted_layer_free_objective(crossing_edges)
+crossing_edges_output <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
+objective <- determine_weighted_layer_free_objective(crossing_edges_output$crossing_edges_df)
 }
 
 }

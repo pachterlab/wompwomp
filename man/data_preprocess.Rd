@@ -2,19 +2,28 @@
 % Please edit documentation in R/plot_alluvial.R
 \name{data_preprocess}
 \alias{data_preprocess}
-\title{1 line description}
+\title{Preprocess data}
 \usage{
-data_preprocess(df, graphing_columns = NULL, column_weights = NULL)
+data_preprocess(
+  df,
+  graphing_columns = NULL,
+  column_weights = NULL,
+  load_df = TRUE,
+  do_gather_set_data = FALSE
+)
 }
 \arguments{
 \item{df}{A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).}
+
+\item{graphing_columns}{Optional Character. List of columns to use. Incompatible with column1 and column2. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
+
+\item{column_weights}{Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.}
 }
 \value{
 A data frame where each row provides the weight in the 'value' column that connects a given combination of values in graphing_columns.
 }
 \description{
-Multiline
-Description
+Preprocess data (load in, add integer columns, and group as needed)
 }
 \examples{
 \dontrun{

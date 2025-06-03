@@ -2,18 +2,21 @@
 % Please edit documentation in R/plot_alluvial.R
 \name{data_sort}
 \alias{data_sort}
-\title{Sorts a dataframe (e.g., the output of )}
+\title{Sorts a dataframe (e.g., the output of data_preprocess)}
 \usage{
 data_sort(
   df,
   graphing_columns = NULL,
+  column1 = NULL,
+  column2 = NULL,
   column_weights = NULL,
   sorting_algorithm = "neighbornet",
   optimize_column_order = TRUE,
   fixed_column = 1,
   random_initializations = 1,
   set_seed = 42,
-  output_df_path = NULL
+  output_df_path = NULL,
+  load_df = TRUE
 )
 }
 \arguments{
@@ -23,13 +26,12 @@ data_sort(
 A \code{ggplot2} object representing the alluvial plot.
 }
 \description{
-Multiline
-Description
+Maps the integers in integer columns corresponding to graphing_columns such that the alluvial plot will be sorted correctly.
 }
 \examples{
 \dontrun{
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-plot_alluvial(df)
+data_sort(df)
 }
 
 }

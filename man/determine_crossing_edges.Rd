@@ -6,15 +6,13 @@
 \usage{
 determine_crossing_edges(
   df,
+  graphing_columns = NULL,
   column1 = NULL,
   column2 = NULL,
   column_weights = "value",
   minimum_edge_weight = 0,
   output_df_path = NULL,
-  map_dict = NULL,
-  map_dict_1 = NULL,
-  map_dict_2 = NULL,
-  fixed_column = NULL,
+  output_lode_df_path = NULL,
   return_weighted_layer_free_objective = FALSE
 )
 }
@@ -43,7 +41,7 @@ Determine overlapping edges of graph run through data_sort
 \dontrun{
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 df <- data_sort(df)
-crossing_edges <- determine_crossing_edges(df, column1 = "col1_int", column2 = "col2_int")
+result <- determine_crossing_edges(df, column1 = "col1_int", column2 = "col2_int")
 }
 
 }

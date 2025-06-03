@@ -16,13 +16,20 @@ library(ggalluvial)
 library(ggforce)
 library(igraph)
 library(tibble)
+library(tidyr)
+library(reticulate)
 ```
 
-```{r}
-library(reticulate)
-conda_env <- "seurat_vs_scanpy"
-Sys.setenv(RETICULATE_PYTHON = paste("/Users/joeyrich/miniconda3/envs", conda_env, "bin/python3.9", sep = "/"))
-use_condaenv("/Users/joeyrich/miniconda3/envs/seurat_vs_scanpy/bin/python3.9", required = TRUE)
+Set up our python environment
+```{r setup-env, eval = FALSE}
+alluvialmatch::setup_python_env()
+```
+
+```{r check-python, include = FALSE}
+if (!reticulate::py_module_available("splitspy")) {
+    message("❌ 'splitspy' not found. Run alluvialmatch::setup_python_env() and restart R.")
+    knitr::knit_exit()
+}
 ```
 
 We create a toy data frame that maps tissues (BRAIN, STOMACH, HEART, T cell, B CELL) to clustering (1-5)

@@ -16,6 +16,20 @@ library(ggalluvial)
 library(ggforce)
 library(igraph)
 library(tibble)
+library(tidyr)
+library(reticulate)
+```
+
+Set up our python environment
+```{r setup-env, eval = FALSE}
+alluvialmatch::setup_python_env()
+```
+
+```{r check-python, include = FALSE}
+if (!reticulate::py_module_available("splitspy")) {
+    message("❌ 'splitspy' not found. Run alluvialmatch::setup_python_env() and restart R.")
+    knitr::knit_exit()
+}
 ```
 
 We create a toy data frame that maps tissues tissues, clusters, sex, and special
