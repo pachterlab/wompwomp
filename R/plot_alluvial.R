@@ -942,22 +942,33 @@ reorder_and_rename_columns <- function(df, graphing_columns) {
 
 #' Preprocess data
 #'
-#' Preprocess data (load in, add integer columns, and group as needed)
+#' Preprocess data (load in, add integer columns, reorder columns to match graphing_columns, and group as needed)
 #'
-#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
-#' @param graphing_columns Optional Character. List of columns to use. Incompatible with column1 and column2. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
-#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
+#' @param df A data frame, tibble, or CSV file path. Must be in one of two formats:
+#' (1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
+#' (2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).
+#' @param graphing_columns Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting).
+#' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
+#' @param load_df Internal flag; not recommended to modify.
+#' @param do_gather_set_data Internal flag; not recommended to modify.
 #'
-#' @return A data frame where each row provides the weight in the 'value' column that connects a given combination of values in graphing_columns.
+#' @return A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings.
 #'
 #' @examples
-#' \dontrun{
+#' Example 1: df format 1
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' clus_df_gather <- data_preprocess(df, graphing_columns = c('method1', 'method2'))
-#' }
+#'
+#' Example 2: df format 2
+#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' clus_df_gather <- df |>
+#'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+#'     dplyr::group_by_all() |>
+#'     dplyr::count(name = "value")
+#' clus_df_gather <- data_preprocess(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
 #'
 #' @export
-data_preprocess <- function(df, graphing_columns = NULL, column_weights = NULL, load_df = TRUE, do_gather_set_data = FALSE) {
+data_preprocess <- function(df, graphing_columns, column_weights = NULL, load_df = TRUE, do_gather_set_data = FALSE) {
     if (load_df) {
         df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
     }
@@ -1020,6 +1031,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
     set.seed(set_seed)
 
 
+    length_clus_df_gather_original <- nrow(clus_df_gather)
     if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather))) > 0) {
         clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
     }
@@ -1065,7 +1077,8 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
         }
     }
 
-    if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather_best))) > 0) {
+    # checks if id, x, y in clus_df_gather_best, as well as if clus_df_gather_best has more rows than original
+    if ((length(setdiff(c("id", "x", "y"), colnames(clus_df_gather_best))) == 0) && nrow(clus_df_gather_best) > length_clus_df_gather_original) {
         clus_df_gather_best <- clus_df_gather_best %>%
             ungroup() %>%
             slice(1:(n() %/% 2)) %>%  # keep first half of rows

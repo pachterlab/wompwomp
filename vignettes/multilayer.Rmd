@@ -18,6 +18,8 @@ library(igraph)
 library(tibble)
 library(tidyr)
 library(reticulate)
+
+alluvialmatch::setup_python_env()  #!!! erase
 ```
 
 Set up our python environment
