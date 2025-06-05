@@ -168,25 +168,32 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     x_vals <- sort(unique(lode_df_long_full$x))
     n_x <- length(x_vals)
 
+    if (!is.null(stratum_column_and_value_to_keep)) {
+        layer_number <- as.integer(names(stratum_column_and_value_to_keep)[1])  # the layer (eg 3 from stratum3)
+        stratum_number <- stratum_column_and_value_to_keep[[1]]  # the stratum (eg value 28 in column stratum3)
+
+        alluvium_values_in_stratum_to_keep <- lode_df_long_full %>%
+            filter(x == layer_number, stratum == stratum_number) %>%
+            pull(alluvium) %>%
+            unique()
+    }
+
     if (verbose) message("Beginning loop through layers")
     # browser()
     for (h in 1:(n_x - 1)) {
         x1 <- h
         x2 <- h + 1
 
-        if (!is.null(stratum_column_and_value_to_keep)) {
-            layer_number <- as.integer(names(stratum_column_and_value_to_keep)[1])  # the layer (eg 3 from stratum3)
-            stratum_number <- stratum_column_and_value_to_keep[[1]]  # the stratum (eg value 28 in column stratum3)
-
-            # even if I have 6 layers, this function will soon filter out all but x1 and x2 - also, if I am doing the whole matrix thing, then I can rest easy that other layers won't matter
-            if (layer_number == x1) {
-                layer_number_in_lode_df <- 1
-            } else if (layer_number == x2) {
-                layer_number_in_lode_df <- 2
-            } else {
-                next
-            }
-        }
+        # if (!is.null(stratum_column_and_value_to_keep)) {
+        #     # even if I have 6 layers, this function will soon filter out all but x1 and x2 - also, if I am doing the whole matrix thing, then I can rest easy that other layers won't matter
+        #     if (layer_number == x1) {
+        #         layer_number_in_lode_df <- 1
+        #     } else if (layer_number == x2) {
+        #         layer_number_in_lode_df <- 2
+        #     } else {
+        #         next
+        #     }
+        # }
 
         lode_df_long <- lode_df_long_full %>% filter(x == x1 | x == x2)
 
@@ -217,11 +224,12 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
 
         # stratum_column_and_value_to_keep could be like list("3" = 28), where 3 is the x/layer number and 28 is the stratum number
         if (!is.null(stratum_column_and_value_to_keep)) {
-            stratum_column_name <- paste0("stratum", layer_number_in_lode_df)
-            lode_df_filtered_with_stratum_of_interest <- lode_df[lode_df[[stratum_column_name]] == stratum_number, ]
+            # stratum_column_name <- paste0("stratum", layer_number_in_lode_df)
+            # browser()
+            lode_df_filtered_with_stratum_of_interest <- lode_df[lode_df$alluvium %in% alluvium_values_in_stratum_to_keep, ]
             lode_df_filtered_with_stratum_of_interest_length <- nrow(lode_df_filtered_with_stratum_of_interest)
 
-            lode_df_filtered_without_stratum_of_interest <- lode_df[lode_df[[stratum_column_name]] != stratum_number, ]
+            lode_df_filtered_without_stratum_of_interest <- lode_df[!lode_df$alluvium %in% alluvium_values_in_stratum_to_keep, ]
             lode_df_filtered_without_stratum_of_interest_length <- nrow(lode_df_filtered_without_stratum_of_interest)
         }
 

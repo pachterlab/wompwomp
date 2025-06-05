@@ -329,7 +329,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         }
         objective_matrix_vector <- neighbornet_objective_output$objective_matrix_vector
         neighbornet_objective <- neighbornet_objective_output$output_objective
-        print(neighbornet_objective)
+        # print(neighbornet_objective)
         # browser()
         # neighbornet_objective <- sum(sapply(objective_matrix_vector, sum)) / 2
         # stopifnot(neighbornet_objective == determine_weighted_layer_free_objective(neighbornet_objective_output$crossing_edges_df))
