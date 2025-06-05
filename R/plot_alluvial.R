@@ -39,7 +39,7 @@ default_colors <- c(
     "#3D3D3D"
 )
 
-determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns) {
+determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns, verbose = FALSE) {
     # this doesn't strictly need its own condition (2 choose 2 is 1 anyways), but does avoid a little overhead
     if (length(graphing_columns) == 2) {
         return(graphing_columns)
@@ -67,6 +67,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns)
     labels <- graphing_columns  # assuming this is a character vector
     column_dist_matrix <- column_dist_matrix
     mat_list <- split(column_dist_matrix, row(column_dist_matrix))  # convert R matrix to list of row-vectors
+    if (verbose) message("Actually running neighbornet")
     reticulate::source_python(file.path(here::here(), "scripts", "run_neighbornet.py"))
     result <- neighbor_net(labels, column_dist_matrix)
     cycle <- result[[1]]
@@ -228,7 +229,7 @@ swap_graphing_column_order_based_on_graphing_column_int_order <- function(graphi
     return(reordered_graphing_columns)
 }
 
-determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", optimize_column_order = TRUE, verbose = FALSE) {
+determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, verbose = FALSE) {
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
@@ -244,16 +245,20 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
     }
 
     # graphing_columns_original <- graphing_columns
+    graphing_columns_ordered_according_to_df <- names(df)[names(df) %in% graphing_columns]
 
     neighbornet_objective_minimum <- Inf
     p_best_neighbornet <- NULL
     cycle_best <- NULL
     clus_df_gather_best <- NULL
     graphing_columns_best <- NULL
-    plots <- list()
+    objective_matrix_vector <- c()
 
     n <- length(cycle)
+    # browser()
     for (i in 0:(n - 1)) {
+        if (verbose) message(sprintf("Starting iteration=%s", i+1))
+        # browser()  #!!!!
         cycle_shifted <- rotate_left(cycle, i)
         graphs_list <- get_graph_groups(cycle_shifted)
 
@@ -282,23 +287,99 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         }
 
         if (optimize_column_order) {
-            graphing_columns_int <- determine_column_order(clus_df_gather_neighbornet, graphing_columns = graphing_columns_int)
+            # optimize order either on the first iteration if optimize_column_order_per_cycle is FALSE, or each time if optimize_column_order_per_cycle is TRUE
+            if ((optimize_column_order_per_cycle) || (i == 0)) {
+                graphing_columns_int <- determine_column_order(clus_df_gather_neighbornet, graphing_columns = graphing_columns_int, verbose = verbose)
+            }
         }
 
-        # go through each adjacent pair of columns and sum up their objectives
-        neighbornet_objective <- 0
-        for (j in seq_len(length(graphing_columns_int) - 1)) {
-            col_a <- graphing_columns_int[j]
-            col_b <- graphing_columns_int[j + 1]
-
-            neighbornet_objective_sub <- determine_crossing_edges(
+        #!!! start of uncharted territory
+        browser()
+        if ((optimize_column_order_per_cycle) || (i == 0)) {
+            neighbornet_objective_output <- determine_crossing_edges(
                 clus_df_gather_neighbornet,
-                column1 = col_a,
-                column2 = col_b,
-                return_weighted_layer_free_objective = TRUE
+                graphing_columns = graphing_columns_int,
+                include_output_objective_matrix_vector = TRUE,
+                return_weighted_layer_free_objective = FALSE
             )
-            neighbornet_objective <- neighbornet_objective + neighbornet_objective_sub
+        } else {
+            swapped_node <- cycle_shifted[length(cycle_shifted)]
+            parts <- strsplit(swapped_node, "_", fixed = TRUE)[[1]]
+            layer_name <- parts[1]
+            node_name <- paste(parts[-1], collapse = "_")
+
+            # determine the int column that matches to this layer_name - because I haven't reordered any columns in clus_df_gather_neighbornet, I should use the order as determined here
+            int_column_int <- match(layer_name, graphing_columns_ordered_according_to_df)
+            int_column <- paste0("col", int_column_int, "_int")
+
+            # find the value in clus_df_gather_neighbornet[[int_column]] that maps to node_name of clus_df_gather_neighbornet[[layer_name]]
+            matched <- clus_df_gather_neighbornet[[int_column]][clus_df_gather_neighbornet[[layer_name]] == node_name]
+            stratum_int_name <- matched[1]
+            stratum_column_and_value_to_keep <- setNames(list(stratum_int_name), as.character(int_column_int))
+
+            neighbornet_objective_output <- determine_crossing_edges(
+                clus_df_gather_neighbornet,
+                graphing_columns = graphing_columns_int,
+                stratum_column_and_value_to_keep = stratum_column_and_value_to_keep,
+                input_objective = neighbornet_objective,
+                input_objective_matrix_vector = objective_matrix_vector,
+                include_output_objective_matrix_vector = TRUE,
+                return_weighted_layer_free_objective = FALSE
+            )
         }
+        objective_matrix_vector <- neighbornet_objective_output$objective_matrix_vector
+        neighbornet_objective <- neighbornet_objective_output$output_objective
+        print(neighbornet_objective)
+        # browser()
+        # neighbornet_objective <- sum(sapply(objective_matrix_vector, sum)) / 2
+        # stopifnot(neighbornet_objective == determine_weighted_layer_free_objective(neighbornet_objective_output$crossing_edges_df))
+        # neighbornet_objective <- determine_weighted_layer_free_objective(neighbornet_objective_output$crossing_edges_df)
+        #!!! end of uncharted territory
+
+
+        # #!!! newly commented out
+        # # go through each adjacent pair of columns and sum up their objectives
+        # neighbornet_objective <- 0
+        # for (j in seq_len(length(graphing_columns_int) - 1)) {
+        #     col_a <- graphing_columns_int[j]
+        #     col_b <- graphing_columns_int[j + 1]
+        #
+        #     if ((optimize_column_order_per_cycle) || (i == 0)) {
+        #         neighbornet_objective_sub_output <- determine_crossing_edges(
+        #             clus_df_gather_neighbornet,
+        #             column1 = col_a,
+        #             column2 = col_b,
+        #             return_weighted_layer_free_objective = FALSE
+        #         )
+        #     } else {
+        #         # get the node that changed from the last cycle
+        #         swapped_node <- cycle[length(cycle)]
+        #         parts <- strsplit(swapped_node, "_", fixed = TRUE)[[1]]
+        #         layer_name <- parts[1]
+        #         node_name <- paste(parts[-1], collapse = "_")
+        #
+        #         # determine the int column that matches to this layer_name - because I haven't reordered any columns in clus_df_gather_neighbornet, I should use the order as determined here
+        #         int_column_int <- match(layer_name, graphing_columns_ordered_according_to_df)
+        #         int_column <- paste0("col", int_column_int, "_int")
+        #
+        #         # find the value in clus_df_gather_neighbornet[[int_column]] that maps to node_name of clus_df_gather_neighbornet[[layer_name]]
+        #         matched <- clus_df_gather_neighbornet[[int_column]][clus_df_gather_neighbornet[[layer_name]] == node_name]
+        #         stopifnot(length(matched) == 1)
+        #         stratum_int_name <- matched[1]
+        #
+        #         objective_matrix <- matrix_vector_for_objectives_between_layer_pairs[j+1]
+        #         neighbornet_objective_sub_output <- determine_crossing_edges(
+        #             clus_df_gather_neighbornet,
+        #             column1 = col_a,
+        #             column2 = col_b,
+        #             ids_to_keep = c(stratum_int_name),
+        #             return_weighted_layer_free_objective = FALSE
+        #         )
+        #     }
+        #     neighbornet_objective_sub <- determine_weighted_layer_free_objective(neighbornet_objective_sub_output$crossing_edges_df)
+        #     matrix_vector_for_objectives_between_layer_pairs <- c(matrix_vector_for_objectives_between_layer_pairs, neighbornet_objective_sub_output$objective_matrix)
+        #     neighbornet_objective <- neighbornet_objective + neighbornet_objective_sub
+        # }
 
         # # swap col_ints
         # clus_df_gather_neighbornet <- swap_columns_in_clus_df_gather(clus_df_gather_neighbornet, graphing_columns_int)
@@ -993,14 +1074,14 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, verbose
 
 
 
-sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_weights = "value", optimize_column_order = TRUE, verbose = FALSE) {
+sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_weights = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, verbose = FALSE) {
     if (!reticulate::py_module_available("splitspy")) {
         stop("Python module 'splitspy' is not available, which is required for the neighbornet algorithm (default). Please run alluvialmatch::setup_python_env().")
     }
     if (verbose) message("Running neighbornet")
     cycle <- run_neighbornet(clus_df_gather, graphing_columns=graphing_columns, column_weights=column_weights, verbose=verbose)
     if (verbose) message("Determining optimal cycle start")
-    res <- determine_optimal_cycle_start(clus_df_gather, cycle, graphing_columns=graphing_columns, column_weights=column_weights, optimize_column_order = optimize_column_order, verbose=verbose)
+    res <- determine_optimal_cycle_start(clus_df_gather, cycle, graphing_columns=graphing_columns, column_weights=column_weights, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle=optimize_column_order_per_cycle, verbose=verbose)
     clus_df_gather_neighbornet <- res$clus_df_gather
     return(clus_df_gather_neighbornet)
 }
@@ -1095,8 +1176,6 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #'
 #' Sorts a dataframe with the algorithm specified by \code{sorting_algorithm}.
 #'
-#' xxxxx
-#'
 #' @param df A data frame, tibble, or CSV file path. Must be in one of two formats:
 #' (1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
 #' (2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).
@@ -1106,6 +1185,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
 #' @param sorting_algorithm Optional character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries.
 #' @param optimize_column_order Optional logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
+#' @param optimize_column_order_per_cycle Optional logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
 #' @param fixed_column Optional Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.
 #' @param random_initializations Optional Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
 #' @param set_seed Optional Integer. Random seed for the \code{random_initializations} parameter. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
@@ -1130,7 +1210,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' }
 #'
 #' @export
-data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, fixed_column = 1, random_initializations = 1, set_seed = 42, output_df_path = NULL, verbose = FALSE, load_df = TRUE) {
+data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, fixed_column = 1, random_initializations = 1, set_seed = 42, output_df_path = NULL, verbose = FALSE, load_df = TRUE) {
     #* Type Checking Start
     valid_algorithms <- c("neighbornet", "greedy_WOLF", "greedy_WBLF", "None")
     if (!(sorting_algorithm %in% valid_algorithms)) {
@@ -1171,7 +1251,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     # browser()
 
     if (sorting_algorithm == "neighbornet") {
-        clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order, verbose = verbose)
+        clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, verbose = verbose)
     } else if (sorting_algorithm == "greedy_WBLF" || sorting_algorithm == "greedy_WOLF") {
         clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, sorting_algorithm = sorting_algorithm, verbose = verbose)
     } else if (sorting_algorithm == "None") {
@@ -1207,6 +1287,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param color_band_boundary Logical. Whether or not to color boundaries between bands
 #' @param sorting_algorithm Character. Must be neighbornet, greedy_WBLF, greedy_WOLF, or None.
 #' @param optimize_column_order Logical. Only used for neighbornet.
+#' @param optimize_column_order_per_cycle Logical. Only used for neighbornet.
 #' @param color_boxes Logical. Whether to color the rectangular strata boxes representing groups.
 #' @param color_bands Logical. Whether to color the alluvial bands connecting the groups.
 #' @param match_colors Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.
@@ -1237,7 +1318,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           match_colors = TRUE, alluvial_alpha = 0.5,
                           include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
                           column_weights = NULL, output_plot_path = NULL, output_df_path = NULL,
-                          set_seed=42, optimize_column_order=TRUE, verbose=FALSE) {
+                          set_seed=42, optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE, verbose=FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -1297,7 +1378,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
 
     # Sort
     if (verbose) message(sprintf("Sorting data with sorting_algorithm=%s", sorting_algorithm))
-    clus_df_gather <- data_sort(df = df, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = sorting_algorithm, optimize_column_order = optimize_column_order, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, output_df_path = output_df_path, load_df = FALSE, verbose = verbose)
+    clus_df_gather <- data_sort(df = df, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = sorting_algorithm, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, output_df_path = output_df_path, load_df = FALSE, verbose = verbose)
     graphing_columns <- graphing_columns[order(match(graphing_columns, names(clus_df_gather)))]  # reorder graphing_columns to match any changed order in data_sort
 
     # Plot

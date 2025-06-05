@@ -49,21 +49,39 @@ determine_weighted_layer_free_objective <- function(crossing_edges_df, verbose =
 }
 
 
-# list(
-#    list(c(l1, r1, e1), c(l2, r2, e2)),
-#    ...
-# )
-#' Determine overlapping edges of graph run through data_sort
+#' Determine overlapping edges
 #'
-#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
-#' @param column1 Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
-#' @param column2 Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}
-#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
-#' @param minimum_edge_weight Optional positive integer that represents the minimum edge weight to count an edge in the calculation.
-#' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
-#' @param return_weighted_layer_free_objective Bool Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
+#' Determine overlapping edges of k-partite graph.
 #'
-#' @return A data frame.
+#' @param df A data frame, tibble, or CSV file path. Must be in one of two formats:
+#' (1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
+#' (2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).
+#' @param graphing_columns Optional character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.
+#' @param column1 Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
+#' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
+#' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
+#' @param minimum_edge_weight Optional positive integer that represents the minimum edge weight to count an edge in the output data frame.
+#' @param output_df_path Optional character. Output path for the output data frame containing crossing edges, in CSV format (see details below). If not provided, then nothing will be saved. Contains the following columns:
+#' @param output_lode_df_path Optional character. Output path for the output data frame containing information on each alluvium, in CSV format (see details below). If not provided, then nothing will be saved.
+#' @param return_weighted_layer_free_objective Optional logical. Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
+#'
+#' @return
+#' If return_weighted_layer_free_objective == FALSE (default): A list of two data frames, in the keys 'crossing_edges_df' and 'lode_df', respectively.
+#' 'crossing_edges_df' contains the following columns:
+#'   - id1: The ID of the first alluvium, corresponding to the 'alluvium' column in \code{lode_df}.
+#'   - id2: The ID of the second alluvium, corresponding to the 'alluvium' column in \code{lode_df}.
+#'   - strat_layer: The region in which the overlap occurred, corresponding to the 'xi' column in \code{lode_df}, where i is an integer 1, 2, ..., length(graphing_columns).
+#'   - weight1: The weight of the first alluvium, corresponding to the 'count' column in \code{lode_df}.
+#'   - weight2: The weight of the second alluvium, corresponding to the 'count' column in \code{lode_df}.
+#' 'lode_df' contains the following columns:
+#'   - alluvium: A specific alluvium/edge.
+#'   - count: The weight of the alluvium/edge.
+#'   - x1, x2, ...: Each xi represents the x position of axis/layer i.
+#'   - y1, y2, ...: Each yi represents the height of a lode in axis/layer i.
+#'   - weight1: The weight of the first alluvium, corresponding to the 'count' column in \code{lode_df}.
+#'   - weight2: The weight of the second alluvium, corresponding to the 'count' column in \code{lode_df}.
+#' If return_weighted_layer_free_objective == TRUE: A nonnegative integer xxxxxxx
+#'
 #'
 #' @examples
 #' \dontrun{
@@ -73,7 +91,7 @@ determine_weighted_layer_free_objective <- function(crossing_edges_df, verbose =
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", minimum_edge_weight = 0, output_df_path = NULL, output_lode_df_path = NULL,  return_weighted_layer_free_objective = FALSE, verbose = FALSE) {
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", output_df_path = NULL, output_lode_df_path = NULL, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, verbose = FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -134,16 +152,45 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     crossing_edges <- list()
     row_index <- 1
 
+    if (is.null(input_objective_matrix_vector)) {
+        output_objective_matrix_vector <- c()
+    } else {
+        output_objective_matrix_vector <- input_objective_matrix_vector
+    }
+
+    if (is.null(input_objective)) {
+        output_objective <- 0
+    } else {
+        output_objective <- input_objective
+    }
+
     # Get unique x values, sorted
     x_vals <- sort(unique(lode_df_long_full$x))
     n_x <- length(x_vals)
 
     if (verbose) message("Beginning loop through layers")
+    # browser()
     for (h in 1:(n_x - 1)) {
         x1 <- h
         x2 <- h + 1
 
+        if (!is.null(stratum_column_and_value_to_keep)) {
+            layer_number <- as.integer(names(stratum_column_and_value_to_keep)[1])  # the layer (eg 3 from stratum3)
+            stratum_number <- stratum_column_and_value_to_keep[[1]]  # the stratum (eg value 28 in column stratum3)
+
+            # even if I have 6 layers, this function will soon filter out all but x1 and x2 - also, if I am doing the whole matrix thing, then I can rest easy that other layers won't matter
+            if (layer_number == x1) {
+                layer_number_in_lode_df <- 1
+            } else if (layer_number == x2) {
+                layer_number_in_lode_df <- 2
+            } else {
+                next
+            }
+        }
+
         lode_df_long <- lode_df_long_full %>% filter(x == x1 | x == x2)
+
+        # browser()
 
         # Sort by alluvium and x to ensure consistent ordering
         if (verbose) message("Filtering, grouping, and widening lode_df")
@@ -166,37 +213,117 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 names_glue = "{.value}{pos}"
             )
 
+        # lode_df$id <- as.integer(lode_df$id)
+
+        # stratum_column_and_value_to_keep could be like list("3" = 28), where 3 is the x/layer number and 28 is the stratum number
+        if (!is.null(stratum_column_and_value_to_keep)) {
+            stratum_column_name <- paste0("stratum", layer_number_in_lode_df)
+            lode_df_filtered_with_stratum_of_interest <- lode_df[lode_df[[stratum_column_name]] == stratum_number, ]
+            lode_df_filtered_with_stratum_of_interest_length <- nrow(lode_df_filtered_with_stratum_of_interest)
+
+            lode_df_filtered_without_stratum_of_interest <- lode_df[lode_df[[stratum_column_name]] != stratum_number, ]
+            lode_df_filtered_without_stratum_of_interest_length <- nrow(lode_df_filtered_without_stratum_of_interest)
+        }
+
         # browser()
 
         lode_df_length <- nrow(lode_df)
 
+        objective_matrix <- NULL
+        if (include_output_objective_matrix_vector) {
+            if (is.null(input_objective_matrix_vector)) {
+                ids <- sort(unique(lode_df$alluvium))
+                # number_alluvia <- length(ids)
+                objective_matrix <- matrix(0, nrow = lode_df_length, ncol = lode_df_length, dimnames = list(as.character(ids), as.character(ids)))
+            } else {
+                # browser()
+                objective_matrix <- input_objective_matrix_vector[[h]]
+            }
+        }
+
         # Compare each pair of edges
         if (verbose) message("Looping through alluvia")
-        for (i in 1:lode_df_length) {
-            for (j in 1:lode_df_length) {
-                # only look at rows where i's stratum is immediately adjacent to left of j's stratum
-                if (i != j) {
-                    if ((lode_df$y1[i] < lode_df$y1[j] && lode_df$y2[i] > lode_df$y2[j]) | (lode_df$y1[i] > lode_df$y1[j] && lode_df$y2[i] < lode_df$y2[j])) {
+        # browser()
+        if (is.null(stratum_column_and_value_to_keep)) {
+            for (i in 1:(lode_df_length - 1)) {
+                for (j in (i + 1):lode_df_length) {
+                    # Check crossing condition once per unordered pair
+                    if ((lode_df$y1[i] - lode_df$y1[j]) * (lode_df$y2[i] - lode_df$y2[j]) < 0) {
+                    # equivalent to below but faster
+                    # if ((lode_df$y1[i] < lode_df$y1[j] && lode_df$y2[i] > lode_df$y2[j]) | (lode_df$y1[i] > lode_df$y1[j] && lode_df$y2[i] < lode_df$y2[j])) {
                         id1 <- lode_df$alluvium[i]
                         id2 <- lode_df$alluvium[j]
-
+                        w1 <- lode_df$count[i]
+                        w2 <- lode_df$count[j]
                         strat_layer <- lode_df$x1[i]  # will be same for i and j
+
                         # stratum1_left <- load_df$stratum1[i]
                         # stratum1_right <- load_df$stratum2[i]  # apologies for the i/j and 1/2 confusion - this is correct though
                         # stratum2_left <- load_df$stratum1[j]
                         # stratum2_right <- load_df$stratum2[j]
-                        w1 <- lode_df$count[i]
-                        w2 <- lode_df$count[j]
 
-                        if (minimum_edge_weight > 0 && (w1 < minimum_edge_weight || w2 < minimum_edge_weight)) {
-                            next
-                        }
 
+                        # # Skip if either below threshold
+                        # if (minimum_edge_weight > 0 && (w1 < minimum_edge_weight || w2 < minimum_edge_weight)) {
+                        #     next
+                        # }
+
+                        # Append (i, j)
                         new_row <- data.frame(id1 = id1, id2 = id2, strat_layer = strat_layer, weight1 = w1, weight2 = w2)
                         crossing_edges[[row_index]] <- new_row
                         row_index <- row_index + 1
+
+                        # Append (j, i)
+                        new_row <- data.frame(id1 = id2, id2 = id1, strat_layer = strat_layer, weight1 = w2, weight2 = w1)
+                        crossing_edges[[row_index]] <- new_row
+                        row_index <- row_index + 1
+
+                        if (include_output_objective_matrix_vector) {
+                            weight_product <- w1 * w2
+                            objective_matrix[id1, id2] <- weight_product
+                            objective_matrix[id2, id1] <- weight_product
+                            output_objective <- output_objective + weight_product
+                        }
                     }
                 }
+            }
+        } else {
+            if (!include_output_objective_matrix_vector) {
+                stop("If stratum_column_and_value_to_keep is not NULL, then include_output_objective_matrix_vector must be provided")
+            }
+            for (i in 1:(lode_df_filtered_with_stratum_of_interest_length)) {
+                for (j in 1:lode_df_filtered_without_stratum_of_interest_length) {
+                    id1 <- lode_df_filtered_with_stratum_of_interest$alluvium[i]
+                    id2 <- lode_df_filtered_without_stratum_of_interest$alluvium[j]
+                    w1 <- lode_df_filtered_with_stratum_of_interest$count[i]
+                    w2 <- lode_df_filtered_without_stratum_of_interest$count[j]
+
+                    if ((lode_df_filtered_with_stratum_of_interest$y1[i] - lode_df_filtered_without_stratum_of_interest$y1[j]) * (lode_df_filtered_with_stratum_of_interest$y2[i] - lode_df_filtered_without_stratum_of_interest$y2[j]) < 0) {
+                        # crosses now, but didn't before (most cases)
+                        if (objective_matrix[id1, id2] == 0) {
+                            weight_product <- w1 * w2
+                            objective_matrix[id1, id2] <- weight_product
+                            objective_matrix[id2, id1] <- weight_product
+                            output_objective <- output_objective + weight_product
+                        }
+                    } else {
+                        # didn't cross before, but crosses now (most cases)
+                        if (objective_matrix[id1, id2] > 0) {
+                            weight_product <- w1 * w2
+                            objective_matrix[id1, id2] <- 0
+                            objective_matrix[id2, id1] <- 0
+                            output_objective <- output_objective - weight_product
+                        }
+                    }
+                }
+            }
+        }
+
+        if (include_output_objective_matrix_vector) {
+            if (is.null(input_objective_matrix_vector)) {
+                output_objective_matrix_vector <- c(output_objective_matrix_vector, list(objective_matrix))
+            } else {
+                output_objective_matrix_vector[[h]] <- objective_matrix
             }
         }
         if (verbose) message(sprintf("Complete with iteration=%s", h))
@@ -219,12 +346,15 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         write.csv(lode_df, file = output_lode_df_path, row.names = FALSE, quote = FALSE)
     }
 
-    WLF_objective <- NULL
     if (return_weighted_layer_free_objective) {
-        if (verbose) message("Calculating WLF objective")
-        WLF_objective <- determine_weighted_layer_free_objective(crossing_edges_df)
-        return(WLF_objective)
+        # if (verbose) message("Calculating WLF objective")
+        # output_objective <- determine_weighted_layer_free_objective(crossing_edges_df)  # already determined now during loop
+        return(output_objective)
     }
 
-    return(list(crossing_edges_df = crossing_edges_df, lode_df = lode_df))
+    if (isTRUE(include_output_objective_matrix_vector)) {
+        return(list(crossing_edges_df = crossing_edges_df, lode_df = lode_df, output_objective = output_objective, objective_matrix_vector = output_objective_matrix_vector))
+    } else {
+        return(list(crossing_edges_df = crossing_edges_df, lode_df = lode_df, output_objective = output_objective))
+    }
 }
