@@ -65,8 +65,6 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
-# best: "cluster_6" "tissue_1"  "cluster_7" "tissue_2"  "tissue_5"  "cluster_8" "tissue_4"  "tissue_3" 
-devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order_per_cycle = FALSE)
 ```
 
@@ -101,11 +99,50 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
+devtools::load_all()
+clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
+data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
+clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
+graphing_columns_reordered <- data_sort_output$graphing_columns
+out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = graphing_columns_reordered, column_weights = "value", return_weighted_layer_free_objective = FALSE)
+print(out$output_objective)
+# print(out$crossing_edges_df)
+
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=TRUE)
 ```
 
 ```{r}
 devtools::load_all()
+clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
+data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
+clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
+graphing_columns_reordered <- data_sort_output$graphing_columns
+out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = graphing_columns_reordered, column_weights = "value", return_weighted_layer_free_objective = FALSE)
+print(out$output_objective)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=TRUE)
+```
+
+
+```{r}
+devtools::load_all()
+clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
+data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
+clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
+graphing_columns_reordered <- data_sort_output$graphing_columns
+out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = graphing_columns_reordered, column_weights = "value", return_weighted_layer_free_objective = FALSE)
+print(out$output_objective)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=TRUE)
+```
+
+
+```{r}
+clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
+clus_df_gather_tmp_sorted <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE)
+graphing_columns_reordered <- graphing_columns[order(match(graphing_columns, names(clus_df_gather_tmp_sorted)))]
+determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = graphing_columns_reordered, column_weights = "value", return_weighted_layer_free_objective = TRUE)
+
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=TRUE)
 ```
 
