@@ -497,8 +497,8 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
 }
 
 
-find_group2_colors <- function(clus_df_gather, ditto_colors,
-                               group1_name = 'col1_int', group2_name = 'col2_int') {
+find_group2_colors <- function(clus_df_gather, ditto_colors,unused_colors, current_g1_colors,
+                               group1_name = 'col1_int', group2_name = 'col2_int', group2_colors=NULL) {
     clus_df_filtered <- clus_df_gather[, c(group1_name, group2_name, "value")]
 
     clus_df_filtered[[group1_name]] <- paste0("G1_", clus_df_filtered[[group1_name]])
@@ -525,222 +525,43 @@ find_group2_colors <- function(clus_df_gather, ditto_colors,
     g2_indices <- as.numeric(sub("G2_", "", g1_to_g2_pairs))
 
     # Initialize the new colors vector
-    group2_colors <- vector("character", number_group2_clusters)
+    if (is.null(group2_colors)) {
+        group2_colors <- vector("character", number_group2_clusters)
+    }
 
     # Assign colors based on the matching
-    for (i in seq_along(g1_indices)) {
-        # Check if the C index is within the bounds of ditto_colors
-        if (g2_indices[i] <= length(ditto_colors)) {
-            group2_colors[g2_indices[i]] <- ditto_colors[g1_indices[i]]
-        }
+    for (i in g1_indices) {
+        g2_indice <-  as.integer(sub("G2_", "", g1_to_g2_pairs[paste0('G1_',i)]))
+        group2_colors[g2_indice] <- current_g1_colors[names(current_g1_colors) == i]
     }
 
-    remaining_colors <- ditto_colors[number_group1_clusters+1:length(ditto_colors)]
+    remaining_colors <- unused_colors
+    
+    num_remaining_group2 <- length(which(group2_colors %in% c('')))
 
-    # logic: take parents color if fraction > .5
-    for (i in which(group2_colors %in% c(''))){
-        current_g2 <-  paste0("G2_", i)
-
-        test <- clus_df_filtered[, c(group1_name, group2_name, "value")]
-        test2 <- test[test[[group2_name]] == current_g2,]
-
-        potential_g1 = test2[[group1_name]]
-
-        if (length(unique(potential_g1)) > 1) {
-            test2[['fraction']] <- test2['value']/sum(test2['value'])
-            if (sum(test2[['fraction']] > .1) > 3) {
-                group2_colors[i] <- remaining_colors[1]
-                remaining_colors <- remaining_colors[2:length(remaining_colors)]
-            } else if (max(test2[['fraction']]) > .5) {
-                test3 <- test2[test2[['fraction']]==max(test2[['fraction']]),]
-                potential_g1 = test3[[group1_name]]
-                group2_colors[i] = ditto_colors[as.numeric(sub("G1_", "", unique(potential_g1)))]
-            } else {
-                group2_colors[i] <- remaining_colors[1]
-                remaining_colors <- remaining_colors[2:length(remaining_colors)]
-            }
-        } else{
-            group2_colors[i] = ditto_colors[as.numeric(sub("G1_", "", unique(potential_g1)))]
-        }
-
-
-    }
-    return (group2_colors)
-}
-
-plot_alluvial_internal_2col <- function(clus_df_gather,
-                                        sorting_algorithm = NULL,
-                                        group1_name = "A", group2_name = "B", fixed_column=NULL,
-                                        color_list = NULL, color_boxes = TRUE,
-                                        color_bands = FALSE, color_band_list = NULL,
-                                        color_band_column=NULL, color_band_boundary=FALSE,
-                                        alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
-                                        include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
-                                        include_group_sizes = FALSE, verbose = FALSE
-) {
-    if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather))) > 0) {
-        clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
-    }
-
-    if (!is.null(color_list)){
-        ditto_colors <- color_list
+    if (num_remaining_group2==0){
+        return (group2_colors)
     } else{
-        ditto_colors <- default_colors
-    }
-    num_levels_group1 <- length(levels(clus_df_gather[[group1_name]]))
-    num_levels_group2 <- length(levels(clus_df_gather[[group2_name]]))
-
-
-    # Extract colors for each factor, assuming ditto_colors is long enough
-    if (match_colors) {
-        if (is.null(fixed_column) | fixed_column == 'col1_int') {
-            colors_group1 <- ditto_colors[1:num_levels_group1]
-            colors_group2 <- find_group2_colors(clus_df_gather, ditto_colors)
-
-        } else {
-            colors_group2 <- ditto_colors[1:num_levels_group2]
-            colors_group1 <- find_group2_colors(clus_df_gather, ditto_colors,
-                                                group1_name = 'col2_int', group2_name = 'col1_int')
-        }
-    } else {
-        colors_group1 <- ditto_colors[1:num_levels_group1]
-        colors_group2 <- ditto_colors[(num_levels_group1+1):(num_levels_group1+num_levels_group2)]
-    }
-
-    colors_group1_reverse <- rev(colors_group1)
-    colors_group2_reverse <- rev(colors_group2)
-
-    # Combine the colors
-    combined_colors_reverse <- c(colors_group1_reverse, colors_group2_reverse)
-    remaining_colors <- ditto_colors[!(ditto_colors %in% combined_colors_reverse)]
-
-    temp_df <- clus_df_gather[1:as.integer(dim(clus_df_gather)[1]/2),1:dim(clus_df_gather)[2]]
-    # uncomment to attempt mapping
-    p <- ggplot(data = temp_df, aes(axis1 = !!sym('col1_int'),
-                                    axis2 = !!sym('col2_int'), y = value),
-    )
-
-    if (color_bands) {
-        if (!is.null(color_band_column)) {
-            if (is.null(color_band_list)) {
-                color_band_list <- remaining_colors
-            }
-            if (color_band_boundary){
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym(color_band_column), color=!!sym(color_band_column)),
-                                  alpha = alluvial_alpha) +
-                    scale_fill_manual(values = color_band_list) + scale_color_manual(values = color_band_list)+
-                    labs(fill = NULL)+guides(fill='none')
-
-            } else{
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym(color_band_column)), alpha = alluvial_alpha) +
-                    scale_fill_manual(values = color_band_list) +
-                    labs(fill = NULL)+guides(fill='none')
-            }
-        } else if (fixed_column == 'col1_int') {
-            if (color_band_boundary){
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym('col1_int'), color = !!sym('col1_int')), alpha = alluvial_alpha) +
-                    scale_fill_manual(values = colors_group1) + scale_color_manual(values = colors_group1)+
-                    labs(fill = NULL)+guides(fill='none')
-            } else{
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym('col1_int')), alpha = alluvial_alpha) +
-                    scale_fill_manual(values = colors_group1) +
-                    labs(fill = NULL)+guides(fill='none')
+        if ((length(remaining_colors)==0) | (length(remaining_colors) < num_remaining_group2)){
+            smaller_clus_df_filtered <- clus_df_gather[!(clus_df_filtered[[group2_name]] %in% g1_to_g2_pairs),]
+            smaller_clus_df_filtered[[group2_name]] <- as.integer(droplevels(as.factor(smaller_clus_df_filtered[[group2_name]])))
+            sub_group2_colors <- find_group2_colors(smaller_clus_df_filtered, ditto_colors,remaining_colors,current_g1_colors,
+                                                    group1_name, group2_name)
+            for (i in which(group2_colors %in% c(''))) {
+                group2_colors[i] <- sub_group2_colors[1]
+                sub_group2_colors <- sub_group2_colors[2:length(sub_group2_colors)]
             }
         } else {
-            if (color_band_boundary){
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym('col2_int'), color=!!sym('col2_int')), alpha = alluvial_alpha) +
-                    scale_fill_manual(values = colors_group2) + scale_color_manual(values = colors_group2)+
-                    labs(fill = NULL)
-            } else{
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym('col2_int')), alpha = alluvial_alpha) +
-                    scale_fill_manual(values = colors_group2) +
-                    labs(fill = NULL)
+            for (i in which(group2_colors %in% c(''))) {
+                group2_colors[i] <- remaining_colors[1]
+                remaining_colors <- remaining_colors[2:length(remaining_colors)]
             }
-        }
-    } else {
-        if (color_band_boundary){
-            p <- p + geom_alluvium(color='grey2',alpha = alluvial_alpha)
-        } else{
-            p <- p + geom_alluvium(alpha = alluvial_alpha)
-        }
+            }
+        return(group2_colors)
     }
-
-    if (color_boxes) {
-        p <- p + geom_stratum(fill = combined_colors_reverse,
-        )
-    } else {
-        p <- p + geom_stratum()
-    }
-
-    if (!(include_labels_in_boxes==FALSE)) {
-        A_label_names <- as.character(unique(clus_df_gather[order(clus_df_gather$col1_int),][[group1_name]]))
-        B_label_names <- as.character(unique(clus_df_gather[order(clus_df_gather$col2_int),][[group2_name]]))
-
-        final_label_names <- c(rev(A_label_names), rev(B_label_names))
-        p <- p +
-            geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))
-    }
-
-    top_y1 <- clus_df_gather %>%
-        filter(x == 1) %>%
-        group_by(y) %>%
-        summarise(total = sum(value), .groups = "drop") %>%
-        arrange(desc(total)) %>%
-        mutate(cum_y = cumsum(total)) %>%
-        pull(cum_y) %>%
-        max()
-
-    top_y2 <- clus_df_gather %>%
-        filter(x == 2) %>%
-        group_by(y) %>%
-        summarise(total = sum(value), .groups = "drop") %>%
-        arrange(desc(total)) %>%
-        mutate(cum_y = cumsum(total)) %>%
-        pull(cum_y) %>%
-        max()
-
-    top_y <- max(top_y1/2, top_y2/2)  # top_y1 and top_y2 are probably the same
-
-    if (include_axis_titles) {
-        # Offset to place labels a bit above
-        offset <- 1.1 * top_y
-
-        p <- p +
-            annotate("text", x = 1, y = top_y + offset, label = group1_name, size = 5, hjust = 0.5) +
-            annotate("text", x = 2, y = top_y + offset, label = group2_name, size = 5, hjust = 0.5)
-    }
-
-    if (include_group_sizes) {
-        offset_below <- top_y * 0.075
-
-        p <- p +
-            annotate("text", x = 1, y = -offset_below, label = num_levels_group1, hjust = 0.5, size = 5) + # Adjust x, y for Seurat
-            annotate("text", x = 2, y = -offset_below, label = num_levels_group2, hjust = 0.5, size = 5) # Adjust x, y for Scanpy
-    }
-
-    p <- p +
-        theme_void() +
-        theme(
-            text = element_text(family = "sans"),
-            legend.text = element_text(size = rel(axis_text_size))
-        )
-
-    p <- p + theme(legend.position = "none")  # to hide legend
-
-    if (!is.null(output_plot_path)) {
-        ggsave(output_plot_path, plot = p, dpi = 300, bg = "white")
-    }
-
-    return(p)
 }
 
-plot_alluvial_internal_multicol <- function(clus_df_gather,graphing_columns,
+plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
                                             sorting_algorithm = NULL,fixed_column=NULL,
                                             color_list = NULL, color_boxes = TRUE,
                                             color_bands = FALSE, color_band_list = NULL,
@@ -749,10 +570,9 @@ plot_alluvial_internal_multicol <- function(clus_df_gather,graphing_columns,
                                             include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
                                             include_group_sizes = FALSE, verbose = FALSE
 ) {
-    if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather))) > 0) {
-        clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
-    }
-
+    clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
+    clus_df_gather <- clus_df_gather[clus_df_gather$x == 1,]
+    
     if (!is.null(color_list)){
         ditto_colors <- color_list
     } else{
@@ -761,20 +581,24 @@ plot_alluvial_internal_multicol <- function(clus_df_gather,graphing_columns,
 
     # Extract colors for each factor, assuming ditto_colors is long enough
     if (match_colors) {
-        remaining_colors <- ditto_colors
+        unused_colors <- ditto_colors
         first <- TRUE
         final_colors <- c()
         n <- 1
         for (col_group in graphing_columns) {
             num_levels <- length(levels(clus_df_gather[[col_group]]))
             if (first) {
-                old_colors <- remaining_colors[1:num_levels]
+                old_colors <- unused_colors[1:num_levels]
+                names(old_colors) <- 1:num_levels
+                unused_colors <- unused_colors[!(unused_colors %in% old_colors)]
                 final_colors <- c(final_colors, rev(old_colors))
+                first <- FALSE
             } else {
-                temp_colors <- find_group2_colors(clus_df_gather, remaining_colors,
-                                                  group_1_name = paste0('col',n-1,'_int'), group_2_name = paste0('col',n,'_int'))
-                remaining_colors <- remaining_colors[1:length(old_colors)]
+                temp_colors <- find_group2_colors(clus_df_gather, ditto_colors,unused_colors,old_colors,
+                                                  group1_name = paste0('col',n-1,'_int'), group2_name = paste0('col',n,'_int'))
+                unused_colors <- unused_colors[!(unused_colors %in% old_colors)]
                 old_colors <- temp_colors
+                names(old_colors) <- 1:num_levels
                 final_colors <- c(final_colors, rev(old_colors))
 
             }
@@ -794,7 +618,7 @@ plot_alluvial_internal_multicol <- function(clus_df_gather,graphing_columns,
     remaining_colors <- ditto_colors[!(ditto_colors %in% final_colors)]
 
     # remove duplicate dims
-    temp_df <- clus_df_gather[1:as.integer(dim(clus_df_gather)[1]/2),1:dim(clus_df_gather)[2]]
+    temp_df <- clus_df_gather#[1:as.integer(dim(clus_df_gather)[1]/2),1:dim(clus_df_gather)[2]]
 
     # uncomment to attempt mapping
     p <- ggplot(data = temp_df, aes(y = value),
@@ -1233,7 +1057,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 
     # Preprocess (i.e., add int columns and do the grouping)
     if (verbose) message("Preprocessing data before sorting")
-    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = load_df, do_gather_set_data = FALSE)
+    temp_df <- df %>% dplyr::relocate(all_of(graphing_columns))
+    clus_df_gather <- data_preprocess(df = temp_df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = load_df, do_gather_set_data = FALSE)
     if (is.null(column_weights)) {
         column_weights <- "value"  # is set during data_preprocess
     }
@@ -1377,18 +1202,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
 
     # Plot
     if (verbose) message("Plotting data")
-    # alluvial_plot <- plot_alluvial_internal()
-    if (length(graphing_columns) == 2) {
-        alluvial_plot <- plot_alluvial_internal_2col(clus_df_gather, group1_name = column1, group2_name = column2, fixed_column = fixed_column,
-                                                     color_list = color_list, color_boxes = color_boxes,
-                                                     color_bands = color_bands, color_band_list = color_band_list,
-                                                     color_band_column=color_band_column, color_band_boundary=color_band_boundary,
-                                                     match_colors = match_colors, alluvial_alpha = alluvial_alpha,
-                                                     include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
-                                                     include_group_sizes = include_group_sizes,
-                                                     output_plot_path = output_plot_path, verbose = verbose)
-    } else {
-        alluvial_plot <- plot_alluvial_internal_multicol(clus_df_gather, graphing_columns=graphing_columns, fixed_column = fixed_column,
+    alluvial_plot <- plot_alluvial_internal(clus_df_gather, graphing_columns=graphing_columns, fixed_column = fixed_column,
                                                          color_list = color_list, color_boxes = color_boxes,
                                                          color_bands = color_bands, color_band_list = color_band_list,
                                                          color_band_column=color_band_column, color_band_boundary=color_band_boundary,
@@ -1396,9 +1210,6 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                                                          include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
                                                          include_group_sizes = include_group_sizes,
                                                          output_plot_path = output_plot_path, verbose = verbose)
-    }
 
     return(alluvial_plot)
 }
-
-
