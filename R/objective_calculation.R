@@ -222,7 +222,6 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     }
 
     if (verbose) message("Beginning loop through layers")
-    # browser()
     for (h in 1:(n_x - 1)) {
         x1 <- h
         x2 <- h + 1
@@ -278,15 +277,12 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         # stratum_column_and_value_to_keep could be like list("3" = 28), where 3 is the x/layer number and 28 is the stratum number
         if (!is.null(stratum_column_and_value_to_keep)) {
             # stratum_column_name <- paste0("stratum", layer_number_in_lode_df)
-            # browser()
             lode_df_filtered_with_stratum_of_interest <- lode_df[lode_df$alluvium %in% alluvium_values_in_stratum_to_keep, ]
             lode_df_filtered_with_stratum_of_interest_length <- nrow(lode_df_filtered_with_stratum_of_interest)
 
             lode_df_filtered_without_stratum_of_interest <- lode_df[!lode_df$alluvium %in% alluvium_values_in_stratum_to_keep, ]
             lode_df_filtered_without_stratum_of_interest_length <- nrow(lode_df_filtered_without_stratum_of_interest)
         }
-
-        # browser()
 
         lode_df_length <- nrow(lode_df)
 
@@ -297,17 +293,14 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 # number_alluvia <- length(ids)
                 objective_matrix <- matrix(0, nrow = lode_df_length, ncol = lode_df_length, dimnames = list(as.character(ids), as.character(ids)))
             } else {
-                # browser()
                 objective_matrix <- input_objective_matrix_vector[[h]]
             }
         }
 
         # Compare each pair of edges
         if (verbose) message("Looping through alluvia")
-        # browser()
         if (is.null(stratum_column_and_value_to_keep)) {
             for (i in 1:(lode_df_length - 1)) {
-                # browser()
                 for (j in (i + 1):lode_df_length) {
                     # Check crossing condition once per unordered pair
                     if ((lode_df$y1[i] - lode_df$y1[j]) * (lode_df$y2[i] - lode_df$y2[j]) < 0) {
@@ -413,7 +406,6 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     }
 
     # only do this if I'm not in my neighbornet loop
-    # browser()
     if (is.null(stratum_column_and_value_to_keep)) {
         crossing_edges_df <- crossing_edges_df %>%
             left_join(

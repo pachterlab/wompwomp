@@ -109,6 +109,7 @@ print(out$output_objective)
 # print(out$crossing_edges_df)
 
 # graph what I did above
+devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=TRUE)
 ```
 
@@ -118,7 +119,7 @@ data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_co
 clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
 graphing_columns_reordered <- data_sort_output$graphing_columns
 out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = graphing_columns_reordered, column_weights = "value", return_weighted_layer_free_objective = FALSE)
-print(out$output_objective)
+# print(out$output_objective)
 # print(out$crossing_edges_df)
 
 # graph what I did above
@@ -148,6 +149,7 @@ print(out$output_objective)
 #         "weight1", "weight2")])
 
 # graph what I did above
+devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=TRUE)
 ```
 
