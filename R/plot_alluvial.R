@@ -370,7 +370,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         objective_matrix_vector <- neighbornet_objective_output$objective_matrix_vector
         neighbornet_objective <- neighbornet_objective_output$output_objective
 
-        print(neighbornet_objective)
+        # print(neighbornet_objective)
         if (neighbornet_objective < neighbornet_objective_minimum) {
 
             neighbornet_objective_minimum <- neighbornet_objective
