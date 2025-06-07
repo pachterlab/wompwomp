@@ -65,7 +65,6 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
-devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order_per_cycle = FALSE)
 ```
 
@@ -91,7 +90,7 @@ df <- data.frame(
     "female", "male", "female", "female", "male", "female",
     "male", "female", "male", "female", "male", "female", "male",
     "female", "male",
-    "male", "male", "male", "male", "male", "male", "male", "male", "male"
+    "female", "male", "female", "male", "female", "male", "female", "female", "male"
   )
 )
 graphing_columns <- c("tissue", "cluster", "sex")
@@ -100,6 +99,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
+devtools::load_all()
 clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
 data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
 clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
@@ -108,25 +108,11 @@ out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = gr
 print(out$output_objective)
 # print(out$crossing_edges_df)
 
-# graph what I did above
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=TRUE)
 ```
 
 ```{r}
-clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
-data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
-clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
-graphing_columns_reordered <- data_sort_output$graphing_columns
-out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = graphing_columns_reordered, column_weights = "value", return_weighted_layer_free_objective = FALSE)
-print(out$output_objective)
-# print(out$crossing_edges_df)
-
-# graph what I did above
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=FALSE)
-```
-
-
-```{r}
+devtools::load_all()
 clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
 data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
 clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
@@ -135,19 +121,18 @@ out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = gr
 print(out$output_objective)
 # print(out$crossing_edges_df)
 
-# print(out$crossing_edges_df[out$crossing_edges_df$strat_layer == 1,
-#       c("alluvium1", "alluvium2", "strat_layer",
-#         "stratum1_char1", "stratum2_char1",
-#         "stratum1_char2", "stratum2_char2",
+# print(out$crossing_edges_df[out$crossing_edges_df$strat_layer == 1, 
+#       c("alluvium1", "alluvium2", "strat_layer", 
+#         "stratum1_char1", "stratum2_char1", 
+#         "stratum1_char2", "stratum2_char2", 
 #         "weight1", "weight2")])
 
-# print(out$crossing_edges_df[out$crossing_edges_df$strat_layer == 2,
-#       c("alluvium1", "alluvium2", "strat_layer",
-#         "stratum2_char1", "stratum3_char1",
-#         "stratum2_char2", "stratum3_char2",
+# print(out$crossing_edges_df[out$crossing_edges_df$strat_layer == 2, 
+#       c("alluvium1", "alluvium2", "strat_layer", 
+#         "stratum2_char1", "stratum3_char1", 
+#         "stratum2_char2", "stratum3_char2", 
 #         "weight1", "weight2")])
 
-# graph what I did above
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=TRUE)
 ```
 
@@ -200,7 +185,7 @@ Let's do an even more extreme example
 ```{r}
 df <- data.frame(
   tissue = c("BRAIN", "STOMACH"),
-  cluster = c(2, 1)
+  cluster = c("BRAIN", "STOMACH")
 )
 graphing_columns <- c("tissue", "cluster")
 

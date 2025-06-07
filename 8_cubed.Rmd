@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 ```{r}
 devtools::load_all()
 # library(alluvialmatch)
@@ -28,16 +33,9 @@ clus_df_gather
 ```
 
 ```{r}
-graphing_columns_summed <- c("Gene", "individual", "Sex", "Genotype", "Tissue")
-clus_df_gather_summed <- clus_df_gather %>%
-  dplyr::group_by(Gene, individual, Sex, Genotype, Tissue) %>%
-  dplyr::summarise(value = sum(value), .groups = "drop")
-print(nrow(clus_df_gather_summed))
-```
+unsorted_objective <- determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", return_weighted_layer_free_objective = TRUE)
+print(unsorted_objective)
 
-
-
-```{r}
 p_unsorted <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "None", color_bands=TRUE)
 p_unsorted
 ```
@@ -47,8 +45,7 @@ optimize_column_order <- FALSE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-devtools::load_all()
-p_sorted_fixed_columns <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, color_bands=TRUE, verbose=TRUE)
+p_sorted_fixed_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE)
 print(Sys.time())
 
 p_sorted_fixed_columns
@@ -56,9 +53,10 @@ p_sorted_fixed_columns
 
 ```{r}
 optimize_column_order <- TRUE
+optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_optimized_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, color_bands=TRUE)
+p_sorted_optimized_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE)
 print(Sys.time())
 
 p_sorted_optimized_columns
@@ -66,3 +64,42 @@ p_sorted_optimized_columns
 
 
 
+Now remove the last column
+```{r}
+graphing_columns_summed <- c("Gene", "individual", "Sex", "Genotype", "Tissue")
+clus_df_gather_summed <- clus_df_gather %>%
+  dplyr::group_by(Gene, individual, Sex, Genotype, Tissue) %>%
+  dplyr::summarise(value = sum(value), .groups = "drop")
+print(nrow(clus_df_gather_summed))
+```
+
+```{r}
+clus_df_gather_summed_processed <- data_preprocess(df = clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", load_df = FALSE, do_gather_set_data = FALSE)
+unsorted_objective_trimmed <- determine_crossing_edges(clus_df_gather_summed_processed, graphing_columns = graphing_columns_summed, column_weights = "value", return_weighted_layer_free_objective = TRUE)
+print(unsorted_objective_trimmed)
+
+p_unsorted_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "None", color_bands=TRUE)
+p_unsorted_trimmed
+```
+
+```{r}
+optimize_column_order <- FALSE
+optimize_column_order_per_cycle <- FALSE
+
+print(Sys.time())
+p_sorted_fixed_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, verbose=TRUE)
+print(Sys.time())
+
+p_sorted_fixed_columns_trimmed
+```
+
+```{r}
+optimize_column_order <- TRUE
+optimize_column_order_per_cycle <- FALSE
+
+print(Sys.time())
+p_sorted_optimized_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, verbose=TRUE)
+print(Sys.time())
+
+p_sorted_optimized_columns_trimmed
+```

@@ -95,14 +95,16 @@ determine_weighted_layer_free_objective <- function(crossing_edges_df, verbose =
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL) {
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
     }
 
-    # df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights) #!!!!!!!!!
+    if (load_df) {
+        df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
+    }
 
     if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
         stop("Some graphing_columns are not present in the dataframe.")
@@ -140,8 +142,11 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     # if (!is.factor(df[[column2]])) df[[column2]] <- factor(df[[column2]])
 
     if (verbose) message("Preprocessing data")
-    # clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, do_gather_set_data = FALSE)  #!!!!!!!!!
-    clus_df_gather <- df  #!!!!!!!!!
+    if (preprocess_data) {
+        clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, do_gather_set_data = FALSE)
+    } else {
+        clus_df_gather <- df
+    }
 
     p <- ggplot(data = clus_df_gather, aes(y = value),
     )
@@ -150,7 +155,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         if (!(int_col %in% colnames(clus_df_gather))) {
             stop(sprintf("%s not in columns. Please run data_preprocess first.", int_col))
         }
-        p$mapping[[paste0('axis',x)]] = sym(paste0('col', x,'_int'))
+        p$mapping[[paste0('axis',x)]] = sym(int_col)
     }
     p <- p + stat_alluvium(geom = "blank")
 
