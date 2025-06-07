@@ -2,7 +2,7 @@
 % Please edit documentation in R/objective_calculation.R
 \name{determine_crossing_edges}
 \alias{determine_crossing_edges}
-\title{Determine overlapping edges of graph run through data_sort}
+\title{Determine overlapping edges}
 \usage{
 determine_crossing_edges(
   df,
@@ -10,33 +10,71 @@ determine_crossing_edges(
   column1 = NULL,
   column2 = NULL,
   column_weights = "value",
-  minimum_edge_weight = 0,
   output_df_path = NULL,
   output_lode_df_path = NULL,
+  include_output_objective_matrix_vector = FALSE,
   return_weighted_layer_free_objective = FALSE,
-  verbose = FALSE
+  verbose = FALSE,
+  stratum_column_and_value_to_keep = NULL,
+  input_objective_matrix_vector = NULL,
+  input_objective = NULL,
+  preprocess_data = TRUE,
+  load_df = TRUE
 )
 }
 \arguments{
-\item{df}{A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).}
+\item{df}{A data frame, tibble, or CSV file path. Must be in one of two formats:
+(1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
+(2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).}
 
-\item{column1}{Character. Name of the first column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
+\item{graphing_columns}{Optional character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.}
 
-\item{column2}{Character. Name of the second column to plot. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}}
+\item{column1}{Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.}
 
-\item{column_weights}{Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.}
+\item{column2}{Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.}
 
-\item{minimum_edge_weight}{Optional positive integer that represents the minimum edge weight to count an edge in the calculation.}
+\item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
 
-\item{output_df_path}{Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.}
+\item{output_df_path}{Optional character. Output path for the data frame containing crossing edges, in CSV format (see details below). If not provided, then nothing will be saved.}
 
-\item{return_weighted_layer_free_objective}{Bool Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)}
+\item{output_lode_df_path}{Optional character. Output path for the data frame containing lode information on each alluvium, in CSV format (see details below). If not provided, then nothing will be saved.}
+
+\item{include_output_objective_matrix_vector}{Logical. Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.}
+
+\item{return_weighted_layer_free_objective}{Logical. Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)}
+
+\item{verbose}{Logical. If TRUE, will display messages during the function.}
+
+\item{stratum_column_and_value_to_keep}{Internal flag; not recommended to modify.}
+
+\item{input_objective_matrix_vector}{Internal flag; not recommended to modify.}
+
+\item{input_objective}{Internal flag; not recommended to modify.}
 }
 \value{
-A data frame.
+If return_weighted_layer_free_objective is FALSE (default): A list of values, as follows:
+'crossing_edges_df': A data frame containing the following columns:
+\itemize{
+\item alluvium1: The ID of the first alluvium, corresponding to the 'alluvium' column in \code{lode_df}.
+\item alluvium2: The ID of the second alluvium, corresponding to the 'alluvium' column in \code{lode_df}.
+\item strat_layer: The region in which the overlap occurred, corresponding to the 'xi' column in \code{lode_df}, where i is an integer 1, 2, ..., length(graphing_columns).
+\item weight1: The weight of the first alluvium, corresponding to the 'count' column in \code{lode_df}.
+\item weight2: The weight of the second alluvium, corresponding to the 'count' column in \code{lode_df}.
+'lode_df': A data frame containing the following columns:
+\item alluvium: A specific alluvium/edge.
+\item count: The weight of the alluvium/edge.
+\item x1, x2, ...: Each xi represents the x position of axis/layer i.
+\item y1, y2, ...: Each yi represents the height of a lode in axis/layer i.
+\item stratum1, stratum2, ...: Each stratumi represents the stratum through which the alluvial crosses in axis/layer i.
+\item weight1: The weight of the first alluvium, corresponding to the 'count' column in \code{lode_df}.
+\item weight2: The weight of the second alluvium, corresponding to the 'count' column in \code{lode_df}.
+'output_objective': An integer representing the sum of products of overlapping edge weights.
+'objective_matrix_vector' (if and only if \code{include_output_objective_matrix_vector} is TRUE): A vector of square symmetric matrices. Each matrix in index h of the vector has rank equal to the number of alluvia present, where entry (i,j) represents the product of edge weights between alluvium i and alluvium j between layers h and h+1 (where the first layer has h=1).
+If return_weighted_layer_free_objective is TRUE: An integer representing the sum of products of overlapping edge weights.
+}
 }
 \description{
-Determine overlapping edges of graph run through data_sort
+Determine overlapping edges of k-partite graph.
 }
 \examples{
 \dontrun{

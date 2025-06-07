@@ -185,7 +185,7 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
 
     # Call Python function
     # result <- nn_mod$neighbor_net(labels, mat_list)
-    if (verbose) message("Running neighbornet for node order")
+    if (verbose) message("Running neighbornet for stratum order")
     reticulate::source_python(file.path(here::here(), "scripts", "run_neighbornet.py"))
     result <- neighbor_net(labels, mat)
     cycle <- result[[1]]
@@ -536,7 +536,7 @@ find_group2_colors <- function(clus_df_gather, ditto_colors,unused_colors, curre
     }
 
     remaining_colors <- unused_colors
-    
+
     num_remaining_group2 <- length(which(group2_colors %in% c('')))
 
     if (num_remaining_group2==0){
@@ -572,7 +572,7 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
 ) {
     clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
     clus_df_gather <- clus_df_gather[clus_df_gather$x == 1,]
-    
+
     if (!is.null(color_list)){
         ditto_colors <- color_list
     } else{
@@ -869,6 +869,7 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, verbose
     df <- add_int_columns(df, graphing_columns = graphing_columns)
 
     # sort columns according to graphing_columns
+    # df <- df %>% dplyr::relocate(all_of(graphing_columns))  # put graphing_columns in front
     if (!all(intersect(colnames(df), graphing_columns) == graphing_columns)) {
         df <- reorder_and_rename_columns(df, graphing_columns)
     }
@@ -994,13 +995,14 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @param column1 Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
-#' @param sorting_algorithm Optional character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries.
+#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries.
 #' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
 #' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
-#' @param fixed_column Optional Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.
+#' @param fixed_column Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.
 #' @param random_initializations Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
 #' @param set_seed Integer. Random seed for the \code{random_initializations} parameter. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
-#' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If not provided, then nothing will be saved.
+#' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
+#' @param preprocess_data Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.
 #' @param return_updated_graphing_columns Logical. If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param load_df Internal flag; not recommended to modify.
@@ -1021,10 +1023,9 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #'     dplyr::group_by_all() |>
 #'     dplyr::count(name = "value")
 #' clus_df_gather <- data_sort(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
-#' }
 #'
 #' @export
-data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, fixed_column = 1, random_initializations = 1, set_seed = 42, output_df_path = NULL, return_updated_graphing_columns = FALSE, verbose = FALSE, load_df = TRUE) {
+data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, fixed_column = 1, random_initializations = 1, set_seed = 42, output_df_path = NULL, preprocess_data = TRUE, return_updated_graphing_columns = FALSE, verbose = FALSE, load_df = TRUE) {
     #* Type Checking Start
     valid_algorithms <- c("neighbornet", "greedy_WOLF", "greedy_WBLF", "None")
     if (!(sorting_algorithm %in% valid_algorithms)) {
@@ -1056,11 +1057,14 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     #* Type Checking End
 
     # Preprocess (i.e., add int columns and do the grouping)
-    if (verbose) message("Preprocessing data before sorting")
-    temp_df <- df %>% dplyr::relocate(all_of(graphing_columns))
-    clus_df_gather <- data_preprocess(df = temp_df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = load_df, do_gather_set_data = FALSE)
-    if (is.null(column_weights)) {
-        column_weights <- "value"  # is set during data_preprocess
+    if (preprocess_data) {
+        if (verbose) message("Preprocessing data before sorting")
+        clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = load_df, do_gather_set_data = FALSE)
+        if (is.null(column_weights)) {
+            column_weights <- "value"  # is set during data_preprocess
+        }
+    } else {
+        clus_df_gather <- df
     }
 
     if (sorting_algorithm == "neighbornet") {
@@ -1094,49 +1098,52 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' Creates a two-axis alluvial plot to visualize the relationship between two categorical groupings (e.g., cluster assignments from different methods),
 #' minimizing crossover and aligning clusters based on agreement.
 #'
-#' @param df A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).
-#' @param graphing_columns Optional Character. List of columns to use. Incompatible with column1 and column2. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
-#' @param column1 Optional Character. Name of the first column to plot. Incompatible with graphing_columns. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
-#' @param column2 Optional Character. Name of the second column to plot. Incompatible with graphing_columns. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
-#' @param fixed_column Optional Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.
-#' @param random_initializations Integer. Number of random initializations of the WLF heuristic to perform.
-#' @param set_seed Integer. Seed for random initializations of the WLF heuristic to perform.
+#' @param df A data frame, tibble, or CSV file path. Must be in one of two formats:
+#' (1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
+#' (2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).
+#' @param graphing_columns Optional character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.
+#' @param column1 Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
+#' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
+#' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
+#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries.
+#' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
+#' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
+#' @param fixed_column Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.
+#' @param random_initializations Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
+#' @param set_seed Integer. Random seed for the \code{random_initializations} parameter. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
+#' @param color_boxes Logical. Whether to color the strata/boxes (representing groups).
+#' @param color_bands Logical. Whether to color the alluvia/edges (connecting the strata).
+#' @param color_list Optional named list or vector of colors to override default group colors.
+#' @param color_band_list Optional named list or vector of colors to override default band colors.
 #' @param color_band_column Optional Character. Which column to use for coloring bands.
 #' @param color_band_boundary Logical. Whether or not to color boundaries between bands
-#' @param sorting_algorithm Character. Must be neighbornet, greedy_WBLF, greedy_WOLF, or None.
-#' @param optimize_column_order Logical. Only used for neighbornet.
-#' @param optimize_column_order_per_cycle Logical. Only used for neighbornet.
-#' @param color_boxes Logical. Whether to color the rectangular strata boxes representing groups.
-#' @param color_bands Logical. Whether to color the alluvial bands connecting the groups.
 #' @param match_colors Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.
 #' @param alluvial_alpha Numeric between 0 and 1. Transparency level for the alluvial bands.
 #' @param include_labels_in_boxes Logical. Whether to include text labels inside the rectangular group boxes.
 #' @param include_axis_titles Logical. Whether to display axis titles for column1 and column2.
 #' @param include_group_sizes Logical. If \code{TRUE}, includes group sizes in the labels (e.g., "Group A (42)").
-#' @param column_weights Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.
-#' @param output_plot_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, the plot is not saved.
-#' @param output_df_path Character. File path to save the dataframe (e.g., "df.csv"). If \code{NULL}, the dataframe is not saved.
-#' @param color_list Optional named list or vector of colors to override default group colors.
-#' @param color_band_list Optional named list or vector of colors to override default band colors.
+#' @param output_plot_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, then will not be saved.
+#' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
+#' @param preprocess_data Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.
+#' @param verbose Logical. If TRUE, will display messages during the function.
 #'
 #' @return A \code{ggplot2} object representing the alluvial plot.
 #'
 #' @examples
-#' \dontrun{
+#' Example 1: df format 1
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' plot_alluvial(df)
-#' }
+#' p <- plot_alluvial(df, graphing_columns = c('method1', 'method2'))
+#'
+#' Example 2: df format 2
+#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' clus_df_gather <- df |>
+#'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+#'     dplyr::group_by_all() |>
+#'     dplyr::count(name = "value")
+#' p <- plot_alluvial(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
 #'
 #' @export
-plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, fixed_column = 1,
-                          sorting_algorithm = 'neighbornet',random_initializations = 1, color_list = NULL,
-                          color_boxes = TRUE,
-                          color_bands = FALSE, color_band_list = NULL,
-                          color_band_column=NULL, color_band_boundary=FALSE,
-                          match_colors = TRUE, alluvial_alpha = 0.5,
-                          include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
-                          column_weights = NULL, output_plot_path = NULL, output_df_path = NULL,
-                          set_seed=42, optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE, verbose=FALSE) {
+plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = 'neighbornet', optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE, fixed_column = 1, random_initializations = 1, set_seed=42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column=NULL, color_band_boundary=FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data=TRUE, verbose=FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -1194,9 +1201,20 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
     }
     #* Type Checking End
 
+    # Preprocess
+    if (preprocess_data) {
+        if (verbose) message("Preprocessing data before sorting")
+        clus_df_gather_unsorted <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, do_gather_set_data = FALSE)
+        if (is.null(column_weights)) {
+            column_weights <- "value"  # is set during data_preprocess
+        }
+    } else {
+        clus_df_gather_unsorted <- df
+    }
+
     # Sort
     if (verbose) message(sprintf("Sorting data with sorting_algorithm=%s", sorting_algorithm))
-    data_sort_output <- data_sort(df = df, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = sorting_algorithm, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, output_df_path = output_df_path, return_updated_graphing_columns = TRUE, load_df = FALSE, verbose = verbose)
+    data_sort_output <- data_sort(df = clus_df_gather_unsorted, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = sorting_algorithm, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, output_df_path = output_df_path, return_updated_graphing_columns = TRUE, preprocess_data = FALSE, load_df = FALSE, verbose = verbose)
     clus_df_gather <- data_sort_output$clus_df_gather
     graphing_columns <- data_sort_output$graphing_columns
 

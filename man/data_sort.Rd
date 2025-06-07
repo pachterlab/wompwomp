@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_alluvial.R
 \name{data_sort}
 \alias{data_sort}
-\title{Sorts a dataframe (e.g., the output of data_preprocess)}
+\title{Sorts a dataframe.}
 \usage{
 data_sort(
   df,
@@ -12,27 +12,70 @@ data_sort(
   column_weights = NULL,
   sorting_algorithm = "neighbornet",
   optimize_column_order = TRUE,
+  optimize_column_order_per_cycle = FALSE,
   fixed_column = 1,
   random_initializations = 1,
   set_seed = 42,
   output_df_path = NULL,
-  load_df = TRUE,
-  verbose = FALSE
+  preprocess_data = TRUE,
+  return_updated_graphing_columns = FALSE,
+  verbose = FALSE,
+  load_df = TRUE
 )
 }
 \arguments{
-\item{df}{A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).}
+\item{df}{A data frame, tibble, or CSV file path. Must be in one of two formats:
+(1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
+(2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).}
+
+\item{graphing_columns}{Optional character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.}
+
+\item{column1}{Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.}
+
+\item{column2}{Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.}
+
+\item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
+
+\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries.}
+
+\item{optimize_column_order}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.}
+
+\item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.}
+
+\item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.}
+
+\item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.}
+
+\item{set_seed}{Integer. Random seed for the \code{random_initializations} parameter. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.}
+
+\item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
+
+\item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.}
+
+\item{return_updated_graphing_columns}{Logical. If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.}
+
+\item{verbose}{Logical. If TRUE, will display messages during the function.}
+
+\item{load_df}{Internal flag; not recommended to modify.}
 }
 \value{
-A \code{ggplot2} object representing the alluvial plot.
+If return_updated_graphing_columns == FALSE (default): A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc. The position mappings in these columns, as well as the order of the columns (if \code{optimize_column_order} is TRUE), will be sorted according to \code{sorting_algorithm}.
+If return_updated_graphing_columns == TRUE: A list of the data frame described above and the sorted \code{graphing_columns}, in the keys 'clus_df_gather' and 'graphing_columns', respectively.
 }
 \description{
-Maps the integers in integer columns corresponding to graphing_columns such that the alluvial plot will be sorted correctly.
+Sorts a dataframe with the algorithm specified by \code{sorting_algorithm}.
 }
 \examples{
-\dontrun{
+Example 1: df format 1
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-data_sort(df)
-}
+clus_df_gather <- data_sort(df, graphing_columns = c('method1', 'method2'))
+
+Example 2: df format 2
+df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+clus_df_gather <- df |>
+    dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+    dplyr::group_by_all() |>
+    dplyr::count(name = "value")
+clus_df_gather <- data_sort(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
 
 }

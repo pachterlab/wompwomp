@@ -6,29 +6,45 @@
 \usage{
 data_preprocess(
   df,
-  graphing_columns = NULL,
+  graphing_columns,
   column_weights = NULL,
+  verbose = FALSE,
   load_df = TRUE,
   do_gather_set_data = FALSE
 )
 }
 \arguments{
-\item{df}{A data frame, tibble, or CSV file path. Must contain at least two columns, each representing a clustering/grouping of the same entities (rows).}
+\item{df}{A data frame, tibble, or CSV file path. Must be in one of two formats:
+(1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
+(2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).}
 
-\item{graphing_columns}{Optional Character. List of columns to use. Incompatible with column1 and column2. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.}
+\item{graphing_columns}{Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting).}
 
-\item{column_weights}{Optional numeric vector of weights (same length as number of rows in \code{df}) to weight each row differently when calculating flows.}
+\item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
+
+\item{verbose}{Logical. If TRUE, will display messages during the function.}
+
+\item{load_df}{Internal flag; not recommended to modify.}
+
+\item{do_gather_set_data}{Internal flag; not recommended to modify.}
 }
 \value{
-A data frame where each row provides the weight in the 'value' column that connects a given combination of values in graphing_columns.
+A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc.
 }
 \description{
-Preprocess data (load in, add integer columns, and group as needed)
+Preprocess data (load in, add integer columns, reorder columns to match graphing_columns, and group as needed)
 }
 \examples{
-\dontrun{
+Example 1: df format 1
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 clus_df_gather <- data_preprocess(df, graphing_columns = c('method1', 'method2'))
-}
+
+Example 2: df format 2
+df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+clus_df_gather <- df |>
+    dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+    dplyr::group_by_all() |>
+    dplyr::count(name = "value")
+clus_df_gather <- data_preprocess(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
 
 }

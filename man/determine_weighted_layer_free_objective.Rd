@@ -2,27 +2,25 @@
 % Please edit documentation in R/objective_calculation.R
 \name{determine_weighted_layer_free_objective}
 \alias{determine_weighted_layer_free_objective}
-\title{Determine sum of products of overlapping edges}
+\title{Compute crossing objective}
 \usage{
 determine_weighted_layer_free_objective(crossing_edges_df, verbose = FALSE)
 }
 \arguments{
-\item{crossing_edges}{A CSV path or list as outputted from determine_crossing_edges.}
+\item{crossing_edges_df}{A CSV path or data frame as outputted with \code{crossing_edges_df} (in R) or \code{output_df_path} (as a file) from \code{determine_crossing_edges}.}
 
-\item{minimum_edge_weight}{Optional positive integer that represents the minimum edge weight to count an edge in the calculation.}
+\item{verbose}{Logical. If TRUE, will display messages during the function.}
 }
 \value{
-A data frame.
+A non-negative integer.
 }
 \description{
-Determine sum of products of overlapping edges
+Determine the sum of products of overlapping edge weights.
 }
 \examples{
-\dontrun{
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-greedy_wolf(df)
-crossing_edges_output <- determine_crossing_edges(df, column1 = "method1", column2 = "method2")
+clus_df_gather <- data_sort(df, graphing_columns = c('method1', 'method2'))
+crossing_edges_output <- determine_crossing_edges(clus_df_gather, column1 = "method1", column2 = "method2")
 objective <- determine_weighted_layer_free_objective(crossing_edges_output$crossing_edges_df)
-}
 
 }
