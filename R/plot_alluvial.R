@@ -1014,7 +1014,7 @@ reorder_and_rename_columns <- function(df, graphing_columns) {
 #' (2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).
 #' @param graphing_columns Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting).
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
-#' @param verbose Optional logical. If TRUE, will display messages during the function.
+#' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param load_df Internal flag; not recommended to modify.
 #' @param do_gather_set_data Internal flag; not recommended to modify.
 #'
@@ -1038,6 +1038,10 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, verbose
     if (load_df) {
         df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
     }
+
+    # Fill in NA values with "Missing"
+    df[is.na(df)] <- "Missing"
+
     df <- add_int_columns(df, graphing_columns = graphing_columns)
 
     # sort columns according to graphing_columns
@@ -1167,16 +1171,19 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
 #' @param sorting_algorithm Optional character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries.
-#' @param optimize_column_order Optional logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
-#' @param optimize_column_order_per_cycle Optional logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
+#' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
+#' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
 #' @param fixed_column Optional Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.
-#' @param random_initializations Optional Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
-#' @param set_seed Optional Integer. Random seed for the \code{random_initializations} parameter. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
+#' @param random_initializations Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
+#' @param set_seed Integer. Random seed for the \code{random_initializations} parameter. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
 #' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If not provided, then nothing will be saved.
-#' @param verbose Optional logical. If TRUE, will display messages during the function.
+#' @param return_updated_graphing_columns Logical. If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.
+#' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param load_df Internal flag; not recommended to modify.
 #'
-#' @return A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc. The position mappings in these columns will be sorted according to \code{sorting_algorithm}.
+#' @return
+#' If return_updated_graphing_columns == FALSE (default): A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc. The position mappings in these columns, as well as the order of the columns (if \code{optimize_column_order} is TRUE), will be sorted according to \code{sorting_algorithm}.
+#' If return_updated_graphing_columns == TRUE: A list of the data frame described above and the sorted \code{graphing_columns}, in the keys 'clus_df_gather' and 'graphing_columns', respectively.
 #'
 #' @examples
 #' Example 1: df format 1
@@ -1267,8 +1274,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param column1 Optional Character. Name of the first column to plot. Incompatible with graphing_columns. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
 #' @param column2 Optional Character. Name of the second column to plot. Incompatible with graphing_columns. Optional if \code{df} has exactly two columns, or if \code{df} has exactly three columns including \code{column_weights}.
 #' @param fixed_column Optional Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.
-#' @param random_initializations Optional Integer. Number of random initializations of the WLF heuristic to perform.
-#' @param set_seed Optional Integer. Seed for random initializations of the WLF heuristic to perform.
+#' @param random_initializations Integer. Number of random initializations of the WLF heuristic to perform.
+#' @param set_seed Integer. Seed for random initializations of the WLF heuristic to perform.
 #' @param color_band_column Optional Character. Which column to use for coloring bands.
 #' @param color_band_boundary Logical. Whether or not to color boundaries between bands
 #' @param sorting_algorithm Character. Must be neighbornet, greedy_WBLF, greedy_WOLF, or None.

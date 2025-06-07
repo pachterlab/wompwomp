@@ -22,7 +22,7 @@ utils::globalVariables(c(
 #' Determine the sum of products of overlapping edge weights.
 #'
 #' @param crossing_edges_df A CSV path or data frame as outputted with \code{crossing_edges_df} (in R) or \code{output_df_path} (as a file) from \code{determine_crossing_edges}.
-#' @param verbose Optional logical. If TRUE, will display messages during the function.
+#' @param verbose Logical. If TRUE, will display messages during the function.
 #'
 #' @return A non-negative integer.
 #'
@@ -62,29 +62,32 @@ determine_weighted_layer_free_objective <- function(crossing_edges_df, verbose =
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
 #' @param output_df_path Optional character. Output path for the data frame containing crossing edges, in CSV format (see details below). If not provided, then nothing will be saved.
 #' @param output_lode_df_path Optional character. Output path for the data frame containing lode information on each alluvium, in CSV format (see details below). If not provided, then nothing will be saved.
-#' @param include_output_objective_matrix_vector Optional logical. Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.
-#' @param return_weighted_layer_free_objective Optional logical. Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
-#' @param verbose Optional logical. If TRUE, will display messages during the function.
+#' @param include_output_objective_matrix_vector Logical. Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.
+#' @param return_weighted_layer_free_objective Logical. Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
+#' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param stratum_column_and_value_to_keep Internal flag; not recommended to modify.
 #' @param input_objective_matrix_vector Internal flag; not recommended to modify.
 #' @param input_objective Internal flag; not recommended to modify.
 #'
 #' @return
-#' If return_weighted_layer_free_objective == FALSE (default): A list of two data frames, in the keys 'crossing_edges_df' and 'lode_df', respectively.
-#' 'crossing_edges_df' contains the following columns:
+#' If return_weighted_layer_free_objective is FALSE (default): A list of values, as follows:
+#' 'crossing_edges_df': A data frame containing the following columns:
 #'   - alluvium1: The ID of the first alluvium, corresponding to the 'alluvium' column in \code{lode_df}.
 #'   - alluvium2: The ID of the second alluvium, corresponding to the 'alluvium' column in \code{lode_df}.
 #'   - strat_layer: The region in which the overlap occurred, corresponding to the 'xi' column in \code{lode_df}, where i is an integer 1, 2, ..., length(graphing_columns).
 #'   - weight1: The weight of the first alluvium, corresponding to the 'count' column in \code{lode_df}.
 #'   - weight2: The weight of the second alluvium, corresponding to the 'count' column in \code{lode_df}.
-#' 'lode_df' contains the following columns:
+#' 'lode_df': A data frame containing the following columns:
 #'   - alluvium: A specific alluvium/edge.
 #'   - count: The weight of the alluvium/edge.
 #'   - x1, x2, ...: Each xi represents the x position of axis/layer i.
 #'   - y1, y2, ...: Each yi represents the height of a lode in axis/layer i.
+#'   - stratum1, stratum2, ...: Each stratumi represents the stratum through which the alluvial crosses in axis/layer i.
 #'   - weight1: The weight of the first alluvium, corresponding to the 'count' column in \code{lode_df}.
 #'   - weight2: The weight of the second alluvium, corresponding to the 'count' column in \code{lode_df}.
-#' If return_weighted_layer_free_objective == TRUE: A nonnegative integer xxxxxxx
+#' 'output_objective': An integer representing the sum of products of overlapping edge weights.
+#' 'objective_matrix_vector' (if and only if \code{include_output_objective_matrix_vector} is TRUE): A vector of square symmetric matrices. Each matrix in index h of the vector has rank equal to the number of alluvia present, where entry (i,j) represents the product of edge weights between alluvium i and alluvium j between layers h and h+1 (where the first layer has h=1).
+#' If return_weighted_layer_free_objective is TRUE: An integer representing the sum of products of overlapping edge weights.
 #'
 #'
 #' @examples
