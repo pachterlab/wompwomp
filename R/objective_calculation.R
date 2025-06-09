@@ -213,7 +213,6 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         lode_df_full[[stratum_char_col]] <- mapping[as.character(lode_df_full[[stratum_col]])]
     }
 
-
     if (!is.null(stratum_column_and_value_to_keep)) {
         layer_number <- as.integer(names(stratum_column_and_value_to_keep)[1])  # the layer (eg 3 from stratum3)
         stratum_number <- stratum_column_and_value_to_keep[[1]]  # the stratum (eg value 28 in column stratum3)
@@ -299,6 +298,8 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 objective_matrix <- input_objective_matrix_vector[[h]]
             }
         }
+
+        # browser()
 
         # Compare each pair of edges
         if (verbose) message("Looping through alluvia")

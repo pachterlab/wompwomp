@@ -188,7 +188,6 @@ for (i in 1:nrow(left_perms)) {
       clus_permuted,
       column1 = "col1_int",
       column2 = "col2_int",
-      fixed_column = NULL,
       return_weighted_layer_free_objective = TRUE
     )
 

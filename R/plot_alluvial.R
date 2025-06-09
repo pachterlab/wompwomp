@@ -357,6 +357,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             stratum_int_name <- matched[1]
             stratum_column_and_value_to_keep <- setNames(list(stratum_int_name), as.character(int_column_int))
 
+            # browser()
             neighbornet_objective_output <- determine_crossing_edges(
                 clus_df_gather_neighbornet_tmp,
                 graphing_columns = graphing_columns_tmp,
@@ -371,6 +372,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         neighbornet_objective <- neighbornet_objective_output$output_objective
 
         # print(neighbornet_objective)
+        if (verbose) message(sprintf("neighbornet_objective for iteration %s = %s", i+1, neighbornet_objective))
         if (neighbornet_objective < neighbornet_objective_minimum) {
 
             neighbornet_objective_minimum <- neighbornet_objective
@@ -562,7 +564,6 @@ find_group2_colors <- function(clus_df_gather, ditto_colors,unused_colors, curre
 }
 
 plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
-                                            sorting_algorithm = NULL,fixed_column=NULL,
                                             color_list = NULL, color_boxes = TRUE,
                                             color_bands = FALSE, color_band_list = NULL,
                                             color_band_column=NULL, color_band_boundary=FALSE,
@@ -895,11 +896,11 @@ sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_wei
     res <- determine_optimal_cycle_start(clus_df_gather, cycle, graphing_columns=graphing_columns, column_weights=column_weights, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle=optimize_column_order_per_cycle, verbose=verbose)
     clus_df_gather_neighbornet <- res$clus_df_gather
     # graphing_columns_neighbornet <- res$graphing_columns
-    if (verbose) message(sprintf("neighbornet_objective = %s", res$neighbornet_objective))
+    if (verbose) message(sprintf("crossing edges objective = %s", res$neighbornet_objective))
     return(clus_df_gather_neighbornet)
 }
 
-sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = NULL, column2 = NULL, fixed_column = 1, random_initializations = 1, set_seed = 42, column_weights = "value", sorting_algorithm = "greedy_WBLF", sort_greedy_wolf = FALSE, verbose = FALSE) {
+sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = NULL, column2 = NULL, fixed_column = NULL, random_initializations = 1, set_seed = 42, column_weights = "value", sorting_algorithm = "greedy_WBLF", verbose = FALSE) {
     if (length(graphing_columns) != 2) {
         stop(sprintf("graphing_columns must be of length 2 for greedy_wblf/greedy_wolf"))
     }
@@ -922,6 +923,8 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
     } else if (isTRUE(fixed_column == column2)) {
         fixed_column <- "col2_int"
         reordered_column <- "col1_int"
+    } else {
+        stop(sprintf("fixed_column '%s' is not recognized.", fixed_column))
     }
     crossing_edges_objective_minimum <- Inf
     set.seed(set_seed)
@@ -959,7 +962,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
         }
         if (random_initializations > 1) {
             crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, column1=column1, column2=column2,
-                                                                 column_weights = column_weights, minimum_edge_weight = 0,
+                                                                 column_weights = column_weights, load_df = FALSE, preprocess_data = FALSE,
                                                                  output_df_path = NULL, return_weighted_layer_free_objective = TRUE)
             if (crossing_edges_objective < crossing_edges_objective_minimum) {
                 crossing_edges_objective_minimum <- crossing_edges_objective
@@ -1025,12 +1028,20 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' clus_df_gather <- data_sort(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
 #'
 #' @export
-data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, fixed_column = 1, random_initializations = 1, set_seed = 42, output_df_path = NULL, preprocess_data = TRUE, return_updated_graphing_columns = FALSE, verbose = FALSE, load_df = TRUE) {
+data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, fixed_column = NULL, random_initializations = 1, set_seed = 42, output_df_path = NULL, preprocess_data = TRUE, return_updated_graphing_columns = FALSE, verbose = FALSE, load_df = TRUE) {
     #* Type Checking Start
     valid_algorithms <- c("neighbornet", "greedy_WOLF", "greedy_WBLF", "None")
     if (!(sorting_algorithm %in% valid_algorithms)) {
         stop(sprintf("Invalid sorting_algorithm: '%s'. Must be one of: %s",
                      sorting_algorithm, paste(valid_algorithms, collapse = ", ")))
+    }
+
+    if (sorting_algorithm == 'neighbornet') {
+        for (col in graphing_columns) {
+            if (grepl("~~", "ab~~s")) {
+                stop(sprintf("No entry of graphing_columns can contain '~~' when sorting_algorithm == neighbornet. Issue with column '%s'.", col))
+            }
+        }
     }
 
     if ((sorting_algorithm == 'None') & (random_initializations > 1)) {
@@ -1075,6 +1086,13 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         clus_df_gather_sorted <- clus_df_gather
     } else {
         stop(sprintf("Invalid sorting_algorithm: '%s'. Must be one of: %s", sorting_algorithm, paste(valid_algorithms, collapse = ", ")))
+    }
+
+    # print objective - don't do for neighbornet because I did it right before
+    if ((verbose) && (sorting_algorithm != "neighbornet")) {
+        objective <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns=graphing_columns,
+                                 column_weights = column_weights, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+        message(sprintf("crossing edges objective = %s", objective))
     }
 
     if (verbose) message("Complete with sorting")
@@ -1143,7 +1161,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' p <- plot_alluvial(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
 #'
 #' @export
-plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = 'neighbornet', optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE, fixed_column = 1, random_initializations = 1, set_seed=42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column=NULL, color_band_boundary=FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data=TRUE, verbose=FALSE) {
+plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = 'neighbornet', optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE, fixed_column = NULL, random_initializations = 1, set_seed=42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column=NULL, color_band_boundary=FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data=TRUE, verbose=FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -1220,7 +1238,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
 
     # Plot
     if (verbose) message("Plotting data")
-    alluvial_plot <- plot_alluvial_internal(clus_df_gather, graphing_columns=graphing_columns, fixed_column = fixed_column,
+    alluvial_plot <- plot_alluvial_internal(clus_df_gather, graphing_columns=graphing_columns,
                                                          color_list = color_list, color_boxes = color_boxes,
                                                          color_bands = color_bands, color_band_list = color_band_list,
                                                          color_band_column=color_band_column, color_band_boundary=color_band_boundary,
