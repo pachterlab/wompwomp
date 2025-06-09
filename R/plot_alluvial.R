@@ -123,9 +123,9 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
 
     # Add prefixes to distinguish node types
 
-    # prefix is "tissue_"
+    # prefix is "tissue~~"
     for (col in graphing_columns) {
-        clus_df_gather[[col]] <- paste0(col, "_", clus_df_gather[[col]])
+        clus_df_gather[[col]] <- paste0(col, "~~", clus_df_gather[[col]])
     }
 
     # prefix is "column1_"
@@ -207,7 +207,7 @@ get_graph_groups <- function(cycle) {
     groups <- list()
 
     for (node in cycle) {
-        prefix <- sub("_.*", "", node)  # Extract everything before the first underscore
+        prefix <- sub("~~.*", "", node)  # Extract everything before the first `~~`
 
         if (!prefix %in% names(groups)) {
             groups[[prefix]] <- c()
@@ -298,7 +298,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
 
         # remove prefix (column1_, etc)
         graphs_list_stripped <- lapply(graphs_list, function(x) {
-            sub("^[^_]+_", "", x)
+            sub("^.*?~~", "", x)
         })
 
         if (is.null(column_weights) || !(column_weights %in% colnames(df))) {
@@ -344,9 +344,9 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             )
         } else {
             swapped_node <- cycle_shifted[length(cycle_shifted)]
-            parts <- strsplit(swapped_node, "_", fixed = TRUE)[[1]]
+            parts <- strsplit(swapped_node, "~~", fixed = TRUE)[[1]]
             layer_name <- parts[1]
-            node_name <- paste(parts[-1], collapse = "_")
+            node_name <- parts[2]
 
             # determine the int column that matches to this layer_name - because I haven't reordered any columns in clus_df_gather_neighbornet, I should use the order as determined here
             int_column_int <- match(layer_name, graphing_columns_tmp)
