@@ -1,14 +1,13 @@
 #' @export
-run_plot_alluvial_cli <- function(args) {
+run_data_sort_cli <- function(args) {
   if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
     cat("
-Usage: alluvialmatch plot_alluvial --input INPUT [options]
+Usage: alluvialmatch data_sort --input INPUT [options]
 
 Required:
   -i, --input, --df               A data frame, tibble, or CSV file path. Must be in one of two formats:
 (1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
 (2) column_weights != NULL: Each row represents a combination of groupings, each column from graphing_columns represents a grouping, and the column column_weights represents the number of entities in that combination of groupings. Must contain at least three columns (two graphing_columns, one column_weights).
-  -o, --output_plot_path          File path to save the plot (e.g., 'plot.png'). If NULL, then will not be saved.
 
 Optional:
   -g, --graphing_columns    Vector of column names from df to be used in graphing (i.e., alluvial plotting). Mutually exclusive with column1 and column2.
@@ -32,7 +31,6 @@ Optional:
 
     # Required arguments
     df <- get_arg(args, c("-i", "--input", "--df"), required = TRUE)
-    output_plot_path <- get_arg(args, c("-o", "--output_plot_path"), required = TRUE)
 
     # Optional arguments
     graphing_columns <- get_multi_arg(args, c("-g", "--graphing_columns"))
@@ -45,25 +43,15 @@ Optional:
     fixed_column    <- get_fixed_column(args, "--fixed_column")
     random_initializations    <- get_numeric_arg(args, "--random_initializations")
     set_seed    <- get_numeric_arg(args, "--set_seed")
-    color_boxes  <- store_true(args, c("--color_boxes"))
-    color_boxes  <- store_true(args, c("--color_bands"))
-    color_list  <- get_multi_arg(args, c("--color_list"))
-    color_band_list  <- get_multi_arg(args, c("--color_band_list"))
-    color_band_column  <- get_arg(args, c("--color_band_column"))
-    color_band_boundary  <- store_true(args, c("--color_band_boundary"))
-    match_colors  <- store_true(args, c("--match_colors"))
-    alluvial_alpha    <- get_numeric_arg(args, "--alluvial_alpha")
-    include_labels_in_boxes  <- store_true(args, c("--include_labels_in_boxes"))
-    include_axis_titles  <- store_true(args, c("--include_axis_titles"))
-    include_group_sizes  <- store_true(args, c("--include_group_sizes"))
-    preprocess_data <- store_true(args, c("--preprocess_data"))
+    output_df_path <- get_arg(args, c("-o", "--output_df_path"))
+    preprocess_data    <- store_true(args, "--random_initializations")
+    return_updated_graphing_columns    <- store_true(args, "--return_updated_graphing_columns")
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
     # Base argument list with required args
     args_list <- list(
-        df = df,
-        output_plot_path = output_plot_path
+        df = df
     )
 
     # Conditionally add optional args if not NULL
@@ -77,29 +65,15 @@ Optional:
     if (!is.null(fixed_column))       args_list$fixed_column <- fixed_column
     if (!is.null(random_initializations))       args_list$random_initializations <- random_initializations
     if (!is.null(set_seed))       args_list$set_seed <- set_seed
-    if (!is.null(color_boxes))                   args_list$color_boxes <- color_boxes
-    if (!is.null(color_bands))                   args_list$color_bands <- color_bands
-    if (!is.null(color_list))                    args_list$color_list <- color_list
-    if (!is.null(color_band_list))              args_list$color_band_list <- color_band_list
-    if (!is.null(color_band_column))            args_list$color_band_column <- color_band_column
-    if (!is.null(color_band_boundary))          args_list$color_band_boundary <- color_band_boundary
-    if (!is.null(match_colors))                 args_list$match_colors <- match_colors
-    if (!is.null(alluvial_alpha))               args_list$alluvial_alpha <- alluvial_alpha
-    if (!is.null(include_labels_in_boxes))      args_list$include_labels_in_boxes <- include_labels_in_boxes
-    if (!is.null(include_axis_titles))          args_list$include_axis_titles <- include_axis_titles
-    if (!is.null(include_group_sizes))          args_list$include_group_sizes <- include_group_sizes
-    if (!is.null(preprocess_data))              args_list$preprocess_data <- preprocess_data
-    if (!is.null(verbose))                      args_list$verbose <- verbose
+    if (!is.null(output_df_path))         args_list$output_df_path <- output_df_path
+    if (!is.null(preprocess_data))       args_list$preprocess_data <- preprocess_data
+    if (!is.null(return_updated_graphing_columns))       args_list$return_updated_graphing_columns <- return_updated_graphing_columns
+    if (!is.null(verbose))                args_list$verbose <- verbose
 
     # Dynamically call function
-    result <- do.call(plot_alluvial, args_list)
+    result <- do.call(data_sort, args_list)
 
     if (!quiet) {
-        (!is.null(output_df_path)) {
-            print(sprintf("Data frame saved to to=%s", output_df_path))
-        }
-        (!is.null(output_plot_path)) {
-            print(sprintf("Plot saved to to=%s", output_plot_path))
-        }
+        print(result)
     }
 }

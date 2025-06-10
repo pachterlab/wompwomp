@@ -732,6 +732,7 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
     p <- p + theme(legend.position = "none")  # to hide legend
 
     if (!is.null(output_plot_path)) {
+        if (verbose) message(sprintf("Saving plot to=%s", output_plot_path))
         ggsave(output_plot_path, plot = p, dpi = 300, bg = "white")
     }
 
@@ -839,6 +840,7 @@ reorder_and_rename_columns <- function(df, graphing_columns) {
 #' (2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).
 #' @param graphing_columns Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting).
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
+#' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param load_df Internal flag; not recommended to modify.
 #' @param do_gather_set_data Internal flag; not recommended to modify.
@@ -859,7 +861,7 @@ reorder_and_rename_columns <- function(df, graphing_columns) {
 #' clus_df_gather <- data_preprocess(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
 #'
 #' @export
-data_preprocess <- function(df, graphing_columns, column_weights = NULL, verbose = FALSE, load_df = TRUE, do_gather_set_data = FALSE) {
+data_preprocess <- function(df, graphing_columns, column_weights = NULL, output_df_path = NULL, verbose = FALSE, load_df = TRUE, do_gather_set_data = FALSE) {
     if (load_df) {
         df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
     }
@@ -879,6 +881,11 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, verbose
         clus_df_gather <- get_alluvial_df(df, do_gather_set_data = do_gather_set_data)
     } else {
         clus_df_gather <- df
+    }
+
+    if ((is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE))) {
+        if (verbose) message(sprintf("Saving sorted dataframe to=%s", output_df_path))
+        write.csv(clus_df_gather, file = output_df_path, row.names = FALSE)
     }
 
     return(clus_df_gather)

@@ -21,7 +21,7 @@ utils::globalVariables(c(
 #'
 #' Determine the sum of products of overlapping edge weights.
 #'
-#' @param crossing_edges_df A CSV path or data frame as outputted with \code{crossing_edges_df} (in R) or \code{output_df_path} (as a file) from \code{determine_crossing_edges}.
+#' @param df A CSV path or data frame as outputted with \code{crossing_edges_df} (in R) or \code{output_df_path} (as a file) from \code{determine_crossing_edges}.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #'
 #' @return A non-negative integer.
@@ -33,18 +33,18 @@ utils::globalVariables(c(
 #' objective <- determine_weighted_layer_free_objective(crossing_edges_output$crossing_edges_df)
 #'
 #' @export
-determine_weighted_layer_free_objective <- function(crossing_edges_df, verbose = FALSE) {
+determine_weighted_layer_free_objective <- function(df, verbose = FALSE) {
     # Case 1: CSV
-    if (is.character(crossing_edges_df) && length(crossing_edges_df) == 1 && file.exists(crossing_edges_df)) {
+    if (is.character(df) && length(df) == 1 && file.exists(df)) {
         # Read the file
-        df_in <- read.csv(crossing_edges_df, stringsAsFactors = FALSE)
+        df <- read.csv(df, stringsAsFactors = FALSE)
     # Case 2: Already a list of edge pairs
-    } else if (is.data.frame(crossing_edges_df)) {
+    } else if (is.data.frame(df)) {
         # do nothing
     } else
         stop("Input must be either a file path or a list.")
 
-    total_weighted_crossings <- sum(crossing_edges_df$weight1 * crossing_edges_df$weight2) / 2  # Correct for double-counting
+    total_weighted_crossings <- sum(df$weight1 * df$weight2) / 2  # Correct for double-counting
     return(total_weighted_crossings)
 }
 

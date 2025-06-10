@@ -28,8 +28,8 @@ if (length(missing) > 0) {
       stop(
         paste0(
             "Aborted. Please install the missing packages manually:\n",
-            "Rscript -e 'install.packages(c(", 
-            paste0(sprintf('\"%s\"', missing), collapse = ", "), 
+            "Rscript -e 'install.packages(c(",
+            paste0(sprintf('\"%s\"', missing), collapse = ", "),
             "))'\n"
         )
     )
@@ -42,8 +42,8 @@ if (length(missing) > 0) {
             "To install them, run:\n",
             "Rscript install.R",
             "or",
-            "Rscript -e 'install.packages(c(", 
-            paste0(sprintf('\"%s\"', missing), collapse = ", "), 
+            "Rscript -e 'install.packages(c(",
+            paste0(sprintf('\"%s\"', missing), collapse = ", "),
             "))'\n"
         )
     )

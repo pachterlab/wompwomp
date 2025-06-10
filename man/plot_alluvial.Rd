@@ -13,7 +13,7 @@ plot_alluvial(
   sorting_algorithm = "neighbornet",
   optimize_column_order = TRUE,
   optimize_column_order_per_cycle = FALSE,
-  fixed_column = 1,
+  fixed_column = NULL,
   random_initializations = 1,
   set_seed = 42,
   color_boxes = TRUE,
