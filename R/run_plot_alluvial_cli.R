@@ -21,9 +21,20 @@ Optional:
   --fixed_column            Name or position of the column in graphing_columns to keep fixed during sorting. Only applies when sorting_algorithm == 'greedy_WOLF'.
   --random_initializations  Number of random initializations for the positions of each grouping in graphing_columns. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
   --set_seed                Random seed for the random_initializations parameter. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
+  --disable_color_boxes     Whether to color the strata/boxes (representing groups)
+  --color_bands             Whether to color the alluvia/edges (connecting the strata)
+  --color_list              List of colors to override default group colors.
+  --color_band_list         List of colors to override default band colors.
+  --color_band_column       Which column to use for coloring bands
+  --color_band_boundary     Whether or not to color boundaries between bands
+  --disable_match_colors            Assigns consistent colors between column1 and column2 where matched.
+  --alluvial_alpha          Numeric between 0 and 1. Transparency level for the alluvial bands.
+  --disable_include_labels_in_boxes Whether to include text labels inside the rectangular group boxes
+  --disable_include_axis_titles     Whether to display axis titles for column1 and column2.
+  --disable_include_group_sizes     Includes group sizes in the labels
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
-  --preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
-  --return_updated_graphing_columns         If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.
+  --output_df_path          Output path for the output data frame, in CSV format. If NULL, then will not be saved
+  --disable_preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
@@ -45,8 +56,8 @@ Optional:
     fixed_column    <- get_fixed_column(args, "--fixed_column")
     random_initializations    <- get_numeric_arg(args, "--random_initializations")
     set_seed    <- get_numeric_arg(args, "--set_seed")
-    color_boxes  <- store_true(args, c("--color_boxes"))
-    color_bands  <- store_false(args, c("--disable_color_bands"))
+    color_boxes  <- store_false(args, c("--disable_color_boxes"))
+    color_bands  <- store_true(args, c("--color_bands"))
     color_list  <- get_multi_arg(args, c("--color_list"))
     color_band_list  <- get_multi_arg(args, c("--color_band_list"))
     color_band_column  <- get_arg(args, c("--color_band_column"))

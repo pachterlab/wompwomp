@@ -15,13 +15,13 @@ Optional:
   -c2, --column2            Can be used along with column1 in place of graphing_columns if working with two columns only. Mutually exclusive with graphing_columns.
   -w, --column_weights      Column name from df that contains the weights of each combination of groupings if df is in format (2) (see above).
   -s, --sorting_algorithm       Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when graphing_columns has exactly two entries.
-  --optimize_column_order   If TRUE, will optimize the order of graphing_columns to minimize edge overlap. Only applies when sorting_algorithm == 'neighbornet' and length(graphing_columns) > 2.
+  --disable_optimize_column_order   If TRUE, will optimize the order of graphing_columns to minimize edge overlap. Only applies when sorting_algorithm == 'neighbornet' and length(graphing_columns) > 2.
   --optimize_column_order_per_cycle         If TRUE, will optimize the order of graphing_columns to minimize edge overlap upon each cycle. If FALSE, will optimize the order of graphing_columns to minimize edge overlap on the beginning cycle only. Only applies when sorting_algorithm == 'neighbornet' and length(graphing_columns) > 2.
   --fixed_column            Name or position of the column in graphing_columns to keep fixed during sorting. Only applies when sorting_algorithm == 'greedy_WOLF'.
   --random_initializations  Number of random initializations for the positions of each grouping in graphing_columns. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
   --set_seed                Random seed for the random_initializations parameter. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
-  --preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
+  --disable_preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
   --return_updated_graphing_columns         If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
