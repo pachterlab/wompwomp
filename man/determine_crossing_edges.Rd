@@ -50,6 +50,10 @@ determine_crossing_edges(
 \item{input_objective_matrix_vector}{Internal flag; not recommended to modify.}
 
 \item{input_objective}{Internal flag; not recommended to modify.}
+
+\item{preprocess_data}{Internal flag; not recommended to modify.}
+
+\item{load_df}{Internal flag; not recommended to modify.}
 }
 \value{
 If return_weighted_layer_free_objective is FALSE (default): A list of values, as follows:

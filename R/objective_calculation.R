@@ -70,6 +70,8 @@ determine_weighted_layer_free_objective <- function(df, verbose = FALSE) {
 #' @param stratum_column_and_value_to_keep Internal flag; not recommended to modify.
 #' @param input_objective_matrix_vector Internal flag; not recommended to modify.
 #' @param input_objective Internal flag; not recommended to modify.
+#' @param preprocess_data Internal flag; not recommended to modify.
+#' @param load_df Internal flag; not recommended to modify.
 #'
 #' @return
 #' If return_weighted_layer_free_objective is FALSE (default): A list of values, as follows:

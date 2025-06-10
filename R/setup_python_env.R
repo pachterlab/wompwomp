@@ -1,7 +1,10 @@
 #' Setup Python environment for this package
 #'
-#' This function installs Miniconda if needed, creates a dedicated environment,
-#' and installs the required Python packages.
+#' This function installs Miniconda if needed, creates a dedicated environment, and installs the required Python packages.
+#'
+#' @param envname Conda environment name
+#' @param packages Packages to install
+#'
 #' @export
 setup_python_env <- function(envname = "alluvialmatch_env", packages = c("numpy==1.23.5", "splitspy")) {
     conda_findable <- tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)

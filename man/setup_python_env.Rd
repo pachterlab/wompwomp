@@ -9,7 +9,11 @@ setup_python_env(
   packages = c("numpy==1.23.5", "splitspy")
 )
 }
+\arguments{
+\item{envname}{Conda environment name}
+
+\item{packages}{Packages to install}
+}
 \description{
-This function installs Miniconda if needed, creates a dedicated environment,
-and installs the required Python packages.
+This function installs Miniconda if needed, creates a dedicated environment, and installs the required Python packages.
 }

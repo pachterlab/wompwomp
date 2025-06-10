@@ -78,7 +78,7 @@ get_multi_arg <- function(args, flags, required = FALSE) {
     }
 
     if (required && length(vals) == 0) {
-        stop(sprintf("No values provided for required argument: %s", flag))
+        stop(sprintf("No values provided for required argument: %s", flags))
     }
 
     return(vals)
