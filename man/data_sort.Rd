@@ -66,11 +66,11 @@ If return_updated_graphing_columns == TRUE: A list of the data frame described a
 Sorts a dataframe with the algorithm specified by \code{sorting_algorithm}.
 }
 \examples{
-Example 1: df format 1
+# Example 1: df format 1
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 clus_df_gather <- data_sort(df, graphing_columns = c('method1', 'method2'))
 
-Example 2: df format 2
+# Example 2: df format 2
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 clus_df_gather <- df |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>

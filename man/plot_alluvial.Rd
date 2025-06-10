@@ -96,11 +96,11 @@ Creates a two-axis alluvial plot to visualize the relationship between two categ
 minimizing crossover and aligning clusters based on agreement.
 }
 \examples{
-Example 1: df format 1
+# Example 1: df format 1
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 p <- plot_alluvial(df, graphing_columns = c('method1', 'method2'))
 
-Example 2: df format 2
+# Example 2: df format 2
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 clus_df_gather <- df |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>

@@ -22,6 +22,14 @@ utils::globalVariables(c(
 
 StatStratum <- ggalluvial::StatStratum  # avoid the error Can't find stat called "stratum"
 
+neighbornet_script_path <- system.file("scripts", "run_neighbornet.py", package = "yourpackagename")
+if (neighbornet_script_path == "") {
+    # Fallback to development location
+    neighbornet_script_path <- file.path(here::here("inst", "scripts", "run_neighbornet.py"))
+    # neighbornet_script_path <- file.path(here::here("scripts", "run_neighbornet.py"))
+}
+stopifnot(file.exists(neighbornet_script_path))
+
 # library(dplyr)
 # library(ggplot2)
 # library(ggalluvial)
@@ -87,7 +95,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns,
     column_dist_matrix <- column_dist_matrix
     mat_list <- split(column_dist_matrix, row(column_dist_matrix))  # convert R matrix to list of row-vectors
     if (verbose) message("Running neighbornet for column order")
-    reticulate::source_python(file.path(here::here(), "scripts", "run_neighbornet.py"))
+    reticulate::source_python(neighbornet_script_path)
     result <- neighbor_net(labels, column_dist_matrix)
     cycle <- result[[1]]
     cycle_mapped <- labels[cycle]
@@ -186,7 +194,7 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
     # Call Python function
     # result <- nn_mod$neighbor_net(labels, mat_list)
     if (verbose) message("Running neighbornet for stratum order")
-    reticulate::source_python(file.path(here::here(), "scripts", "run_neighbornet.py"))
+    reticulate::source_python(neighbornet_script_path)
     result <- neighbor_net(labels, mat)
     cycle <- result[[1]]
     splits <- result[[2]]
@@ -847,11 +855,11 @@ reorder_and_rename_columns <- function(df, graphing_columns) {
 #' @return A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc.
 #'
 #' @examples
-#' Example 1: df format 1
+#' # Example 1: df format 1
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' clus_df_gather <- data_preprocess(df, graphing_columns = c('method1', 'method2'))
 #'
-#' Example 2: df format 2
+#' # Example 2: df format 2
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' clus_df_gather <- df |>
 #'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
@@ -1021,11 +1029,11 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' If return_updated_graphing_columns == TRUE: A list of the data frame described above and the sorted \code{graphing_columns}, in the keys 'clus_df_gather' and 'graphing_columns', respectively.
 #'
 #' @examples
-#' Example 1: df format 1
+#' # Example 1: df format 1
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' clus_df_gather <- data_sort(df, graphing_columns = c('method1', 'method2'))
 #'
-#' Example 2: df format 2
+#' # Example 2: df format 2
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' clus_df_gather <- df |>
 #'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
@@ -1183,11 +1191,11 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @return A \code{ggplot2} object representing the alluvial plot.
 #'
 #' @examples
-#' Example 1: df format 1
+#' # Example 1: df format 1
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' p <- plot_alluvial(df, graphing_columns = c('method1', 'method2'))
 #'
-#' Example 2: df format 2
+#' # Example 2: df format 2
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' clus_df_gather <- df |>
 #'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
