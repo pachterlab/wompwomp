@@ -4,7 +4,7 @@
 #' @docType package
 #' @name alluvialmatch
 #'
-#' @importFrom dplyr mutate group_by summarise arrange desc ungroup slice n pull filter row_number
+#' @importFrom dplyr mutate group_by summarise arrange desc ungroup slice n pull filter row_number left_join rename_with
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble is_tibble
 #' @importFrom utils read.csv

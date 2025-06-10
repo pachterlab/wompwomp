@@ -68,7 +68,7 @@ Optional:
     if (!quiet) {
         cat("Sum of products of overlapping edge weights:\n")
         print(result$output_objective)
-        if (!return_objective) {
+        if (!return_weighted_layer_free_objective) {
             cat("Crossing edges data frame:\n")
             print(result$crossing_edges_df)
         }

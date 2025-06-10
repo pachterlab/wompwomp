@@ -150,7 +150,7 @@ test_that("CLI data_sort, WOLF right fixed", {
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
 
-# ./exec/alluvialmatch data_sort --df tests/testthat/ground_truth/df_tests_cli.csv --output_df_path tests/testthat/ground_truth/sorting_wblf_df.csv --sorting_algorithm greedy_WBLF
+# ./exec/alluvialmatch data_sort --df tests/testthat/ground_truth/df_tests_cli.csv --output_df_path tests/testthat/ground_truth/sorting_wblf_df.csv --sorting_algorithm greedy_WBLF --graphing_columns tissue leiden
 test_that("CLI data_sort, WBLF", {
     # Paths
     command <- "data_sort"

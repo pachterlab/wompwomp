@@ -357,7 +357,6 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             stratum_int_name <- matched[1]
             stratum_column_and_value_to_keep <- setNames(list(stratum_int_name), as.character(int_column_int))
 
-            # browser()
             neighbornet_objective_output <- determine_crossing_edges(
                 clus_df_gather_neighbornet_tmp,
                 graphing_columns = graphing_columns_tmp,
@@ -1045,7 +1044,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 
     if (sorting_algorithm == 'neighbornet') {
         for (col in graphing_columns) {
-            if (grepl("~~", "ab~~s")) {
+            if (grepl("~~", col)) {
                 stop(sprintf("No entry of graphing_columns can contain '~~' when sorting_algorithm == neighbornet. Issue with column '%s'.", col))
             }
         }
@@ -1060,7 +1059,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         stop(sprintf("Column to fix for One-Sided matching is not specified.", fixed_column))
     }
 
-    if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
+    if (is.null(graphing_columns) && (is.null(column1) || is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
     }
 
@@ -1073,6 +1072,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         graphing_columns <- c(column1, column2)
     }
     #* Type Checking End
+
 
     # Preprocess (i.e., add int columns and do the grouping)
     if (preprocess_data) {
@@ -1107,7 +1107,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     # Save if desired
     if ((is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE))) {
         if (verbose) message(sprintf("Saving sorted dataframe to=%s", output_df_path))
-        write.csv(clus_df_gather_to_save, file = output_df_path, row.names = FALSE)
+        write.csv(clus_df_gather_sorted, file = output_df_path, row.names = FALSE)
     }
 
     if (return_updated_graphing_columns) {
