@@ -715,12 +715,14 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
 
     if (include_axis_titles) {
         # Offset to place labels a bit above
-        text_size <- 5
+        offset <- top_y + top_y/5
         #x<-1
         #for (col_group in graphing_columns) {
         p <- p +
-            annotate("text", x = seq(1, length(graphing_columns)), y = rep(2*text_size+top_y, length(graphing_columns)), 
-                     label = graphing_columns, size = text_size, hjust = 0.5)
+            scale_x_continuous(breaks = 1:length(graphing_columns), labels = graphing_columns,
+                               position = 'top')
+            #annotate("text", x = seq(1, length(graphing_columns)), y = rep(offset, length(graphing_columns)), 
+                     #label = graphing_columns, size = 5, hjust = 0.5, vjust=.5)
         #    x <- x+1
         #}
     }
@@ -739,7 +741,8 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
         theme_void() +
         theme(
             text = element_text(family = "sans"),
-            legend.text = element_text(size = rel(axis_text_size))
+            legend.text = element_text(size = rel(axis_text_size)),
+            axis.text.x = element_text()
         )
 
     p <- p + theme(legend.position = "none")  # to hide legend
