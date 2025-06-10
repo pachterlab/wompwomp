@@ -4,13 +4,15 @@
 #' @docType package
 #' @name alluvialmatch
 #'
-#' @importFrom dplyr mutate group_by summarise arrange desc ungroup slice n pull filter
+#' @importFrom dplyr mutate group_by summarise arrange desc ungroup slice n pull filter row_number
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble is_tibble
 #' @importFrom utils read.csv
 #' @importFrom rlang sym .data
 #' @importFrom magrittr %>%
 #' @importFrom data.table :=
+#' @importFrom ggalluvial stat_alluvium
+#' @importFrom ggplot2 ggplot_build
 
 utils::globalVariables(c(
     ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"

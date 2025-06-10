@@ -4,10 +4,10 @@
 \alias{determine_weighted_layer_free_objective}
 \title{Compute crossing objective}
 \usage{
-determine_weighted_layer_free_objective(crossing_edges_df, verbose = FALSE)
+determine_weighted_layer_free_objective(df, verbose = FALSE)
 }
 \arguments{
-\item{crossing_edges_df}{A CSV path or data frame as outputted with \code{crossing_edges_df} (in R) or \code{output_df_path} (as a file) from \code{determine_crossing_edges}.}
+\item{df}{A CSV path or data frame as outputted with \code{crossing_edges_df} (in R) or \code{output_df_path} (as a file) from \code{determine_crossing_edges}.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 }

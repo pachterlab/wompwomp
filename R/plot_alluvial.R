@@ -6,7 +6,7 @@
 #'
 #' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter
 #' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave guides
-#' @importFrom ggalluvial geom_alluvium geom_stratum stat_stratum
+#' @importFrom ggalluvial geom_alluvium geom_stratum stat_stratum stat_alluvium
 #' @importFrom ggforce gather_set_data
 #' @importFrom igraph max_bipartite_match V graph_from_data_frame
 #' @importFrom tibble is_tibble
@@ -1098,7 +1098,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     # print objective - don't do for neighbornet because I did it right before
     if ((verbose) && (sorting_algorithm != "neighbornet")) {
         objective <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns=graphing_columns,
-                                 column_weights = column_weights, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+                                 column_weights = column_weights, load_df = FALSE, preprocess_data = TRUE, return_weighted_layer_free_objective = TRUE)
         message(sprintf("crossing edges objective = %s", objective))
     }
 

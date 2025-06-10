@@ -39,6 +39,10 @@ Optional:
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
+    # Hidden arguments
+    preprocess_data <- store_false(args, c("--disable_preprocess_data"))
+    load_df <- store_false(args, c("--disable_load_df"))
+
     # Base argument list with required args
     args_list <- list(
         df = df
@@ -54,6 +58,8 @@ Optional:
     if (!is.null(include_output_objective_matrix_vector))         args_list$include_output_objective_matrix_vector <- include_output_objective_matrix_vector
     if (!is.null(return_weighted_layer_free_objective))         args_list$return_weighted_layer_free_objective <- return_weighted_layer_free_objective
     if (!is.null(verbose))                args_list$verbose <- verbose
+    if (!is.null(preprocess_data))       args_list$preprocess_data <- preprocess_data
+    if (!is.null(load_df))       args_list$load_df <- load_df
 
     # Dynamically call function
     result <- do.call(determine_crossing_edges, args_list)

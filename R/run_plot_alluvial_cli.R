@@ -1,7 +1,7 @@
 #' @export
 run_plot_alluvial_cli <- function(args) {
   if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
-    cat("
+      cat("
 Usage: alluvialmatch plot_alluvial --input INPUT [options]
 
 Required:
@@ -27,8 +27,8 @@ Optional:
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
-    quit(save = "no", status = 0)
-  }
+        quit(save = "no", status = 0)
+    }
 
     # Required arguments
     df <- get_arg(args, c("-i", "--input", "--df"), required = TRUE)
@@ -46,19 +46,23 @@ Optional:
     random_initializations    <- get_numeric_arg(args, "--random_initializations")
     set_seed    <- get_numeric_arg(args, "--set_seed")
     color_boxes  <- store_true(args, c("--color_boxes"))
-    color_boxes  <- store_true(args, c("--color_bands"))
+    color_bands  <- store_false(args, c("--disable_color_bands"))
     color_list  <- get_multi_arg(args, c("--color_list"))
     color_band_list  <- get_multi_arg(args, c("--color_band_list"))
     color_band_column  <- get_arg(args, c("--color_band_column"))
     color_band_boundary  <- store_true(args, c("--color_band_boundary"))
-    match_colors  <- store_true(args, c("--match_colors"))
+    match_colors  <- store_false(args, c("--disable_match_colors"))
     alluvial_alpha    <- get_numeric_arg(args, "--alluvial_alpha")
-    include_labels_in_boxes  <- store_true(args, c("--include_labels_in_boxes"))
-    include_axis_titles  <- store_true(args, c("--include_axis_titles"))
-    include_group_sizes  <- store_true(args, c("--include_group_sizes"))
-    preprocess_data <- store_true(args, c("--preprocess_data"))
+    include_labels_in_boxes  <- store_false(args, c("--disable_include_labels_in_boxes"))
+    include_axis_titles  <- store_false(args, c("--disable_include_axis_titles"))
+    include_group_sizes  <- store_false(args, c("--disable_include_group_sizes"))
+    output_df_path <- get_arg(args, c("--output_df_path"))
+    preprocess_data <- store_false(args, c("--disable_preprocess_data"))
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
+
+    # Hidden arguments
+    load_df <- store_false(args, c("--disable_load_df"))
 
     # Base argument list with required args
     args_list <- list(
@@ -88,6 +92,7 @@ Optional:
     if (!is.null(include_labels_in_boxes))      args_list$include_labels_in_boxes <- include_labels_in_boxes
     if (!is.null(include_axis_titles))          args_list$include_axis_titles <- include_axis_titles
     if (!is.null(include_group_sizes))          args_list$include_group_sizes <- include_group_sizes
+    if (!is.null(output_df_path))          args_list$output_df_path <- output_df_path
     if (!is.null(preprocess_data))              args_list$preprocess_data <- preprocess_data
     if (!is.null(verbose))                      args_list$verbose <- verbose
 
@@ -95,10 +100,10 @@ Optional:
     result <- do.call(plot_alluvial, args_list)
 
     if (!quiet) {
-        (!is.null(output_df_path)) {
+        if (!is.null(output_df_path)) {
             print(sprintf("Data frame saved to to=%s", output_df_path))
         }
-        (!is.null(output_plot_path)) {
+        if (!is.null(output_plot_path)) {
             print(sprintf("Plot saved to to=%s", output_plot_path))
         }
     }

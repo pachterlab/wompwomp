@@ -12,7 +12,7 @@ Required:
 
 Optional:
   -w, --column_weights      Column name from df that contains the weights of each combination of groupings if df is in format (2) (see above).
-  -o, --output_df_path      Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
+  -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
@@ -29,6 +29,9 @@ Optional:
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
+    # Hidden arguments
+    load_df <- store_false(args, c("--disable_load_df"))
+
     # Base argument list with required args
     args_list <- list(
         df = df,
@@ -39,6 +42,7 @@ Optional:
     if (!is.null(column_weights))         args_list$column_weights <- column_weights
     if (!is.null(output_df_path))         args_list$output_df_path <- output_df_path
     if (!is.null(verbose))                args_list$verbose <- verbose
+    if (!is.null(load_df))                args_list$load_df <- load_df
 
     # Dynamically call function
     result <- do.call(data_preprocess, args_list)

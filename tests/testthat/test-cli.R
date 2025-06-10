@@ -111,9 +111,22 @@ test_that("CLI plot_alluvial, WBLF", {
     compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
 
-test_that("CLI greedy_wolf, WOLF left fixed", {
+test_that("CLI plot_alluvial, neighbornet", {
     # Paths
-    command <- "greedy_wolf"
+    command <- "plot_alluvial"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    output_path <- tempfile(fileext = ".png")
+    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_neighbornet.png")
+
+    # Run CLI
+    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "neighbornet", "--quiet", "TRUE"))
+
+    compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
+})
+
+test_that("CLI data_sort, WOLF left fixed", {
+    # Paths
+    command <- "data_sort"
     df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
     output_path <- tempfile(fileext = ".csv")
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_left_df.csv")
@@ -124,9 +137,9 @@ test_that("CLI greedy_wolf, WOLF left fixed", {
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
 
-test_that("CLI greedy_wolf, WOLF right fixed", {
+test_that("CLI data_sort, WOLF right fixed", {
     # Paths
-    command <- "greedy_wolf"
+    command <- "data_sort"
     df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
     output_path <- tempfile(fileext = ".csv")
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_right_df.csv")
@@ -137,16 +150,29 @@ test_that("CLI greedy_wolf, WOLF right fixed", {
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
 
-# ./exec/alluvialmatch greedy_wolf --df tests/testthat/ground_truth/df_tests_cli.csv --output_df_path tests/testthat/ground_truth/sorting_wblf_df.csv --sorting_algorithm greedy_WBLF
-test_that("CLI greedy_wolf, WBLF", {
+# ./exec/alluvialmatch data_sort --df tests/testthat/ground_truth/df_tests_cli.csv --output_df_path tests/testthat/ground_truth/sorting_wblf_df.csv --sorting_algorithm greedy_WBLF
+test_that("CLI data_sort, WBLF", {
     # Paths
-    command <- "greedy_wolf"
+    command <- "data_sort"
     df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
     output_path <- tempfile(fileext = ".csv")
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wblf_df.csv")
 
     # Run CLI
     system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--sorting_algorithm", "greedy_WBLF", "--quiet", "TRUE"))
+
+    compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
+})
+
+test_that("CLI data_sort, neighbornet", {
+    # Paths
+    command <- "data_sort"
+    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    output_path <- tempfile(fileext = ".csv")
+    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_neighbornet_df.csv")
+
+    # Run CLI
+    system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--sorting_algorithm", "neighbornet", "--quiet", "TRUE"))
 
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })

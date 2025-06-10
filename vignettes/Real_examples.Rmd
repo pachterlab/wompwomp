@@ -82,3 +82,11 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neig
 sessioninfo::session_info()
 ```
 
+
+
+
+```{r}
+plot_alluvial(df="/Users/joeyrich/Desktop/local/alluvialmatch/tests/testthat/ground_truth/df_tests_cli.csv", output_plot_path="/Users/joeyrich/Desktop/local/alluvialmatch/sorting_none.png", sorting_algorithm="None")
+```
+
+

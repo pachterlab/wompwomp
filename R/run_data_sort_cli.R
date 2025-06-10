@@ -38,16 +38,19 @@ Optional:
     column2        <- get_arg(args, c("-c2", "--column2"))
     column_weights <- get_arg(args, c("-w", "--column_weights"))
     sorting_algorithm       <- get_arg(args, c("-s", "--sorting_algorithm"))
-    optimize_column_order <- store_true(args, c("--optimize_column_order"))
+    optimize_column_order <- store_false(args, c("--disable_optimize_column_order"))
     optimize_column_order_per_cycle <- store_true(args, c("--optimize_column_order_per_cycle"))
     fixed_column    <- get_fixed_column(args, "--fixed_column")
     random_initializations    <- get_numeric_arg(args, "--random_initializations")
     set_seed    <- get_numeric_arg(args, "--set_seed")
     output_df_path <- get_arg(args, c("-o", "--output_df_path"))
-    preprocess_data    <- store_true(args, "--random_initializations")
+    preprocess_data <- store_false(args, c("--disable_preprocess_data"))
     return_updated_graphing_columns    <- store_true(args, "--return_updated_graphing_columns")
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
+
+    # Hidden arguments
+    load_df <- store_false(args, c("--disable_load_df"))
 
     # Base argument list with required args
     args_list <- list(
@@ -69,6 +72,7 @@ Optional:
     if (!is.null(preprocess_data))       args_list$preprocess_data <- preprocess_data
     if (!is.null(return_updated_graphing_columns))       args_list$return_updated_graphing_columns <- return_updated_graphing_columns
     if (!is.null(verbose))                args_list$verbose <- verbose
+    if (!is.null(load_df))                args_list$load_df <- load_df
 
     # Dynamically call function
     result <- do.call(data_sort, args_list)

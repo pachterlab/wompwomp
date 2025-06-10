@@ -8,6 +8,7 @@ data_preprocess(
   df,
   graphing_columns,
   column_weights = NULL,
+  output_df_path = NULL,
   verbose = FALSE,
   load_df = TRUE,
   do_gather_set_data = FALSE
@@ -21,6 +22,8 @@ data_preprocess(
 \item{graphing_columns}{Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting).}
 
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
+
+\item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
