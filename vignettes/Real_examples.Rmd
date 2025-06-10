@@ -37,6 +37,20 @@ if (!reticulate::py_module_available("splitspy")) {
 ```{r}
 data_path <- "/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/kits_alluvial_data.csv"
 df <- read.csv(data_path)
+
+df$KiTS_dice_score_binned_broad <- cut(
+  df$KiTS_dice_score,
+  breaks = c(-Inf, 0.2, 0.7, 1),
+  labels = c("0-0.2", "0.2-0.7", "0.7-1"),
+  right = FALSE  # means intervals are [a, b)
+)
+
+df$USC_dice_score_binned_broad <- cut(
+  df$USC_dice_score,
+  breaks = c(-Inf, 0.2, 0.7, 1),
+  labels = c("0-0.2", "0.2-0.7", "0.7-1"),
+  right = FALSE  # means intervals are [a, b)
+)
 ```
 
 ```{r}
@@ -67,9 +81,13 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "gree
 
 
 ```{r}
-graphing_columns <- c("gender", "Race", "radiographic_size_binned", "KiTS_dice_score_binned")
+graphing_columns <- c("gender", "Race", "radiographic_size_binned", "KiTS_dice_score_binned_broad")
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE)
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE)
+# plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE)
+
+graphing_columns <- c("gender", "Race", "radiographic_size_binned", "USC_dice_score_binned_broad")
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE)
+# plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE)
 ```
 
 ```{r}
@@ -81,5 +99,32 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neig
 ```{r}
 sessioninfo::session_info()
 ```
+
+
+
+GOT
+```{r}
+url <- "https://raw.githubusercontent.com/MattLunkes/GoT_Affiliations/master/got_char.csv"
+got_file <- "got_char.csv"
+graphing_columns <- c("Origin", "Starting.Affiliation", "End.of.S1", "End.of.S2", "End.of.S3", "End.of.S4", "End.of.S5", "End.of.S6", "End.of.S7")
+
+if (!file.exists(got_file)) {
+    download.file(got_file, destfile, method = "curl")
+}
+
+df <- read.csv(got_file)
+```
+
+```{r}
+df_tmp <- df[graphing_columns]
+plot_alluvial(df_tmp, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE)
+```
+
+```{r}
+plot_alluvial(df_tmp, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_bands=TRUE, verbose=TRUE)
+```
+
+
+
 
 

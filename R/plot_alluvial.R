@@ -1055,10 +1055,6 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         random_initializations=1
     }
 
-    if ((is.null(fixed_column)) && (sorting_algorithm=='greedy_WOLF')) {
-        stop(sprintf("Column to fix for One-Sided matching is not specified.", fixed_column))
-    }
-
     if (is.null(graphing_columns) && (is.null(column1) || is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
     }
@@ -1070,6 +1066,11 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 
     if (is.null(graphing_columns)) {
         graphing_columns <- c(column1, column2)
+    }
+
+    if ((is.null(fixed_column)) && (sorting_algorithm=='greedy_WOLF')) {
+        if (verbose) message(sprintf("Using column %s as fixed_column for greedy_WOLF by default", column1))
+        fixed_column <- column1
     }
     #* Type Checking End
 

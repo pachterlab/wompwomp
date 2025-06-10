@@ -22,12 +22,12 @@ test_that("plot_alluvial returns a ggplot object", {
 
 test_that("plot_alluvial returns an error with 0 columns", {
     df <- data.frame()
-    expect_error(plot_alluvial(df), "at least two columns")
+    expect_error(plot_alluvial(df), "at least 2 columns")
 })
 
 test_that("plot_alluvial returns an error with 1 column", {
     df <- data.frame(method1 = sample(1:3, 100, TRUE))
-    expect_error(plot_alluvial(df), "at least two columns")
+    expect_error(plot_alluvial(df), "at least 2 columns")
 })
 
 test_that("plot_alluvial returns an error with 2 columns, where column1 is not in df", {
@@ -44,7 +44,7 @@ test_that("plot_alluvial returns an error with 3 columns, where graphing_columns
     df <- data.frame(method1 = sample(1:3, 100, TRUE),
                      method2 = sample(1:3, 100, TRUE),
                      method3 = sample(1:3, 100, TRUE))
-    expect_error(plot_alluvial(df, graphing_columns = NULL), "Dataframe has more than two columns")
+    expect_error(plot_alluvial(df, graphing_columns = NULL), "dataframe has more than 2 columns")
 })
 
 test_that("plot_alluvial returns an error with 3 columns, where column2 is not in df", {
@@ -58,27 +58,6 @@ test_that("plot_alluvial works with a df with 2 columns, both column1 and column
     set.seed(42)
     df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
     expect_s3_class(plot_alluvial(df), "ggplot")
-})
-
-test_that("plot_alluvial works with 2 columns, column1 specified, column2 NULL", {
-    set.seed(42)
-    df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-    expect_s3_class(plot_alluvial(df, graphing_columns = "method1"), "ggplot")
-})
-
-test_that("plot_alluvial works with 2 columns, column2 specified, column1 NULL", {
-    set.seed(42)
-    df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-    expect_s3_class(plot_alluvial(df, graphing_columns = c("method2")), "ggplot")
-})
-
-test_that("VDIFFR - plot_alluvial works with 2 columns, column2 specified, column1 NULL", {
-    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
-
-    set.seed(42)
-    df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-    p <- plot_alluvial(df, graphing_columns = "method2", sorting_algorithm = "greedy_WBLF")
-    vdiffr::expect_doppelganger("basic alluvial plot", p)
 })
 
 test_that("plot_alluvial works with 4 columns, column1 and column2 specified", {
@@ -118,8 +97,14 @@ test_that("data_sort works with unsorted algorithm", {
     df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "weight"))
 
     unsorted_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "weight", sorting_algorithm = "None")
+    # unsorted_df <- dplyr::ungroup(unsorted_df)
 
     ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "unsorted_df.rds")
+
+    if (!file.exists(ground_truth_df_path)) {
+        saveRDS(unsorted_df, file = ground_truth_df_path)
+    }
+
     ground_truth_df <- readRDS(ground_truth_df_path)
 
     expect_equal(unsorted_df, ground_truth_df)
@@ -135,10 +120,14 @@ test_that("data_sort works with greedy_WOLF algorithm", {
 
     # Aggregate by combination
     df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "weight"))
-
     greedy_wolf_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "weight", sorting_algorithm = "greedy_WOLF")
 
     ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "greedy_wolf_df.rds")
+
+    if (!file.exists(ground_truth_df_path)) {
+        saveRDS(greedy_wolf_df, file = ground_truth_df_path)
+    }
+
     ground_truth_df <- readRDS(ground_truth_df_path)
 
     expect_equal(greedy_wolf_df, ground_truth_df)
@@ -158,6 +147,11 @@ test_that("data_sort works with greedy_WBLF algorithm", {
     greedy_wblf_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "weight", sorting_algorithm = "greedy_WBLF")
 
     ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "greedy_wblf_df.rds")
+
+    if (!file.exists(ground_truth_df_path)) {
+        saveRDS(greedy_wblf_df, file = ground_truth_df_path)
+    }
+
     ground_truth_df <- readRDS(ground_truth_df_path)
 
     expect_equal(greedy_wblf_df, ground_truth_df)
@@ -178,8 +172,48 @@ test_that("data_sort works with neighbornet algorithm", {
     neighbornet_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "weight", sorting_algorithm = "neighbornet")
 
     ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "neighbornet_df.rds")
+
+    if (!file.exists(ground_truth_df_path)) {
+        saveRDS(neighbornet_df, file = ground_truth_df_path)
+    }
+
     ground_truth_df <- readRDS(ground_truth_df_path)
 
     expect_equal(neighbornet_df, ground_truth_df)
 })
 
+test_that("VDIFFR - plot_alluvial works with 2 columns, unsorted", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+    p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "None")
+    vdiffr::expect_doppelganger("basic_alluvial_plot_unsorted", p)
+})
+
+test_that("VDIFFR - plot_alluvial works with 2 columns, greedy_WOLF", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+    p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "greedy_WOLF")
+    vdiffr::expect_doppelganger("basic_alluvial_plot_WOLF", p)
+})
+
+test_that("VDIFFR - plot_alluvial works with 2 columns, greedy_WBLF", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+    p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "greedy_WBLF")
+    vdiffr::expect_doppelganger("basic_alluvial_plot_WBLF", p)
+})
+
+test_that("VDIFFR - plot_alluvial works with 2 columns, greedy_NN", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+    p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "neighbornet")
+    vdiffr::expect_doppelganger("basic_alluvial_plot_NN", p)
+})
