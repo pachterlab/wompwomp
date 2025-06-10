@@ -126,6 +126,9 @@ plot_alluvial(df_tmp, graphing_columns = graphing_columns, sorting_algorithm = "
 
 
 ```{r}
+devtools::load_all()
+data_sort(df="/Users/joeyrich/Desktop/local/alluvialmatch/tests/testthat/ground_truth/df_tests_cli.csv", sorting_algorithm="greedy_WOLF", fixed_column=1)
+
 df_path <- "/Users/joeyrich/Desktop/local/alluvialmatch/tests/testthat/ground_truth/df_tests_cli.csv"
 output_plot_path <- "/Users/joeyrich/Desktop/local/alluvialmatch/TMP2.png"
 plot_alluvial(df=df_path, output_plot_path=output_plot_path, sorting_algorithm="greedy_WOLF", fixed_column=1)

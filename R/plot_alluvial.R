@@ -4,7 +4,7 @@
 #' @docType package
 #' @name alluvialmatch
 #'
-#' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter
+#' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter bind_rows
 #' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave guides
 #' @importFrom ggalluvial geom_alluvium geom_stratum stat_stratum stat_alluvium
 #' @importFrom ggforce gather_set_data
@@ -1055,8 +1055,35 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         random_initializations=1
     }
 
-    if (is.null(graphing_columns) && (is.null(column1) || is.null(column2))) {
+    if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
+    }
+
+    if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
+        stop("Some graphing_columns are not present in the dataframe.")
+    }
+
+    if ((is.character(df)) && (load_df)) {
+        if (verbose) message("Loading in data")
+        df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
+        load_df <- FALSE
+    }
+
+    if (ncol(df) < 2) {
+        stop("Dataframe must have at least 2 columns when column_weights is NULL.")
+    } else if (ncol(df) > 2) {
+        if (is.null(graphing_columns) && is.null(column1) && is.null(column2)) {
+            stop("graphing_columns must be specified when dataframe has more than 2 columns and column_weights is NULL.")
+        }
+    } else {  # length 2
+        if (is.null(column1) && !is.null(column2)) {
+            column1 <- setdiff(colnames(df), column2)
+        } else if (is.null(column2) && !is.null(column1)) {
+            column2 <- setdiff(colnames(df), column1)
+        } else if (is.null(column1) && is.null(column2)) {
+            column1 <- colnames(df)[1]
+            column2 <- colnames(df)[2]
+        }
     }
 
     if (length(graphing_columns) == 2) {

@@ -64,10 +64,15 @@ test_that("CLI plot_alluvial, no sort", {
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_none.png")
 
     # Run CLI
-    # browser()
-    # cat(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "None"))
-    # plot_alluvial(df=df_path, output_plot_path=output_path, sorting_algorithm="None")
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "None", "--quiet", "TRUE"))
+    args <- c(
+        command,
+        "--df", df_path,
+        "--output_plot_path", output_path,
+        "--sorting_algorithm", "None",
+        "--quiet", "TRUE"
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    system2(cli_cmd_path, args)
 
     compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
@@ -80,7 +85,16 @@ test_that("CLI plot_alluvial, WOLF left fixed", {
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_left.png")
 
     # Run CLI
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "greedy_WOLF", "--fixed_column", 1, "--quiet", "TRUE"))
+    args <- c(
+        command,
+        "--df", df_path,
+        "--output_plot_path", output_path,
+        "--sorting_algorithm", "greedy_WOLF",
+        "--fixed_column", 1,
+        "--quiet", "TRUE"
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    system2(cli_cmd_path, args)
 
     compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
@@ -93,7 +107,16 @@ test_that("CLI plot_alluvial, WOLF right fixed", {
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_right.png")
 
     # Run CLI
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "greedy_WOLF", "--fixed_column", 2, "--quiet", "TRUE"))
+    args <- c(
+        command,
+        "--df", df_path,
+        "--output_plot_path", output_path,
+        "--sorting_algorithm", "greedy_WOLF",
+        "--fixed_column", 2,
+        "--quiet", "TRUE"
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    system2(cli_cmd_path, args)
 
     compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
@@ -106,7 +129,15 @@ test_that("CLI plot_alluvial, WBLF", {
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wblf.png")
 
     # Run CLI
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "greedy_WBLF", "--quiet", "TRUE"))
+    args <- c(
+        command,
+        "--df", df_path,
+        "--output_plot_path", output_path,
+        "--sorting_algorithm", "greedy_WBLF",
+        "--quiet", "TRUE"
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    system2(cli_cmd_path, args)
 
     compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
@@ -119,7 +150,15 @@ test_that("CLI plot_alluvial, neighbornet", {
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_neighbornet.png")
 
     # Run CLI
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_plot_path", output_path, "--sorting_algorithm", "neighbornet", "--quiet", "TRUE"))
+    args <- c(
+        command,
+        "--df", df_path,
+        "--output_plot_path", output_path,
+        "--sorting_algorithm", "neighbornet",
+        "--quiet", "TRUE"
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    system2(cli_cmd_path, args)
 
     compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
@@ -132,7 +171,16 @@ test_that("CLI data_sort, WOLF left fixed", {
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_left_df.csv")
 
     # Run CLI
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--sorting_algorithm", "greedy_WOLF", "--fixed_column", 1, "--quiet", "TRUE"))
+    args <- c(
+        command,
+        "--df", df_path,
+        "--output_df_path", output_path,
+        "--sorting_algorithm", "greedy_WOLF",
+        "--fixed_column", 1,
+        "--quiet", "TRUE"
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    system2(cli_cmd_path, args)
 
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
@@ -145,7 +193,16 @@ test_that("CLI data_sort, WOLF right fixed", {
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_right_df.csv")
 
     # Run CLI
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--sorting_algorithm", "greedy_WOLF", "--fixed_column", 2, "--quiet", "TRUE"))
+    args <- c(
+        command,
+        "--df", df_path,
+        "--output_df_path", output_path,
+        "--sorting_algorithm", "greedy_WOLF",
+        "--fixed_column", 2,
+        "--quiet", "TRUE"
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    system2(cli_cmd_path, args)
 
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
@@ -159,7 +216,15 @@ test_that("CLI data_sort, WBLF", {
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wblf_df.csv")
 
     # Run CLI
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--sorting_algorithm", "greedy_WBLF", "--quiet", "TRUE"))
+    args <- c(
+        command,
+        "--df", df_path,
+        "--output_df_path", output_path,
+        "--sorting_algorithm", "greedy_WBLF",
+        "--quiet", "TRUE"
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    system2(cli_cmd_path, args)
 
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
@@ -172,7 +237,15 @@ test_that("CLI data_sort, neighbornet", {
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_neighbornet_df.csv")
 
     # Run CLI
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--sorting_algorithm", "neighbornet", "--quiet", "TRUE"))
+    args <- c(
+        command,
+        "--df", df_path,
+        "--output_df_path", output_path,
+        "--sorting_algorithm", "neighbornet",
+        "--quiet", "TRUE"
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    system2(cli_cmd_path, args)
 
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
@@ -186,8 +259,16 @@ test_that("CLI determine_crossing_edges", {
     truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "crossing_wblf_df.csv")
 
     # Run CLI
-
-    system2(cli_cmd_path, c(command, "--df", df_path, "--output_df_path", output_path, "--column1", "col1_int", "--column2", "col2_int", "--quiet", "TRUE"))
+    args <- c(
+        command,
+        "--df", df_path,
+        "--output_df_path", output_path,
+        "--column1", "col1_int",
+        "--column2", "col2_int",
+        "--quiet", "TRUE"
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    system2(cli_cmd_path, args)
 
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
@@ -199,7 +280,12 @@ test_that("CLI determine_weighted_layer_free_objective", {
     df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "crossing_wblf_df.csv")
 
     # Run CLI
-    output <- system2(cli_cmd_path, args = c(command, "--df", df_path), stdout = TRUE)
+    args <- c(
+        command,
+        "--df", df_path
+    )
+    # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
+    output <- system2(cli_cmd_path, args, stdout = TRUE)
     num <- as.integer(gsub(".*\\s", "", output))
 
     testthat::expect_equal(num, 14)
