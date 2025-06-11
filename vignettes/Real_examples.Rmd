@@ -67,6 +67,94 @@ plot_alluvial(df_tmp, graphing_columns = graphing_columns, sorting_algorithm = "
 
 ```{r}
 devtools::load_all()
+
+new_row <- data.frame(KiTS_dice_score_binned = "0.1-0.2", USC_dice_score_binned  = "0.6-0.7", stringsAsFactors = FALSE)
+df_tmp_added <- rbind(df_tmp, new_row)
+
+new_row <- data.frame(KiTS_dice_score_binned = "0.3-0.4", USC_dice_score_binned  = "0.6-0.7", stringsAsFactors = FALSE)
+df_tmp_added <- rbind(df_tmp_added, new_row)
+
+new_row <- data.frame(KiTS_dice_score_binned = "0.4-0.5", USC_dice_score_binned  = "0.6-0.7", stringsAsFactors = FALSE)
+df_tmp_added <- rbind(df_tmp_added, new_row)
+
+plot_alluvial(df_tmp_added, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE, optimize_column_order_per_cycle=FALSE)
+```
+
+```{r}
+devtools::load_all()
+plot_alluvial(df_tmp_added, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, verbose=TRUE, optimize_column_order_per_cycle=FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+devtools::load_all()
+plot_alluvial(df_tmp, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, verbose=TRUE, optimize_column_order_per_cycle=FALSE, make_intermediate_neighbornet_plots=TRUE)
+```
+
+```{r}
+devtools::load_all()
+plot_alluvial(df_tmp, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, verbose=TRUE, optimize_column_order_per_cycle=FALSE)
+```
+
+```{r}
+devtools::load_all()
+plot_alluvial(df_tmp, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, verbose=TRUE, optimize_column_order_per_cycle=FALSE, make_intermediate_neighbornet_plots=TRUE)
+```
+
+```{r}
+devtools::load_all()
+plot_alluvial(df_tmp, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, verbose=TRUE, optimize_column_order_per_cycle=FALSE)
+```
+
+```{r}
+devtools::load_all()
 # debugonce(plot_alluvial)
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, verbose=TRUE)
 ```
@@ -103,7 +191,7 @@ got_file <- "got_char.csv"
 graphing_columns <- c("Origin", "Starting.Affiliation", "End.of.S1", "End.of.S2", "End.of.S3", "End.of.S4", "End.of.S5", "End.of.S6", "End.of.S7")
 
 if (!file.exists(got_file)) {
-    download.file(got_file, destfile, method = "curl")
+    download.file(url, got_file, method = "curl")
 }
 
 df <- read.csv(got_file)

@@ -73,7 +73,7 @@ Optional:
     quiet <- store_true(args, c("-q", "--quiet"))
 
     # Hidden arguments
-    load_df <- store_false(args, c("--disable_load_df"))
+    make_intermediate_neighbornet_plots <- store_true(args, c("make_intermediate_neighbornet_plots"))
 
     # Base argument list with required args
     args_list <- list(
@@ -106,6 +106,7 @@ Optional:
     if (!is.null(output_df_path))          args_list$output_df_path <- output_df_path
     if (!is.null(preprocess_data))              args_list$preprocess_data <- preprocess_data
     if (!is.null(verbose))                      args_list$verbose <- verbose
+    if (!is.null(make_intermediate_neighbornet_plots))   args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
 
     # Dynamically call function
     result <- do.call(plot_alluvial, args_list)

@@ -30,7 +30,8 @@ plot_alluvial(
   output_plot_path = NULL,
   output_df_path = NULL,
   preprocess_data = TRUE,
-  verbose = FALSE
+  verbose = FALSE,
+  make_intermediate_neighbornet_plots = FALSE
 )
 }
 \arguments{
@@ -87,6 +88,8 @@ plot_alluvial(
 \item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
+
+\item{make_intermediate_neighbornet_plots}{Internal flag; not recommended to modify.}
 }
 \value{
 A \code{ggplot2} object representing the alluvial plot.

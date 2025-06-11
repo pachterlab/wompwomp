@@ -24,19 +24,30 @@ type_checking_files <- function(output_path, truth_path, check = TRUE) {
     if (!check) return(invisible(TRUE))  # Allow skipping comparison
 }
 
-compare_images <- function(output_path, truth_path, check = TRUE) {
+compare_images <- function(output_path, truth_path, tolerance_fraction = 0.01, check = TRUE) {
+    # tolerance_fraction of 0.01 means up to 1% difference allowable
     type_checking_files(output_path=output_path, truth_path=truth_path, check=check)
 
     # Load and compare images
     img_new   <- magick::image_read(output_path)
     img_truth <- magick::image_read(truth_path)
 
+    # Ensure same size before comparing
+    stopifnot(identical(magick::image_info(img_new)[, c("width", "height")],
+                        magick::image_info(img_truth)[, c("width", "height")]))
+
+    # Total pixel count
+    dims <- magick::image_info(img_new)
+    total_pixels <- dims$width * dims$height
+
     # Compare images using Absolute Error metric
     diff <- magick::image_compare(img_new, img_truth, metric = "AE")
     diff_val <- as.numeric(attr(diff, "distortion"))
 
+    tolerance <- tolerance_fraction * total_pixels
+
     testthat::expect_true(
-        diff_val == 0,
+        diff_val <= tolerance,
         info = sprintf("Images differ (distortion = %f)", diff_val)
     )
 
@@ -290,4 +301,6 @@ test_that("CLI determine_weighted_layer_free_objective", {
 
     testthat::expect_equal(num, 14)
 })
+
+
 

@@ -9,14 +9,33 @@
 setup_python_env <- function(envname = "alluvialmatch_env", packages = c("numpy==1.23.5", "splitspy")) {
     conda_findable <- tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)
     if (!conda_findable) {
-        message("Installing Miniconda...")
-        reticulate::install_miniconda()
+        if (interactive()) {
+            answer <- readline("Miniconda not found. Would you like to install it now? [y/n]: ")
+            if (tolower(answer) %in% c("y", "yes")) {
+                message("Installing Miniconda...")
+                reticulate::install_miniconda()
+            } else {
+                stop("Miniconda is required but was not installed. Install with `reticulate::install_miniconda()`.")
+            }
+        }
     }
 
     envs <- reticulate::conda_list()$name
     if (!(envname %in% envs)) {
-        message("Creating conda environment '", envname, "'...")
-        reticulate::conda_create(envname, python_version = "3.10")
+        if (interactive()) {
+            answer <- readline(paste0("Conda environment '", envname, "' not found. Create it now? [y/n]: "))
+            if (tolower(answer) %in% c("y", "yes")) {
+                message("Creating conda environment '", envname, "'...")
+                reticulate::conda_create(envname, python_version = "3.10")
+            } else {
+                stop("Conda environment '", envname, "' is required but was not created.")
+            }
+        } else {
+            stop(sprintf(
+                "Conda environment '%s' not found, and cannot prompt in non-interactive mode. Create it with: reticulate::conda_create('%s', python_version = \"3.10\")",
+                envname, envname
+            ))
+        }
     }
 
     reticulate::use_condaenv(envname, required = TRUE)
@@ -47,7 +66,18 @@ setup_python_env <- function(envname = "alluvialmatch_env", packages = c("numpy=
         }
 
         if (need_install) {
-            reticulate::conda_install(envname, packages = pkg, pip = TRUE)
+            if (interactive()) {
+                answer <- readline(paste0("Package '", pkg, "' is not installed in conda env '", envname, "'. Install it now with pip? [y/n]: "))
+                if (tolower(answer) %in% c("y", "yes")) {
+                    reticulate::conda_install(envname, packages = pkg, pip = TRUE)
+                } else {
+                    stop("Package '", pkg, "' is required but was not installed.")
+                }
+            } else {
+                stop("Package '", pkg, "' not found in conda environment '", envname, "', and cannot prompt in non-interactive mode. ",
+                     "You can install it manually with:\n",
+                     "reticulate::conda_install(\"", envname, "\", packages = \"", pkg, "\", pip = TRUE)")
+            }
         }
     }
 }

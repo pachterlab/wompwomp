@@ -217,3 +217,176 @@ test_that("VDIFFR - plot_alluvial works with 2 columns, greedy_NN", {
     p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "neighbornet")
     vdiffr::expect_doppelganger("basic_alluvial_plot_NN", p)
 })
+
+
+make_more_neighbornet_2_layer_df <- function() {
+    df <- data.frame(
+        tissue = c(
+            1, 1, 1,
+            2, 2, 2, 2, 2, 2,
+            3, 3, 3, 3, 3, 3, 3,
+            4, 4,
+            5, 5, 5, 5, 5, 5, 5, 5, 5
+        ),
+        cluster = c(
+            6, 6, 7,
+            6, 7, 7, 7, 7, 7,
+            6, 8, 8, 8, 8, 8, 8,
+            8, 8,
+            8, 8, 8, 8, 8, 8, 8, 8, 8
+        )
+    )
+    column1 <- "tissue"
+    column2 <- "cluster"
+    graphing_columns <- c(column1, column2)
+
+    list(
+        df = df,
+        graphing_columns = graphing_columns
+    )
+}
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, unsorted", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_2_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_2layer_unsorted", p)
+})
+
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, optimize_column_order_per_cycle FALSE", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_2_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order_per_cycle=FALSE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_2layer_neighbornet_optimize_column_order_per_cycle_FALSE", p)
+})
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, optimize_column_order_per_cycle TRUE", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_2_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order_per_cycle=TRUE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_2layer_neighbornet_optimize_column_order_per_cycle_TRUE", p)
+})
+
+
+
+
+make_more_neighbornet_3_layer_df <- function() {
+    df <- data.frame(
+        tissue = c(
+            "BRAIN", "BRAIN", "BRAIN",
+            "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+            "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+            "T CELL", "T CELL",
+            "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+        ),
+        cluster = c(
+            1, 1, 2,
+            1, 2, 2, 2, 2, 2,
+            1, 3, 3, 3, 3, 3, 3,
+            4, 4,
+            4, 4, 4, 4, 4, 4, 4, 4, 4
+        ),
+        sex = c(
+            "male", "female", "male",
+            "female", "male", "female", "female", "male", "female",
+            "male", "female", "male", "female", "male", "female", "male",
+            "female", "male",
+            "male", "male", "male", "male", "male", "male", "male", "male", "male"
+        )
+    )
+    graphing_columns <- c("tissue", "cluster", "sex")
+
+    list(
+        df = df,
+        graphing_columns = graphing_columns
+    )
+}
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, unsorted", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_3_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted", p)
+})
+
+
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order FALSE, optimize_column_order_per_cycle FALSE", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_3_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=FALSE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderFALSE_optimize_column_order_per_cycleFALSE", p)
+})
+
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order FALSE, optimize_column_order_per_cycle TRUE", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_3_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=TRUE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderFALSE_optimize_column_order_per_cycleTRUE", p)
+})
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE, optimize_column_order_per_cycle FALSE", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_3_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderTRUE_optimize_column_order_per_cycleFALSE", p)
+})
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE, optimize_column_order_per_cycle TRUE", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_3_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=TRUE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderTRUE_optimize_column_order_per_cycleTRUE", p)
+})
+
+

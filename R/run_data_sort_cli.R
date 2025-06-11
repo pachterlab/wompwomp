@@ -51,6 +51,8 @@ Optional:
 
     # Hidden arguments
     load_df <- store_false(args, c("--disable_load_df"))
+    make_intermediate_neighbornet_plots <- store_true(args, c("make_intermediate_neighbornet_plots"))
+
 
     # Base argument list with required args
     args_list <- list(
@@ -73,6 +75,7 @@ Optional:
     if (!is.null(return_updated_graphing_columns))       args_list$return_updated_graphing_columns <- return_updated_graphing_columns
     if (!is.null(verbose))                args_list$verbose <- verbose
     if (!is.null(load_df))                args_list$load_df <- load_df
+    if (!is.null(make_intermediate_neighbornet_plots))   args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
 
     # Dynamically call function
     result <- do.call(data_sort, args_list)

@@ -20,7 +20,8 @@ data_sort(
   preprocess_data = TRUE,
   return_updated_graphing_columns = FALSE,
   verbose = FALSE,
-  load_df = TRUE
+  load_df = TRUE,
+  make_intermediate_neighbornet_plots = FALSE
 )
 }
 \arguments{
@@ -57,6 +58,8 @@ data_sort(
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
 \item{load_df}{Internal flag; not recommended to modify.}
+
+\item{make_intermediate_neighbornet_plots}{Internal flag; not recommended to modify.}
 }
 \value{
 If return_updated_graphing_columns == FALSE (default): A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc. The position mappings in these columns, as well as the order of the columns (if \code{optimize_column_order} is TRUE), will be sorted according to \code{sorting_algorithm}.

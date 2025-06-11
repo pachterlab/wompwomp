@@ -1,10 +1,10 @@
 citHeader("To cite the alluvialmatch package in publications, use:")
 
 # Once manuscript is out, replace entry = "Manual" with entry = "Article", and add in journal = "Journal Name"
-citEntry(
+bibentry(
   # entry = "Article"
   entry = "Manual",
-  title = "alluvialmatch: Make alluvial plots with order and colors optimized to minimize cluster cross-over",
+  title = "alluvialmatch: Make Alluvial Plots with Order and Colors Optimized to Heuristically Minimize Cluster Cross-over in Polynomial Time",
   author = c(person("Joseph", "Rich", role = c("aut", "cre"), email = "jmrich@caltech.edu"), person("Conrad", "Oakes", role = "aut", email = "coakes@caltech.edu"), person("Lior", "Pachter", role = "aut")),
   # journal = "Journal Name",
   year = 2025,
