@@ -7,6 +7,7 @@
 #' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter bind_rows across matches all_of
 #' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave guides scale_color_manual
 #' @importFrom ggalluvial geom_alluvium geom_stratum stat_stratum stat_alluvium
+#' @importFrom ggfittext geom_fit_text
 #' @importFrom ggforce gather_set_data
 #' @importFrom purrr map
 #' @importFrom igraph max_bipartite_match V graph_from_data_frame
@@ -587,7 +588,9 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
                                             color_band_column=NULL, color_band_boundary=FALSE,
                                             alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
                                             include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
-                                            include_group_sizes = FALSE, verbose = FALSE
+                                            include_group_sizes = FALSE, verbose = FALSE,
+                                   box_width = 1/3, text_width = 1/4, min_text = 4, 
+                                   save_height = 6, save_width = 6
 ) {
     clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
     clus_df_gather <- clus_df_gather[clus_df_gather$x == 1,]
@@ -687,9 +690,9 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
     }
 
     if (color_boxes) {
-        p <- p + geom_stratum(fill = final_colors)
+        p <- p + geom_stratum(width = box_width, fill = final_colors)
     } else {
-        p <- p + geom_stratum()
+        p <- p + geom_stratum(width = box_width)
     }
 
     if (!(include_labels_in_boxes==FALSE)) {
@@ -702,8 +705,10 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
 
             final_label_names <- c(final_label_names, rev(curr_label))
         }
-        p <- p +
-            geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))
+        p <- p + 
+            #geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))+
+            geom_fit_text(reflow = TRUE,stat = "stratum", width = text_width, min.size = min_text, 
+                          aes(label = after_stat(final_label_names)))
     }
 
     top_y = 0
@@ -716,18 +721,21 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
             mutate(cum_y = cumsum(total)) %>%
             pull(cum_y) %>%
             max()
-        top_y <- max(curr_y/2, top_y/2)
+        top_y <- max(curr_y, top_y)
     }# top_y1 and top_y2 are probably the same
 
     if (include_axis_titles) {
         # Offset to place labels a bit above
-        offset <- 1.1 * top_y
-        x<-1
-        for (col_group in graphing_columns) {
-            p <- p +
-                annotate("text", x = x, y = top_y + offset, label = col_group, size = 5, hjust = 0.5)
-            x <- x+1
-        }
+        offset <- top_y + top_y/5
+        #x<-1
+        #for (col_group in graphing_columns) {
+        p <- p +
+            scale_x_continuous(breaks = 1:length(graphing_columns), labels = graphing_columns,
+                               position = 'top')
+            #annotate("text", x = seq(1, length(graphing_columns)), y = rep(offset, length(graphing_columns)), 
+                     #label = graphing_columns, size = 5, hjust = 0.5, vjust=.5)
+        #    x <- x+1
+        #}
     }
 
     if (include_group_sizes) {
@@ -744,14 +752,16 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
         theme_void() +
         theme(
             text = element_text(family = "sans"),
-            legend.text = element_text(size = rel(axis_text_size))
+            legend.text = element_text(size = rel(axis_text_size)),
+            axis.text.x = element_text()
         )
 
     p <- p + theme(legend.position = "none")  # to hide legend
 
     if (!is.null(output_plot_path)) {
         if (verbose) message(sprintf("Saving plot to=%s", output_plot_path))
-        ggsave(output_plot_path, plot = p, dpi = 300, bg = "white")
+        ggsave(output_plot_path, plot = p, 
+               height = save_height, width = save_width, dpi = 300, bg = "white")
     }
 
     return(p)
@@ -1219,7 +1229,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' p <- plot_alluvial(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
 #'
 #' @export
-plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = 'neighbornet', optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE, fixed_column = NULL, random_initializations = 1, set_seed=42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column=NULL, color_band_boundary=FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data=TRUE, verbose=FALSE, make_intermediate_neighbornet_plots = FALSE) {
+plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = 'neighbornet', optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE, fixed_column = NULL, random_initializations = 1, set_seed=42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column=NULL, color_band_boundary=FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data=TRUE, box_width = 1/3, text_width = 1/4, min_text = 4, save_height = 6, save_width = 6, verbose=FALSE, make_intermediate_neighbornet_plots = FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -1305,7 +1315,9 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                                                          match_colors = match_colors, alluvial_alpha = alluvial_alpha,
                                                          include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
                                                          include_group_sizes = include_group_sizes,
-                                                         output_plot_path = output_plot_path, verbose = verbose)
+                                                         output_plot_path = output_plot_path, verbose = verbose,
+                                            box_width = box_width, text_width = text_width, min_text = min_text, 
+                                            save_height = save_height, save_width = save_width)
 
     return(alluvial_plot)
 }
