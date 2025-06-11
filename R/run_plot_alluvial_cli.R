@@ -38,6 +38,7 @@ Optional:
   --box_width Numeric between 0 and 1. Box width
   --text_width Numeric between 0 and 1. Text width
   --min_text Integer greater than 0. Min text
+  --auto_adjust_text Whether to automatically adjust text size to fit in box.
   --save_height Integer greater than 0. Save height, in inches
   --save_width Integer greater than 0. Save width, in inches
   -v, --verbose             If TRUE, will display messages during the function.
@@ -74,11 +75,12 @@ Optional:
     include_group_sizes <- store_false(args, c("--disable_include_group_sizes"))
     output_df_path <- get_arg(args, c("--output_df_path"))
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
-    box_width <- store_false(args, c("--box_width"))
-    text_width <- store_false(args, c("--text_width"))
-    min_text <- store_false(args, c("--min_text"))
-    save_height <- store_false(args, c("--save_height"))
-    save_width <- store_false(args, c("--save_width"))
+    box_width <- get_numeric_arg(args, c("--box_width"))
+    text_width <- get_numeric_arg(args, c("--text_width"))
+    min_text <- get_numeric_arg(args, c("--min_text"))
+    auto_adjust_text <- store_false(args, c("--disable_auto_adjust_text"))
+    save_height <- get_numeric_arg(args, c("--save_height"))
+    save_width <- get_numeric_arg(args, c("--save_width"))
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
@@ -118,6 +120,7 @@ Optional:
     if (!is.null(box_width)) args_list$box_width <- box_width
     if (!is.null(text_width)) args_list$text_width <- text_width
     if (!is.null(min_text)) args_list$min_text <- min_text
+    if (!is.null(auto_adjust_text)) args_list$auto_adjust_text <- auto_adjust_text
     if (!is.null(save_height)) args_list$save_height <- save_height
     if (!is.null(save_width)) args_list$save_width <- save_width
     if (!is.null(verbose)) args_list$verbose <- verbose

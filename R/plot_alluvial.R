@@ -172,6 +172,9 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
     # Combine into a single data frame
     final_result <- bind_rows(summarized_results)
 
+    # full_dist_matrix[1:10, 1:10] <- 100
+    # full_dist_matrix[11:17, 11:17] <- 100
+
     for (i in seq_len(nrow(final_result))) {
         grouping_str <- final_result$grouping[i]
         parts <- strsplit(grouping_str, "\\+")[[1]]
@@ -187,6 +190,11 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
             full_dist_matrix[n2, n1] <- -log(w) # symmetric since graph is undirected
         }
     }
+
+    # full_dist_matrix[17,2] = 1000000  #!!!!
+    # full_dist_matrix[2,17] = 1000000  #!!!!
+    # full_dist_matrix[17,4] = 1000000  #!!!!
+    # full_dist_matrix[4,17] = 1000000  #!!!!
 
     # make sure all numbers are positive for neighbornet
     min_val_abs <- abs(min(full_dist_matrix))
@@ -598,7 +606,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns,
                                    alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
                                    include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
                                    include_group_sizes = FALSE, verbose = FALSE,
-                                   box_width = 1 / 3, text_width = 1 / 4, min_text = 4,
+                                   box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE,
                                    save_height = 6, save_width = 6) {
     clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
     clus_df_gather <- clus_df_gather[clus_df_gather$x == 1, ]
@@ -712,12 +720,16 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns,
 
             final_label_names <- c(final_label_names, rev(curr_label))
         }
-        p <- p +
-            # geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))+
-            geom_fit_text(
-                reflow = TRUE, stat = "stratum", width = text_width, min.size = min_text,
-                aes(label = after_stat(final_label_names))
-            )
+        if (auto_adjust_text) {
+            p <- p +
+                geom_fit_text(
+                    reflow = TRUE, stat = "stratum", width = text_width, min.size = min_text,
+                    aes(label = after_stat(final_label_names))
+                )
+        } else {
+            p <- p +
+                geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))
+        }
     }
 
     top_y <- 0
@@ -1241,6 +1253,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param box_width Numeric between 0 and 1. Box width
 #' @param text_width Numeric between 0 and 1. Text width
 #' @param min_text Integer greater than 0. Min text
+#' @param auto_adjust_text Logical. Whether to automatically adjust text size to fit in box.
 #' @param save_height Integer greater than 0. Save height, in inches
 #' @param save_width Integer greater than 0. Save width, in inches
 #' @param verbose Logical. If TRUE, will display messages during the function.
@@ -1262,7 +1275,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' p <- plot_alluvial(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
 #'
 #' @export
-plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, fixed_column = NULL, random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_band_boundary = FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE, box_width = 1 / 3, text_width = 1 / 4, min_text = 4, save_height = 6, save_width = 6, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE) {
+plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, fixed_column = NULL, random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_band_boundary = FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE, box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE, save_height = 6, save_width = 6, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -1354,7 +1367,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
         include_group_sizes = include_group_sizes,
         output_plot_path = output_plot_path, verbose = verbose,
-        box_width = box_width, text_width = text_width, min_text = min_text,
+        box_width = box_width, text_width = text_width, min_text = min_text, auto_adjust_text = auto_adjust_text,
         save_height = save_height, save_width = save_width
     )
 
