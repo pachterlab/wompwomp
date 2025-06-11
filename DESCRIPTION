@@ -23,7 +23,8 @@ Imports:
     magrittr,
     data.table,
     reticulate,
-    purrr
+    purrr,
+    ggfittext
 Depends: R (>= 3.5.0)
 Suggests: 
     testthat (>= 3.0.0),

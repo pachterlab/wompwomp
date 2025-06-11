@@ -95,7 +95,9 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns,
     # Prepare data in R
     labels <- graphing_columns  # assuming this is a character vector
     column_dist_matrix <- column_dist_matrix
-    mat_list <- split(column_dist_matrix, row(column_dist_matrix))  # convert R matrix to list of row-vectors
+    # # Call Python function
+    # mat_list <- split(column_dist_matrix, row(column_dist_matrix))  # convert R matrix to list of row-vectors
+    # result <- nn_mod$neighbor_net(labels, mat_list)
     if (verbose) message("Running neighbornet for column order")
     reticulate::source_python(neighbornet_script_path)
     result <- neighbor_net(labels, column_dist_matrix)
@@ -191,9 +193,9 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
     mat <- full_dist_matrix
     mat[is.infinite(mat)] <- 1e6
     mat[is.na(mat)] <- 1e6
-    mat_list <- split(mat, row(mat))  # convert R matrix to list of row-vectors
 
-    # Call Python function
+    # # Call Python function
+    # mat_list <- split(mat, row(mat))  # convert R matrix to list of row-vectors
     # result <- nn_mod$neighbor_net(labels, mat_list)
     if (verbose) message("Running neighbornet for stratum order")
     reticulate::source_python(neighbornet_script_path)
@@ -289,7 +291,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
     }
 
     neighbornet_objective_minimum <- Inf
-    p_best_neighbornet <- NULL
+    # p_best_neighbornet <- NULL
     cycle_best <- NULL
     clus_df_gather_best <- NULL
     graphing_columns_best <- NULL
@@ -518,8 +520,8 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
 }
 
 
-find_group2_colors <- function(clus_df_gather, ditto_colors,unused_colors, current_g1_colors,
-                               group1_name = 'col1_int', group2_name = 'col2_int', group2_colors=NULL) {
+find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, current_g1_colors,
+                               group1_name = "col1_int", group2_name = "col2_int", group2_colors = NULL) {
     clus_df_filtered <- clus_df_gather[, c(group1_name, group2_name, "value")]
 
     clus_df_filtered[[group1_name]] <- paste0("G1_", clus_df_filtered[[group1_name]])
@@ -531,7 +533,7 @@ find_group2_colors <- function(clus_df_gather, ditto_colors,unused_colors, curre
     matching <- igraph::max_bipartite_match(g, weights = clus_df_filtered$value)
 
     keys <- names(matching$matching)
-    number_group1_clusters <- length(sub("^G1_", "", keys[grep("^G1_", keys)]))
+    # number_group1_clusters <- length(sub("^G1_", "", keys[grep("^G1_", keys)]))
     number_group2_clusters <- length(sub("^G2_", "", keys[grep("^G2_", keys)]))
 
     # Extract and filter the matching pairs
@@ -543,7 +545,7 @@ find_group2_colors <- function(clus_df_gather, ditto_colors,unused_colors, curre
 
     # Extract numeric indices from the filtered pairs
     g1_indices <- as.numeric(sub("G1_", "", names(g1_to_g2_pairs)))
-    g2_indices <- as.numeric(sub("G2_", "", g1_to_g2_pairs))
+    # g2_indices <- as.numeric(sub("G2_", "", g1_to_g2_pairs))
 
     # Initialize the new colors vector
     if (is.null(group2_colors)) {
@@ -552,18 +554,18 @@ find_group2_colors <- function(clus_df_gather, ditto_colors,unused_colors, curre
 
     # Assign colors based on the matching
     for (i in g1_indices) {
-        g2_indice <-  as.integer(sub("G2_", "", g1_to_g2_pairs[paste0('G1_',i)]))
+        g2_indice <-  as.integer(sub("G2_", "", g1_to_g2_pairs[paste0("G1_", i)]))
         group2_colors[g2_indice] <- current_g1_colors[names(current_g1_colors) == i]
     }
 
     remaining_colors <- unused_colors
 
-    num_remaining_group2 <- length(which(group2_colors %in% c('')))
+    num_remaining_group2 <- length(which(group2_colors %in% c("")))
 
-    if (num_remaining_group2==0){
+    if (num_remaining_group2==0) {
         return (group2_colors)
-    } else{
-        if ((length(remaining_colors)==0) | (length(remaining_colors) < num_remaining_group2)){
+    } else {
+        if ((length(remaining_colors)==0) || (length(remaining_colors) < num_remaining_group2)){
             smaller_clus_df_filtered <- clus_df_gather[!(clus_df_filtered[[group2_name]] %in% g1_to_g2_pairs),]
             smaller_clus_df_filtered[[group2_name]] <- as.integer(droplevels(as.factor(smaller_clus_df_filtered[[group2_name]])))
             sub_group2_colors <- find_group2_colors(smaller_clus_df_filtered, ditto_colors,remaining_colors,current_g1_colors,
@@ -577,7 +579,7 @@ find_group2_colors <- function(clus_df_gather, ditto_colors,unused_colors, curre
                 group2_colors[i] <- remaining_colors[1]
                 remaining_colors <- remaining_colors[2:length(remaining_colors)]
             }
-            }
+        }
         return(group2_colors)
     }
 }
@@ -942,7 +944,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 
     if (is.null(fixed_column)) {
         fixed_column <- column1
-    } else if ((is.integer(fixed_column) | (is.double(fixed_column)))) {
+    } else if ((is.integer(fixed_column) || (is.double(fixed_column)))) {
         if (fixed_column > length(colnames(clus_df_gather))){
             stop(sprintf("fixed_column index '%s' is not a column in the dataframe.", fixed_column))
         } else{
@@ -1080,13 +1082,17 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         }
     }
 
-    if ((sorting_algorithm == 'None') & (random_initializations > 1)) {
+    if ((sorting_algorithm == 'None') && (random_initializations > 1)) {
         warning("random_initializations > 1 but sorting algorithm is None. Setting random_initializations to 1.")
         random_initializations=1
     }
 
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
+    }
+
+    if (is.vector(graphing_columns) && length(graphing_columns) < 2) {
+        stop("graphing_columns must have at least 2 entries.")
     }
 
     if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
@@ -1241,6 +1247,10 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         stop("Specify either graphing_columns or column1/column2, not both.")
     }
 
+    if (is.vector(graphing_columns) && length(graphing_columns) < 2) {
+        stop("graphing_columns must have at least 2 entries.")
+    }
+
     if (preprocess_data) {
         if (verbose) message("Loading in data")
         df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
@@ -1279,7 +1289,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
 
     if (is.null(fixed_column)) {
         fixed_column <- column1
-    } else if ((is.integer(fixed_column) | (is.double(fixed_column)))) {
+    } else if ((is.integer(fixed_column) || (is.double(fixed_column)))) {
         if (fixed_column > length(colnames(df))){
             stop(sprintf("fixed_column index '%s' is not a column in the dataframe.", fixed_column))
         } else{

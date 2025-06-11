@@ -30,6 +30,11 @@ plot_alluvial(
   output_plot_path = NULL,
   output_df_path = NULL,
   preprocess_data = TRUE,
+  box_width = 1/3,
+  text_width = 1/4,
+  min_text = 4,
+  save_height = 6,
+  save_width = 6,
   verbose = FALSE,
   make_intermediate_neighbornet_plots = FALSE
 )
@@ -86,6 +91,16 @@ plot_alluvial(
 \item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
 
 \item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.}
+
+\item{box_width}{Numeric between 0 and 1. Box width}
+
+\item{text_width}{Numeric between 0 and 1. Text width}
+
+\item{min_text}{Integer greater than 0. Min text}
+
+\item{save_height}{Integer greater than 0. Save height, in inches}
+
+\item{save_width}{Integer greater than 0. Save width, in inches}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 

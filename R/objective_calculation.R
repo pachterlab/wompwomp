@@ -43,8 +43,9 @@ determine_weighted_layer_free_objective <- function(df, verbose = FALSE) {
     # Case 2: Already a list of edge pairs
     } else if (is.data.frame(df)) {
         # do nothing
-    } else
+    } else {
         stop("Input must be either a file path or a list.")
+    }
 
     total_weighted_crossings <- sum(df$weight1 * df$weight2) / 2  # Correct for double-counting
     return(total_weighted_crossings)
@@ -158,11 +159,11 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     p <- ggplot(data = clus_df_gather, aes(y = value),
     )
     for (x in seq_along(graphing_columns)) {
-        int_col <- paste0('col', x,'_int')
+        int_col <- paste0("col", x, "_int")
         if (!(int_col %in% colnames(clus_df_gather))) {
             stop(sprintf("%s not in columns. Please run data_preprocess first.", int_col))
         }
-        p$mapping[[paste0('axis',x)]] = sym(int_col)
+        p$mapping[[paste0("axis", x)]] <- sym(int_col)
     }
     p <- p + stat_alluvium(geom = "blank")
 

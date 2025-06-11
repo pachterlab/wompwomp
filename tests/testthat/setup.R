@@ -4,4 +4,3 @@ if ((!file.exists(reticulate::conda_binary()) || (!("alluvialmatch_env" %in% ret
 }
 reticulate::use_condaenv("alluvialmatch_env", required = TRUE)
 Sys.setenv(RETICULATE_PYTHON = reticulate::py_config()$python)
-

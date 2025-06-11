@@ -301,6 +301,3 @@ test_that("CLI determine_weighted_layer_free_objective", {
 
     testthat::expect_equal(num, 14)
 })
-
-
-
