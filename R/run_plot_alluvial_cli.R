@@ -35,6 +35,11 @@ Optional:
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   --output_df_path          Output path for the output data frame, in CSV format. If NULL, then will not be saved
   --disable_preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
+  --box_width Numeric between 0 and 1. Box width
+  --text_width Numeric between 0 and 1. Text width
+  --min_text Integer greater than 0. Min text
+  --save_height Integer greater than 0. Save height, in inches
+  --save_width Integer greater than 0. Save width, in inches
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
@@ -69,6 +74,11 @@ Optional:
     include_group_sizes  <- store_false(args, c("--disable_include_group_sizes"))
     output_df_path <- get_arg(args, c("--output_df_path"))
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
+    box_width <- store_false(args, c("--box_width"))
+    text_width <- store_false(args, c("--text_width"))
+    min_text <- store_false(args, c("--min_text"))
+    save_height <- store_false(args, c("--save_height"))
+    save_width <- store_false(args, c("--save_width"))
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
@@ -105,6 +115,11 @@ Optional:
     if (!is.null(include_group_sizes))          args_list$include_group_sizes <- include_group_sizes
     if (!is.null(output_df_path))          args_list$output_df_path <- output_df_path
     if (!is.null(preprocess_data))              args_list$preprocess_data <- preprocess_data
+    if (!is.null(box_width))              args_list$box_width <- box_width
+    if (!is.null(text_width))              args_list$text_width <- text_width
+    if (!is.null(min_text))              args_list$min_text <- min_text
+    if (!is.null(save_height))              args_list$save_height <- save_height
+    if (!is.null(save_width))              args_list$save_width <- save_width
     if (!is.null(verbose))                      args_list$verbose <- verbose
     if (!is.null(make_intermediate_neighbornet_plots))   args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
 

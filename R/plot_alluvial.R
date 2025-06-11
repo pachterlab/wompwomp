@@ -589,7 +589,7 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
                                             alluvial_alpha = 0.5, match_colors = TRUE, output_plot_path = NULL,
                                             include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
                                             include_group_sizes = FALSE, verbose = FALSE,
-                                   box_width = 1/3, text_width = 1/4, min_text = 4, 
+                                   box_width = 1/3, text_width = 1/4, min_text = 4,
                                    save_height = 6, save_width = 6
 ) {
     clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
@@ -705,9 +705,9 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
 
             final_label_names <- c(final_label_names, rev(curr_label))
         }
-        p <- p + 
+        p <- p +
             #geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))+
-            geom_fit_text(reflow = TRUE,stat = "stratum", width = text_width, min.size = min_text, 
+            geom_fit_text(reflow = TRUE,stat = "stratum", width = text_width, min.size = min_text,
                           aes(label = after_stat(final_label_names)))
     }
 
@@ -732,7 +732,7 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
         p <- p +
             scale_x_continuous(breaks = 1:length(graphing_columns), labels = graphing_columns,
                                position = 'top')
-            #annotate("text", x = seq(1, length(graphing_columns)), y = rep(offset, length(graphing_columns)), 
+            #annotate("text", x = seq(1, length(graphing_columns)), y = rep(offset, length(graphing_columns)),
                      #label = graphing_columns, size = 5, hjust = 0.5, vjust=.5)
         #    x <- x+1
         #}
@@ -760,7 +760,7 @@ plot_alluvial_internal <- function(clus_df_gather,graphing_columns,
 
     if (!is.null(output_plot_path)) {
         if (verbose) message(sprintf("Saving plot to=%s", output_plot_path))
-        ggsave(output_plot_path, plot = p, 
+        ggsave(output_plot_path, plot = p,
                height = save_height, width = save_width, dpi = 300, bg = "white")
     }
 
@@ -1210,6 +1210,11 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param output_plot_path Character. File path to save the plot (e.g., "plot.png"). If \code{NULL}, then will not be saved.
 #' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
 #' @param preprocess_data Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.
+#' @param box_width Numeric between 0 and 1. Box width
+#' @param text_width Numeric between 0 and 1. Text width
+#' @param min_text Integer greater than 0. Min text
+#' @param save_height Integer greater than 0. Save height, in inches
+#' @param save_width Integer greater than 0. Save width, in inches
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param make_intermediate_neighbornet_plots Internal flag; not recommended to modify.
 #'
@@ -1316,7 +1321,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                                                          include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
                                                          include_group_sizes = include_group_sizes,
                                                          output_plot_path = output_plot_path, verbose = verbose,
-                                            box_width = box_width, text_width = text_width, min_text = min_text, 
+                                            box_width = box_width, text_width = text_width, min_text = min_text,
                                             save_height = save_height, save_width = save_width)
 
     return(alluvial_plot)
