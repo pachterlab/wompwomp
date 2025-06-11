@@ -1,7 +1,7 @@
 #' @export
 run_data_preprocess_cli <- function(args) {
-  if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
-    cat("
+    if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
+        cat("
 Usage: alluvialmatch data_preprocess --input INPUT graphing_columns GRAPHING_COLUMNS [options]
 
 Required:
@@ -16,8 +16,8 @@ Optional:
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
-    quit(save = "no", status = 0)
-  }
+        quit(save = "no", status = 0)
+    }
 
     # Required arguments
     df <- get_arg(args, c("-i", "--input", "--df"), required = TRUE)
@@ -39,10 +39,10 @@ Optional:
     )
 
     # Conditionally add optional args if not NULL
-    if (!is.null(column_weights))         args_list$column_weights <- column_weights
-    if (!is.null(output_df_path))         args_list$output_df_path <- output_df_path
-    if (!is.null(verbose))                args_list$verbose <- verbose
-    if (!is.null(load_df))                args_list$load_df <- load_df
+    if (!is.null(column_weights)) args_list$column_weights <- column_weights
+    if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
+    if (!is.null(verbose)) args_list$verbose <- verbose
+    if (!is.null(load_df)) args_list$load_df <- load_df
 
     # Dynamically call function
     result <- do.call(data_preprocess, args_list)

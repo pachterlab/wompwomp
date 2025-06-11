@@ -29,13 +29,13 @@ Optional:
 
     # Optional arguments
     graphing_columns <- get_multi_arg(args, c("-g", "--graphing_columns"))
-    column1        <- get_arg(args, c("-c1", "--column1"))
-    column2        <- get_arg(args, c("-c2", "--column2"))
+    column1 <- get_arg(args, c("-c1", "--column1"))
+    column2 <- get_arg(args, c("-c2", "--column2"))
     column_weights <- get_arg(args, c("-w", "--column_weights"))
     output_df_path <- get_arg(args, c("-o", "--output_df_path"))
     output_lode_df_path <- get_arg(args, c("--output_lode_df_path"))
-    include_output_objective_matrix_vector    <- store_true(args, "--include_output_objective_matrix_vector")
-    return_weighted_layer_free_objective    <- store_true(args, "--return_weighted_layer_free_objective")
+    include_output_objective_matrix_vector <- store_true(args, "--include_output_objective_matrix_vector")
+    return_weighted_layer_free_objective <- store_true(args, "--return_weighted_layer_free_objective")
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
@@ -49,17 +49,17 @@ Optional:
     )
 
     # Conditionally add optional args if not NULL
-    if (!is.null(graphing_columns))       args_list$graphing_columns <- graphing_columns
-    if (!is.null(column1))       args_list$column1 <- column1
-    if (!is.null(column2))       args_list$column2 <- column2
-    if (!is.null(column_weights))         args_list$column_weights <- column_weights
-    if (!is.null(output_df_path))         args_list$output_df_path <- output_df_path
-    if (!is.null(output_lode_df_path))         args_list$output_lode_df_path <- output_lode_df_path
-    if (!is.null(include_output_objective_matrix_vector))         args_list$include_output_objective_matrix_vector <- include_output_objective_matrix_vector
-    if (!is.null(return_weighted_layer_free_objective))         args_list$return_weighted_layer_free_objective <- return_weighted_layer_free_objective
-    if (!is.null(verbose))                args_list$verbose <- verbose
-    if (!is.null(preprocess_data))       args_list$preprocess_data <- preprocess_data
-    if (!is.null(load_df))       args_list$load_df <- load_df
+    if (!is.null(graphing_columns)) args_list$graphing_columns <- graphing_columns
+    if (!is.null(column1)) args_list$column1 <- column1
+    if (!is.null(column2)) args_list$column2 <- column2
+    if (!is.null(column_weights)) args_list$column_weights <- column_weights
+    if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
+    if (!is.null(output_lode_df_path)) args_list$output_lode_df_path <- output_lode_df_path
+    if (!is.null(include_output_objective_matrix_vector)) args_list$include_output_objective_matrix_vector <- include_output_objective_matrix_vector
+    if (!is.null(return_weighted_layer_free_objective)) args_list$return_weighted_layer_free_objective <- return_weighted_layer_free_objective
+    if (!is.null(verbose)) args_list$verbose <- verbose
+    if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
+    if (!is.null(load_df)) args_list$load_df <- load_df
 
     # Dynamically call function
     result <- do.call(determine_crossing_edges, args_list)

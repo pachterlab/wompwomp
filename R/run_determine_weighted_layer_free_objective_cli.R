@@ -27,7 +27,7 @@ Optional:
     )
 
     # Conditionally add optional args if not NULL
-    if (!is.null(verbose))                args_list$verbose <- verbose
+    if (!is.null(verbose)) args_list$verbose <- verbose
 
     # Dynamically call function
     result <- do.call(determine_weighted_layer_free_objective, args_list)

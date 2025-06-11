@@ -54,14 +54,19 @@ setup_python_env <- function(envname = "alluvialmatch_env", packages = c("numpy=
             message("Module '", pkg_name, "' not found. Will install.")
         } else if (!is.null(required_version)) {
             # Get current installed version
-            actual_version <- tryCatch({
-                reticulate::import(pkg_name)$`__version__`
-            }, error = function(e) NA)
+            actual_version <- tryCatch(
+                {
+                    reticulate::import(pkg_name)$`__version__`
+                },
+                error = function(e) NA
+            )
 
             if (is.na(actual_version) || actual_version != required_version) {
                 need_install <- TRUE
-                message("Module '", pkg_name, "' has version ", actual_version,
-                        " but requires ", required_version, ". Will reinstall.")
+                message(
+                    "Module '", pkg_name, "' has version ", actual_version,
+                    " but requires ", required_version, ". Will reinstall."
+                )
             }
         }
 
@@ -74,9 +79,11 @@ setup_python_env <- function(envname = "alluvialmatch_env", packages = c("numpy=
                     stop("Package '", pkg, "' is required but was not installed.")
                 }
             } else {
-                stop("Package '", pkg, "' not found in conda environment '", envname, "', and cannot prompt in non-interactive mode. ",
-                     "You can install it manually with:\n",
-                     "reticulate::conda_install(\"", envname, "\", packages = \"", pkg, "\", pip = TRUE)")
+                stop(
+                    "Package '", pkg, "' not found in conda environment '", envname, "', and cannot prompt in non-interactive mode. ",
+                    "You can install it manually with:\n",
+                    "reticulate::conda_install(\"", envname, "\", packages = \"", pkg, "\", pip = TRUE)"
+                )
             }
         }
     }

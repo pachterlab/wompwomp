@@ -30,7 +30,7 @@ utils::globalVariables(c(
 #'
 #' @examples
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data_sort(df, graphing_columns = c('method1', 'method2'))
+#' clus_df_gather <- data_sort(df, graphing_columns = c("method1", "method2"))
 #' crossing_edges_output <- determine_crossing_edges(clus_df_gather, column1 = "method1", column2 = "method2")
 #' objective <- determine_weighted_layer_free_objective(crossing_edges_output$crossing_edges_df)
 #'
@@ -40,14 +40,14 @@ determine_weighted_layer_free_objective <- function(df, verbose = FALSE) {
     if (is.character(df) && length(df) == 1 && file.exists(df)) {
         # Read the file
         df <- read.csv(df, stringsAsFactors = FALSE)
-    # Case 2: Already a list of edge pairs
+        # Case 2: Already a list of edge pairs
     } else if (is.data.frame(df)) {
         # do nothing
     } else {
         stop("Input must be either a file path or a list.")
     }
 
-    total_weighted_crossings <- sum(df$weight1 * df$weight2) / 2  # Correct for double-counting
+    total_weighted_crossings <- sum(df$weight1 * df$weight2) / 2 # Correct for double-counting
     return(total_weighted_crossings)
 }
 
@@ -124,7 +124,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         if (is.null(graphing_columns) && is.null(column1) && is.null(column2)) {
             stop("graphing_columns must be specified when dataframe has more than 2 columns and column_weights is NULL.")
         }
-    } else {  # length 2
+    } else { # length 2
         if (is.null(column1) && !is.null(column2)) {
             column1 <- setdiff(colnames(df), column2)
         } else if (is.null(column2) && !is.null(column1)) {
@@ -156,8 +156,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         clus_df_gather <- df
     }
 
-    p <- ggplot(data = clus_df_gather, aes(y = value),
-    )
+    p <- ggplot(data = clus_df_gather, aes(y = value), )
     for (x in seq_along(graphing_columns)) {
         int_col <- paste0("col", x, "_int")
         if (!(int_col %in% colnames(clus_df_gather))) {
@@ -208,10 +207,10 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
 
     # add the actual character values
     for (i in seq_along(graphing_columns)) {
-        int_col <- paste0("col", i, "_int")         # e.g. col1_int
+        int_col <- paste0("col", i, "_int") # e.g. col1_int
         label_col <- graphing_columns[i]
-        stratum_col <- paste0("stratum", i)         # e.g. stratum1
-        stratum_char_col <- paste0(stratum_col, "_char")  # e.g. stratum1_char
+        stratum_col <- paste0("stratum", i) # e.g. stratum1
+        stratum_char_col <- paste0(stratum_col, "_char") # e.g. stratum1_char
 
         mapping <- setNames(clus_df_gather[[label_col]], clus_df_gather[[int_col]])
         mapping <- mapping[!duplicated(names(mapping))]
@@ -219,8 +218,8 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     }
 
     if (!is.null(stratum_column_and_value_to_keep)) {
-        layer_number <- as.integer(names(stratum_column_and_value_to_keep)[1])  # the layer (eg 3 from stratum3)
-        stratum_number <- stratum_column_and_value_to_keep[[1]]  # the stratum (eg value 28 in column stratum3)
+        layer_number <- as.integer(names(stratum_column_and_value_to_keep)[1]) # the layer (eg 3 from stratum3)
+        stratum_number <- stratum_column_and_value_to_keep[[1]] # the stratum (eg value 28 in column stratum3)
 
         alluvium_values_in_stratum_to_keep <- lode_df_long_full %>%
             filter(x == layer_number, stratum == stratum_number) %>%
@@ -313,13 +312,13 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 for (j in (i + 1):lode_df_length) {
                     # Check crossing condition once per unordered pair
                     if ((lode_df$y1[i] - lode_df$y1[j]) * (lode_df$y2[i] - lode_df$y2[j]) < 0) {
-                    # equivalent to below but faster
-                    # if ((lode_df$y1[i] < lode_df$y1[j] && lode_df$y2[i] > lode_df$y2[j]) | (lode_df$y1[i] > lode_df$y1[j] && lode_df$y2[i] < lode_df$y2[j])) {
+                        # equivalent to below but faster
+                        # if ((lode_df$y1[i] < lode_df$y1[j] && lode_df$y2[i] > lode_df$y2[j]) | (lode_df$y1[i] > lode_df$y1[j] && lode_df$y2[i] < lode_df$y2[j])) {
                         alluvium1 <- lode_df$alluvium[i]
                         alluvium2 <- lode_df$alluvium[j]
                         w1 <- lode_df$count[i]
                         w2 <- lode_df$count[j]
-                        strat_layer <- lode_df$x1[i]  # will be same for i and j
+                        strat_layer <- lode_df$x1[i] # will be same for i and j
 
                         # stratum1_left <- lode_df$stratum1_char[i]
                         # stratum1_right <- lode_df$stratum2_char[i]  # apologies for the i/j and 1/2 confusion - this is correct though

@@ -1,7 +1,7 @@
 #' @export
 run_data_sort_cli <- function(args) {
-  if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
-    cat("
+    if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
+        cat("
 Usage: alluvialmatch data_sort --input INPUT [options]
 
 Required:
@@ -26,26 +26,26 @@ Optional:
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
-    quit(save = "no", status = 0)
-  }
+        quit(save = "no", status = 0)
+    }
 
     # Required arguments
     df <- get_arg(args, c("-i", "--input", "--df"), required = TRUE)
 
     # Optional arguments
     graphing_columns <- get_multi_arg(args, c("-g", "--graphing_columns"))
-    column1        <- get_arg(args, c("-c1", "--column1"))
-    column2        <- get_arg(args, c("-c2", "--column2"))
+    column1 <- get_arg(args, c("-c1", "--column1"))
+    column2 <- get_arg(args, c("-c2", "--column2"))
     column_weights <- get_arg(args, c("-w", "--column_weights"))
-    sorting_algorithm       <- get_arg(args, c("-s", "--sorting_algorithm"))
+    sorting_algorithm <- get_arg(args, c("-s", "--sorting_algorithm"))
     optimize_column_order <- store_false(args, c("--disable_optimize_column_order"))
     optimize_column_order_per_cycle <- store_true(args, c("--optimize_column_order_per_cycle"))
-    fixed_column    <- get_fixed_column(args, "--fixed_column")
-    random_initializations    <- get_numeric_arg(args, "--random_initializations")
-    set_seed    <- get_numeric_arg(args, "--set_seed")
+    fixed_column <- get_fixed_column(args, "--fixed_column")
+    random_initializations <- get_numeric_arg(args, "--random_initializations")
+    set_seed <- get_numeric_arg(args, "--set_seed")
     output_df_path <- get_arg(args, c("-o", "--output_df_path"))
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
-    return_updated_graphing_columns    <- store_true(args, "--return_updated_graphing_columns")
+    return_updated_graphing_columns <- store_true(args, "--return_updated_graphing_columns")
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
@@ -60,22 +60,22 @@ Optional:
     )
 
     # Conditionally add optional args if not NULL
-    if (!is.null(graphing_columns))       args_list$graphing_columns <- graphing_columns
-    if (!is.null(column1))       args_list$column1 <- column1
-    if (!is.null(column2))       args_list$column2 <- column2
-    if (!is.null(column_weights))         args_list$column_weights <- column_weights
-    if (!is.null(sorting_algorithm))       args_list$sorting_algorithm <- sorting_algorithm
-    if (!is.null(optimize_column_order))       args_list$optimize_column_order <- optimize_column_order
-    if (!is.null(optimize_column_order_per_cycle))       args_list$optimize_column_order_per_cycle <- optimize_column_order_per_cycle
-    if (!is.null(fixed_column))       args_list$fixed_column <- fixed_column
-    if (!is.null(random_initializations))       args_list$random_initializations <- random_initializations
-    if (!is.null(set_seed))       args_list$set_seed <- set_seed
-    if (!is.null(output_df_path))         args_list$output_df_path <- output_df_path
-    if (!is.null(preprocess_data))       args_list$preprocess_data <- preprocess_data
-    if (!is.null(return_updated_graphing_columns))       args_list$return_updated_graphing_columns <- return_updated_graphing_columns
-    if (!is.null(verbose))                args_list$verbose <- verbose
-    if (!is.null(load_df))                args_list$load_df <- load_df
-    if (!is.null(make_intermediate_neighbornet_plots))   args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
+    if (!is.null(graphing_columns)) args_list$graphing_columns <- graphing_columns
+    if (!is.null(column1)) args_list$column1 <- column1
+    if (!is.null(column2)) args_list$column2 <- column2
+    if (!is.null(column_weights)) args_list$column_weights <- column_weights
+    if (!is.null(sorting_algorithm)) args_list$sorting_algorithm <- sorting_algorithm
+    if (!is.null(optimize_column_order)) args_list$optimize_column_order <- optimize_column_order
+    if (!is.null(optimize_column_order_per_cycle)) args_list$optimize_column_order_per_cycle <- optimize_column_order_per_cycle
+    if (!is.null(fixed_column)) args_list$fixed_column <- fixed_column
+    if (!is.null(random_initializations)) args_list$random_initializations <- random_initializations
+    if (!is.null(set_seed)) args_list$set_seed <- set_seed
+    if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
+    if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
+    if (!is.null(return_updated_graphing_columns)) args_list$return_updated_graphing_columns <- return_updated_graphing_columns
+    if (!is.null(verbose)) args_list$verbose <- verbose
+    if (!is.null(load_df)) args_list$load_df <- load_df
+    if (!is.null(make_intermediate_neighbornet_plots)) args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
 
     # Dynamically call function
     result <- do.call(data_sort, args_list)

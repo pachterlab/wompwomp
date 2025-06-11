@@ -16,21 +16,27 @@ get_arg <- function(args, flags, default = NULL, required = FALSE) {
 # --input 7
 get_numeric_arg <- function(args, flags, default = NULL) {
     val <- get_arg(args, flags)
-    if (is.null(val)) return(default)
+    if (is.null(val)) {
+        return(default)
+    }
     as.numeric(val)
 }
 
 # --input a,b,c
 get_list_arg <- function(args, flag) {
     val <- get_arg(args, flag)
-    if (is.null(val)) return(NULL)
+    if (is.null(val)) {
+        return(NULL)
+    }
     strsplit(val, ",")[[1]]
 }
 
 # --input 1,2,3
 get_numeric_list_arg <- function(args, flag) {
     val_list <- get_list_arg(args, flag)
-    if (is.null(val_list)) return(NULL)
+    if (is.null(val_list)) {
+        return(NULL)
+    }
     as.numeric(val_list)
 }
 
@@ -47,7 +53,9 @@ store_false <- function(args, flags) {
 # --fixed_column abc --> "abc" (str); --fixed_column 123 --> 123 (int); --fixed_column "123" --> 123 (int); --fixed_column str:123 --> "123" (str)
 get_fixed_column <- function(args, flag, default = 1) {
     val <- get_arg(args, flag)
-    if (is.null(val)) return(default)
+    if (is.null(val)) {
+        return(default)
+    }
 
     if (startsWith(val, "str:")) {
         return(sub("^str:", "", val))
@@ -67,7 +75,7 @@ get_multi_arg <- function(args, flags, required = FALSE) {
         return(NULL)
     }
 
-    i <- i[1]  # Use the first match if multiple flags found
+    i <- i[1] # Use the first match if multiple flags found
 
     # Collect all values until the next flag (starting with "-") or end of args
     vals <- character()

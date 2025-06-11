@@ -1,7 +1,7 @@
 #' @export
 run_plot_alluvial_cli <- function(args) {
-  if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
-      cat("
+    if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
+        cat("
 Usage: alluvialmatch plot_alluvial --input INPUT [options]
 
 Required:
@@ -52,26 +52,26 @@ Optional:
 
     # Optional arguments
     graphing_columns <- get_multi_arg(args, c("-g", "--graphing_columns"))
-    column1        <- get_arg(args, c("-c1", "--column1"))
-    column2        <- get_arg(args, c("-c2", "--column2"))
+    column1 <- get_arg(args, c("-c1", "--column1"))
+    column2 <- get_arg(args, c("-c2", "--column2"))
     column_weights <- get_arg(args, c("-w", "--column_weights"))
-    sorting_algorithm       <- get_arg(args, c("-s", "--sorting_algorithm"))
+    sorting_algorithm <- get_arg(args, c("-s", "--sorting_algorithm"))
     optimize_column_order <- store_true(args, c("--optimize_column_order"))
     optimize_column_order_per_cycle <- store_true(args, c("--optimize_column_order_per_cycle"))
-    fixed_column    <- get_fixed_column(args, "--fixed_column")
-    random_initializations    <- get_numeric_arg(args, "--random_initializations")
-    set_seed    <- get_numeric_arg(args, "--set_seed")
-    color_boxes  <- store_false(args, c("--disable_color_boxes"))
-    color_bands  <- store_true(args, c("--color_bands"))
-    color_list  <- get_multi_arg(args, c("--color_list"))
-    color_band_list  <- get_multi_arg(args, c("--color_band_list"))
-    color_band_column  <- get_arg(args, c("--color_band_column"))
-    color_band_boundary  <- store_true(args, c("--color_band_boundary"))
-    match_colors  <- store_false(args, c("--disable_match_colors"))
-    alluvial_alpha    <- get_numeric_arg(args, "--alluvial_alpha")
-    include_labels_in_boxes  <- store_false(args, c("--disable_include_labels_in_boxes"))
-    include_axis_titles  <- store_false(args, c("--disable_include_axis_titles"))
-    include_group_sizes  <- store_false(args, c("--disable_include_group_sizes"))
+    fixed_column <- get_fixed_column(args, "--fixed_column")
+    random_initializations <- get_numeric_arg(args, "--random_initializations")
+    set_seed <- get_numeric_arg(args, "--set_seed")
+    color_boxes <- store_false(args, c("--disable_color_boxes"))
+    color_bands <- store_true(args, c("--color_bands"))
+    color_list <- get_multi_arg(args, c("--color_list"))
+    color_band_list <- get_multi_arg(args, c("--color_band_list"))
+    color_band_column <- get_arg(args, c("--color_band_column"))
+    color_band_boundary <- store_true(args, c("--color_band_boundary"))
+    match_colors <- store_false(args, c("--disable_match_colors"))
+    alluvial_alpha <- get_numeric_arg(args, "--alluvial_alpha")
+    include_labels_in_boxes <- store_false(args, c("--disable_include_labels_in_boxes"))
+    include_axis_titles <- store_false(args, c("--disable_include_axis_titles"))
+    include_group_sizes <- store_false(args, c("--disable_include_group_sizes"))
     output_df_path <- get_arg(args, c("--output_df_path"))
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
     box_width <- store_false(args, c("--box_width"))
@@ -92,36 +92,36 @@ Optional:
     )
 
     # Conditionally add optional args if not NULL
-    if (!is.null(graphing_columns))       args_list$graphing_columns <- graphing_columns
-    if (!is.null(column1))       args_list$column1 <- column1
-    if (!is.null(column2))       args_list$column2 <- column2
-    if (!is.null(column_weights))         args_list$column_weights <- column_weights
-    if (!is.null(sorting_algorithm))       args_list$sorting_algorithm <- sorting_algorithm
-    if (!is.null(optimize_column_order))       args_list$optimize_column_order <- optimize_column_order
-    if (!is.null(optimize_column_order_per_cycle))       args_list$optimize_column_order_per_cycle <- optimize_column_order_per_cycle
-    if (!is.null(fixed_column))       args_list$fixed_column <- fixed_column
-    if (!is.null(random_initializations))       args_list$random_initializations <- random_initializations
-    if (!is.null(set_seed))       args_list$set_seed <- set_seed
-    if (!is.null(color_boxes))                   args_list$color_boxes <- color_boxes
-    if (!is.null(color_bands))                   args_list$color_bands <- color_bands
-    if (!is.null(color_list))                    args_list$color_list <- color_list
-    if (!is.null(color_band_list))              args_list$color_band_list <- color_band_list
-    if (!is.null(color_band_column))            args_list$color_band_column <- color_band_column
-    if (!is.null(color_band_boundary))          args_list$color_band_boundary <- color_band_boundary
-    if (!is.null(match_colors))                 args_list$match_colors <- match_colors
-    if (!is.null(alluvial_alpha))               args_list$alluvial_alpha <- alluvial_alpha
-    if (!is.null(include_labels_in_boxes))      args_list$include_labels_in_boxes <- include_labels_in_boxes
-    if (!is.null(include_axis_titles))          args_list$include_axis_titles <- include_axis_titles
-    if (!is.null(include_group_sizes))          args_list$include_group_sizes <- include_group_sizes
-    if (!is.null(output_df_path))          args_list$output_df_path <- output_df_path
-    if (!is.null(preprocess_data))              args_list$preprocess_data <- preprocess_data
-    if (!is.null(box_width))              args_list$box_width <- box_width
-    if (!is.null(text_width))              args_list$text_width <- text_width
-    if (!is.null(min_text))              args_list$min_text <- min_text
-    if (!is.null(save_height))              args_list$save_height <- save_height
-    if (!is.null(save_width))              args_list$save_width <- save_width
-    if (!is.null(verbose))                      args_list$verbose <- verbose
-    if (!is.null(make_intermediate_neighbornet_plots))   args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
+    if (!is.null(graphing_columns)) args_list$graphing_columns <- graphing_columns
+    if (!is.null(column1)) args_list$column1 <- column1
+    if (!is.null(column2)) args_list$column2 <- column2
+    if (!is.null(column_weights)) args_list$column_weights <- column_weights
+    if (!is.null(sorting_algorithm)) args_list$sorting_algorithm <- sorting_algorithm
+    if (!is.null(optimize_column_order)) args_list$optimize_column_order <- optimize_column_order
+    if (!is.null(optimize_column_order_per_cycle)) args_list$optimize_column_order_per_cycle <- optimize_column_order_per_cycle
+    if (!is.null(fixed_column)) args_list$fixed_column <- fixed_column
+    if (!is.null(random_initializations)) args_list$random_initializations <- random_initializations
+    if (!is.null(set_seed)) args_list$set_seed <- set_seed
+    if (!is.null(color_boxes)) args_list$color_boxes <- color_boxes
+    if (!is.null(color_bands)) args_list$color_bands <- color_bands
+    if (!is.null(color_list)) args_list$color_list <- color_list
+    if (!is.null(color_band_list)) args_list$color_band_list <- color_band_list
+    if (!is.null(color_band_column)) args_list$color_band_column <- color_band_column
+    if (!is.null(color_band_boundary)) args_list$color_band_boundary <- color_band_boundary
+    if (!is.null(match_colors)) args_list$match_colors <- match_colors
+    if (!is.null(alluvial_alpha)) args_list$alluvial_alpha <- alluvial_alpha
+    if (!is.null(include_labels_in_boxes)) args_list$include_labels_in_boxes <- include_labels_in_boxes
+    if (!is.null(include_axis_titles)) args_list$include_axis_titles <- include_axis_titles
+    if (!is.null(include_group_sizes)) args_list$include_group_sizes <- include_group_sizes
+    if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
+    if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
+    if (!is.null(box_width)) args_list$box_width <- box_width
+    if (!is.null(text_width)) args_list$text_width <- text_width
+    if (!is.null(min_text)) args_list$min_text <- min_text
+    if (!is.null(save_height)) args_list$save_height <- save_height
+    if (!is.null(save_width)) args_list$save_width <- save_width
+    if (!is.null(verbose)) args_list$verbose <- verbose
+    if (!is.null(make_intermediate_neighbornet_plots)) args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
 
     # Dynamically call function
     result <- do.call(plot_alluvial, args_list)
