@@ -56,7 +56,7 @@ df$USC_dice_score_binned_broad <- cut(
 
 ```{r}
 graphing_columns <- c("KiTS_dice_score_binned", "USC_dice_score_binned")
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE, auto_adjust_text=FALSE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE, auto_adjust_text=FALSE, output_plot_path = 'Segmentation_unsorted.pdf')
 ```
 
 ```{r}
@@ -84,7 +84,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
-graphing_columns <- c("gender", "Race", "radiographic_size_binned", "USC_dice_score_binned")
+graphing_columns <- c("gender", "Race", "radiographic_size_binned", "USC_dice_score_binned_broad")
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE)
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE)
 ```
@@ -103,14 +103,22 @@ df <- read.csv(got_file)
 ```
 
 ```{r}
-df_tmp <- df[graphing_columns]
-plot_alluvial(df_tmp, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE, output_plot_path='GoT_unsorted.pdf')
+p
 ```
 
 ```{r}
-plot_alluvial(df_tmp, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_bands=TRUE, verbose=TRUE)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_bands=FALSE, min_text = 0.01, verbose=TRUE, output_plot_path='GoT_NN.pdf', save_height = 24, save_width = 24)
+p
 ```
 
+```{r}
+df['Lannister'] <- df["Origin"] == 'House Lannister'
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_boxes=FALSE, color_bands=TRUE, min_text = 0.01, verbose=TRUE, color_band_list = c('grey',"#FFBE2D"), color_band_column = 'Lannister', output_plot_path = 'GoT_lannister.pdf', save_height = 24, save_width = 24)
+p
+```
+
+git commit -m "added hyperparameters for neighbornet distance matrix modification"
 ```{r}
 sessioninfo::session_info()
 ```

@@ -97,6 +97,22 @@ p_sorted_fixed_columns_trimmed
 optimize_column_order <- TRUE
 optimize_column_order_per_cycle <- FALSE
 
+devtools::load_all()
+
+print(Sys.time())
+p_sorted_optimized_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, verbose=TRUE)
+print(Sys.time())
+
+p_sorted_optimized_columns_trimmed
+```
+
+
+```{r}
+optimize_column_order <- TRUE
+optimize_column_order_per_cycle <- FALSE
+
+devtools::load_all()
+
 print(Sys.time())
 p_sorted_optimized_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, verbose=TRUE)
 print(Sys.time())

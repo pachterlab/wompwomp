@@ -31,6 +31,8 @@ Optional:
 
     # Hidden arguments
     load_df <- store_false(args, c("--disable_load_df"))
+    do_gather_set_data <- store_true(args, c("--do_gather_set_data"))
+    color_band_column <- get_arg(args, c("--color_band_column"))
 
     # Base argument list with required args
     args_list <- list(
@@ -43,6 +45,8 @@ Optional:
     if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
     if (!is.null(verbose)) args_list$verbose <- verbose
     if (!is.null(load_df)) args_list$load_df <- load_df
+    if (!is.null(do_gather_set_data)) args_list$do_gather_set_data <- do_gather_set_data
+    if (!is.null(color_band_column)) args_list$color_band_column <- color_band_column
 
     # Dynamically call function
     result <- do.call(data_preprocess, args_list)

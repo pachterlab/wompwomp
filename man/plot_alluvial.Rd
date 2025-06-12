@@ -13,6 +13,9 @@ plot_alluvial(
   sorting_algorithm = "neighbornet",
   optimize_column_order = TRUE,
   optimize_column_order_per_cycle = FALSE,
+  matrix_initialization_value = 1e+06,
+  same_side_matrix_initialization_value = 1e+06,
+  weight_scalar = 5e+05,
   fixed_column = NULL,
   random_initializations = 1,
   set_seed = 42,
@@ -33,6 +36,7 @@ plot_alluvial(
   box_width = 1/3,
   text_width = 1/4,
   min_text = 4,
+  auto_adjust_text = TRUE,
   save_height = 6,
   save_width = 6,
   verbose = FALSE,
@@ -57,6 +61,12 @@ plot_alluvial(
 \item{optimize_column_order}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.}
 
 \item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.}
+
+\item{matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'neighbornet'}.}
+
+\item{same_side_matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{sorting_algorithm == 'neighbornet'}.}
+
+\item{weight_scalar}{Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{sorting_algorithm == 'neighbornet'}.}
 
 \item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.}
 
@@ -98,6 +108,8 @@ plot_alluvial(
 
 \item{min_text}{Integer greater than 0. Min text}
 
+\item{auto_adjust_text}{Logical. Whether to automatically adjust text size to fit in box.}
+
 \item{save_height}{Integer greater than 0. Save height, in inches}
 
 \item{save_width}{Integer greater than 0. Save width, in inches}
@@ -116,7 +128,7 @@ minimizing crossover and aligning clusters based on agreement.
 \examples{
 # Example 1: df format 1
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-p <- plot_alluvial(df, graphing_columns = c('method1', 'method2'))
+p <- plot_alluvial(df, graphing_columns = c("method1", "method2"))
 
 # Example 2: df format 2
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -124,6 +136,6 @@ clus_df_gather <- df |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
-p <- plot_alluvial(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
+p <- plot_alluvial(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
 
 }

@@ -11,7 +11,8 @@ data_preprocess(
   output_df_path = NULL,
   verbose = FALSE,
   load_df = TRUE,
-  do_gather_set_data = FALSE
+  do_gather_set_data = FALSE,
+  color_band_column = NULL
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ data_preprocess(
 \item{load_df}{Internal flag; not recommended to modify.}
 
 \item{do_gather_set_data}{Internal flag; not recommended to modify.}
+
+\item{color_band_column}{Internal flag; not recommended to modify.}
 }
 \value{
 A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc.
@@ -40,7 +43,7 @@ Preprocess data (load in, add integer columns, reorder columns to match graphing
 \examples{
 # Example 1: df format 1
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- data_preprocess(df, graphing_columns = c('method1', 'method2'))
+clus_df_gather <- data_preprocess(df, graphing_columns = c("method1", "method2"))
 
 # Example 2: df format 2
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -48,6 +51,6 @@ clus_df_gather <- df |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
-clus_df_gather <- data_preprocess(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
+clus_df_gather <- data_preprocess(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
 
 }

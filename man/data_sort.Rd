@@ -13,6 +13,9 @@ data_sort(
   sorting_algorithm = "neighbornet",
   optimize_column_order = TRUE,
   optimize_column_order_per_cycle = FALSE,
+  matrix_initialization_value = 1e+06,
+  same_side_matrix_initialization_value = 1e+06,
+  weight_scalar = 5e+05,
   fixed_column = NULL,
   random_initializations = 1,
   set_seed = 42,
@@ -43,6 +46,12 @@ data_sort(
 
 \item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.}
 
+\item{matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'neighbornet'}.}
+
+\item{same_side_matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{sorting_algorithm == 'neighbornet'}.}
+
+\item{weight_scalar}{Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{sorting_algorithm == 'neighbornet'}.}
+
 \item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.}
 
 \item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.}
@@ -71,7 +80,7 @@ Sorts a dataframe with the algorithm specified by \code{sorting_algorithm}.
 \examples{
 # Example 1: df format 1
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- data_sort(df, graphing_columns = c('method1', 'method2'))
+clus_df_gather <- data_sort(df, graphing_columns = c("method1", "method2"))
 
 # Example 2: df format 2
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -79,6 +88,6 @@ clus_df_gather <- df |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
-clus_df_gather <- data_sort(clus_df_gather, graphing_columns = c('method1', 'method2'), column_weights = 'value')
+clus_df_gather <- data_sort(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
 
 }

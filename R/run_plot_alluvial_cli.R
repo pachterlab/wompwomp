@@ -18,6 +18,9 @@ Optional:
   -s, --sorting_algorithm       Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when graphing_columns has exactly two entries.
   --optimize_column_order   If TRUE, will optimize the order of graphing_columns to minimize edge overlap. Only applies when sorting_algorithm == 'neighbornet' and length(graphing_columns) > 2.
   --optimize_column_order_per_cycle         If TRUE, will optimize the order of graphing_columns to minimize edge overlap upon each cycle. If FALSE, will optimize the order of graphing_columns to minimize edge overlap on the beginning cycle only. Only applies when sorting_algorithm == 'neighbornet' and length(graphing_columns) > 2.
+  --matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when sorting_algorithm == 'neighbornet'.
+  --same_side_matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when sorting_algorithm == 'neighbornet'.
+  --weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when sorting_algorithm == 'neighbornet'.
   --fixed_column            Name or position of the column in graphing_columns to keep fixed during sorting. Only applies when sorting_algorithm == 'greedy_WOLF'.
   --random_initializations  Number of random initializations for the positions of each grouping in graphing_columns. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
   --set_seed                Random seed for the random_initializations parameter. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
@@ -59,6 +62,9 @@ Optional:
     sorting_algorithm <- get_arg(args, c("-s", "--sorting_algorithm"))
     optimize_column_order <- store_true(args, c("--optimize_column_order"))
     optimize_column_order_per_cycle <- store_true(args, c("--optimize_column_order_per_cycle"))
+    matrix_initialization_value <- get_numeric_arg(args, c("--matrix_initialization_value"))
+    same_side_matrix_initialization_value <- get_numeric_arg(args, c("--same_side_matrix_initialization_value"))
+    weight_scalar <- get_numeric_arg(args, c("--weight_scalar"))
     fixed_column <- get_fixed_column(args, "--fixed_column")
     random_initializations <- get_numeric_arg(args, "--random_initializations")
     set_seed <- get_numeric_arg(args, "--set_seed")
@@ -101,6 +107,9 @@ Optional:
     if (!is.null(sorting_algorithm)) args_list$sorting_algorithm <- sorting_algorithm
     if (!is.null(optimize_column_order)) args_list$optimize_column_order <- optimize_column_order
     if (!is.null(optimize_column_order_per_cycle)) args_list$optimize_column_order_per_cycle <- optimize_column_order_per_cycle
+    if (!is.null(matrix_initialization_value)) args_list$matrix_initialization_value <- matrix_initialization_value
+    if (!is.null(same_side_matrix_initialization_value)) args_list$same_side_matrix_initialization_value <- same_side_matrix_initialization_value
+    if (!is.null(weight_scalar)) args_list$weight_scalar <- weight_scalar
     if (!is.null(fixed_column)) args_list$fixed_column <- fixed_column
     if (!is.null(random_initializations)) args_list$random_initializations <- random_initializations
     if (!is.null(set_seed)) args_list$set_seed <- set_seed
