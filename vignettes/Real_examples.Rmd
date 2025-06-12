@@ -19,7 +19,6 @@ library(tibble)
 library(tidyr)
 library(reticulate)
 
-set.seed(42)
 alluvialmatch::setup_python_env()  #!!! erase
 ```
 
@@ -36,7 +35,15 @@ if (!reticulate::py_module_available("splitspy")) {
 ```
 
 ```{r}
-data_path <- "/Users/joeyrich/Desktop/local/alluvialmatch/tmp_files/kits_alluvial_data.csv"
+use_temp_dir <- FALSE
+
+use_temp_dir <- (use_temp_dir || !interactive())  # ensure temp_dire when non-interactive always
+output_dir <- ifelse(!use_temp_dir, here::here("vignettes", "output"), file.path(tempdir(), "vignette_output"))
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+```
+
+```{r}
+data_path <- file.path(output_dir, "kits_alluvial_data.csv")
 df <- read.csv(data_path)
 
 df$KiTS_dice_score_binned_broad <- cut(
@@ -56,13 +63,13 @@ df$USC_dice_score_binned_broad <- cut(
 
 ```{r}
 graphing_columns <- c("KiTS_dice_score_binned", "USC_dice_score_binned")
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE, output_plot_path = 'Segmentation_unsorted.pdf', min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE, output_plot_path = file.path(output_dir, "Segmentation_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 ```
 
 ```{r}
 devtools::load_all()
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, verbose=TRUE, output_plot_path = 'Segmentation_NN.pdf', min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, verbose=TRUE, output_plot_path = file.path(output_dir, "Segmentation_NN.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 ```
 
@@ -77,12 +84,12 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "gree
 
 ```{r}
 graphing_columns <- c("gender", "Race", "radiographic_size_binned", "KiTS_dice_score_binned_broad")
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, output_plot_path = 'Segmentation_stratified_KiTS_unsorted.pdf', min_text = 0.01, save_height = 24, save_width = 24)
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = 'Segmentation_stratified_KiTS_NN.pdf', min_text = 0.01, save_height = 24, save_width = 24)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_KiTS_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_KiTS_NN.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 
 graphing_columns <- c("gender", "Race", "radiographic_size_binned", "USC_dice_score_binned_broad")
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, output_plot_path = 'Segmentation_stratified_USC_unsorted.pdf', min_text = 0.01, save_height = 24, save_width = 24)
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = 'Segmentation_stratified_USC_NN.pdf', min_text = 0.01, save_height = 24, save_width = 24)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_USC_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_USC_NN.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 ```
 
 
@@ -91,7 +98,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neig
 GOT
 ```{r}
 url <- "https://raw.githubusercontent.com/MattLunkes/GoT_Affiliations/master/got_char.csv"
-got_file <- "got_char.csv"
+got_file <- file.path(output_dir, "got_char.csv")
 graphing_columns <- c("Origin", "Starting.Affiliation", "End.of.S1", "End.of.S2", "End.of.S3", "End.of.S4", "End.of.S5", "End.of.S6", "End.of.S7")
 
 if (!file.exists(got_file)) {
@@ -102,18 +109,18 @@ df <- read.csv(got_file)
 ```
 
 ```{r}
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE, output_plot_path='GoT_unsorted.pdf', min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 ```
 
 ```{r}
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_bands=FALSE, min_text = 0.01, verbose=TRUE, output_plot_path='GoT_NN.pdf', save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_bands=FALSE, min_text = 0.01, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_NN.pdf"), save_height = 24, save_width = 24)
 p
 ```
 
 ```{r}
 df['Lannister'] <- df["Origin"] == 'House Lannister'
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_boxes=FALSE, color_bands=TRUE, min_text = 0.01, verbose=TRUE, color_band_list = c('grey',"#FFBE2D"), color_band_column = 'Lannister', output_plot_path = 'GoT_lannister.pdf', save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_boxes=FALSE, color_bands=TRUE, min_text = 0.01, verbose=TRUE, color_band_list = c('grey',"#FFBE2D"), color_band_column = 'Lannister', output_plot_path = file.path(output_dir, "GoT_NN_lannister.pdf"), save_height = 24, save_width = 24)
 p
 ```
 

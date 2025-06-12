@@ -3,6 +3,7 @@
 .Rhistory
 tmp.Rmd
 tmp_files
+vignettes/output
 trash
 /doc/
 /Meta/
