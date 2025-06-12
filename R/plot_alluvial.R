@@ -542,8 +542,11 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
 
 find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, current_g1_colors,
                                group1_name = "col1_int", group2_name = "col2_int", group2_colors = NULL) {
-    clus_df_filtered <- clus_df_gather[, c(group1_name, group2_name, "value")]
-
+    clus_df_ungrouped <- clus_df_gather[, c(group1_name, group2_name, "value")]
+    clus_df_filtered <- clus_df_ungrouped %>% add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value)%>%    
+        select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
+    clus_df_filtered <- distinct(clus_df_filtered)
+    colnames(clus_df_filtered) <- c(group1_name, group2_name, 'value')
     clus_df_filtered[[group1_name]] <- paste0("G1_", clus_df_filtered[[group1_name]])
     clus_df_filtered[[group2_name]] <- paste0("G2_", clus_df_filtered[[group2_name]])
 
@@ -586,7 +589,10 @@ find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, curr
         return(group2_colors)
     } else {
         if ((length(remaining_colors) == 0) || (length(remaining_colors) < num_remaining_group2)) {
-            smaller_clus_df_filtered <- clus_df_gather[!(clus_df_filtered[[group2_name]] %in% g1_to_g2_pairs), ]
+            smaller_clus_df_filtered <- clus_df_filtered[!(clus_df_filtered[[group2_name]] %in% g1_to_g2_pairs), ]
+            smaller_clus_df_filtered[[group1_name]] <- sub("^G1_", "",smaller_clus_df_filtered[[group1_name]])
+            smaller_clus_df_filtered[[group2_name]] <- sub("^G2_", "",smaller_clus_df_filtered[[group2_name]])
+            #smaller_clus_df_filtered[[group1_name]] <- as.integer(droplevels(as.factor(smaller_clus_df_filtered[[group1_name]])))
             smaller_clus_df_filtered[[group2_name]] <- as.integer(droplevels(as.factor(smaller_clus_df_filtered[[group2_name]])))
             sub_group2_colors <- find_group2_colors(
                 smaller_clus_df_filtered, ditto_colors, remaining_colors, current_g1_colors,
@@ -614,7 +620,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns,
                                    include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
                                    include_group_sizes = FALSE, verbose = FALSE,
                                    box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE,
-                                   save_height = 6, save_width = 6) {
+                                   save_height = 6, save_width = 6, keep_y_labels=FALSE, box_line_width=1) {
     clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
     clus_df_gather <- clus_df_gather[clus_df_gather$x == 1, ]
 
@@ -656,7 +662,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns,
             num_levels <- length(levels(clus_df_gather[[col_group]]))
             old_colors <- remaining_colors[1:num_levels]
             final_colors <- c(final_colors, rev(old_colors))
-            remaining_colors <- remaining_colors[num_levels:length(remaining_colors)]
+            remaining_colors <- remaining_colors[(1+num_levels):length(remaining_colors)]
         }
     }
 
@@ -712,9 +718,9 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns,
     }
 
     if (color_boxes) {
-        p <- p + geom_stratum(width = box_width, fill = final_colors)
+        p <- p + geom_stratum(width = box_width, fill = final_colors, linewidth=box_line_width)
     } else {
-        p <- p + geom_stratum(width = box_width)
+        p <- p + geom_stratum(width = box_width, linewidth=box_line_width)
     }
 
     if (!(include_labels_in_boxes == FALSE)) {
@@ -777,14 +783,25 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns,
             x <- x + 1
         }
     }
-
+    if (keep_y_labels) {
     p <- p +
         theme_void() +
         theme(
             text = element_text(family = "sans"),
             legend.text = element_text(size = rel(axis_text_size)),
-            axis.text.x = element_text()
+            axis.text.x = element_text(),
+            axis.text.y = element_text()
         )
+    } else{
+        p <- p +
+            theme_void() +
+            theme(
+                text = element_text(family = "sans"),
+                legend.text = element_text(size = rel(axis_text_size)),
+                axis.text.x = element_text()
+            )
+        
+    }
 
     p <- p + theme(legend.position = "none") # to hide legend
 
@@ -1299,7 +1316,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' p <- plot_alluvial(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
 #'
 #' @export
-plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, fixed_column = NULL, random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_band_boundary = FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE, box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE, save_height = 6, save_width = 6, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE) {
+plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, fixed_column = NULL, random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_band_boundary = FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE, box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE, save_height = 6, save_width = 6, keep_y_labels=FALSE, box_line_width=2, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -1391,8 +1408,8 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
         include_group_sizes = include_group_sizes,
         output_plot_path = output_plot_path, verbose = verbose,
-        box_width = box_width, text_width = text_width, min_text = min_text, auto_adjust_text = auto_adjust_text,
-        save_height = save_height, save_width = save_width
+        box_width = box_width, text_width = text_width, min_text = min_text, auto_adjust_text = auto_adjust_text
+        save_height = save_height, save_width = save_width, keep_y_labels=FALSE, box_line_width=2
     )
 
     return(alluvial_plot)
