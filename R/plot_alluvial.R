@@ -543,7 +543,7 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
 find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, current_g1_colors,
                                group1_name = "col1_int", group2_name = "col2_int", group2_colors = NULL) {
     clus_df_ungrouped <- clus_df_gather[, c(group1_name, group2_name, "value")]
-    clus_df_filtered <- clus_df_ungrouped %>% add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value)%>%    
+    clus_df_filtered <- clus_df_ungrouped %>% add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value)%>%
         select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
     clus_df_filtered <- distinct(clus_df_filtered)
     colnames(clus_df_filtered) <- c(group1_name, group2_name, 'value')
@@ -800,7 +800,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns,
                 legend.text = element_text(size = rel(axis_text_size)),
                 axis.text.x = element_text()
             )
-        
+
     }
 
     p <- p + theme(legend.position = "none") # to hide legend
@@ -1297,6 +1297,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param auto_adjust_text Logical. Whether to automatically adjust text size to fit in box.
 #' @param save_height Integer greater than 0. Save height, in inches
 #' @param save_width Integer greater than 0. Save width, in inches
+#' @param keep_y_labels Keep y labels
+#' @param box_line_width Box line width
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param make_intermediate_neighbornet_plots Internal flag; not recommended to modify.
 #'
@@ -1316,7 +1318,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' p <- plot_alluvial(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
 #'
 #' @export
-plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, fixed_column = NULL, random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_band_boundary = FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE, box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE, save_height = 6, save_width = 6, keep_y_labels=FALSE, box_line_width=2, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE) {
+plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, fixed_column = NULL, random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_band_boundary = FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE, box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE, save_height = 6, save_width = 6, keep_y_labels=FALSE, box_line_width=1, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -1408,8 +1410,8 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
         include_group_sizes = include_group_sizes,
         output_plot_path = output_plot_path, verbose = verbose,
-        box_width = box_width, text_width = text_width, min_text = min_text, auto_adjust_text = auto_adjust_text
-        save_height = save_height, save_width = save_width, keep_y_labels=FALSE, box_line_width=2
+        box_width = box_width, text_width = text_width, min_text = min_text, auto_adjust_text = auto_adjust_text,
+        save_height = save_height, save_width = save_width, keep_y_labels=keep_y_labels, box_line_width=box_line_width
     )
 
     return(alluvial_plot)
