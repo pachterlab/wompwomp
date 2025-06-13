@@ -43,8 +43,13 @@ dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 ```
 
 ```{r}
-data_path <- file.path(output_dir, "kits_alluvial_data.csv")
-df <- read.csv(data_path)
+kits_file <- file.path(output_dir, "kits_alluvial_data.csv")
+
+if (!file.exists(kits_file)) {
+    stop("KiTS file not found, and is currently not available for download")
+}
+
+df <- read.csv(kits_file)
 
 df$KiTS_dice_score_binned_broad <- cut(
   df$KiTS_dice_score,

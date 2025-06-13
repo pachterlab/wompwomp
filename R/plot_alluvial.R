@@ -318,6 +318,8 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
     objective_matrix_vector <- c()
 
     n <- length(cycle)
+
+    graphing_columns_tmp <- graphing_columns
     for (i in 0:(n - 1)) {
         if (i == 0) {
             if (verbose) message(sprintf("Starting iteration 1"))
@@ -358,11 +360,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             if ((optimize_column_order_per_cycle) || (i == 0)) {
                 verbose_tmp <- if (i == 0) verbose else FALSE # only have the option for verbose on first iteration
                 graphing_columns_tmp <- determine_column_order(clus_df_gather_neighbornet, graphing_columns = graphing_columns, column_weights = column_weights, verbose = verbose_tmp)
-            } else {
-                graphing_columns_tmp <- graphing_columns
             }
-        } else {
-            graphing_columns_tmp <- graphing_columns
         }
 
         # graphing_columns_tmp <- swap_graphing_column_order_based_on_graphing_column_int_order(graphing_columns=graphing_columns, graphing_columns_int=graphing_columns_int_sorted)
@@ -400,6 +398,14 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
                 return_weighted_layer_free_objective = FALSE
             )
         }
+
+        #!!!TEMP
+        if (neighbornet_objective_output$output_objective < 0) {
+            browser()
+        }
+        #!!!TEMP
+
+
         objective_matrix_vector <- neighbornet_objective_output$objective_matrix_vector
         neighbornet_objective <- neighbornet_objective_output$output_objective
 
@@ -1233,6 +1239,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 
     # print objective - don't do for neighbornet because I did it right before
     if ((verbose) && (sorting_algorithm != "neighbornet")) {
+        message("Determining crossing edges objective (to disable, use verbose==FALSE")
         objective <- determine_crossing_edges(clus_df_gather_sorted,
             graphing_columns = graphing_columns,
             column_weights = column_weights, load_df = FALSE, preprocess_data = TRUE, return_weighted_layer_free_objective = TRUE

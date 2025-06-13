@@ -12,31 +12,40 @@ library(ggalluvial)
 library(ggforce)
 library(igraph)
 library(tibble)
-
 library(reticulate)
-conda_env <- "seurat_vs_scanpy"
-Sys.setenv(RETICULATE_PYTHON = paste("/Users/joeyrich/miniconda3/envs", conda_env, "bin/python3.9", sep = "/"))
-use_condaenv("/Users/joeyrich/miniconda3/envs/seurat_vs_scanpy/bin/python3.9", required = TRUE)
+
+alluvialmatch::setup_python_env()  #!!! erase
 ```
 
 ```{r}
-grouped_file_path <- "/Users/joeyrich/Downloads/Akr1c21_Slc7a12_grouped.csv"
+use_temp_dir <- FALSE
+
+use_temp_dir <- (use_temp_dir || !interactive())  # ensure temp_dire when non-interactive always
+output_dir <- ifelse(!use_temp_dir, here::here("vignettes", "output"), file.path(tempdir(), "vignette_output"))
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+```
+
+```{r}
+eight_cubed_grouped_file_path <- file.path(output_dir, "Akr1c21_Slc7a12_grouped.csv")
 graphing_columns <- c("Gene", "individual", "Sex", "Genotype", "Tissue", "Celltype_final")
+
+if (!file.exists(eight_cubed_grouped_file_path)) {
+    stop("8 cubed file not found, and is currently not available for download")
+}
 ```
 
-
 ```{r}
-clus_df_gather <- read.csv(grouped_file_path)
+clus_df_gather <- read.csv(eight_cubed_grouped_file_path)
 clus_df_gather$value <- round(clus_df_gather$value)  # round to nearest whole number
 print(nrow(clus_df_gather))
 clus_df_gather
 ```
 
 ```{r}
-unsorted_objective <- determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", return_weighted_layer_free_objective = TRUE)
-print(unsorted_objective)
+# unsorted_objective <- determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", return_weighted_layer_free_objective = TRUE)
+# print(unsorted_objective)
 
-p_unsorted <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "None", color_bands=TRUE)
+p_unsorted <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "None", color_bands=TRUE, color_boxes=FALSE, verbose=TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p_unsorted
 ```
 
@@ -45,7 +54,7 @@ optimize_column_order <- FALSE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_fixed_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE)
+p_sorted_fixed_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, color_boxes=FALSE, verbose=TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_fixed_columns
@@ -56,7 +65,7 @@ optimize_column_order <- TRUE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_optimized_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE)
+p_sorted_optimized_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, color_boxes=FALSE, verbose=TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_optimized_columns
@@ -74,11 +83,11 @@ print(nrow(clus_df_gather_summed))
 ```
 
 ```{r}
-clus_df_gather_summed_processed <- data_preprocess(df = clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", load_df = FALSE, do_gather_set_data = FALSE)
-unsorted_objective_trimmed <- determine_crossing_edges(clus_df_gather_summed_processed, graphing_columns = graphing_columns_summed, column_weights = "value", return_weighted_layer_free_objective = TRUE)
-print(unsorted_objective_trimmed)
+# clus_df_gather_summed_processed <- data_preprocess(df = clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", load_df = FALSE, do_gather_set_data = FALSE)
+# unsorted_objective_trimmed <- determine_crossing_edges(clus_df_gather_summed_processed, graphing_columns = graphing_columns_summed, column_weights = "value", return_weighted_layer_free_objective = TRUE)
+# print(unsorted_objective_trimmed)
 
-p_unsorted_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "None", color_bands=TRUE)
+p_unsorted_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "None", color_bands=TRUE, color_boxes=FALSE, verbose=TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p_unsorted_trimmed
 ```
 
@@ -87,7 +96,7 @@ optimize_column_order <- FALSE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_fixed_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, verbose=TRUE)
+p_sorted_fixed_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, color_boxes=FALSE, verbose=TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_fixed_columns_trimmed
@@ -100,7 +109,8 @@ optimize_column_order_per_cycle <- FALSE
 devtools::load_all()
 
 print(Sys.time())
-p_sorted_optimized_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, verbose=TRUE)
+p_sorted_optimized_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, color_boxes=FALSE, verbose=TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+
 print(Sys.time())
 
 p_sorted_optimized_columns_trimmed
@@ -108,14 +118,6 @@ p_sorted_optimized_columns_trimmed
 
 
 ```{r}
-optimize_column_order <- TRUE
-optimize_column_order_per_cycle <- FALSE
-
-devtools::load_all()
-
-print(Sys.time())
-p_sorted_optimized_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, verbose=TRUE)
-print(Sys.time())
-
-p_sorted_optimized_columns_trimmed
+sessioninfo::session_info()
 ```
+

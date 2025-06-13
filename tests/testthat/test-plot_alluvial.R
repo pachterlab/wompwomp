@@ -321,6 +321,38 @@ make_more_neighbornet_3_layer_df <- function() {
     )
 }
 
+make_more_neighbornet_3_layer_df_with_2_identical_layers <- function() {
+    df <- data.frame(
+        tissue = c(
+            "BRAIN", "BRAIN", "BRAIN",
+            "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+            "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+            "T CELL", "T CELL",
+            "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+        ),
+        sex = c(
+            "male", "female", "male",
+            "female", "male", "female", "female", "male", "female",
+            "male", "female", "male", "female", "male", "female", "male",
+            "female", "male",
+            "female", "male", "female", "male", "female", "male", "female", "female", "male"
+        ),
+        cluster = c(
+            "BRAIN", "BRAIN", "BRAIN",
+            "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+            "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+            "T CELL", "T CELL",
+            "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+        )
+    )
+    graphing_columns <- c("tissue", "cluster", "sex")
+
+    list(
+        df = df,
+        graphing_columns = graphing_columns
+    )
+}
+
 test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, unsorted", {
     skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
 
@@ -344,7 +376,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=FALSE)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=FALSE)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderFALSE_optimize_column_order_per_cycleFALSE", p)
 })
@@ -358,7 +390,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=TRUE)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=TRUE)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderFALSE_optimize_column_order_per_cycleTRUE", p)
 })
@@ -371,7 +403,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderTRUE_optimize_column_order_per_cycleFALSE", p)
 })
@@ -384,9 +416,49 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=TRUE)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=TRUE)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderTRUE_optimize_column_order_per_cycleTRUE", p)
 })
 
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, unsorted", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_3_layer_df_with_2_identical_layers()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_identical_layers_unsorted", p)
+})
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order FALSE", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_3_layer_df_with_2_identical_layers()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_identical_layers_unsorted_optimize_column_orderFALSE", p)
+})
+
+
+test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order TRUE", {
+    skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
+
+    set.seed(42)
+    input <- make_more_neighbornet_3_layer_df_with_2_identical_layers()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE)
+
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_identical_layers_unsorted_optimize_column_orderTRUE", p)
+})
 
