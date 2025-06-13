@@ -8,8 +8,8 @@ vignette: >
 ---
 
 ```{r}
-# devtools::load_all()
-library(alluvialmatch)
+devtools::load_all()
+# library(alluvialmatch)
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -82,20 +82,23 @@ n <- nlevels(clus_df_gather_sorted$cluster)
 perms <- gtools::permutations(n, n)
 
 # Original cluster levels
-orig_levels <- levels(clus_df_gather_sorted$cluster)
+orig_levels <- levels(clus_df_gather_sorted$col2_int)
 
 # Loop over permutations
 objective_minimum = Inf
 objectives <- numeric(nrow(perms))
 for (i in 1:nrow(perms)) {
   new_labels <- perms[i, ]  # as.character(perms[i, ])
+  right_map <- setNames(new_labels, orig_levels)
   
-  # # Create a relabeled copy
-  # clus_permuted <- clus_df_gather_sorted %>%
-  #   mutate(cluster = factor(cluster, levels = orig_levels, labels = new_labels))
+  # Create a relabeled copy
+  clus_permuted <- clus_df_gather_sorted %>%
+      mutate(
+        col2_int = right_map[as.character(col2_int)]
+      )
 
   map_dict <- setNames(new_labels, orig_levels)
-  clus_permuted_objective <- determine_crossing_edges(clus_df_gather_sorted, column1 = "col1_int", column2 = "col2_int", fixed_column = 1, map_dict = map_dict, return_weighted_layer_free_objective = TRUE)
+  clus_permuted_objective <- determine_crossing_edges(clus_permuted, column1 = "col1_int", column2 = "col2_int", return_weighted_layer_free_objective = TRUE)
   
   objectives[i] <- clus_permuted_objective
   
@@ -169,6 +172,7 @@ best_right_map <- NULL
 
 # Loop through all left and right permutations
 for (i in 1:nrow(left_perms)) {
+  # print(i)
   left_new_labels <- left_perms[i, ]
   left_map <- setNames(left_new_labels, left_levels)
   

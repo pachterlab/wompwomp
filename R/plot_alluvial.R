@@ -4,8 +4,8 @@
 #' @docType package
 #' @name alluvialmatch
 #'
-#' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter bind_rows across matches all_of
-#' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave guides scale_color_manual
+#' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter bind_rows across matches all_of add_count distinct
+#' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave guides scale_color_manual scale_x_continuous
 #' @importFrom ggalluvial geom_alluvium geom_stratum stat_stratum stat_alluvium
 #' @importFrom ggfittext geom_fit_text
 #' @importFrom ggforce gather_set_data
