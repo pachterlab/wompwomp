@@ -132,10 +132,11 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
 
     # map from string to int if needed
     if (is.null(column_weights) || !(column_weights %in% colnames(df))) {
-        clus_df_gather <- get_alluvial_df(df)
+        clus_df_gather <- get_alluvial_df(df, column_weights = column_weights)
     } else {
         clus_df_gather <- df
     }
+
 
     # Add prefixes to distinguish node types
 
@@ -176,9 +177,16 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
     summarized_results <- purrr::map(pairwise_groupings, function(cols) {
         clus_df_gather %>%
             group_by(across(all_of(cols))) %>%
-            summarise(total_value = sum(value), .groups = "drop") %>%
+            summarise(total_value = sum(!!sym(column_weights)), .groups = "drop") %>%
             mutate(grouping = paste(cols, collapse = "+"))
     })
+
+    # summarized_results <- purrr::map(pairwise_groupings, function(cols) {
+    #     clus_df_gather %>%
+    #         group_by(across(all_of(cols))) %>%
+    #         summarise(total_value = sum(value), .groups = "drop") %>%
+    #         mutate(grouping = paste(cols, collapse = "+"))
+    # })
 
     # Combine into a single data frame
     final_result <- bind_rows(summarized_results)
@@ -338,7 +346,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         })
 
         if (is.null(column_weights) || !(column_weights %in% colnames(df))) {
-            clus_df_gather_neighbornet <- get_alluvial_df(df)
+            clus_df_gather_neighbornet <- get_alluvial_df(df, column_weights = column_weights)
         } else {
             clus_df_gather_neighbornet <- df
         }
@@ -357,7 +365,6 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         }
 
         if (optimize_column_order) {
-            # browser()
             # optimize order either on the first iteration if optimize_column_order_per_cycle is FALSE, or each time if optimize_column_order_per_cycle is TRUE
             if ((optimize_column_order_per_cycle) || (i == 0)) {
                 verbose_tmp <- if (i == 0) verbose else FALSE # only have the option for verbose on first iteration
@@ -372,6 +379,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             neighbornet_objective_output <- determine_crossing_edges(
                 clus_df_gather_neighbornet_tmp,
                 graphing_columns = graphing_columns_tmp,
+                column_weights = column_weights,
                 include_output_objective_matrix_vector = TRUE,
                 return_weighted_layer_free_objective = FALSE
             )
@@ -393,6 +401,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             neighbornet_objective_output <- determine_crossing_edges(
                 clus_df_gather_neighbornet_tmp,
                 graphing_columns = graphing_columns_tmp,
+                column_weights = column_weights,
                 stratum_column_and_value_to_keep = stratum_column_and_value_to_keep,
                 input_objective = neighbornet_objective,
                 input_objective_matrix_vector = objective_matrix_vector,
@@ -400,13 +409,6 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
                 return_weighted_layer_free_objective = FALSE
             )
         }
-
-        #!!!TEMP
-        if (neighbornet_objective_output$output_objective < 0) {
-            browser()
-        }
-        #!!!TEMP
-
 
         objective_matrix_vector <- neighbornet_objective_output$objective_matrix_vector
         neighbornet_objective <- neighbornet_objective_output$output_objective
@@ -486,7 +488,7 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
             subset_data2 <- subset_data[subset_data[[reordered_column_original_clusters_name]] == cluster_number, ]
 
             # Find the row with the largest overlap (value)
-            largest_overlap_row <- subset_data2[which.max(subset_data2$value), ]
+            largest_overlap_row <- subset_data2[which.max(subset_data2$value), ]   #!!!xxx
 
             # Check if the corresponding Group 1 number is available
             new_cluster_number <- as.numeric(as.character(largest_overlap_row[[stable_column]]))
@@ -620,7 +622,7 @@ find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, curr
     }
 }
 
-plot_alluvial_internal <- function(clus_df_gather, graphing_columns,
+plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weights = "value",
                                    color_list = NULL, color_boxes = TRUE,
                                    color_bands = FALSE, color_band_list = NULL,
                                    color_band_column = NULL, color_band_boundary = FALSE,
@@ -629,6 +631,11 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns,
                                    include_group_sizes = FALSE, verbose = FALSE,
                                    box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE,
                                    save_height = 6, save_width = 6, keep_y_labels=FALSE, box_line_width=1) {
+    if (column_weights != "value") {
+        clus_df_gather <- clus_df_gather %>% dplyr::rename(value = !!sym(column_weights))
+        column_weights <- "value"
+    }
+
     clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
     clus_df_gather <- clus_df_gather[clus_df_gather$x == 1, ]
 
@@ -842,12 +849,15 @@ add_int_columns <- function(df, graphing_columns) {
     return(df)
 }
 
-get_alluvial_df <- function(df, do_gather_set_data = FALSE) {
+get_alluvial_df <- function(df, column_weights = "value", do_gather_set_data = FALSE) {
+    if (is.null(column_weights)) {
+        column_weights = "value"
+    }
     # Convert numeric clustering columns to ordered factors
     df <- df |>
         dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
         dplyr::group_by_all() |>
-        dplyr::count(name = "value")
+        dplyr::count(name = column_weights)
     if (do_gather_set_data) {
         df <- ggforce::gather_set_data(df, 1:2)
     }
@@ -974,7 +984,7 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, output_
     }
 
     if (is.null(column_weights) || !(column_weights %in% colnames(df))) {
-        clus_df_gather <- get_alluvial_df(df, do_gather_set_data = do_gather_set_data)
+        clus_df_gather <- get_alluvial_df(df, column_weights = column_weights, do_gather_set_data = do_gather_set_data)
     } else {
         clus_df_gather <- df
     }
@@ -1411,7 +1421,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
     # Plot
     if (verbose) message("Plotting data")
     alluvial_plot <- plot_alluvial_internal(clus_df_gather,
-        graphing_columns = graphing_columns,
+        graphing_columns = graphing_columns, column_weights = column_weights,
         color_list = color_list, color_boxes = color_boxes,
         color_bands = color_bands, color_band_list = color_band_list,
         color_band_column = color_band_column, color_band_boundary = color_band_boundary,

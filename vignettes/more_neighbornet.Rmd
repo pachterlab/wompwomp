@@ -204,3 +204,17 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neig
 ```{r}
 sessioninfo::session_info()
 ```
+
+```{r}
+raw_df <- data.frame(
+    method1 = sample(1:3, 100, TRUE),
+    method2 = sample(1:3, 100, TRUE)
+)
+
+# Aggregate by combination
+df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "weight"))
+    
+devtools::load_all()
+plot_alluvial(df, graphing_columns = c("method1", "method2"), column_weights = "weight")
+```
+

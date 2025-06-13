@@ -4,7 +4,7 @@
 #' @docType package
 #' @name alluvialmatch
 #'
-#' @importFrom dplyr mutate group_by summarise arrange desc ungroup slice n pull filter row_number left_join rename_with
+#' @importFrom dplyr mutate group_by summarise arrange desc ungroup slice n pull filter row_number left_join rename_with rename
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble is_tibble
 #' @importFrom utils read.csv
@@ -156,6 +156,11 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         clus_df_gather <- df
     }
 
+    if (column_weights != "value") {
+        clus_df_gather <- clus_df_gather %>% dplyr::rename(value = !!sym(column_weights))
+        column_weights <- "value"
+    }
+
     p <- ggplot(data = clus_df_gather, aes(y = value), )
     for (x in seq_along(graphing_columns)) {
         int_col <- paste0("col", x, "_int")
@@ -302,8 +307,6 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 objective_matrix <- input_objective_matrix_vector[[h]]
             }
         }
-
-        # browser()
 
         # Compare each pair of edges
         if (verbose) message("Looping through alluvia")
