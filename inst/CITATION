@@ -8,6 +8,6 @@ bibentry(
   author = c(person("Joseph", "Rich", role = c("aut", "cre"), email = "jmrich@caltech.edu"), person("Conrad", "Oakes", role = "aut", email = "coakes@caltech.edu"), person("Lior", "Pachter", role = "aut")),
   # journal = "Journal Name",
   year = 2025,
-  note = "R package version 0.0.1",
+  note = "R package version 0.1.0",
   url = "https://github.com/pachterlab/alluvialmatch"
 )
