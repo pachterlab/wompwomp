@@ -462,3 +462,89 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identic
     vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_identical_layers_unsorted_optimize_column_orderTRUE", p)
 })
 
+
+test_that("Objective calculation, more_neighbornet.Rmd, 3 layers, unsorted", {
+    input <- make_more_neighbornet_3_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+
+    clus_df_gather_sorted <- data_sort(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "None", optimize_column_order = FALSE)
+
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+
+    testthat::expect_equal(num, 14)
+})
+
+test_that("Objective calculation, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order FALSE", {
+    input <- make_more_neighbornet_3_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+
+    clus_df_gather_sorted <- data_sort(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "neighbornet", optimize_column_order = FALSE)
+
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+
+    testthat::expect_equal(num, 14)
+})
+
+test_that("Objective calculation, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE", {
+    input <- make_more_neighbornet_3_layer_df()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+
+    clus_df_gather_sorted <- data_sort(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE)
+
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+
+    testthat::expect_equal(num, 14)
+})
+
+
+
+test_that("Objective calculation, more_neighbornet.Rmd, 3 layers with 2 identical layers, unsorted", {
+    input <- make_more_neighbornet_3_layer_df_with_2_identical_layers()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+
+    clus_df_gather_sorted <- data_sort(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "None", optimize_column_order = FALSE)
+
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+
+    testthat::expect_equal(num, 14)
+})
+
+test_that("Objective calculation, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order FALSE", {
+    input <- make_more_neighbornet_3_layer_df_with_2_identical_layers()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+
+    clus_df_gather_sorted <- data_sort(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "neighbornet", optimize_column_order = FALSE)
+
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+
+    testthat::expect_equal(num, 14)
+})
+
+test_that("Objective calculation, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order TRUE", {
+    input <- make_more_neighbornet_3_layer_df_with_2_identical_layers()
+    df <- input$df
+    graphing_columns <- input$graphing_columns
+
+    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+
+    clus_df_gather_sorted <- data_sort(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE)
+
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+
+    testthat::expect_equal(num, 14)
+})

@@ -46,7 +46,7 @@ dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 kits_file <- file.path(output_dir, "kits_alluvial_data.csv")
 
 if (!file.exists(kits_file)) {
-    stop("KiTS file not found, and is currently not available for download")
+    stop(sprintf("KiTS file not found, and is currently not available for download. Please place the file in '%s'", kits_file))
 }
 
 df <- read.csv(kits_file)

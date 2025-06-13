@@ -39,6 +39,8 @@ plot_alluvial(
   auto_adjust_text = TRUE,
   save_height = 6,
   save_width = 6,
+  keep_y_labels = FALSE,
+  box_line_width = 1,
   verbose = FALSE,
   make_intermediate_neighbornet_plots = FALSE
 )
@@ -113,6 +115,10 @@ plot_alluvial(
 \item{save_height}{Integer greater than 0. Save height, in inches}
 
 \item{save_width}{Integer greater than 0. Save width, in inches}
+
+\item{keep_y_labels}{Keep y labels}
+
+\item{box_line_width}{Box line width}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 

@@ -30,7 +30,7 @@ eight_cubed_grouped_file_path <- file.path(output_dir, "Akr1c21_Slc7a12_grouped.
 graphing_columns <- c("Gene", "individual", "Sex", "Genotype", "Tissue", "Celltype_final")
 
 if (!file.exists(eight_cubed_grouped_file_path)) {
-    stop("8 cubed file not found, and is currently not available for download")
+    stop(sprintf("8 cubed file not found, and is currently not available for download. Please place the file in '%s'", eight_cubed_grouped_file_path))
 }
 ```
 

@@ -61,7 +61,9 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns,
     )
 
     pairs <- combn(graphing_columns, 2)
+    if (verbose) message("Computing objectives for each pair of columns in order to determine column order")
     for (i in 1:ncol(pairs)) {
+        if (verbose) message(sprintf("Computing objective for column pairs %s / %s", i, ncol(pairs)))
         column1 <- pairs[1, i]
         column2 <- pairs[2, i]
 
@@ -1226,10 +1228,10 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     }
 
     if (sorting_algorithm == "neighbornet") {
-        # n^3 complexity, where n is the sum of blocks across all layers
+        # O(n^3) complexity, where n is the sum of blocks across all layers
         clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, verbose = verbose, make_intermediate_neighbornet_plots = make_intermediate_neighbornet_plots)
     } else if (sorting_algorithm == "greedy_WBLF" || sorting_algorithm == "greedy_WOLF") {
-        # n_1 * n_2 complexity, where n1 is the number of blocks in layer 1, and n2 is the number of blocks in layer 2
+        # O(n_1 * n_2) complexity, where n1 is the number of blocks in layer 1, and n2 is the number of blocks in layer 2
         clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, sorting_algorithm = sorting_algorithm, verbose = verbose)
     } else if (sorting_algorithm == "None") {
         clus_df_gather_sorted <- clus_df_gather
