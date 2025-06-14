@@ -21,6 +21,8 @@ Optional:
   --matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when sorting_algorithm == 'neighbornet'.
   --same_side_matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when sorting_algorithm == 'neighbornet'.
   --weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when sorting_algorithm == 'neighbornet'.
+  --matrix_initialization_value_column_order Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when sorting_algorithm == 'neighbornet' and optimize_column_order is TRUE.
+  --weight_scalar_column_order Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when sorting_algorithm == 'neighbornet' and optimize_column_order is TRUE.
   --fixed_column            Name or position of the column in graphing_columns to keep fixed during sorting. Only applies when sorting_algorithm == 'greedy_WOLF'.
   --random_initializations  Number of random initializations for the positions of each grouping in graphing_columns. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
   --set_seed                Random seed for the random_initializations parameter. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
@@ -67,6 +69,8 @@ Optional:
     matrix_initialization_value <- get_numeric_arg(args, c("--matrix_initialization_value"))
     same_side_matrix_initialization_value <- get_numeric_arg(args, c("--same_side_matrix_initialization_value"))
     weight_scalar <- get_numeric_arg(args, c("--weight_scalar"))
+    matrix_initialization_value_column_order <- get_numeric_arg(args, c("--matrix_initialization_value_column_order"))
+    weight_scalar_column_order <- get_numeric_arg(args, c("--weight_scalar_column_order"))
     fixed_column <- get_fixed_column(args, "--fixed_column")
     random_initializations <- get_numeric_arg(args, "--random_initializations")
     set_seed <- get_numeric_arg(args, "--set_seed")
@@ -114,6 +118,8 @@ Optional:
     if (!is.null(matrix_initialization_value)) args_list$matrix_initialization_value <- matrix_initialization_value
     if (!is.null(same_side_matrix_initialization_value)) args_list$same_side_matrix_initialization_value <- same_side_matrix_initialization_value
     if (!is.null(weight_scalar)) args_list$weight_scalar <- weight_scalar
+    if (!is.null(matrix_initialization_value_column_order)) args_list$matrix_initialization_value_column_order <- matrix_initialization_value_column_order
+    if (!is.null(weight_scalar_column_order)) args_list$weight_scalar_column_order <- weight_scalar_column_order
     if (!is.null(fixed_column)) args_list$fixed_column <- fixed_column
     if (!is.null(random_initializations)) args_list$random_initializations <- random_initializations
     if (!is.null(set_seed)) args_list$set_seed <- set_seed
