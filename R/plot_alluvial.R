@@ -376,11 +376,12 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         clus_df_gather_neighbornet_tmp <- reorder_and_rename_columns(clus_df_gather_neighbornet, graphing_columns_tmp)
 
         if ((optimize_column_order_per_cycle) || (i == 0)) {
+            include_output_objective_matrix_vector <- !optimize_column_order_per_cycle  # if optimize_column_order_per_cycle is TRUE, then no need to return this big matrix
             neighbornet_objective_output <- determine_crossing_edges(
                 clus_df_gather_neighbornet_tmp,
                 graphing_columns = graphing_columns_tmp,
                 column_weights = column_weights,
-                include_output_objective_matrix_vector = TRUE,
+                include_output_objective_matrix_vector = include_output_objective_matrix_vector,
                 return_weighted_layer_free_objective = FALSE
             )
         } else {
@@ -1005,6 +1006,7 @@ sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_wei
     }
     if (verbose) message("Running neighbornet")
     cycle <- run_neighbornet(clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, verbose = verbose)
+    if (verbose) message("Cycle: ", paste(cycle, collapse = ", "))
     if (verbose) message("Determining optimal cycle start")
     res <- determine_optimal_cycle_start(clus_df_gather, cycle, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, verbose = verbose, make_intermediate_neighbornet_plots = make_intermediate_neighbornet_plots)
     clus_df_gather_neighbornet <- res$clus_df_gather
