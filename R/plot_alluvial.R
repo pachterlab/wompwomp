@@ -359,6 +359,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             graphing_columns_int <- c(graphing_columns_int, int_col_name)
         }
 
+        graphing_columns_tmp_previous_iteration <- graphing_columns_tmp
         if (optimize_column_order) {
             # optimize order either on the first iteration if optimize_column_order_per_cycle is FALSE, or each time if optimize_column_order_per_cycle is TRUE
             if ((optimize_column_order_per_cycle) || (i == 0)) {
@@ -367,16 +368,17 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             }
         }
 
-        # graphing_columns_tmp <- swap_graphing_column_order_based_on_graphing_column_int_order(graphing_columns=graphing_columns, graphing_columns_int=graphing_columns_int_sorted)
         clus_df_gather_neighbornet_tmp <- reorder_and_rename_columns(clus_df_gather_neighbornet, graphing_columns_tmp)
 
-        if ((optimize_column_order_per_cycle) || (i == 0)) {
-            include_output_objective_matrix_vector <- !optimize_column_order_per_cycle  # if optimize_column_order_per_cycle is TRUE, then no need to return this big matrix
+        # if ((optimize_column_order_per_cycle) || (i == 0)) {
+        # # recalculate from scratch if i == 0 (first iteration, no matrices made yet) OR if graphing_columns_tmp != graphing_columns_tmp_previous_iteration (optimize_column_order_per_cycle is TRUE and we have a new column order, and therefore our matrices are no help)
+        if ((!all(graphing_columns_tmp == graphing_columns_tmp_previous_iteration)) || (i == 0)) {
+            # include_output_objective_matrix_vector <- !optimize_column_order_per_cycle  # if optimize_column_order_per_cycle is TRUE, then no need to return this big matrix
             neighbornet_objective_output <- determine_crossing_edges(
                 clus_df_gather_neighbornet_tmp,
                 graphing_columns = graphing_columns_tmp,
                 column_weights = column_weights,
-                include_output_objective_matrix_vector = include_output_objective_matrix_vector,
+                include_output_objective_matrix_vector = TRUE,
                 return_weighted_layer_free_objective = FALSE
             )
         } else {
