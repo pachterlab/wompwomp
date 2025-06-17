@@ -1,15 +1,15 @@
 ---
-title: "Introduction to alluvialmatch"
+title: "Introduction to wompwomp"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to alluvialmatch}
+  %\VignetteIndexEntry{Introduction to wompwomp}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r}
 devtools::load_all()
-# library(alluvialmatch)
+# library(wompwomp)
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -19,17 +19,17 @@ library(tibble)
 library(tidyr)
 library(reticulate)
 
-alluvialmatch::setup_python_env()  #!!! erase
+wompwomp::setup_python_env()  #!!! erase
 ```
 
 Set up our python environment
 ```{r setup-env, eval = FALSE}
-alluvialmatch::setup_python_env()
+wompwomp::setup_python_env()
 ```
 
 ```{r check-python, include = FALSE}
 if (!reticulate::py_module_available("splitspy")) {
-    message("❌ 'splitspy' not found. Run alluvialmatch::setup_python_env() and restart R.")
+    message("❌ 'splitspy' not found. Run wompwomp::setup_python_env() and restart R.")
     knitr::knit_exit()
 }
 ```
@@ -81,7 +81,7 @@ Plot with ggalluvial before sorting - notice especially how B CELLs cross down t
 p1 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "None", color_bands=TRUE)
 p1
 
-# ggsave("alluvialmatch_unsorted.png", plot = p1, dpi = 300, bg = "white")
+# ggsave("wompwomp_unsorted.png", plot = p1, dpi = 300, bg = "white")
 ```
 Implementing a greedy heuristic for weighted one-layer free problem
 ```{r}
@@ -95,7 +95,7 @@ p2 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), c
 # alternatively: p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster") sorting_algorithm = "greedy_WOLF", fixed_column = 1)
 p2
 
-# ggsave("alluvialmatch_WOLF.png", plot = p2, dpi = 300, bg = "white")
+# ggsave("wompwomp_WOLF.png", plot = p2, dpi = 300, bg = "white")
 ```
 
 Notice how, because we kept the left layer fixed, B CELL and T CELL are separated far apart, even though we would minimize edge crossings if they were next to each other - we can fix this with the weighted both-layers free heuristic
@@ -109,7 +109,7 @@ p3 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), c
 # alternatively: p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster"), sorting_algorithm = "greedy_WBLF")
 p3
 
-# ggsave("alluvialmatch_WBLF.png", plot = p3, dpi = 300, bg = "white")
+# ggsave("wompwomp_WBLF.png", plot = p3, dpi = 300, bg = "white")
 ```
 
 But this still isn't optimal - let's try another algorithm
@@ -120,7 +120,7 @@ p4 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), c
 # alternatively: p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster"), sorting_algorithm = "neighbornet")
 p4
 
-# ggsave("alluvialmatch_NN.png", plot = p4, dpi = 300, bg = "white")
+# ggsave("wompwomp_NN.png", plot = p4, dpi = 300, bg = "white")
 ```
 
 What is our objective value on clus_df_gather_sorted_wolf and clus_df_gather_sorted_wblf, where our objective function is the sum of products of overlapping edge weights?

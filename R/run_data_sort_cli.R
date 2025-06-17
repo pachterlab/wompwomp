@@ -2,7 +2,7 @@
 run_data_sort_cli <- function(args) {
     if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
         cat("
-Usage: alluvialmatch data_sort --input INPUT [options]
+Usage: wompwomp data_sort --input INPUT [options]
 
 Required:
   -i, --input, --df               A data frame, tibble, or CSV file path. Must be in one of two formats:

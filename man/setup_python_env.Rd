@@ -5,7 +5,7 @@
 \title{Setup Python environment for this package}
 \usage{
 setup_python_env(
-  envname = "alluvialmatch_env",
+  envname = "wompwomp_env",
   packages = c("numpy==1.23.5", "splitspy")
 )
 }

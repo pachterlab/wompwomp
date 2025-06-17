@@ -3,9 +3,9 @@
 args <- commandArgs(trailingOnly = TRUE)
 
 ## if doing development, then comment this out, and uncomment the package installation and devtools thing
-#if (!requireNamespace("alluvialmatch", quietly = TRUE)) {
-#  message("alluvialmatch not installed. Installing now...")
-#  install.packages("alluvialmatch")
+#if (!requireNamespace("wompwomp", quietly = TRUE)) {
+#  message("wompwomp not installed. Installing now...")
+#  install.packages("wompwomp")
 #}
 
 
@@ -74,4 +74,4 @@ if (length(script_path) == 0) stop("Failed to detect script path.")
 package_root <- dirname(dirname(script_path))
 setwd(package_root)
 
-alluvialmatch::run_cli(args)
+wompwomp::run_cli(args)

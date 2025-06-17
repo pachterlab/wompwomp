@@ -1,8 +1,8 @@
-#' alluvialmatch: Cluster-matching alluvial plots
+#' wompwomp: Cluster-matching alluvial plots
 #'
 #' Main plotting function and helpers for bipartite-matching-based alluvial diagrams
 #' @docType package
-#' @name alluvialmatch
+#' @name wompwomp
 #'
 #' @importFrom dplyr mutate group_by summarise arrange desc ungroup slice n pull filter row_number left_join rename_with rename
 #' @importFrom tidyr pivot_wider

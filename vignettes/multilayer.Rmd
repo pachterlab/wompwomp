@@ -1,15 +1,15 @@
 ---
-title: "Introduction to alluvialmatch"
+title: "Introduction to wompwomp"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to alluvialmatch}
+  %\VignetteIndexEntry{Introduction to wompwomp}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r}
 devtools::load_all()
-# library(alluvialmatch)
+# library(wompwomp)
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -19,17 +19,17 @@ library(tibble)
 library(tidyr)
 library(reticulate)
 
-alluvialmatch::setup_python_env()  #!!! erase
+wompwomp::setup_python_env()  #!!! erase
 ```
 
 Set up our python environment
 ```{r setup-env, eval = FALSE}
-alluvialmatch::setup_python_env()
+wompwomp::setup_python_env()
 ```
 
 ```{r check-python, include = FALSE}
 if (!reticulate::py_module_available("splitspy")) {
-    message("❌ 'splitspy' not found. Run alluvialmatch::setup_python_env() and restart R.")
+    message("❌ 'splitspy' not found. Run wompwomp::setup_python_env() and restart R.")
     knitr::knit_exit()
 }
 ```

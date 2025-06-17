@@ -6,7 +6,7 @@
 #' @param packages Packages to install
 #'
 #' @export
-setup_python_env <- function(envname = "alluvialmatch_env", packages = c("numpy==1.23.5", "splitspy")) {
+setup_python_env <- function(envname = "wompwomp_env", packages = c("numpy==1.23.5", "splitspy")) {
     conda_findable <- tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)
     if (!conda_findable) {
         if (interactive()) {

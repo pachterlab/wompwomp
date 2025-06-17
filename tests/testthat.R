@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(alluvialmatch)
+library(wompwomp)
 
-test_check("alluvialmatch")
+test_check("wompwomp")

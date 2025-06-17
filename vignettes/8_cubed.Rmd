@@ -5,7 +5,7 @@ output:
 ---
 ```{r}
 devtools::load_all()
-# library(alluvialmatch)
+# library(wompwomp)
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -14,7 +14,7 @@ library(igraph)
 library(tibble)
 library(reticulate)
 
-alluvialmatch::setup_python_env()  #!!! erase
+wompwomp::setup_python_env()  #!!! erase
 ```
 
 ```{r}

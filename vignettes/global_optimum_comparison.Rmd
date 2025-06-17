@@ -9,7 +9,7 @@ vignette: >
 
 ```{r}
 devtools::load_all()
-# library(alluvialmatch)
+# library(wompwomp)
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -19,17 +19,17 @@ library(tibble)
 library(tidyr)
 library(reticulate)
 
-alluvialmatch::setup_python_env()  #!!! erase
+wompwomp::setup_python_env()  #!!! erase
 ```
 
 Set up our python environment
 ```{r setup-env, eval = FALSE}
-alluvialmatch::setup_python_env()
+wompwomp::setup_python_env()
 ```
 
 ```{r check-python, include = FALSE}
 if (!reticulate::py_module_available("splitspy")) {
-    message("❌ 'splitspy' not found. Run alluvialmatch::setup_python_env() and restart R.")
+    message("❌ 'splitspy' not found. Run wompwomp::setup_python_env() and restart R.")
     knitr::knit_exit()
 }
 ```
@@ -63,8 +63,8 @@ Implementing a greedy heuristic for weighted one-layer free problem
 clus_df_gather_sorted <- data_sort(df, column1="tissue", column2="cluster", sorting_algorithm="greedy_WOLF", fixed_column = "tissue")
 crossing_edges_output <- determine_crossing_edges(clus_df_gather_sorted, column1 = "col1_int", column2 = "col2_int")
 crossing_edges <- crossing_edges_output$crossing_edges_df
-alluvialmatch_objective_greedy_wolf <- determine_weighted_layer_free_objective(crossing_edges)
-print(alluvialmatch_objective_greedy_wolf)
+wompwomp_objective_greedy_wolf <- determine_weighted_layer_free_objective(crossing_edges)
+print(wompwomp_objective_greedy_wolf)
 ```
 
 Plot the alluvial plot with sorting and color matching
@@ -128,8 +128,8 @@ df_plot <- data.frame(
 
 ggplot(df_plot, aes(x = perm_id, y = objective)) +
   geom_point() +
-  geom_hline(yintercept = alluvialmatch_objective_greedy_wolf, linetype = "dashed", color = "blue") +
-  annotate("text", x = Inf, y = alluvialmatch_objective_greedy_wolf, label = "alluvialmatch objective", 
+  geom_hline(yintercept = wompwomp_objective_greedy_wolf, linetype = "dashed", color = "blue") +
+  annotate("text", x = Inf, y = wompwomp_objective_greedy_wolf, label = "wompwomp objective", 
            hjust = 1.1, vjust = -0.5, color = "blue", size = 3) +
   labs(x = "Permutation index", y = "Objective value") +
   theme_minimal()
@@ -141,8 +141,8 @@ Now do the same for WBLF
 clus_df_gather_sorted <- data_sort(df, column1="tissue", column2="cluster", sorting_algorithm="greedy_WBLF", random_initializations = 10)
 crossing_edges_output <- determine_crossing_edges(clus_df_gather_sorted, column1 = "col1_int", column2 = "col2_int")
 crossing_edges <- crossing_edges_output$crossing_edges_df
-alluvialmatch_objective_greedy_wblf <- determine_weighted_layer_free_objective(crossing_edges)
-print(alluvialmatch_objective_greedy_wblf)
+wompwomp_objective_greedy_wblf <- determine_weighted_layer_free_objective(crossing_edges)
+print(wompwomp_objective_greedy_wblf)
 ```
 
 ```{r}
@@ -233,8 +233,8 @@ df_plot <- data.frame(
 
 ggplot(df_plot, aes(x = perm_id, y = objective)) +
   geom_point() +
-  geom_hline(yintercept = alluvialmatch_objective_greedy_wblf, linetype = "dashed", color = "blue") +
-  annotate("text", x = Inf, y = alluvialmatch_objective_greedy_wblf, label = "alluvialmatch objective", 
+  geom_hline(yintercept = wompwomp_objective_greedy_wblf, linetype = "dashed", color = "blue") +
+  annotate("text", x = Inf, y = wompwomp_objective_greedy_wblf, label = "wompwomp objective", 
            hjust = 1.1, vjust = -0.5, color = "blue", size = 3) +
   geom_hline(yintercept = neighbornet_objective_minimum, linetype = "dashed", color = "orange") +
   annotate("text", x = Inf, y = neighbornet_objective_minimum, label = "neighbornet objective", 

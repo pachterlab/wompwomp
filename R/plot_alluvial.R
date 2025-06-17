@@ -1,8 +1,8 @@
-#' alluvialmatch: Cluster-matching alluvial plots
+#' wompwomp: Cluster-matching alluvial plots
 #'
 #' Main plotting function and helpers for bipartite-matching-based alluvial diagrams
 #' @docType package
-#' @name alluvialmatch
+#' @name wompwomp
 #'
 #' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter bind_rows across matches all_of add_count distinct
 #' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave guides scale_color_manual scale_x_continuous
@@ -1018,7 +1018,7 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, output_
 
 sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_weights = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", verbose = FALSE, make_intermediate_neighbornet_plots = FALSE) {
     if (!reticulate::py_module_available("splitspy")) {
-        stop("Python module 'splitspy' is not available, which is required for the neighbornet algorithm (default). Please run alluvialmatch::setup_python_env().")
+        stop("Python module 'splitspy' is not available, which is required for the neighbornet algorithm (default). Please run wompwomp::setup_python_env().")
     }
     if (verbose) message("Running neighbornet")
     cycle <- run_neighbornet(clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, verbose = verbose)

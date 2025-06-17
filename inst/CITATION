@@ -1,13 +1,13 @@
-citHeader("To cite the alluvialmatch package in publications, use:")
+citHeader("To cite the wompwomp package in publications, use:")
 
 # Once manuscript is out, replace entry = "Manual" with entry = "Article", and add in journal = "Journal Name"
 bibentry(
   # entry = "Article"
   entry = "Manual",
-  title = "alluvialmatch: Make Alluvial Plots with Order and Colors Optimized to Heuristically Minimize Cluster Cross-over in Polynomial Time",
+  title = "wompwomp: Make Alluvial Plots with Order and Colors Optimized to Heuristically Minimize Cluster Cross-over in Polynomial Time",
   author = c(person("Joseph", "Rich", role = c("aut", "cre"), email = "jmrich@caltech.edu"), person("Conrad", "Oakes", role = "aut", email = "coakes@caltech.edu"), person("Lior", "Pachter", role = "aut")),
   # journal = "Journal Name",
   year = 2025,
   note = "R package version 0.1.0",
-  url = "https://github.com/pachterlab/alluvialmatch"
+  url = "https://github.com/pachterlab/wompwomp"
 )

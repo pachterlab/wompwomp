@@ -2,7 +2,7 @@
 run_determine_weighted_layer_free_objective_cli <- function(args) {
     if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
         cat("
-Usage: alluvialmatch determine_weighted_layer_free_objective --df FILE [options]
+Usage: wompwomp determine_weighted_layer_free_objective --df FILE [options]
 
 Required:
   -i, --input, --df            A CSV path or data frame as outputted with crossing_edges_df (in R) or output_df_path (as a file) from determine_crossing_edges.

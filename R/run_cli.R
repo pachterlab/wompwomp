@@ -3,7 +3,7 @@ run_cli <- function(args) {
     if (length(args) == 0 || (length(args) == 1 && args[1] %in% c("--help", "-h"))) {
         cat("
 Usage:
-  alluvialmatch <command> [options]
+  wompwomp <command> [options]
 
 Commands:
   plot_alluvial     Generate an Alluvial Plot with Minimal Cluster Cross-over (runs data_preprocess and data_sort internally)
@@ -13,7 +13,7 @@ Commands:
   determine_weighted_layer_free_objective    Compute crossing objective
 
 Use:
-  alluvialmatch COMMAND --help
+  wompwomp COMMAND --help
 ")
         quit(save = "no", status = 0)
     }

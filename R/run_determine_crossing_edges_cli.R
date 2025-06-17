@@ -2,7 +2,7 @@
 run_determine_crossing_edges_cli <- function(args) {
     if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
         cat("
-Usage: alluvialmatch determine_crossing_edges --input INPUT [options]
+Usage: wompwomp determine_crossing_edges --input INPUT [options]
 
 Required:
   -i, --input, --df               A data frame, tibble, or CSV file path. Must be in one of two formats:

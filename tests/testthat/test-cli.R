@@ -1,4 +1,4 @@
-cli_cmd_path <- file.path(here::here(), "exec", "alluvialmatch")
+cli_cmd_path <- file.path(here::here(), "exec", "wompwomp")
 
 type_checking_files <- function(output_path, truth_path, check = TRUE) {
     # check for file path type
@@ -65,7 +65,7 @@ compare_csvs <- function(output_path, truth_path, check = TRUE) {
     invisible(TRUE)
 }
 
-# ./exec/alluvialmatch plot_alluvial --df tests/testthat/ground_truth/df_tests_cli.csv --output_plot_path tests/testthat/ground_truth/sorting_none.png --sorting_algorithm None
+# ./exec/wompwomp plot_alluvial --df tests/testthat/ground_truth/df_tests_cli.csv --output_plot_path tests/testthat/ground_truth/sorting_none.png --sorting_algorithm None
 test_that("CLI plot_alluvial, no sort", {
     # Paths
     command <- "plot_alluvial"
@@ -218,7 +218,7 @@ test_that("CLI data_sort, WOLF right fixed", {
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
 
-# ./exec/alluvialmatch data_sort --df tests/testthat/ground_truth/df_tests_cli.csv --output_df_path tests/testthat/ground_truth/sorting_wblf_df.csv --sorting_algorithm greedy_WBLF --graphing_columns tissue leiden
+# ./exec/wompwomp data_sort --df tests/testthat/ground_truth/df_tests_cli.csv --output_df_path tests/testthat/ground_truth/sorting_wblf_df.csv --sorting_algorithm greedy_WBLF --graphing_columns tissue leiden
 test_that("CLI data_sort, WBLF", {
     # Paths
     command <- "data_sort"
@@ -261,7 +261,7 @@ test_that("CLI data_sort, neighbornet", {
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
 
-# ./exec/alluvialmatch determine_crossing_edges --df tests/testthat/ground_truth/sorting_wblf_df.csv --output_df_path tests/testthat/ground_truth/crossing_wblf_df.csv --column1 col1_int --column2 col2_int
+# ./exec/wompwomp determine_crossing_edges --df tests/testthat/ground_truth/sorting_wblf_df.csv --output_df_path tests/testthat/ground_truth/crossing_wblf_df.csv --column1 col1_int --column2 col2_int
 test_that("CLI determine_crossing_edges", {
     # Paths
     command <- "determine_crossing_edges"
@@ -284,7 +284,7 @@ test_that("CLI determine_crossing_edges", {
     compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
 })
 
-# ./exec/alluvialmatch determine_weighted_layer_free_objective --df tests/testthat/ground_truth/crossing_wblf_df.csv
+# ./exec/wompwomp determine_weighted_layer_free_objective --df tests/testthat/ground_truth/crossing_wblf_df.csv
 test_that("CLI determine_weighted_layer_free_objective", {
     # Paths
     command <- "determine_weighted_layer_free_objective"

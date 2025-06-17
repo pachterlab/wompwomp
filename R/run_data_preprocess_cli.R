@@ -2,7 +2,7 @@
 run_data_preprocess_cli <- function(args) {
     if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
         cat("
-Usage: alluvialmatch data_preprocess --input INPUT graphing_columns GRAPHING_COLUMNS [options]
+Usage: wompwomp data_preprocess --input INPUT graphing_columns GRAPHING_COLUMNS [options]
 
 Required:
   -i, --input, --df                  A data frame, tibble, or CSV file path. Must be in one of two formats:
