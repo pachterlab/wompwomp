@@ -232,11 +232,43 @@ df <- data.frame(
 # )
 graphing_columns <- c("tissue", "cluster")
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_unsorted.pdf"))
+```
+
+```{r}
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_NN.pdf"))
+```
+
+```{r}
+df <- data.frame(
+  tissue = c(
+    "BRAIN", "BRAIN", "BRAIN", "BRAIN",
+    "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+    "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART"
+  ),
+  cluster = c(
+    1, 1, 2, 3,
+    1, 2, 2, 2, 2, 3,
+    1, 2, 2, 3, 3, 3, 3
+  ),
+  batch = c(
+    "A", "A", "A", "A",
+    "B", "B", "B", "B", "B", "B", 
+    "C", "C", "C", "C", "C", "C", "C"
+  )
+)
+graphing_columns <- c("tissue", "cluster", "batch")
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_unsorted.pdf"))
 ```
 
 ```{r}
 devtools::load_all()
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
+```
+
+```{r}
+devtools::load_all()
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"), column_sorting_metric = "ARI")
 ```
 

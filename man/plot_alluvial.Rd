@@ -18,6 +18,7 @@ plot_alluvial(
   weight_scalar = 5e+05,
   matrix_initialization_value_column_order = 1e+06,
   weight_scalar_column_order = 1,
+  column_sorting_metric = "edge_crossing",
   fixed_column = NULL,
   random_initializations = 1,
   set_seed = 42,
@@ -75,6 +76,8 @@ plot_alluvial(
 \item{matrix_initialization_value_column_order}{Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{optimize_column_order} is TRUE.}
 
 \item{weight_scalar_column_order}{Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{optimize_column_order} is TRUE.}
+
+\item{column_sorting_metric}{Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI".}
 
 \item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.}
 
