@@ -6,39 +6,61 @@
 #' @param packages Packages to install
 #'
 #' @export
-setup_python_env <- function(envname = "wompwomp_env", packages = c("numpy==1.23.5", "splitspy")) {
-    conda_findable <- tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)
-    if (!conda_findable) {
-        if (interactive()) {
-            answer <- readline("Miniconda not found. Would you like to install it now? [y/n]: ")
-            if (tolower(answer) %in% c("y", "yes")) {
-                message("Installing Miniconda...")
-                reticulate::install_miniconda()
-            } else {
-                stop("Miniconda is required but was not installed. Install with `reticulate::install_miniconda()`.")
+setup_python_env <- function(envname = "wompwomp_env", packages = c("numpy==1.23.5", "splitspy"), use_conda = TRUE) {
+    if (use_conda) {
+        conda_findable <- tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)
+        if (!conda_findable) {
+            if (interactive()) {
+                answer <- readline("use_conda is TRUE but Miniconda not found. Would you like to install it now? [y/n]: ")
+                if (tolower(answer) %in% c("y", "yes")) {
+                    message("Installing Miniconda...")
+                    reticulate::install_miniconda()
+                } else {
+                    stop("Miniconda is required but was not installed. Install with `reticulate::install_miniconda()`, or set use_conda = FALSE.")
+                }
             }
         }
-    }
 
-    envs <- reticulate::conda_list()$name
-    if (!(envname %in% envs)) {
-        if (interactive()) {
-            answer <- readline(paste0("Conda environment '", envname, "' not found. Create it now? [y/n]: "))
-            if (tolower(answer) %in% c("y", "yes")) {
-                message("Creating conda environment '", envname, "'...")
-                reticulate::conda_create(envname, python_version = "3.10")
+        envs <- reticulate::conda_list()$name
+        if (!(envname %in% envs)) {
+            if (interactive()) {
+                answer <- readline(paste0("Conda environment '", envname, "' not found. Create it now? [y/n]: "))
+                if (tolower(answer) %in% c("y", "yes")) {
+                    message("Creating conda environment '", envname, "'...")
+                    reticulate::conda_create(envname, python_version = "3.10")
+                } else {
+                    stop("Conda environment '", envname, "' is required but was not created.")
+                }
             } else {
-                stop("Conda environment '", envname, "' is required but was not created.")
+                stop(sprintf(
+                    "Conda environment '%s' not found, and cannot prompt in non-interactive mode. Create it with: reticulate::conda_create('%s', python_version = \"3.10\")",
+                    envname, envname
+                ))
             }
-        } else {
-            stop(sprintf(
-                "Conda environment '%s' not found, and cannot prompt in non-interactive mode. Create it with: reticulate::conda_create('%s', python_version = \"3.10\")",
-                envname, envname
-            ))
         }
-    }
 
-    reticulate::use_condaenv(envname, required = TRUE)
+        reticulate::use_condaenv(envname, required = TRUE)
+    } else {
+        env_path <- file.path("~/.virtualenvs", envname)
+        if (!dir.exists(path.expand(env_path))) {
+            if (interactive()) {
+                answer <- readline(paste0("Virtualenv '", envname, "' not found. Create it now? [y/n]: "))
+                if (tolower(answer) %in% c("y", "yes")) {
+                    message("Creating virtualenv '", envname, "'...")
+                    reticulate::virtualenv_create(envname, python = "python3.10")
+                } else {
+                    stop("Virtualenv is required but was not created.")
+                }
+            } else {
+                stop(sprintf(
+                    "Virtualenv '%s' not found, and cannot prompt in non-interactive mode. Create it with: reticulate::virtualenv_create('%s', python = 'python3.10')",
+                    envname, envname
+                ))
+            }
+        }
+
+        reticulate::use_virtualenv(envname, required = TRUE)
+    }
 
     # Only install missing Python modules
     for (pkg in packages) {

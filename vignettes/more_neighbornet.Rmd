@@ -267,8 +267,245 @@ devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
 ```
 
+
+FAILED ARI EXPERIMENTS
 ```{r}
-devtools::load_all()
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"), column_sorting_metric = "ARI")
+graphing_columns <- c("a", "b")
+
+m <- 100
+
+# Create perfectly conflicting clusterings
+a <- rep(c(1, 1, 2, 2), each = m / 4)
+b <- rep(c(1, 2, 1, 2), each = m / 4)
+
+df <- data.frame(a = a, b = b)
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE)
 ```
+
+
+```{r}
+set.seed(123)
+m <- 101  # number of elements
+
+a <- rep(1:2, each = m/2)
+b <- rep(1:2, each = m/2)
+b[1:(m/4)] <- sample(3:4, m/4, replace = TRUE)  # inject some disorder
+df <- data.frame(a = a, b = b)
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+
+# debugonce(mclustcomp)
+# mclustcomp(df$a, df$b, types = c("wallace2"))
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE)
+```
+
+```{r}
+set.seed(123)
+m <- 101
+
+a <- rep(1:4, each = m/4)
+b <- a
+b[sample(m, 5)] <- sample(1:4, 5, replace = TRUE)  # small noise
+df <- data.frame(a = a, b = b)
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE)
+```
+
+
+
+
+ARI of 0
+```{r}
+graphing_columns <- c("a", "b")
+
+set.seed(123)
+m <- 250  # total number of entries
+n_groups <- 5
+stopifnot(m %% (n_groups^2) == 0)
+
+block_size <- m / (n_groups^2)  # number of rows per a-b pairing (10 if m = 250)
+
+a <- rep(1:n_groups, each = block_size * n_groups)         # each a group appears in n_groups blocks
+b <- rep(1:n_groups, times = n_groups * block_size)        # each b group repeats across each a group
+
+df <- data.frame(a = a, b = b)
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_0.pdf"))
+```
+
+
+```{r}
+set.seed(123)
+m <- 250
+n_groups <- 5
+rows_per_group <- m / n_groups  # = 50 rows per group in `a`
+
+# Heavier diagonal mapping: 20 to diagonal, 7.5 to each off-diagonal (→ 50 total)
+strong <- 30
+weak <- (rows_per_group - strong) / (n_groups - 1)  # = 7.5
+
+stopifnot(weak == floor(weak) || weak == ceiling(weak))  # ensure integers
+
+a <- c()
+b <- c()
+for (i in 1:n_groups) {
+  # Diagonal: strong connection
+  a <- c(a, rep(i, strong))
+  b <- c(b, rep(i, strong))
+
+  # Off-diagonal: weaker connections
+  for (j in setdiff(1:n_groups, i)) {
+    a <- c(a, rep(i, weak))
+    b <- c(b, rep(j, weak))
+  }
+}
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_02.pdf"))
+```
+
+```{r}
+set.seed(123)
+m <- 250
+n_groups <- 5
+rows_per_group <- m / n_groups  # = 50 rows per group in `a`
+
+# Heavier diagonal mapping: 20 to diagonal, 7.5 to each off-diagonal (→ 50 total)
+strong <- 38
+weak <- (rows_per_group - strong) / (n_groups - 1)  # = 7.5
+
+stopifnot(weak == floor(weak) || weak == ceiling(weak))  # ensure integers
+
+a <- c()
+b <- c()
+for (i in 1:n_groups) {
+  # Diagonal: strong connection
+  a <- c(a, rep(i, strong))
+  b <- c(b, rep(i, strong))
+
+  # Off-diagonal: weaker connections
+  for (j in setdiff(1:n_groups, i)) {
+    a <- c(a, rep(i, weak))
+    b <- c(b, rep(j, weak))
+  }
+}
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05.pdf"))
+```
+
+
+```{r}
+set.seed(123)
+m <- 250
+n_groups <- 5
+rows_per_group <- m / n_groups  # = 50 rows per group in `a`
+
+# Heavier diagonal mapping: 20 to diagonal, 7.5 to each off-diagonal (→ 50 total)
+strong <- 46
+weak <- (rows_per_group - strong) / (n_groups - 1)  # = 7.5
+
+stopifnot(weak == floor(weak) || weak == ceiling(weak))  # ensure integers
+
+a <- c()
+b <- c()
+for (i in 1:n_groups) {
+  # Diagonal: strong connection
+  a <- c(a, rep(i, strong))
+  b <- c(b, rep(i, strong))
+
+  # Off-diagonal: weaker connections
+  for (j in setdiff(1:n_groups, i)) {
+    a <- c(a, rep(i, weak))
+    b <- c(b, rep(j, weak))
+  }
+}
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_08.pdf"))
+```
+
+```{r}
+set.seed(123)
+m <- 250
+n_groups <- 5
+rows_per_group <- m / n_groups  # = 50 rows per group in `a`
+
+a <- rep(1:n_groups, each = rows_per_group)
+b <- rep(1:n_groups, each = rows_per_group)
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_1.pdf"))
+```
+
+```{r}
+m <- 250
+rows_per_group <- m / 5  # = 50
+
+a <- rep(1:5, each = rows_per_group)
+b <- c(
+  rep(1, rows_per_group),   # a = 1 → b = 1
+  rep(2, rows_per_group),   # a = 2 → b = 2
+  rep(3, rows_per_group * 3)  # a = 3,4,5 → b = 3
+)
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_left.pdf"))
+```
+
+```{r}
+m <- 250
+rows_per_group <- m / 5  # = 50
+
+b <- rep(1:5, each = rows_per_group)
+a <- c(
+  rep(1, rows_per_group),   # a = 1 → b = 1
+  rep(2, rows_per_group),   # a = 2 → b = 2
+  rep(3, rows_per_group * 3)  # a = 3,4,5 → b = 3
+)
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_right.pdf"))
+```
+
 

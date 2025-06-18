@@ -34,6 +34,14 @@ if (!reticulate::py_module_available("splitspy")) {
 }
 ```
 
+```{r}
+use_temp_dir <- FALSE
+
+use_temp_dir <- (use_temp_dir || !interactive())  # ensure temp_dire when non-interactive always
+output_dir <- ifelse(!use_temp_dir, here::here("vignettes", "output"), file.path(tempdir(), "vignette_output"))
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+```
+
 We create a toy data frame that maps tissues (BRAIN, STOMACH, HEART, T CELL, B CELL) to clustering (1-4)
 ```{r}
 df <- data.frame(
@@ -78,11 +86,19 @@ Plot with ggalluvial before sorting - notice especially how B CELLs cross down t
 #     geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
 #     theme_minimal()
 # p1
-p1 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "None", color_bands=TRUE)
+p1 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "None", color_boxes = FALSE, match_colors = FALSE, color_bands=TRUE, output_plot_path = file.path(output_dir, "intro_unsorted.pdf"))
 p1
 
 # ggsave("wompwomp_unsorted.png", plot = p1, dpi = 300, bg = "white")
 ```
+
+With color
+```{r}
+p1_5 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "None", color_boxes = TRUE, match_colors = TRUE, color_bands=TRUE, output_plot_path = file.path(output_dir, "intro_unsorted_matched_colors.pdf"))
+p1_5
+```
+
+
 Implementing a greedy heuristic for weighted one-layer free problem
 ```{r}
 clus_df_gather_sorted_wolf <- data_sort(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF")
@@ -91,7 +107,7 @@ clus_df_gather_sorted_wolf
 
 Plot the alluvial plot with sorting and color matching
 ```{r}
-p2 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_WOLF", fixed_column = 1, color_bands=TRUE)
+p2 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_WOLF", fixed_column = 1, color_bands=TRUE, output_plot_path = file.path(output_dir, "intro_WOLF.pdf"))
 # alternatively: p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster") sorting_algorithm = "greedy_WOLF", fixed_column = 1)
 p2
 
@@ -105,7 +121,7 @@ clus_df_gather_sorted_wblf
 ```
 
 ```{r}
-p3 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_WBLF", color_bands=TRUE)  # output_plot_path = "vignette_intro_plot.png"
+p3 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_WBLF", color_bands=TRUE, output_plot_path = file.path(output_dir, "intro_WBLF.pdf"))  # output_plot_path = "vignette_intro_plot.png"
 # alternatively: p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster"), sorting_algorithm = "greedy_WBLF")
 p3
 
@@ -116,7 +132,7 @@ But this still isn't optimal - let's try another algorithm
 ```{r}
 clus_df_gather_sorted_nn <- data_sort(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "neighbornet")  # output_df_path = "vignette_intro_df_cluster_wblf.csv"
 
-p4 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "neighbornet", color_bands=TRUE)  # output_plot_path = "vignette_intro_plot.png"
+p4 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = file.path(output_dir, "intro_NN.pdf"))  # output_plot_path = "vignette_intro_plot.png"
 # alternatively: p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster"), sorting_algorithm = "neighbornet")
 p4
 

@@ -14,6 +14,7 @@ Optional:
   -c1, --column1            Can be used along with column2 in place of graphing_columns if working with two columns only. Mutually exclusive with graphing_columns.
   -c2, --column2            Can be used along with column1 in place of graphing_columns if working with two columns only. Mutually exclusive with graphing_columns.
   -w, --column_weights      Column name from df that contains the weights of each combination of groupings if df is in format (2) (see above).
+  --normalize_objective  Logical. Whether to normalize the objective by dividing by the sum of products of all edge weights.
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   --output_lode_df_path     Output path for the data frame containing lode information on each alluvium, in CSV format (see details below). If not provided, then will not be saved.
   --include_output_objective_matrix_vector            Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.
@@ -32,6 +33,7 @@ Optional:
     column1 <- get_arg(args, c("-c1", "--column1"))
     column2 <- get_arg(args, c("-c2", "--column2"))
     column_weights <- get_arg(args, c("-w", "--column_weights"))
+    normalize_objective <- store_true(args, c("-normalize_objective"))
     output_df_path <- get_arg(args, c("-o", "--output_df_path"))
     output_lode_df_path <- get_arg(args, c("--output_lode_df_path"))
     include_output_objective_matrix_vector <- store_true(args, "--include_output_objective_matrix_vector")
@@ -53,6 +55,7 @@ Optional:
     if (!is.null(column1)) args_list$column1 <- column1
     if (!is.null(column2)) args_list$column2 <- column2
     if (!is.null(column_weights)) args_list$column_weights <- column_weights
+    if (!is.null(normalize_objective)) args_list$normalize_objective <- normalize_objective
     if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
     if (!is.null(output_lode_df_path)) args_list$output_lode_df_path <- output_lode_df_path
     if (!is.null(include_output_objective_matrix_vector)) args_list$include_output_objective_matrix_vector <- include_output_objective_matrix_vector

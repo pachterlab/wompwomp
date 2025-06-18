@@ -71,8 +71,6 @@ print(Sys.time())
 p_sorted_optimized_columns
 ```
 
-
-
 Now remove the last column
 ```{r}
 graphing_columns_summed <- c("Gene", "individual", "Sex", "Genotype", "Tissue")
@@ -113,6 +111,44 @@ print(Sys.time())
 
 p_sorted_optimized_columns_trimmed
 ```
+
+And now remove individual as well
+```{r}
+graphing_columns_summed2 <- c("Gene", "Sex", "Genotype", "Tissue")
+clus_df_gather_summed2 <- clus_df_gather_summed %>%
+  dplyr::group_by(Gene, Sex, Genotype, Tissue) %>%
+  dplyr::summarise(value = sum(value), .groups = "drop")
+print(nrow(clus_df_gather_summed2))
+```
+
+```{r}
+p_unsorted_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "None", color_bands=TRUE, color_band_column="Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes=FALSE, verbose=TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_unsorted_trimmed2
+```
+
+```{r}
+optimize_column_order <- FALSE
+optimize_column_order_per_cycle <- FALSE
+
+print(Sys.time())
+p_sorted_fixed_columns_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, color_band_column="Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes=FALSE, verbose=TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+print(Sys.time())
+
+p_sorted_fixed_columns_trimmed2
+```
+
+```{r}
+optimize_column_order <- TRUE
+optimize_column_order_per_cycle <- TRUE
+
+print(Sys.time())
+p_sorted_optimized_columns_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands=TRUE, color_band_column="Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes=FALSE, verbose=TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+print(Sys.time())
+
+p_sorted_optimized_columns_trimmed2
+```
+
+
 
 
 ```{r}

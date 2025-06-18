@@ -325,9 +325,10 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         graphing_columns <- c(column1, column2)
     }
 
-    if (optimize_column_order_per_cycle && (column_sorting_metric == "edge_crossing")) {
-        if (verbose) message("column_sorting_metric == 'edge_crossing' and optimize_column_order_per_cycle is TRUE. This might be a bit slow. Consider setting column_sorting_metric == 'ARI' and/or optimize_column_order_per_cycle to FALSE.")
-    }
+    # # Commented out because I'm not sold on ARI
+    # if (optimize_column_order_per_cycle && (column_sorting_metric == "edge_crossing")) {
+    #     if (verbose) message("column_sorting_metric == 'edge_crossing' and optimize_column_order_per_cycle is TRUE. This might be a bit slow. Consider setting column_sorting_metric == 'ARI' and/or optimize_column_order_per_cycle to FALSE.")
+    # }
 
     # factorize input columns
     for (col in graphing_columns) {
@@ -348,7 +349,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         if (i == 0) {
             if (verbose) message(sprintf("Starting iteration 1"))
         } else if (i == 1) {
-            if (verbose) message(sprintf("Starting subsequent iterations (should go much faster than iteration 1)"))
+            if (verbose) message(sprintf("Starting subsequent iterations (should go much faster than iteration 1 if optimize_column_order is FALSE and/or optimize_column_order_per_cycle is FALSE)"))
         }
 
         cycle_shifted <- rotate_left(cycle, i)
@@ -1007,7 +1008,7 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, output_
     }
 
     if ((is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE))) {
-        if (verbose) message(sprintf("Saving sorted dataframe to=%s", output_df_path))
+        if (verbose) message(sprintf("Saving dataframe to=%s", output_df_path))
         write.csv(clus_df_gather, file = output_df_path, row.names = FALSE)
     }
 
@@ -1272,7 +1273,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 
     # print objective - don't do for neighbornet because I did it right before
     if ((verbose) && (sorting_algorithm != "neighbornet")) {
-        message("Determining crossing edges objective (to disable, use verbose==FALSE")
+        message("Determining crossing edges objective (to disable, use verbose==FALSE)")
         objective <- determine_crossing_edges(clus_df_gather_sorted,
             graphing_columns = graphing_columns,
             column_weights = column_weights, load_df = FALSE, preprocess_data = TRUE, return_weighted_layer_free_objective = TRUE

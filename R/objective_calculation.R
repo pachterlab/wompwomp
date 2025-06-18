@@ -63,6 +63,7 @@ determine_weighted_layer_free_objective <- function(df, verbose = FALSE) {
 #' @param column1 Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
+#' @param normalize_objective  Logical. Whether to normalize the objective by dividing by the sum of products of all edge weights.
 #' @param output_df_path Optional character. Output path for the data frame containing crossing edges, in CSV format (see details below). If not provided, then nothing will be saved.
 #' @param output_lode_df_path Optional character. Output path for the data frame containing lode information on each alluvium, in CSV format (see details below). If not provided, then nothing will be saved.
 #' @param include_output_objective_matrix_vector Logical. Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.
@@ -103,7 +104,7 @@ determine_weighted_layer_free_objective <- function(df, verbose = FALSE) {
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE) {
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -111,7 +112,11 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     }
 
     if (load_df) {
-        df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
+        column_weights_tmp <- column_weights
+        if (!(column_weights %in% colnames(df))) {
+            column_weights_tmp <- NULL
+        }
+        df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights_tmp)
     }
 
     if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
@@ -408,6 +413,12 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         }
         if (verbose) message(sprintf("Saving lode_df dataframe to=%s", output_lode_df_path))
         write.csv(lode_df_full, file = output_lode_df_path, row.names = FALSE, quote = FALSE)
+    }
+
+    if (normalize_objective) {
+        combs <- combn(seq_len(nrow(clus_df_gather)), 2)
+        values <- clus_df_gather[[column_weights]]
+        output_objective <- output_objective / sum(values[combs[1,]] * values[combs[2,]])  # take the sum of all products
     }
 
     if (return_weighted_layer_free_objective) {
