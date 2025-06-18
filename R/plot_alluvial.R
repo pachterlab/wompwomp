@@ -939,7 +939,19 @@ reorder_and_rename_columns <- function(df, graphing_columns) {
     return(df)
 }
 
+randomly_map_int_columns <- function(clus_df_gather, set_seed = 42) {
+    set.seed(set_seed)
+    cols_to_shuffle <- grep("^col\\d+_int$", names(clus_df_gather), value = TRUE)
 
+    for (col in cols_to_shuffle) {
+        old_vals <- unique(clus_df_gather[[col]])
+        new_vals <- sample(old_vals)
+        clus_df_gather[[col]] <- match(clus_df_gather[[col]], old_vals)
+        clus_df_gather[[col]] <- new_vals[clus_df_gather[[col]]]
+    }
+
+    return (clus_df_gather)
+}
 
 
 
@@ -1137,7 +1149,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @param column1 Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
-#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries.
+#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'None' keeps the mappings as-is when passed into the function.
 #' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
 #' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
 #' @param matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'neighbornet'}.
@@ -1176,7 +1188,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @export
 data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", fixed_column = NULL, random_initializations = 1, set_seed = 42, output_df_path = NULL, preprocess_data = TRUE, return_updated_graphing_columns = FALSE, verbose = FALSE, load_df = TRUE, make_intermediate_neighbornet_plots = FALSE) {
     #* Type Checking Start
-    valid_algorithms <- c("neighbornet", "greedy_WOLF", "greedy_WBLF", "None")
+    valid_algorithms <- c("neighbornet", "greedy_WOLF", "greedy_WBLF", "None", "random")
     if (!(sorting_algorithm %in% valid_algorithms)) {
         stop(sprintf(
             "Invalid sorting_algorithm: '%s'. Must be one of: %s",
@@ -1192,8 +1204,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         }
     }
 
-    if ((sorting_algorithm == "None") && (random_initializations > 1)) {
-        warning("random_initializations > 1 but sorting algorithm is None. Setting random_initializations to 1.")
+    if (((sorting_algorithm == "None") || (sorting_algorithm == "random") || (sorting_algorithm == "neighbornet")) && (random_initializations > 1)) {
+        sprintf("random_initializations > 1 but sorting algorithm is %s Setting random_initializations to 1.", sorting_algorithm)
         random_initializations <- 1
     }
 
@@ -1265,6 +1277,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     } else if (sorting_algorithm == "greedy_WBLF" || sorting_algorithm == "greedy_WOLF") {
         # O(n_1 * n_2) complexity, where n1 is the number of blocks in layer 1, and n2 is the number of blocks in layer 2
         clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = set_seed, sorting_algorithm = sorting_algorithm, verbose = verbose)
+    } else if (sorting_algorithm == "random") {
+        clus_df_gather_sorted <- randomly_map_int_columns(clus_df_gather, set_seed = set_seed)
     } else if (sorting_algorithm == "None") {
         clus_df_gather_sorted <- clus_df_gather
     } else {
@@ -1309,7 +1323,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param column1 Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
-#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries.
+#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'random', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'None' keeps the mappings as-is when passed into the function.
 #' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
 #' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.
 #' @param matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'neighbornet'}.

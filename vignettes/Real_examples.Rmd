@@ -127,6 +127,12 @@ p
 ```
 
 ```{r}
+devtools::load_all()
+p <- plot_alluvial(df_shuffled, graphing_columns = graphing_columns, sorting_algorithm = "random", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_shuffled.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p
+```
+
+```{r}
 p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_bands=FALSE, min_text = 0.01, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_NN.pdf"), save_height = 24, save_width = 24)
 p
 ```
