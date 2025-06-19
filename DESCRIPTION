@@ -35,5 +35,7 @@ Suggests:
     gtools,
     mclust,
     here,
+    ggrastr,
+    DuoClustering2018,
     sessioninfo
 Config/testthat/edition: 3

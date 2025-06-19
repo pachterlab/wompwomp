@@ -127,6 +127,11 @@ p_unsorted_trimmed2
 ```
 
 ```{r}
+p_unsorted_trimmed_random2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "random", color_bands=TRUE, color_band_column="Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes=FALSE, verbose=TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_unsorted_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_unsorted_trimmed_random2
+```
+
+```{r}
 optimize_column_order <- FALSE
 optimize_column_order_per_cycle <- FALSE
 

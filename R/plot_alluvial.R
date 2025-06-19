@@ -24,7 +24,7 @@ utils::globalVariables(c(
 
 StatStratum <- ggalluvial::StatStratum # avoid the error Can't find stat called "stratum"
 
-neighbornet_script_path <- system.file("scripts", "run_neighbornet.py", package = "yourpackagename")
+neighbornet_script_path <- system.file("scripts", "run_neighbornet.py")
 if (neighbornet_script_path == "") {
     # Fallback to development location
     neighbornet_script_path <- file.path(here::here("inst", "scripts", "run_neighbornet.py"))
@@ -132,6 +132,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns,
     max_index <- which.max(adj_distances)
 
     cycle_mapped_optimal_start <- rotate_left(cycle_mapped, max_index)
+    if (verbose) message("Done with neighbornet for column order")
     return(cycle_mapped_optimal_start)
 }
 
@@ -648,7 +649,13 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                                    include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
                                    include_group_sizes = FALSE, verbose = FALSE,
                                    box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE,
-                                   save_height = 6, save_width = 6, keep_y_labels=FALSE, box_line_width=1) {
+                                   save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE, keep_y_labels=FALSE, box_line_width=1) {
+    geom_alluvium <- if (rasterise_alluvia) {
+        function(...) ggrastr::rasterise(ggalluvial::geom_alluvium(...), dpi = dpi)
+    } else {
+        ggalluvial::geom_alluvium
+    }
+
     if (column_weights != "value") {
         clus_df_gather <- clus_df_gather %>% dplyr::rename(value = !!sym(column_weights))
         column_weights <- "value"
@@ -842,7 +849,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
         if (verbose) message(sprintf("Saving plot to=%s", output_plot_path))
         ggsave(output_plot_path,
             plot = p,
-            height = save_height, width = save_width, dpi = 300, bg = "white"
+            height = save_height, width = save_width, dpi = dpi, bg = "white"
         )
     }
 
@@ -1002,8 +1009,13 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, output_
     cols_to_keep <- intersect(cols_to_keep, names(df))
     df <- df[, cols_to_keep, drop = FALSE]
 
-    # Fill in NA values with "Missing"
-    df[is.na(df)] <- "Missing"
+    # # Fill in NA values with "Missing"
+    # df[is.na(df)] <- "Missing"
+    df <- df %>%
+        mutate(across(everything(), ~ {
+            if (is.factor(.)) . <- as.character(.)
+            replace(., is.na(.), "Missing")
+        }))
 
     df <- add_int_columns(df, graphing_columns = graphing_columns)
 
@@ -1355,6 +1367,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param auto_adjust_text Logical. Whether to automatically adjust text size to fit in box.
 #' @param save_height Integer greater than 0. Save height, in inches
 #' @param save_width Integer greater than 0. Save width, in inches
+#' @param dpi Integer greater than 0. DPI for \code{output_plot_path}, if \code{output_plot_path} is a raster image or \code{rasterise_alluvia} is TRUE
+#' @param rasterise_alluvia Logical. Whether to rasterize the alluvia if \code{output_plot_path} is a PDF. Can save space if DPI low enough
 #' @param keep_y_labels Keep y labels
 #' @param box_line_width Box line width
 #' @param verbose Logical. If TRUE, will display messages during the function.
@@ -1376,7 +1390,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' p <- plot_alluvial(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
 #'
 #' @export
-plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", fixed_column = NULL, random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_band_boundary = FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE, box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE, save_height = 6, save_width = 6, keep_y_labels=FALSE, box_line_width=1, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE) {
+plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", fixed_column = NULL, random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE, color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_band_boundary = FALSE, match_colors = TRUE, alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE, output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE, box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE, save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE, keep_y_labels=FALSE, box_line_width=1, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -1469,7 +1483,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         include_group_sizes = include_group_sizes,
         output_plot_path = output_plot_path, verbose = verbose,
         box_width = box_width, text_width = text_width, min_text = min_text, auto_adjust_text = auto_adjust_text,
-        save_height = save_height, save_width = save_width, keep_y_labels=keep_y_labels, box_line_width=box_line_width
+        save_height = save_height, save_width = save_width, dpi=dpi, rasterise_alluvia=rasterise_alluvia, keep_y_labels=keep_y_labels, box_line_width=box_line_width
     )
 
     return(alluvial_plot)

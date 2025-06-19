@@ -47,6 +47,8 @@ Optional:
   --auto_adjust_text Whether to automatically adjust text size to fit in box.
   --save_height Integer greater than 0. Save height, in inches
   --save_width Integer greater than 0. Save width, in inches
+  --dpi Integer greater than 0. DPI for output_plot_path, if output_plot_path is a raster image or rasterise_alluvia is TRUE
+  --rasterise_alluvia Logical. Whether to rasterize the alluvia ifoutput_plot_path is a PDF. Can save space if DPI low enough
   --keep_y_labels Keep y labels
   --box_line_width Box line width
   -v, --verbose             If TRUE, will display messages during the function.
@@ -96,6 +98,8 @@ Optional:
     save_height <- get_numeric_arg(args, c("--save_height"))
     save_width <- get_numeric_arg(args, c("--save_width"))
     keep_y_labels <- store_true(args, c("--keep_y_labels"))
+    dpi <- get_numeric_arg(args, c("--dpi"))
+    rasterise_alluvia <- store_true(args, c("--rasterise_alluvia"))
     box_line_width <- get_numeric_arg(args, c("--box_line_width"))
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
@@ -145,6 +149,8 @@ Optional:
     if (!is.null(auto_adjust_text)) args_list$auto_adjust_text <- auto_adjust_text
     if (!is.null(save_height)) args_list$save_height <- save_height
     if (!is.null(save_width)) args_list$save_width <- save_width
+    if (!is.null(dpi)) args_list$dpi <- dpi
+    if (!is.null(rasterise_alluvia)) args_list$rasterise_alluvia <- rasterise_alluvia
     if (!is.null(keep_y_labels)) args_list$keep_y_labels <- keep_y_labels
     if (!is.null(box_line_width)) args_list$box_line_width <- box_line_width
     if (!is.null(verbose)) args_list$verbose <- verbose

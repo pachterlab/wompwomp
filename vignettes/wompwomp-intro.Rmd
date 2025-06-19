@@ -132,7 +132,10 @@ But this still isn't optimal - let's try another algorithm
 ```{r}
 clus_df_gather_sorted_nn <- data_sort(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "neighbornet")  # output_df_path = "vignette_intro_df_cluster_wblf.csv"
 
-p4 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = file.path(output_dir, "intro_NN.pdf"))  # output_plot_path = "vignette_intro_plot.png"
+p4 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = file.path(output_dir, "intro_NN.pdf"))
+
+plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "neighbornet", color_boxes = FALSE, match_colors = FALSE, color_bands=TRUE, output_plot_path = file.path(output_dir, "intro_NN_without_color.pdf")) 
+# output_plot_path = "vignette_intro_plot.png"
 # alternatively: p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster"), sorting_algorithm = "neighbornet")
 p4
 
