@@ -44,6 +44,8 @@ Optional:
     # Hidden arguments
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
     load_df <- store_false(args, c("--disable_load_df"))
+    default_sorting <- get_arg(args, c("--default_sorting"))
+    set_seed <- get_numeric_arg(args, c("--set_seed"))
 
     # Base argument list with required args
     args_list <- list(
@@ -63,6 +65,8 @@ Optional:
     if (!is.null(verbose)) args_list$verbose <- verbose
     if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
     if (!is.null(load_df)) args_list$load_df <- load_df
+    if (!is.null(default_sorting)) args_list$default_sorting <- default_sorting
+    if (!is.null(set_seed)) args_list$set_seed <- set_seed
 
     # Dynamically call function
     result <- do.call(determine_crossing_edges, args_list)

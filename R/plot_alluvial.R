@@ -1024,13 +1024,23 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, default
     cols_to_keep <- intersect(cols_to_keep, names(df))
     df <- df[, cols_to_keep, drop = FALSE]
 
-    # # Fill in NA values with "Missing"
-    # df[is.na(df)] <- "Missing"
-    df <- df %>%
-        mutate(across(everything(), ~ {
-            if (is.factor(.)) . <- as.character(.)
-            replace(., is.na(.), "Missing")
-        }))
+    # # # Fill in NA values with "Missing"
+    # # df[is.na(df)] <- "Missing"
+    # df <- df %>%
+    #     mutate(across(all_of(graphing_columns), ~ {
+    #         if (is.factor(.x) || is.character(.x)) {
+    #             replace(as.character(.x), is.na(.x), "Missing")
+    #         } else {
+    #             .x  # leave numeric and other types untouched
+    #         }
+    #     }))
+    for (col in graphing_columns) {
+        if (col %in% colnames(df)) {
+            if (is.factor(df[[col]]) || is.character(df[[col]])) {
+                df[[col]] <- replace(as.character(df[[col]]), is.na(df[[col]]), "Missing")
+            }
+        }
+    }
 
     df <- add_int_columns(df, graphing_columns = graphing_columns, default_sorting = default_sorting, set_seed = set_seed)
 
@@ -1316,11 +1326,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     # print objective - don't do for neighbornet because I did it right before
     if ((verbose) && (sorting_algorithm != "neighbornet")) {
         message("Determining crossing edges objective (to disable, use verbose==FALSE)")
-        browser()
-        objective <- determine_crossing_edges(clus_df_gather_sorted,
-            graphing_columns = graphing_columns,
-            column_weights = column_weights, load_df = FALSE, preprocess_data = TRUE, return_weighted_layer_free_objective = TRUE, default_sorting = default_sorting, set_seed = set_seed
-        )
+        objective <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE, default_sorting = default_sorting, set_seed = set_seed)
         message(sprintf("crossing edges objective = %s", objective))
     }
 
