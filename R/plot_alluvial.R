@@ -1316,9 +1316,10 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     # print objective - don't do for neighbornet because I did it right before
     if ((verbose) && (sorting_algorithm != "neighbornet")) {
         message("Determining crossing edges objective (to disable, use verbose==FALSE)")
+        browser()
         objective <- determine_crossing_edges(clus_df_gather_sorted,
             graphing_columns = graphing_columns,
-            column_weights = column_weights, load_df = FALSE, preprocess_data = TRUE, return_weighted_layer_free_objective = TRUE
+            column_weights = column_weights, load_df = FALSE, preprocess_data = TRUE, return_weighted_layer_free_objective = TRUE, default_sorting = default_sorting, set_seed = set_seed
         )
         message(sprintf("crossing edges objective = %s", objective))
     }

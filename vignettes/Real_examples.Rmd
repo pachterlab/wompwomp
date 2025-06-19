@@ -122,21 +122,22 @@ df <- read.csv(got_file)
 ```
 
 ```{r}
+devtools::load_all()
 p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "alphabetical", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_alphabetical.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 
 p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "reverse_alphabetical", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_reverse_alphabetical.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 
-p <- plot_alluvial(df_shuffled, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "increasing", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_increasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "increasing", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_increasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 
-p <- plot_alluvial(df_shuffled, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "decreasing", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_random_unsorted_decreasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "decreasing", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_decreasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 ```
 
 ```{r}
-p <- plot_alluvial(df_shuffled, graphing_columns = graphing_columns, sorting_algorithm = "random", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 
 df['Lannister_origin'] <- df["Origin"] == 'House Lannister'

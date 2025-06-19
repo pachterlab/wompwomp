@@ -74,6 +74,8 @@ determine_weighted_layer_free_objective <- function(df, verbose = FALSE) {
 #' @param input_objective Internal flag; not recommended to modify.
 #' @param preprocess_data Internal flag; not recommended to modify.
 #' @param load_df Internal flag; not recommended to modify.
+#' @param default_sorting Internal flag; not recommended to modify.
+#' @param set_seed Internal flag; not recommended to modify.
 #'
 #' @return
 #' If return_weighted_layer_free_objective is FALSE (default): A list of values, as follows:
@@ -104,7 +106,7 @@ determine_weighted_layer_free_objective <- function(df, verbose = FALSE) {
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE) {
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical", set_seed = 42) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -156,7 +158,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
 
     if (verbose) message("Preprocessing data")
     if (preprocess_data) {
-        clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, do_gather_set_data = FALSE)
+        clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, do_gather_set_data = FALSE, default_sorting = default_sorting, set_seed = set_seed)
     } else {
         clus_df_gather <- df
     }
