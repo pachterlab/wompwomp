@@ -41,6 +41,7 @@ Optional:
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   --output_df_path          Output path for the output data frame, in CSV format. If NULL, then will not be saved
   --disable_preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
+  --default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if sorting_algorithm == 'neighbornet'. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
   --box_width Numeric between 0 and 1. Box width
   --text_width Numeric between 0 and 1. Text width
   --min_text Integer greater than 0. Min text
@@ -91,6 +92,7 @@ Optional:
     include_group_sizes <- store_false(args, c("--disable_include_group_sizes"))
     output_df_path <- get_arg(args, c("--output_df_path"))
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
+    default_sorting <- get_arg(args, c("--default_sorting"))
     box_width <- get_numeric_arg(args, c("--box_width"))
     text_width <- get_numeric_arg(args, c("--text_width"))
     min_text <- get_numeric_arg(args, c("--min_text"))
@@ -143,6 +145,7 @@ Optional:
     if (!is.null(include_group_sizes)) args_list$include_group_sizes <- include_group_sizes
     if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
     if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
+    if (!is.null(default_sorting)) args_list$default_sorting <- default_sorting
     if (!is.null(box_width)) args_list$box_width <- box_width
     if (!is.null(text_width)) args_list$text_width <- text_width
     if (!is.null(min_text)) args_list$min_text <- min_text

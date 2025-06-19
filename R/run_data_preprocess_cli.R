@@ -12,6 +12,8 @@ Required:
 
 Optional:
   -w, --column_weights      Column name from df that contains the weights of each combination of groupings if df is in format (2) (see above).
+  --default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if sorting_algorithm == 'neighbornet'. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
+  --set_seed Integer. Random seed for when default_sorting == 'random' parameter.
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
@@ -25,6 +27,8 @@ Optional:
 
     # Optional arguments
     column_weights <- get_arg(args, c("-w", "--column_weights"))
+    default_sorting <- get_arg(args, c("--default_sorting"))
+    set_seed <- get_numeric_arg(args, c("--set_seed"))
     output_df_path <- get_arg(args, c("-o", "--output_df_path"))
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
@@ -42,6 +46,8 @@ Optional:
 
     # Conditionally add optional args if not NULL
     if (!is.null(column_weights)) args_list$column_weights <- column_weights
+    if (!is.null(default_sorting)) args_list$default_sorting <- default_sorting
+    if (!is.null(set_seed)) args_list$set_seed <- set_seed
     if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
     if (!is.null(verbose)) args_list$verbose <- verbose
     if (!is.null(load_df)) args_list$load_df <- load_df

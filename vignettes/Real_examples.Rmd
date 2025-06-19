@@ -122,25 +122,45 @@ df <- read.csv(got_file)
 ```
 
 ```{r}
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "alphabetical", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_alphabetical.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p
+
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "reverse_alphabetical", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_reverse_alphabetical.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p
+
+p <- plot_alluvial(df_shuffled, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "increasing", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_increasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p
+
+p <- plot_alluvial(df_shuffled, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "decreasing", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_random_unsorted_decreasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 ```
 
 ```{r}
-p <- plot_alluvial(df_shuffled, graphing_columns = graphing_columns, sorting_algorithm = "random", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_shuffled.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df_shuffled, graphing_columns = graphing_columns, sorting_algorithm = "random", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p
+
+df['Lannister_origin'] <- df["Origin"] == 'House Lannister'
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", optimize_column_order=FALSE, color_boxes=FALSE, color_bands=TRUE, min_text = 0.01, verbose=FALSE, color_band_list = c("grey","#FFBE2D"), color_band_column = 'Lannister_origin', output_plot_path = file.path(output_dir, "GoT_random_lannister_origin.pdf"), save_height = 24, save_width = 24)
+p
+
+df['Lannister_ending'] <- df["End.of.S7"] == 'Queen Cersei Lannister'
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", optimize_column_order=FALSE, color_boxes=FALSE, color_bands=TRUE, min_text = 0.01, verbose=FALSE, color_band_list = c("grey","#FFBE2D"), color_band_column = 'Lannister_ending', output_plot_path = file.path(output_dir, "GoT_random_lannister_ending.pdf"), save_height = 24, save_width = 24)
 p
 ```
 
 ```{r}
 p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_bands=FALSE, min_text = 0.01, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_NN.pdf"), save_height = 24, save_width = 24)
 p
-```
 
-```{r}
-df['Lannister'] <- df["Origin"] == 'House Lannister'
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_boxes=FALSE, color_bands=TRUE, min_text = 0.01, verbose=TRUE, color_band_list = c('grey',"#FFBE2D"), color_band_column = 'Lannister', output_plot_path = file.path(output_dir, "GoT_NN_lannister.pdf"), save_height = 24, save_width = 24)
+df['Lannister_origin'] <- df["Origin"] == 'House Lannister'
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", optimize_column_order=FALSE, color_boxes=FALSE, color_bands=TRUE, min_text = 0.01, verbose=TRUE, color_band_list = c("grey","#FFBE2D"), color_band_column = 'Lannister_origin', output_plot_path = file.path(output_dir, "GoT_NN_lannister_origin.pdf"), save_height = 24, save_width = 24)
+p
+
+df['Lannister_ending'] <- df["End.of.S7"] == 'Queen Cersei Lannister'
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", optimize_column_order=FALSE, color_boxes=FALSE, color_bands=TRUE, min_text = 0.01, verbose=TRUE, color_band_list = c("grey","#FFBE2D"), color_band_column = 'Lannister_ending', output_plot_path = file.path(output_dir, "GoT_NN_lannister_ending.pdf"), save_height = 24, save_width = 24)
 p
 ```
+
 
 Clustering
 ```{r}

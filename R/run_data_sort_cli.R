@@ -28,6 +28,7 @@ Optional:
   --set_seed                Random seed for the random_initializations parameter. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   --disable_preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
+  --default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if sorting_algorithm == 'neighbornet'. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
   --return_updated_graphing_columns         If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
@@ -57,6 +58,7 @@ Optional:
     set_seed <- get_numeric_arg(args, "--set_seed")
     output_df_path <- get_arg(args, c("-o", "--output_df_path"))
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
+    default_sorting <- get_arg(args, c("--default_sorting"))
     return_updated_graphing_columns <- store_true(args, "--return_updated_graphing_columns")
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
@@ -90,6 +92,7 @@ Optional:
     if (!is.null(set_seed)) args_list$set_seed <- set_seed
     if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
     if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
+    if (!is.null(default_sorting)) args_list$default_sorting <- default_sorting
     if (!is.null(return_updated_graphing_columns)) args_list$return_updated_graphing_columns <- return_updated_graphing_columns
     if (!is.null(verbose)) args_list$verbose <- verbose
     if (!is.null(load_df)) args_list$load_df <- load_df
