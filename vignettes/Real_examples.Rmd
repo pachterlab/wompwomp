@@ -198,7 +198,7 @@ if (!requireNamespace("DuoClustering2018", quietly = TRUE)) {
 df_long <- DuoClustering2018::clustering_summary_filteredExpr10_Koh_v2()
 # print(unique(df_long$method))
 # graphing_columns <- c("PCAKmeans", "RtsneKmeans", "Seurat", "SC3")
-graphing_columns <- c("PCAKmeans", "RtsneKmeans", "Seurat", "SC3", "CIDR", "PCAHC", "SC3svm", "pcaReduce", "TSCAN", "ascend", "SAFE", "monocle", "RaceID2")  # FlowSOM has no data
+graphing_columns <- c("PCAKmeans", "RtsneKmeans", "Seurat", "SC3", "CIDR", "PCAHC", "SC3svm", "pcaReduce", "TSCAN", "SAFE", "monocle", "RaceID2")  # FlowSOM and ascend have minimal data
 
 head(df_long)
 ```
@@ -220,37 +220,46 @@ df <- df_long %>%
   select(-obs_id)  # optional: remove if obs_id is no longer needed
 
 df$FlowSOM <- NULL
+df$ascend <- NULL
+
+# Remove rows with >na_threshold fraction NA
+na_threshold <- 0.8
+df <- df[rowMeans(is.na(df)) <= na_threshold, ]
 
 head(df)
 ```
 
-Subsample for debugging  #!!!! ERASE
+Subsample for debugging
 ```{r}
-set.seed(42)
-df <- df %>% slice_sample(n = 10000)
+sample_size <- NULL
+if (!is.null(sample_size)) {
+    set.seed(42)
+    df <- df %>% slice_sample(n = sample_size)
+} else {
+    sample_size <- "full"
+}
 ```
 
 ```{r}
 devtools::load_all()
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "clustering_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
-p
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
 ```
 
 ```{r}
+devtools::load_all()
 log_msgs <- character()
 
 withCallingHandlers({
-  p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=FALSE, verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, "clustering_NN.pdf"), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
+  p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=FALSE, verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
 }, message = function(m) {
   log_msgs <<- c(log_msgs, conditionMessage(m))
   # no muffling → still prints to console
 })
-p2
 ```
 
 ```{r}
 objectives <- stringr::str_match(log_msgs, "neighbornet_objective for iteration \\d+ = (\\d+)")[, 2]
-objectives <- as.integer(na.omit(objectives))
+objectives <- as.numeric(na.omit(objectives))
 
 df_obj <- data.frame(
   iteration = seq_along(objectives),
@@ -271,12 +280,11 @@ ggplot(df_obj, aes(x = iteration, y = objective)) +
 
 ```{r}
 devtools::load_all()
-cycle_start_positions <- c(40:55, 65:72)  # choose based on finding some local optima above
+cycle_start_positions <- c(12:25, 130:150)  # c(40:60, 140:160)  # choose based on finding some local optima above
 column_sorting_metric <- "edge_crossing"  # edge_crossing or ARI
 optimize_column_order_per_cycle <- TRUE
 
-p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=FALSE, verbose=TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path=file.path(output_dir, "clustering_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass', cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric)
-p3
+p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=FALSE, verbose=TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN_optimized_columns.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass', cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric)
 ```
 
 

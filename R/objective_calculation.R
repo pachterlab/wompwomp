@@ -346,99 +346,109 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         }
 
         # Compare each pair of edges
-        if (verbose) message("Looping through alluvia")
-        browser()
-
-        # # option 1 for objective (best): fenwick
-        # output_objective <- calculate_objective_fenwick(lode_df)
-
-        # # option 2 for objective: vectorized
-        # objective_matrix <- make_crossing_matrix_vectorized(lode_df$y1, lode_df$y2, lode_df$count)
-        # output_objective <- sum(objective_matrix)
-
-        # # option 3 for objective (worst): double for loop
-        if (is.null(stratum_column_and_value_to_keep)) {
-            for (i in 1:(lode_df_length - 1)) {
-                for (j in (i + 1):lode_df_length) {
-                    # Check crossing condition once per unordered pair
-                    if ((lode_df$y1[i] - lode_df$y1[j]) * (lode_df$y2[i] - lode_df$y2[j]) < 0) {
-                        # equivalent to below but faster
-                        # if ((lode_df$y1[i] < lode_df$y1[j] && lode_df$y2[i] > lode_df$y2[j]) | (lode_df$y1[i] > lode_df$y1[j] && lode_df$y2[i] < lode_df$y2[j])) {
-                        alluvium1 <- lode_df$alluvium[i]
-                        alluvium2 <- lode_df$alluvium[j]
-                        w1 <- lode_df$count[i]
-                        w2 <- lode_df$count[j]
-                        strat_layer <- lode_df$x1[i] # will be same for i and j
-
-                        # stratum1_left <- lode_df$stratum1_char[i]
-                        # stratum1_right <- lode_df$stratum2_char[i]  # apologies for the i/j and 1/2 confusion - this is correct though
-                        # stratum2_left <- lode_df$stratum1_char[j]
-                        # stratum2_right <- lode_df$stratum2_char[j]
-
-                        # Append (i, j)
-                        new_row <- data.frame(alluvium1 = alluvium1, alluvium2 = alluvium2, strat_layer = strat_layer, weight1 = w1, weight2 = w2)
-                        # new_row <- data.frame(alluvium1 = alluvium1, alluvium2 = alluvium2, strat_layer = strat_layer, stratum1_left = stratum1_left, stratum1_right = stratum1_right, stratum2_left = stratum2_left, stratum2_right = stratum2_right, weight1 = w1, weight2 = w2)
-                        crossing_edges[[row_index]] <- new_row
-                        row_index <- row_index + 1
-
-                        # Append (j, i)
-                        new_row <- data.frame(alluvium1 = alluvium2, alluvium2 = alluvium1, strat_layer = strat_layer, weight1 = w2, weight2 = w1)
-                        # new_row <- data.frame(alluvium1 = alluvium2, alluvium2 = alluvium1, strat_layer = strat_layer, stratum1_left = stratum2_left, stratum1_right = stratum2_right, stratum2_left = stratum1_left, stratum2_right = stratum1_right, weight1 = w2, weight2 = w1)
-                        crossing_edges[[row_index]] <- new_row
-                        row_index <- row_index + 1
-
-                        weight_product <- w1 * w2
-                        output_objective <- output_objective + weight_product
-
-                        if (include_output_objective_matrix_vector) {
-                            objective_matrix[alluvium1, alluvium2] <- weight_product
-                            objective_matrix[alluvium2, alluvium1] <- weight_product
-                        }
-                    }
-                }
-            }
+        if (return_weighted_layer_free_objective) {
+            # # option 1 for objective (best): fenwick (only good if I only need objective, ie no matrix or data frame)
+            if (verbose) message("Calculating objective with fenwick tree")
+            output_objective <- output_objective + calculate_objective_fenwick(lode_df)
         } else {
-            if (!include_output_objective_matrix_vector) {
-                stop("If stratum_column_and_value_to_keep is not NULL, then include_output_objective_matrix_vector must be provided")
-            }
-            for (i in 1:(lode_df_filtered_with_stratum_of_interest_length)) {
-                for (j in 1:lode_df_filtered_without_stratum_of_interest_length) {
-                    alluvium1 <- lode_df_filtered_with_stratum_of_interest$alluvium[i]
-                    alluvium2 <- lode_df_filtered_without_stratum_of_interest$alluvium[j]
-                    w1 <- lode_df_filtered_with_stratum_of_interest$count[i]
-                    w2 <- lode_df_filtered_without_stratum_of_interest$count[j]
+            if (verbose) message("Looping through alluvia")
 
-                    if ((lode_df_filtered_with_stratum_of_interest$y1[i] - lode_df_filtered_without_stratum_of_interest$y1[j]) * (lode_df_filtered_with_stratum_of_interest$y2[i] - lode_df_filtered_without_stratum_of_interest$y2[j]) < 0) {
-                        # crosses now, but didn't before (most cases)
-                        if (objective_matrix[alluvium1, alluvium2] == 0) {
+            # # option 2 for objective: vectorized (only good if I don't need data frame)
+            # objective_matrix <- make_crossing_matrix_vectorized(lode_df$y1, lode_df$y2, lode_df$count)
+            # output_objective <- sum(objective_matrix)
+
+            # # option 3 for objective (worst): double for loop (good if I need data frame)
+            if (is.null(stratum_column_and_value_to_keep)) {
+                for (i in 1:(lode_df_length - 1)) {
+                    for (j in (i + 1):lode_df_length) {
+                        # Check crossing condition once per unordered pair
+                        if ((lode_df$y1[i] - lode_df$y1[j]) * (lode_df$y2[i] - lode_df$y2[j]) < 0) {
+                            # equivalent to below but faster
+                            # if ((lode_df$y1[i] < lode_df$y1[j] && lode_df$y2[i] > lode_df$y2[j]) | (lode_df$y1[i] > lode_df$y1[j] && lode_df$y2[i] < lode_df$y2[j])) {
+                            alluvium1 <- lode_df$alluvium[i]
+                            alluvium2 <- lode_df$alluvium[j]
+                            w1 <- lode_df$count[i]
+                            w2 <- lode_df$count[j]
+                            strat_layer <- lode_df$x1[i] # will be same for i and j
+
+                            # stratum1_left <- lode_df$stratum1_char[i]
+                            # stratum1_right <- lode_df$stratum2_char[i]  # apologies for the i/j and 1/2 confusion - this is correct though
+                            # stratum2_left <- lode_df$stratum1_char[j]
+                            # stratum2_right <- lode_df$stratum2_char[j]
+
+                            # Append (i, j)
+                            new_row <- data.frame(alluvium1 = alluvium1, alluvium2 = alluvium2, strat_layer = strat_layer, weight1 = w1, weight2 = w2)
+                            # new_row <- data.frame(alluvium1 = alluvium1, alluvium2 = alluvium2, strat_layer = strat_layer, stratum1_left = stratum1_left, stratum1_right = stratum1_right, stratum2_left = stratum2_left, stratum2_right = stratum2_right, weight1 = w1, weight2 = w2)
+                            crossing_edges[[row_index]] <- new_row
+                            row_index <- row_index + 1
+
+                            # Append (j, i)
+                            new_row <- data.frame(alluvium1 = alluvium2, alluvium2 = alluvium1, strat_layer = strat_layer, weight1 = w2, weight2 = w1)
+                            # new_row <- data.frame(alluvium1 = alluvium2, alluvium2 = alluvium1, strat_layer = strat_layer, stratum1_left = stratum2_left, stratum1_right = stratum2_right, stratum2_left = stratum1_left, stratum2_right = stratum1_right, weight1 = w2, weight2 = w1)
+                            crossing_edges[[row_index]] <- new_row
+                            row_index <- row_index + 1
+
                             weight_product <- w1 * w2
-                            objective_matrix[alluvium1, alluvium2] <- weight_product
-                            objective_matrix[alluvium2, alluvium1] <- weight_product
                             output_objective <- output_objective + weight_product
+
+                            if (include_output_objective_matrix_vector) {
+                                objective_matrix[alluvium1, alluvium2] <- weight_product
+                                objective_matrix[alluvium2, alluvium1] <- weight_product
+                            }
                         }
-                    } else {
-                        # didn't cross before, but crosses now (most cases)
-                        if (objective_matrix[alluvium1, alluvium2] > 0) {
-                            weight_product <- w1 * w2
-                            objective_matrix[alluvium1, alluvium2] <- 0
-                            objective_matrix[alluvium2, alluvium1] <- 0
-                            output_objective <- output_objective - weight_product
+                    }
+                }
+            } else {
+                if (!include_output_objective_matrix_vector) {
+                    stop("If stratum_column_and_value_to_keep is not NULL, then include_output_objective_matrix_vector must be provided")
+                }
+                for (i in 1:(lode_df_filtered_with_stratum_of_interest_length)) {
+                    for (j in 1:lode_df_filtered_without_stratum_of_interest_length) {
+                        alluvium1 <- lode_df_filtered_with_stratum_of_interest$alluvium[i]
+                        alluvium2 <- lode_df_filtered_without_stratum_of_interest$alluvium[j]
+                        w1 <- lode_df_filtered_with_stratum_of_interest$count[i]
+                        w2 <- lode_df_filtered_without_stratum_of_interest$count[j]
+
+                        if ((lode_df_filtered_with_stratum_of_interest$y1[i] - lode_df_filtered_without_stratum_of_interest$y1[j]) * (lode_df_filtered_with_stratum_of_interest$y2[i] - lode_df_filtered_without_stratum_of_interest$y2[j]) < 0) {
+                            # crosses now, but didn't before (most cases)
+                            if (objective_matrix[alluvium1, alluvium2] == 0) {
+                                weight_product <- w1 * w2
+                                objective_matrix[alluvium1, alluvium2] <- weight_product
+                                objective_matrix[alluvium2, alluvium1] <- weight_product
+                                output_objective <- output_objective + weight_product
+                            }
+                        } else {
+                            # didn't cross before, but crosses now (most cases)
+                            if (objective_matrix[alluvium1, alluvium2] > 0) {
+                                weight_product <- w1 * w2
+                                objective_matrix[alluvium1, alluvium2] <- 0
+                                objective_matrix[alluvium2, alluvium1] <- 0
+                                output_objective <- output_objective - weight_product
+                            }
                         }
                     }
                 }
             }
-        }
 
-        browser()
-
-        if (include_output_objective_matrix_vector) {
-            if (is.null(input_objective_matrix_vector)) {
-                output_objective_matrix_vector <- c(output_objective_matrix_vector, list(objective_matrix))
-            } else {
-                output_objective_matrix_vector[[h]] <- objective_matrix
+            if (include_output_objective_matrix_vector) {
+                if (is.null(input_objective_matrix_vector)) {
+                    output_objective_matrix_vector <- c(output_objective_matrix_vector, list(objective_matrix))
+                } else {
+                    output_objective_matrix_vector[[h]] <- objective_matrix
+                }
             }
         }
         if (verbose) message(sprintf("Complete with iteration=%s", h))
+    }
+
+    if (normalize_objective) {
+        combs <- combn(seq_len(nrow(clus_df_gather)), 2)
+        values <- clus_df_gather[[column_weights]]
+        output_objective <- output_objective / sum(values[combs[1,]] * values[combs[2,]])  # take the sum of all products
+    }
+
+    if (return_weighted_layer_free_objective) {
+        return (output_objective)
     }
 
     if (length(crossing_edges) > 0) {
@@ -457,18 +467,6 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         }
         if (verbose) message(sprintf("Saving lode_df dataframe to=%s", output_lode_df_path))
         write.csv(lode_df_full, file = output_lode_df_path, row.names = FALSE, quote = FALSE)
-    }
-
-    if (normalize_objective) {
-        combs <- combn(seq_len(nrow(clus_df_gather)), 2)
-        values <- clus_df_gather[[column_weights]]
-        output_objective <- output_objective / sum(values[combs[1,]] * values[combs[2,]])  # take the sum of all products
-    }
-
-    if (return_weighted_layer_free_objective) {
-        # if (verbose) message("Calculating WLF objective")
-        # output_objective <- determine_weighted_layer_free_objective(crossing_edges_df)  # already determined now during loop
-        return(output_objective)
     }
 
     # only do this if I'm not in my neighbornet loop
