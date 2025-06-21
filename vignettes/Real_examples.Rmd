@@ -231,7 +231,7 @@ head(df)
 
 Subsample for debugging
 ```{r}
-sample_size <- NULL
+sample_size <- NULL  # NULL for full sample
 if (!is.null(sample_size)) {
     set.seed(42)
     df <- df %>% slice_sample(n = sample_size)
@@ -246,7 +246,6 @@ p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = 
 ```
 
 ```{r}
-devtools::load_all()
 log_msgs <- character()
 
 withCallingHandlers({
@@ -287,6 +286,33 @@ optimize_column_order_per_cycle <- TRUE
 p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=FALSE, verbose=TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN_optimized_columns.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass', cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric)
 ```
 
+Make legend
+```{r}
+# Ensure color_band_list is a named vector
+color_band_list <- c(
+  "H7_dreived_D2.25_Smtmrs" = "#D55E00",
+  "H7_derived_Sclrtm"        = "#56B4E9",
+  "H7_derived_D2LtM"         = "#009E73",
+  "H7_derived_D5CntrlDrmmtm" = "#F0E442",
+  "H7_derived_ESMT"          = "#0072B2",
+  "H7_derived_APS"           = "#E69F00",
+  "H7_derived_MPS"           = "#CC79A7",
+  "H7_derived_DLL1pPXM"      = "#666666",
+  "H7hESC"                   = "#AD7700"
+)
+
+# Make a dummy data frame just for the legend
+legend_df <- data.frame(trueclass = names(color_band_list))
+
+# Plot with invisible points to show only the legend
+legend_plot <- ggplot(legend_df, aes(x = 1, y = trueclass, color = trueclass)) +
+  geom_line(linewidth = 5) +
+  scale_color_manual(values = color_band_list, name = "trueclass") +
+  theme_void() +
+  theme(legend.position = "right")
+
+ggsave(file.path(output_dir, sprintf("clustering_%s_legend.pdf", sample_size)), plot = legend_plot)
+```
 
 
 

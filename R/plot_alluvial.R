@@ -839,14 +839,14 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
         }
     }
     if (keep_y_labels) {
-    p <- p +
-        theme_void() +
-        theme(
-            text = element_text(family = "sans"),
-            legend.text = element_text(size = rel(axis_text_size)),
-            axis.text.x = element_text(),
-            axis.text.y = element_text()
-        )
+        p <- p +
+            theme_void() +
+            theme(
+                text = element_text(family = "sans"),
+                legend.text = element_text(size = rel(axis_text_size)),
+                axis.text.x = element_text(),
+                axis.text.y = element_text()
+            )
     } else{
         p <- p +
             theme_void() +
