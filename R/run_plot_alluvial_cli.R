@@ -23,7 +23,8 @@ Optional:
   --weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when sorting_algorithm == 'neighbornet'.
   --matrix_initialization_value_column_order Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when sorting_algorithm == 'neighbornet' and optimize_column_order is TRUE.
   --weight_scalar_column_order Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when sorting_algorithm == 'neighbornet' and optimize_column_order is TRUE.
-  --column_sorting_metric Character. Metric to use for determining column order. Options are 'edge_crossing' (default) or 'ARI'.
+  --column_sorting_metric Character. Metric to use for determining column order. Options are 'edge_crossing' (default) or 'ARI'. Only applies when sorting_algorithm == 'neighbornet' and optimize_column_order is TRUE.
+  --cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when sorting_algorithm == 'neighbornet'.
   --fixed_column            Name or position of the column in graphing_columns to keep fixed during sorting. Only applies when sorting_algorithm == 'greedy_WOLF'.
   --random_initializations  Number of random initializations for the positions of each grouping in graphing_columns. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
   --set_seed                Random seed for the random_initializations parameter. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
@@ -76,6 +77,7 @@ Optional:
     matrix_initialization_value_column_order <- get_numeric_arg(args, c("--matrix_initialization_value_column_order"))
     weight_scalar_column_order <- get_numeric_arg(args, c("--weight_scalar_column_order"))
     column_sorting_metric <- get_arg(args, c("--column_sorting_metric"))
+    cycle_start_positions <- get_multi_arg(args, c("--cycle_start_positions"))
     fixed_column <- get_fixed_column(args, "--fixed_column")
     random_initializations <- get_numeric_arg(args, "--random_initializations")
     set_seed <- get_numeric_arg(args, "--set_seed")
@@ -129,6 +131,7 @@ Optional:
     if (!is.null(matrix_initialization_value_column_order)) args_list$matrix_initialization_value_column_order <- matrix_initialization_value_column_order
     if (!is.null(weight_scalar_column_order)) args_list$weight_scalar_column_order <- weight_scalar_column_order
     if (!is.null(column_sorting_metric)) args_list$column_sorting_metric <- column_sorting_metric
+    if (!is.null(cycle_start_positions)) args_list$cycle_start_positions <- cycle_start_positions
     if (!is.null(fixed_column)) args_list$fixed_column <- fixed_column
     if (!is.null(random_initializations)) args_list$random_initializations <- random_initializations
     if (!is.null(set_seed)) args_list$set_seed <- set_seed

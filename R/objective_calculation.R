@@ -18,6 +18,15 @@ utils::globalVariables(c(
     ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"
 ))
 
+objective_fenwick_script_path <- system.file("scripts", "calculate_objective.py")
+if (objective_fenwick_script_path == "") {
+    # Fallback to development location
+    objective_fenwick_script_path <- file.path(here::here("inst", "scripts", "calculate_objective.py"))
+}
+stopifnot(file.exists(objective_fenwick_script_path))
+
+reticulate::source_python(objective_fenwick_script_path)
+
 
 #' Compute crossing objective
 #'
@@ -51,6 +60,27 @@ determine_weighted_layer_free_objective <- function(df, verbose = FALSE) {
     return(total_weighted_crossings)
 }
 
+
+make_crossing_matrix_vectorized <- function(y1, y2, count) {
+    # Pairwise differences
+    dy1 <- outer(y1, y1, "-")
+    dy2 <- outer(y2, y2, "-")
+
+    # Crossing condition
+    crosses <- (dy1 * dy2) < 0
+
+    # Only keep upper triangle
+    crosses[lower.tri(crosses, diag = TRUE)] <- FALSE
+
+    # Compute outer product of counts
+    count_product <- outer(count, count, "*")
+
+    # Return weighted crossing matrix
+    weighted_crosses <- matrix(0, length(y1), length(y1))
+    weighted_crosses[crosses] <- count_product[crosses]
+
+    return(weighted_crosses)
+}
 
 #' Determine overlapping edges
 #'
@@ -156,8 +186,8 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     # if (!is.factor(df[[column1]])) df[[column1]] <- factor(df[[column1]])
     # if (!is.factor(df[[column2]])) df[[column2]] <- factor(df[[column2]])
 
-    if (verbose) message("Preprocessing data")
     if (preprocess_data) {
+        if (verbose) message("Preprocessing data")
         clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, do_gather_set_data = FALSE, default_sorting = default_sorting, set_seed = set_seed)
     } else {
         clus_df_gather <- df
@@ -317,6 +347,16 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
 
         # Compare each pair of edges
         if (verbose) message("Looping through alluvia")
+        browser()
+
+        # # option 1 for objective (best): fenwick
+        # output_objective <- calculate_objective_fenwick(lode_df)
+
+        # # option 2 for objective: vectorized
+        # objective_matrix <- make_crossing_matrix_vectorized(lode_df$y1, lode_df$y2, lode_df$count)
+        # output_objective <- sum(objective_matrix)
+
+        # # option 3 for objective (worst): double for loop
         if (is.null(stratum_column_and_value_to_keep)) {
             for (i in 1:(lode_df_length - 1)) {
                 for (j in (i + 1):lode_df_length) {
@@ -388,6 +428,8 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 }
             }
         }
+
+        browser()
 
         if (include_output_objective_matrix_vector) {
             if (is.null(input_objective_matrix_vector)) {

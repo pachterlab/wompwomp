@@ -36,6 +36,7 @@ Suggests:
     mclust,
     here,
     ggrastr,
+    stringr,
     DuoClustering2018,
     sessioninfo
 Config/testthat/edition: 3
