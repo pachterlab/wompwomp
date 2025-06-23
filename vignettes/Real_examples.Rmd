@@ -299,10 +299,9 @@ ggplot(df_obj, aes(x = iteration, y = objective)) +
   theme_minimal()
 ```
 
-
 ```{r}
 devtools::load_all()
-cycle_start_positions <- NULL  # c(12:25, 130:150)  # c(40:60, 140:160)  # choose based on finding some local optima above
+cycle_start_positions <- NULL  #c(110) - 110 for NN, 34 for TSP  # c(12:25, 130:150)  # c(40:60, 140:160)  # choose based on finding some local optima above
 column_sorting_metric <- "edge_crossing"  # edge_crossing or ARI
 optimize_column_order_per_cycle <- TRUE
 
