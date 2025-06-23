@@ -22,7 +22,7 @@ utils::globalVariables(c(
     ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count"
 ))
 
-StatStratum <- ggalluvial::StatStratum # avoid the error Can't find stat called "stratum"
+StatStratum <- ggalluvial::StatStratum # avoid the error Can't find stat called "stratum" - and make sure to do stat = StatStratum instead of stat = "stratum"
 
 neighbornet_script_path <- system.file("scripts", "run_neighbornet.py")
 if (neighbornet_script_path == "") {
@@ -31,7 +31,7 @@ if (neighbornet_script_path == "") {
 }
 stopifnot(file.exists(neighbornet_script_path))
 
-reticulate::source_python(neighbornet_script_path)
+# reticulate::source_python(neighbornet_script_path)  # Error: Unable to access object (object is from previous session and is now invalid)
 
 # library(dplyr)
 # library(ggplot2)
@@ -147,6 +147,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns,
         tour <- TSP::solve_TSP(tsp_instance)
         cycle <- as.integer(tour)
     } else if (column_sorting_algorithm == "neighbornet") {
+        reticulate::source_python(neighbornet_script_path)
         result <- neighbor_net(labels, column_dist_matrix)  # from python
         cycle <- result[[1]]
     } else {
@@ -276,6 +277,7 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
         tour <- TSP::solve_TSP(tsp_instance)
         cycle <- as.integer(tour)
     } else if (sorting_algorithm == "neighbornet") {
+        reticulate::source_python(neighbornet_script_path)
         result <- neighbor_net(labels, mat)  # from python
         cycle <- result[[1]]
         # splits <- result[[2]]
@@ -832,7 +834,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
         if (auto_adjust_text) {
             p <- p +
                 geom_fit_text(
-                    reflow = TRUE, stat = "stratum", width = text_width, min.size = min_text,
+                    reflow = TRUE, stat = StatStratum, width = text_width, min.size = min_text,
                     aes(label = after_stat(final_label_names))
                 )
         } else {

@@ -28,7 +28,7 @@ data_preprocess(
 
 \item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if \code{sorting_algorithm == 'neighbornet'}. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
 
-\item{set_seed}{Integer. Random seed for when \code{default_sorting == 'random'} parameter.}
+\item{set_seed}{Integer. Random seed for the \code{random_initializations} parameter, random initialization/shuffling of blocks, and TSP solver for optimizing column order.}
 
 \item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
 

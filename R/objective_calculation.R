@@ -25,7 +25,7 @@ if (objective_fenwick_script_path == "") {
 }
 stopifnot(file.exists(objective_fenwick_script_path))
 
-reticulate::source_python(objective_fenwick_script_path)
+# reticulate::source_python(objective_fenwick_script_path)  # Error: Unable to access object (object is from previous session and is now invalid)
 
 
 #' Compute crossing objective
@@ -349,6 +349,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         if (return_weighted_layer_free_objective) {
             # # option 1 for objective (best): fenwick (only good if I only need objective, ie no matrix or data frame)
             if (verbose) message("Calculating objective with fenwick tree")
+            reticulate::source_python(objective_fenwick_script_path)
             output_objective <- output_objective + calculate_objective_fenwick(lode_df)
         } else {
             if (verbose) message("Looping through alluvia")
