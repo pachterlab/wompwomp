@@ -6,7 +6,8 @@
 \usage{
 setup_python_env(
   envname = "wompwomp_env",
-  packages = c("numpy==1.23.5", "splitspy")
+  packages = c("numpy==1.23.5", "splitspy", "pandas", "scipy"),
+  use_conda = TRUE
 )
 }
 \arguments{

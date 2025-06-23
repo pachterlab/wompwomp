@@ -19,6 +19,8 @@ plot_alluvial(
   matrix_initialization_value_column_order = 1e+06,
   weight_scalar_column_order = 1,
   column_sorting_metric = "edge_crossing",
+  column_sorting_algorithm = "tsp",
+  cycle_start_positions = NULL,
   fixed_column = NULL,
   random_initializations = 1,
   set_seed = 42,
@@ -36,12 +38,15 @@ plot_alluvial(
   output_plot_path = NULL,
   output_df_path = NULL,
   preprocess_data = TRUE,
+  default_sorting = "alphabetical",
   box_width = 1/3,
   text_width = 1/4,
   min_text = 4,
   auto_adjust_text = TRUE,
   save_height = 6,
   save_width = 6,
+  dpi = 300,
+  rasterise_alluvia = FALSE,
   keep_y_labels = FALSE,
   box_line_width = 1,
   verbose = FALSE,
@@ -61,7 +66,7 @@ plot_alluvial(
 
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
 
-\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries.}
+\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'random', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'None' keeps the mappings as-is when passed into the function.}
 
 \item{optimize_column_order}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.}
 
@@ -77,7 +82,11 @@ plot_alluvial(
 
 \item{weight_scalar_column_order}{Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{optimize_column_order} is TRUE.}
 
-\item{column_sorting_metric}{Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI".}
+\item{column_sorting_metric}{Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{optimize_column_order} is TRUE.}
+
+\item{column_sorting_algorithm}{Character. Algorithm to use for determining column order. Options are "tsp" (default) or "neighbornet". Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{optimize_column_order} is TRUE.}
+
+\item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'neighbornet'}.}
 
 \item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.}
 
@@ -113,6 +122,8 @@ plot_alluvial(
 
 \item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.}
 
+\item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if \code{sorting_algorithm == 'neighbornet'}. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+
 \item{box_width}{Numeric between 0 and 1. Box width}
 
 \item{text_width}{Numeric between 0 and 1. Text width}
@@ -124,6 +135,10 @@ plot_alluvial(
 \item{save_height}{Integer greater than 0. Save height, in inches}
 
 \item{save_width}{Integer greater than 0. Save width, in inches}
+
+\item{dpi}{Integer greater than 0. DPI for \code{output_plot_path}, if \code{output_plot_path} is a raster image or \code{rasterise_alluvia} is TRUE}
+
+\item{rasterise_alluvia}{Logical. Whether to rasterize the alluvia if \code{output_plot_path} is a PDF. Can save space if DPI low enough}
 
 \item{keep_y_labels}{Keep y labels}
 

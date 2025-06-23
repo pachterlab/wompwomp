@@ -10,6 +10,7 @@ determine_crossing_edges(
   column1 = NULL,
   column2 = NULL,
   column_weights = "value",
+  normalize_objective = FALSE,
   output_df_path = NULL,
   output_lode_df_path = NULL,
   include_output_objective_matrix_vector = FALSE,
@@ -19,7 +20,9 @@ determine_crossing_edges(
   input_objective_matrix_vector = NULL,
   input_objective = NULL,
   preprocess_data = TRUE,
-  load_df = TRUE
+  load_df = TRUE,
+  default_sorting = "alphabetical",
+  set_seed = 42
 )
 }
 \arguments{
@@ -34,6 +37,8 @@ determine_crossing_edges(
 \item{column2}{Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.}
 
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
+
+\item{normalize_objective}{Logical. Whether to normalize the objective by dividing by the sum of products of all edge weights.}
 
 \item{output_df_path}{Optional character. Output path for the data frame containing crossing edges, in CSV format (see details below). If not provided, then nothing will be saved.}
 
@@ -54,6 +59,10 @@ determine_crossing_edges(
 \item{preprocess_data}{Internal flag; not recommended to modify.}
 
 \item{load_df}{Internal flag; not recommended to modify.}
+
+\item{default_sorting}{Internal flag; not recommended to modify.}
+
+\item{set_seed}{Internal flag; not recommended to modify.}
 }
 \value{
 If return_weighted_layer_free_objective is FALSE (default): A list of values, as follows:

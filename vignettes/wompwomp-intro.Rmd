@@ -8,8 +8,10 @@ vignette: >
 ---
 
 ```{r}
-devtools::load_all()
-# library(wompwomp)
+reticulate::use_condaenv("wompwomp_env", required = TRUE)  #!!! erase
+devtools::load_all()  #!!! erase
+
+# library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -18,8 +20,6 @@ library(igraph)
 library(tibble)
 library(tidyr)
 library(reticulate)
-
-wompwomp::setup_python_env()  #!!! erase
 ```
 
 Set up our python environment

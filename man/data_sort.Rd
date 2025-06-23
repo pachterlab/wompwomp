@@ -19,15 +19,19 @@ data_sort(
   matrix_initialization_value_column_order = 1e+06,
   weight_scalar_column_order = 1,
   column_sorting_metric = "edge_crossing",
+  column_sorting_algorithm = "tsp",
+  cycle_start_positions = NULL,
   fixed_column = NULL,
   random_initializations = 1,
   set_seed = 42,
   output_df_path = NULL,
   preprocess_data = TRUE,
+  default_sorting = "alphabetical",
   return_updated_graphing_columns = FALSE,
   verbose = FALSE,
   load_df = TRUE,
-  make_intermediate_neighbornet_plots = FALSE
+  make_intermediate_neighbornet_plots = FALSE,
+  do_compute_alluvial_statistics = TRUE
 )
 }
 \arguments{
@@ -43,7 +47,7 @@ data_sort(
 
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
 
-\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries.}
+\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'greedy_WOLF', 'greedy_WBLF', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'None' keeps the mappings as-is when passed into the function.}
 
 \item{optimize_column_order}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{length(graphing_columns) > 2}.}
 
@@ -59,7 +63,11 @@ data_sort(
 
 \item{weight_scalar_column_order}{Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{optimize_column_order} is TRUE.}
 
-\item{column_sorting_metric}{Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI".}
+\item{column_sorting_metric}{Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{optimize_column_order} is TRUE.}
+
+\item{column_sorting_algorithm}{Character. Algorithm to use for determining column order. Options are "tsp" (default) or "neighbornet". Only applies when \code{sorting_algorithm == 'neighbornet'} and \code{optimize_column_order} is TRUE.}
+
+\item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'neighbornet'}.}
 
 \item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.}
 
@@ -71,6 +79,8 @@ data_sort(
 
 \item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.}
 
+\item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if \code{sorting_algorithm == 'neighbornet'}. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+
 \item{return_updated_graphing_columns}{Logical. If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
@@ -78,6 +88,8 @@ data_sort(
 \item{load_df}{Internal flag; not recommended to modify.}
 
 \item{make_intermediate_neighbornet_plots}{Internal flag; not recommended to modify.}
+
+\item{do_compute_alluvial_statistics}{Internal flag; not recommended to modify.}
 }
 \value{
 If return_updated_graphing_columns == FALSE (default): A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc. The position mappings in these columns, as well as the order of the columns (if \code{optimize_column_order} is TRUE), will be sorted according to \code{sorting_algorithm}.

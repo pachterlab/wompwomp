@@ -8,8 +8,10 @@ vignette: >
 ---
 
 ```{r}
-devtools::load_all()
-# library(wompwomp)
+reticulate::use_condaenv("wompwomp_env", required = TRUE)  #!!! erase
+devtools::load_all()  #!!! erase
+
+# library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -18,8 +20,6 @@ library(igraph)
 library(tibble)
 library(tidyr)
 library(reticulate)
-
-wompwomp::setup_python_env()  #!!! erase
 ```
 
 Set up our python environment
@@ -136,7 +136,7 @@ p
 ```
 
 ```{r}
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", match_colors=TRUE, color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 
 # df['Lannister_origin'] <- df["Origin"] == 'House Lannister'
@@ -198,10 +198,37 @@ if (!requireNamespace("DuoClustering2018", quietly = TRUE)) {
 df_long <- DuoClustering2018::clustering_summary_filteredExpr10_Koh_v2()
 # print(unique(df_long$method))
 # graphing_columns <- c("PCAKmeans", "RtsneKmeans", "Seurat", "SC3")
-graphing_columns <- c("PCAKmeans", "RtsneKmeans", "Seurat", "SC3", "CIDR", "PCAHC", "SC3svm", "pcaReduce", "TSCAN", "SAFE", "monocle", "RaceID2")  # FlowSOM and ascend have minimal data
+graphing_columns <- c("PCAKmeans", "RtsneKmeans", "Seurat", "SC3", "CIDR", "PCAHC", "SC3svm", "pcaReduce", "TSCAN", "SAFE", "monocle", "RaceID2", "FlowSOM")  # ascend has no data
+
+graphing_columns <- c("RaceID2", "FlowSOM", "CIDR", "TSCAN", "PCAKmeans", "PCAHC", "SAFE", "pcaReduce", "RtsneKmeans", "monocle", "SC3svm", "Seurat", "SC3")  # ascend has no data
 
 head(df_long)
 ```
+
+```{r}
+for (method_name in graphing_columns) {
+  cat("Method:", method_name, "\n")
+
+  df_sub <- df_long[df_long$method == method_name, ]
+
+  cat("  Unique runs:       ", sort(unique(df_sub$run)), "\n")
+  cat("  Unique k values:   ", sort(unique(df_sub$k)), "\n")
+  cat("  Unique resolutions:", sort(unique(df_sub$resolution)), "\n\n")
+}
+```
+
+
+```{r}
+# keep only rows where run = 1, k = 9, and (for df_long$Seurat only) resolution = 2
+df_long <- df_long %>%
+  mutate(resolution = as.numeric(as.character(resolution))) %>%
+  filter(
+    run == 1,
+    k == 9,
+    method != "Seurat" | (method == "Seurat" & resolution == 2)
+  )
+```
+
 
 ```{r}
 # Add a unique row index per observation
@@ -219,12 +246,8 @@ df <- df_long %>%
   ) %>%
   select(-obs_id)  # optional: remove if obs_id is no longer needed
 
-df$FlowSOM <- NULL
+# df$FlowSOM <- NULL
 df$ascend <- NULL
-
-# Remove rows with >na_threshold fraction NA
-na_threshold <- 0.8
-df <- df[rowMeans(is.na(df)) <= na_threshold, ]
 
 head(df)
 ```
@@ -241,8 +264,8 @@ if (!is.null(sample_size)) {
 ```
 
 ```{r}
-devtools::load_all()
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", match_colors=TRUE, color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
+p
 ```
 
 ```{r}
@@ -279,7 +302,7 @@ ggplot(df_obj, aes(x = iteration, y = objective)) +
 
 ```{r}
 devtools::load_all()
-cycle_start_positions <- c(12:25, 130:150)  # c(40:60, 140:160)  # choose based on finding some local optima above
+cycle_start_positions <- NULL  # c(12:25, 130:150)  # c(40:60, 140:160)  # choose based on finding some local optima above
 column_sorting_metric <- "edge_crossing"  # edge_crossing or ARI
 optimize_column_order_per_cycle <- TRUE
 
@@ -287,6 +310,26 @@ p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm =
 ```
 
 Make legend
+```{r}
+# Ensure color_band_list is a named vector
+color_band_list <- c(
+  "Lannister" = "#D55E00",
+  "Westeros"        = "#56B4E9"
+)
+
+# Make a dummy data frame just for the legend
+legend_df <- data.frame(Gene = names(color_band_list))
+
+# Plot with invisible points to show only the legend
+legend_plot <- ggplot(legend_df, aes(x = 1, y = Gene, color = Gene)) +
+  geom_line(linewidth = 5) +
+  scale_color_manual(values = color_band_list, name = "Affiliation") +
+  theme_void() +
+  theme(legend.position = "right")
+
+ggsave(file.path(output_dir, "GoT_legend.pdf"), plot = legend_plot)
+```
+
 ```{r}
 # Ensure color_band_list is a named vector
 color_band_list <- c(
@@ -307,7 +350,7 @@ legend_df <- data.frame(trueclass = names(color_band_list))
 # Plot with invisible points to show only the legend
 legend_plot <- ggplot(legend_df, aes(x = 1, y = trueclass, color = trueclass)) +
   geom_line(linewidth = 5) +
-  scale_color_manual(values = color_band_list, name = "trueclass") +
+  scale_color_manual(values = color_band_list, name = "True Class") +
   theme_void() +
   theme(legend.position = "right")
 
