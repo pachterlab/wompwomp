@@ -6,7 +6,7 @@
 #' @param packages Packages to install
 #'
 #' @export
-setup_python_env <- function(envname = "wompwomp_env", packages = c("numpy==1.23.5", "splitspy", "pandas", "scipy"), use_conda = TRUE) {
+setup_python_env <- function(envname = "wompwomp_env", packages = c("numpy==1.23.5", "splitspy", "pandas", "scipy", "leidenalg", "python-igraph"), use_conda = TRUE) {
     if (use_conda) {
         conda_findable <- tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)
         if (!conda_findable) {
