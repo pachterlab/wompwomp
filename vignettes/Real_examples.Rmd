@@ -198,9 +198,11 @@ if (!requireNamespace("DuoClustering2018", quietly = TRUE)) {
 df_long <- DuoClustering2018::clustering_summary_filteredExpr10_Koh_v2()
 # print(unique(df_long$method))
 # graphing_columns <- c("PCAKmeans", "RtsneKmeans", "Seurat", "SC3")
-graphing_columns <- c("PCAKmeans", "RtsneKmeans", "Seurat", "SC3", "CIDR", "PCAHC", "SC3svm", "pcaReduce", "TSCAN", "SAFE", "monocle", "RaceID2", "FlowSOM")  # ascend has no data
+graphing_columns <- c("RaceID2", "FlowSOM", "CIDR", "TSCAN", "PCAKmeans", "PCAHC", "SAFE", "pcaReduce", "RtsneKmeans", "monocle", "SC3svm", "Seurat", "SC3")  # the order from the original study; ascend has no data
 
-graphing_columns <- c("RaceID2", "FlowSOM", "CIDR", "TSCAN", "PCAKmeans", "PCAHC", "SAFE", "pcaReduce", "RtsneKmeans", "monocle", "SC3svm", "Seurat", "SC3")  # ascend has no data
+# shuffle graphing_columns
+set.seed(42)
+graphing_columns <- sample(graphing_columns)
 
 head(df_long)
 ```
@@ -265,8 +267,13 @@ if (!is.null(sample_size)) {
 
 ```{r}
 p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", match_colors=TRUE, color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
-p
 ```
+
+```{r}
+p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=FALSE, verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
+```
+
+
 
 ```{r}
 log_msgs <- character()

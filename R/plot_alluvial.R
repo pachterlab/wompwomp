@@ -720,6 +720,9 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
     }
 
     clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
+    if (!is.numeric(clus_df_gather$x)) {
+        clus_df_gather$x <- match(as.character(clus_df_gather$x), graphing_columns)
+    }  # weird Docker issue
     clus_df_gather <- clus_df_gather[clus_df_gather$x == 1, ]
 
     if (!is.null(color_list)) {
