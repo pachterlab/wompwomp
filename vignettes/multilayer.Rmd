@@ -8,6 +8,7 @@ vignette: >
 ---
 
 ```{r}
+setwd("~/Desktop/local/wompwomp/")
 reticulate::use_condaenv("wompwomp_env", required = TRUE)  #!!! erase
 devtools::load_all()  #!!! erase
 

@@ -688,7 +688,7 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors,
 
     clus_df_extra_filtered <- clus_df_filtered[, c('group1', 'group2', "value")]
     g <- igraph::graph_from_data_frame(d = clus_df_extra_filtered, directed = FALSE)
-    partition <- igraph::cluster_leiden(g)
+    partition <- leiden::leiden(g)
     #partition <- cluster_louvain(g)
 
     clus_df_leiden <- data.frame(group_name=igraph::V(g)$name, leiden=partition)
