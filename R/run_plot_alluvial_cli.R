@@ -36,9 +36,10 @@ Optional:
   --color_band_column       Which column to use for coloring bands
   --color_band_boundary     Whether or not to color boundaries between bands
   --disable_match_colors            Assigns consistent colors between column1 and column2 where matched.
-  --param match_order Character. Matching colors methods. Choices are 'None', 'random', 'box_labels', 'fixed_column', 'fixed_column_and_propogate', and 'clustering'.
-  --param graphing_algorithm Character. If match_order == 'clustering', then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
-  --param cutoff Logical. If match_order == 'fixed_column', match_order == 'fixed_column_and_propogate', or match_order == 'clustering', sets the cutoff for color matching, below which a new color will be assigned.
+  --match_order Character. Matching colors methods. Choices are 'None', 'random', 'box_labels', 'fixed_column', 'fixed_column_and_propogate', and 'clustering'.
+  --graphing_algorithm Character. If match_order == 'clustering', then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
+  --resolution Numeric If match_order == 'clustering', then choose resolution for the graph clustering algorithm.
+  --cutoff Numeric If match_order == 'fixed_column', match_order == 'fixed_column_and_propogate', or match_order == 'clustering', sets the cutoff for color matching, below which a new color will be assigned.
   --alluvial_alpha          Numeric between 0 and 1. Transparency level for the alluvial bands.
   --disable_include_labels_in_boxes Whether to include text labels inside the rectangular group boxes
   --disable_include_axis_titles     Whether to display axis titles for column1 and column2.
@@ -84,8 +85,8 @@ Optional:
     column_sorting_algorithm <- get_arg(args, c("--column_sorting_algorithm"))
     cycle_start_positions <- get_multi_arg(args, c("--cycle_start_positions"))
     fixed_column <- get_fixed_column(args, "--fixed_column")
-    random_initializations <- get_numeric_arg(args, "--random_initializations")
-    set_seed <- get_numeric_arg(args, "--set_seed")
+    random_initializations <- get_integer_arg(args, "--random_initializations")
+    set_seed <- get_integer_arg(args, "--set_seed")
     color_boxes <- store_false(args, c("--disable_color_boxes"))
     color_bands <- store_true(args, c("--color_bands"))
     color_list <- get_multi_arg(args, c("--color_list"))
@@ -95,6 +96,7 @@ Optional:
     match_colors <- store_false(args, c("--disable_match_colors"))
     match_order <- get_arg(args, c("--match_order"))
     graphing_algorithm <- get_arg(args, c("--graphing_algorithm"))
+    resolution <- get_numeric_arg(args, c("--resolution"))
     cutoff <- get_numeric_arg(args, c("--cutoff"))
     alluvial_alpha <- get_numeric_arg(args, "--alluvial_alpha")
     include_labels_in_boxes <- store_false(args, c("--disable_include_labels_in_boxes"))
@@ -110,7 +112,7 @@ Optional:
     save_height <- get_numeric_arg(args, c("--save_height"))
     save_width <- get_numeric_arg(args, c("--save_width"))
     keep_y_labels <- store_true(args, c("--keep_y_labels"))
-    dpi <- get_numeric_arg(args, c("--dpi"))
+    dpi <- get_integer_arg(args, c("--dpi"))
     rasterise_alluvia <- store_true(args, c("--rasterise_alluvia"))
     box_line_width <- get_numeric_arg(args, c("--box_line_width"))
     verbose <- store_true(args, c("-v", "--verbose"))
@@ -153,6 +155,7 @@ Optional:
     if (!is.null(match_colors)) args_list$match_colors <- match_colors
     if (!is.null(match_order)) args_list$match_order <- match_order
     if (!is.null(graphing_algorithm)) args_list$graphing_algorithm <- graphing_algorithm
+    if (!is.null(resolution)) args_list$resolution <- resolution
     if (!is.null(cutoff)) args_list$cutoff <- cutoff
     if (!is.null(alluvial_alpha)) args_list$alluvial_alpha <- alluvial_alpha
     if (!is.null(include_labels_in_boxes)) args_list$include_labels_in_boxes <- include_labels_in_boxes

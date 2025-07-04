@@ -45,7 +45,7 @@ Optional:
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
     load_df <- store_false(args, c("--disable_load_df"))
     default_sorting <- get_arg(args, c("--default_sorting"))
-    set_seed <- get_numeric_arg(args, c("--set_seed"))
+    set_seed <- get_integer_arg(args, c("--set_seed"))
 
     # Base argument list with required args
     args_list <- list(

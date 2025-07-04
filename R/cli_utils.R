@@ -13,13 +13,22 @@ get_arg <- function(args, flags, default = NULL, required = FALSE) {
     args[i[1] + 1]
 }
 
-# --input 7
+# --input 0.5
 get_numeric_arg <- function(args, flags, default = NULL) {
     val <- get_arg(args, flags)
     if (is.null(val)) {
         return(default)
     }
     as.numeric(val)
+}
+
+# --input 7
+get_integer_arg <- function(args, flags, default = NULL) {
+    val <- get_arg(args, flags)
+    if (is.null(val)) {
+        return(default)
+    }
+    as.integer(val)
 }
 
 # --input a,b,c

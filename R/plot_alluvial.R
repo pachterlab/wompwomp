@@ -624,7 +624,7 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
     return(clus_df_gather)
 }
 
-find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = "louvain", set_seed = 42) {
+find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = "louvain", match_order = 1, set_seed = 42) {
     column_int_names <- c()
     for (col_int in seq_along(graphing_columns)) {
         int_name <- paste0("col", col_int, "_int")
@@ -769,7 +769,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                                    include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
                                    include_group_sizes = FALSE, verbose = FALSE,
                                    box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE,
-                                   save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE, keep_y_labels=FALSE, box_line_width=1, do_compute_alluvial_statistics = TRUE, graphing_algorithm = "louvain", set_seed = 42) {
+                                   save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE, keep_y_labels=FALSE, box_line_width=1, do_compute_alluvial_statistics = TRUE, graphing_algorithm = "louvain", resolution = 1, set_seed = 42) {
     if (verbose && do_compute_alluvial_statistics) compute_alluvial_statistics(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights)
 
     geom_alluvium <- if (rasterise_alluvia) {
@@ -845,7 +845,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                 }
             }
         } else if (match_order == 'advanced') {
-            final_colors <- find_colors_advanced(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = graphing_algorithm, set_seed = set_seed)
+            final_colors <- find_colors_advanced(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = graphing_algorithm, resolution = resolution, set_seed = set_seed)
         } else {
             col_group <- match_order
             num_levels <- length(levels(clus_df_gather[[col_group]]))
@@ -1565,7 +1565,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param match_colors Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.
 #' @param match_order Character. Matching colors methods. Choices are 'None', 'random', 'box_labels', 'fixed_column', 'fixed_column_and_propogate', and 'clustering'.
 #' @param graphing_algorithm Character. If \code{match_order == 'clustering'}, then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
-#' @param cutoff Logical. If \code{match_order == 'fixed_column', match_order == 'fixed_column_and_propogate', or match_order == 'clustering'}, sets the cutoff for color matching, below which a new color will be assigned.
+#' @param resolution Numeric If \code{match_order == 'clustering'}, then choose resolution for the graph clustering algorithm.
+#' @param cutoff Numeric If \code{match_order == 'fixed_column', match_order == 'fixed_column_and_propogate', or match_order == 'clustering'}, sets the cutoff for color matching, below which a new color will be assigned.
 #' match_order = 'left', graphing_algorithm = "louvain", cutoff=.5
 #' @param alluvial_alpha Numeric between 0 and 1. Transparency level for the alluvial bands.
 #' @param include_labels_in_boxes Logical. Whether to include text labels inside the rectangular group boxes.
@@ -1613,7 +1614,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL,
                           random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE,
                           color_list = NULL, color_band_list = NULL, color_band_column = NULL,
-                          color_band_boundary = FALSE, match_colors = TRUE, match_order = 'left', graphing_algorithm = "louvain", cutoff=.5,
+                          color_band_boundary = FALSE, match_colors = TRUE, match_order = 'left', graphing_algorithm = "louvain", resolution = 1, cutoff=.5,
                           alluvial_alpha = 0.5,
                           include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
                           output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE,
@@ -1719,8 +1720,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         include_group_sizes = include_group_sizes,
         output_plot_path = output_plot_path, verbose = verbose,
         box_width = box_width, text_width = text_width, min_text = min_text, auto_adjust_text = auto_adjust_text,
-        save_height = save_height, save_width = save_width, dpi=dpi, rasterise_alluvia=rasterise_alluvia, keep_y_labels=keep_y_labels, box_line_width=box_line_width, do_compute_alluvial_statistics = do_compute_alluvial_statistics, graphing_algorithm = graphing_algorithm, set_seed = set_seed
-    )
+        save_height = save_height, save_width = save_width, dpi=dpi, rasterise_alluvia=rasterise_alluvia, keep_y_labels=keep_y_labels, box_line_width=box_line_width, do_compute_alluvial_statistics = do_compute_alluvial_statistics, graphing_algorithm = graphing_algorithm, resolution = resolution, set_seed = set_seed)
 
     return(alluvial_plot)
 }

@@ -28,7 +28,7 @@ Optional:
     # Optional arguments
     column_weights <- get_arg(args, c("-w", "--column_weights"))
     default_sorting <- get_arg(args, c("--default_sorting"))
-    set_seed <- get_numeric_arg(args, c("--set_seed"))
+    set_seed <- get_integer_arg(args, c("--set_seed"))
     output_df_path <- get_arg(args, c("-o", "--output_df_path"))
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
