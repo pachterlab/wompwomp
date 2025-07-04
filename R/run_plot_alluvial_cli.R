@@ -28,7 +28,7 @@ Optional:
   --cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when sorting_algorithm == 'neighbornet' or 'tsp'.
   --fixed_column            Name or position of the column in graphing_columns to keep fixed during sorting. Only applies when sorting_algorithm == 'greedy_WOLF'.
   --random_initializations  Number of random initializations for the positions of each grouping in graphing_columns. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
-  --set_seed                Random seed for the random_initializations parameter. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
+  --set_seed                Random seed for the random_initializations parameter (only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'), random initialization/shuffling of blocks (only applies when default_sorting == 'random' or sorting_algorithm == 'random'), TSP solver for block order or optimizing column order (only applies when sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'), and louvain/leiden clustering (only applies when match_order == 'advanced').
   --disable_color_boxes     Whether to color the strata/boxes (representing groups)
   --color_bands             Whether to color the alluvia/edges (connecting the strata)
   --color_list              List of colors to override default group colors.
@@ -36,6 +36,9 @@ Optional:
   --color_band_column       Which column to use for coloring bands
   --color_band_boundary     Whether or not to color boundaries between bands
   --disable_match_colors            Assigns consistent colors between column1 and column2 where matched.
+  --param match_order Character. Matching colors methods. Choices are 'None', 'random', 'box_labels', 'fixed_column', 'fixed_column_and_propogate', and 'clustering'.
+  --param graphing_algorithm Character. If match_order == 'clustering', then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
+  --param cutoff Logical. If match_order == 'fixed_column', match_order == 'fixed_column_and_propogate', or match_order == 'clustering', sets the cutoff for color matching, below which a new color will be assigned.
   --alluvial_alpha          Numeric between 0 and 1. Transparency level for the alluvial bands.
   --disable_include_labels_in_boxes Whether to include text labels inside the rectangular group boxes
   --disable_include_axis_titles     Whether to display axis titles for column1 and column2.
@@ -90,6 +93,9 @@ Optional:
     color_band_column <- get_arg(args, c("--color_band_column"))
     color_band_boundary <- store_true(args, c("--color_band_boundary"))
     match_colors <- store_false(args, c("--disable_match_colors"))
+    match_order <- get_arg(args, c("--match_order"))
+    graphing_algorithm <- get_arg(args, c("--graphing_algorithm"))
+    cutoff <- get_numeric_arg(args, c("--cutoff"))
     alluvial_alpha <- get_numeric_arg(args, "--alluvial_alpha")
     include_labels_in_boxes <- store_false(args, c("--disable_include_labels_in_boxes"))
     include_axis_titles <- store_false(args, c("--disable_include_axis_titles"))
@@ -145,6 +151,9 @@ Optional:
     if (!is.null(color_band_column)) args_list$color_band_column <- color_band_column
     if (!is.null(color_band_boundary)) args_list$color_band_boundary <- color_band_boundary
     if (!is.null(match_colors)) args_list$match_colors <- match_colors
+    if (!is.null(match_order)) args_list$match_order <- match_order
+    if (!is.null(graphing_algorithm)) args_list$graphing_algorithm <- graphing_algorithm
+    if (!is.null(cutoff)) args_list$cutoff <- cutoff
     if (!is.null(alluvial_alpha)) args_list$alluvial_alpha <- alluvial_alpha
     if (!is.null(include_labels_in_boxes)) args_list$include_labels_in_boxes <- include_labels_in_boxes
     if (!is.null(include_axis_titles)) args_list$include_axis_titles <- include_axis_titles

@@ -10,7 +10,7 @@
 #' @importFrom ggfittext geom_fit_text
 #' @importFrom ggforce gather_set_data
 #' @importFrom purrr map
-#' @importFrom igraph max_bipartite_match V graph_from_data_frame
+#' @importFrom igraph max_bipartite_match V graph_from_data_frame cluster_louvain cluster_leiden
 #' @importFrom tibble is_tibble
 #' @importFrom utils read.csv write.csv combn
 #' @importFrom stats setNames
@@ -624,8 +624,7 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
     return(clus_df_gather)
 }
 
-find_colors_advanced <- function(clus_df_gather, ditto_colors,
-                                        graphing_columns) {
+find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = "louvain", set_seed = 42) {
     column_int_names <- c()
     for (col_int in seq_along(graphing_columns)) {
         int_name <- paste0("col", col_int, "_int")
@@ -688,9 +687,15 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors,
 
     clus_df_extra_filtered <- clus_df_filtered[, c('group1', 'group2', "value")]
     g <- igraph::graph_from_data_frame(d = clus_df_extra_filtered, directed = FALSE)
-    # partition <- leiden::leiden(g)
-    # partition <- igraph::cluster_leiden(g)
-    partition <- igraph::cluster_louvain(g)
+    set.seed(set_seed)
+    if (graphing_algorithm == "louvain") {
+        partition <- igraph::cluster_louvain(g, resolution = resolution)
+    } else if (graphing_algorithm == "louvain") {
+        # partition <- leiden::leiden(g, resolution_parameter = resolution, seed = set_seed)
+        partition <- igraph::cluster_leiden(g, resolution_parameter = resolution)
+    } else {
+        stop(sprintf("graphing_algorithm '%s' is not recognized. Please choose from 'louvain' (default) or 'leiden'.", default_sorting))
+    }
 
     clus_df_leiden <- data.frame(group_name=igraph::V(g)$name, leiden=partition)
     clus_df_leiden <- clus_df_leiden %>% separate_wider_delim(group_name, names=c('col', 'trash', 'group'), delim='_')
@@ -715,27 +720,27 @@ find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, curr
                                group1_name = "col1_int", group2_name = "col2_int",
                                cutoff=.5) {
     num_levels <- length(levels(clus_df_gather[[group2_name]]))
-    
+
     clus_df_ungrouped <- clus_df_gather[, c(group1_name, group2_name, "value")]
     clus_df_filtered <- clus_df_ungrouped %>% add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value)%>%
         select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
     clus_df_filtered <- distinct(clus_df_filtered)
     colnames(clus_df_filtered) <- c(group1_name, group2_name, 'value')
-    
-    
-    clus_df_filtered <- clus_df_filtered %>% 
+
+
+    clus_df_filtered <- clus_df_filtered %>%
         group_by(!!rlang::sym(group1_name)) %>% mutate(group1_size = sum(value))
-    clus_df_filtered <- clus_df_filtered %>% 
+    clus_df_filtered <- clus_df_filtered %>%
         group_by(!!rlang::sym(group2_name)) %>% mutate(group2_size = sum(value))
-    clus_df_filtered <- clus_df_filtered %>% 
+    clus_df_filtered <- clus_df_filtered %>%
         group_by(!!rlang::sym(group1_name)) %>% mutate(weight = value/group2_size)
-    
+
     parent_df <- clus_df_filtered %>% group_by(!!rlang::sym(group2_name)) %>% filter(weight == max(weight)) #%>% select(!!rlang::sym(group1_name))
     colnames(parent_df)[which(names(parent_df) == group1_name)] <- "parent"
     parent_df <- parent_df %>% mutate(parent = (ifelse(weight > cutoff, as.character(parent), '')))
     parent_df <- parent_df[,c(group2_name, 'parent')]
     clus_df_filtered <- merge(clus_df_filtered, parent_df, by=group2_name)
-    
+
     clus_df_filtered[['colors']] <- unlist(Map(function(x) ifelse(x=='', '', current_g1_colors[x]), clus_df_filtered$parent))
     clus_df_parent <- clus_df_filtered[clus_df_filtered$parent != '',]
     group2_colors <- vector("character", num_levels)
@@ -747,10 +752,10 @@ find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, curr
         } else {
             group2_colors[[as.integer(col_int)]] <- unused_colors[1]
             unused_colors <- unused_colors[2:length(unused_colors)]
-        } 
-        
+        }
+
     }
-    
+
     return(group2_colors)
 
 }
@@ -764,7 +769,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                                    include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
                                    include_group_sizes = FALSE, verbose = FALSE,
                                    box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE,
-                                   save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE, keep_y_labels=FALSE, box_line_width=1, do_compute_alluvial_statistics = TRUE) {
+                                   save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE, keep_y_labels=FALSE, box_line_width=1, do_compute_alluvial_statistics = TRUE, graphing_algorithm = "louvain", set_seed = 42) {
     if (verbose && do_compute_alluvial_statistics) compute_alluvial_statistics(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights)
 
     geom_alluvium <- if (rasterise_alluvia) {
@@ -840,8 +845,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                 }
             }
         } else if (match_order == 'advanced') {
-            final_colors <- find_colors_advanced(clus_df_gather, ditto_colors,
-                                             graphing_columns)
+            final_colors <- find_colors_advanced(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = graphing_algorithm, set_seed = set_seed)
         } else {
             col_group <- match_order
             num_levels <- length(levels(clus_df_gather[[col_group]]))
@@ -1551,7 +1555,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
 #' @param fixed_column Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.
 #' @param random_initializations Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.
-#' @param set_seed Integer. Random seed for the \code{random_initializations} parameter, random initialization/shuffling of blocks, and TSP solver for optimizing column order.
+#' @param set_seed Integer. Random seed for the \code{random_initializations} parameter (only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}), random initialization/shuffling of blocks (only applies when \code{default_sorting == 'random' or sorting_algorithm == 'random'}), TSP solver for block order or optimizing column order (only applies when \code{sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'}), and louvain/leiden clustering (only applies when \code{match_order == 'advanced'}).
 #' @param color_boxes Logical. Whether to color the strata/boxes (representing groups).
 #' @param color_bands Logical. Whether to color the alluvia/edges (connecting the strata).
 #' @param color_list Optional named list or vector of colors to override default group colors.
@@ -1559,6 +1563,10 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param color_band_column Optional Character. Which column to use for coloring bands.
 #' @param color_band_boundary Logical. Whether or not to color boundaries between bands
 #' @param match_colors Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.
+#' @param match_order Character. Matching colors methods. Choices are 'None', 'random', 'box_labels', 'fixed_column', 'fixed_column_and_propogate', and 'clustering'.
+#' @param graphing_algorithm Character. If \code{match_order == 'clustering'}, then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
+#' @param cutoff Logical. If \code{match_order == 'fixed_column', match_order == 'fixed_column_and_propogate', or match_order == 'clustering'}, sets the cutoff for color matching, below which a new color will be assigned.
+#' match_order = 'left', graphing_algorithm = "louvain", cutoff=.5
 #' @param alluvial_alpha Numeric between 0 and 1. Transparency level for the alluvial bands.
 #' @param include_labels_in_boxes Logical. Whether to include text labels inside the rectangular group boxes.
 #' @param include_axis_titles Logical. Whether to display axis titles for column1 and column2.
@@ -1605,7 +1613,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL,
                           random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE,
                           color_list = NULL, color_band_list = NULL, color_band_column = NULL,
-                          color_band_boundary = FALSE, match_colors = TRUE, match_order = 'left', cutoff=.5,
+                          color_band_boundary = FALSE, match_colors = TRUE, match_order = 'left', graphing_algorithm = "louvain", cutoff=.5,
                           alluvial_alpha = 0.5,
                           include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
                           output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE,
@@ -1711,7 +1719,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         include_group_sizes = include_group_sizes,
         output_plot_path = output_plot_path, verbose = verbose,
         box_width = box_width, text_width = text_width, min_text = min_text, auto_adjust_text = auto_adjust_text,
-        save_height = save_height, save_width = save_width, dpi=dpi, rasterise_alluvia=rasterise_alluvia, keep_y_labels=keep_y_labels, box_line_width=box_line_width, do_compute_alluvial_statistics = do_compute_alluvial_statistics
+        save_height = save_height, save_width = save_width, dpi=dpi, rasterise_alluvia=rasterise_alluvia, keep_y_labels=keep_y_labels, box_line_width=box_line_width, do_compute_alluvial_statistics = do_compute_alluvial_statistics, graphing_algorithm = graphing_algorithm, set_seed = set_seed
     )
 
     return(alluvial_plot)
