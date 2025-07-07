@@ -1054,6 +1054,8 @@ add_int_columns <- function(df, graphing_columns, default_sorting = "alphabetica
         } else if (default_sorting == "random") {
             set.seed(set_seed)
             df[[col]] <- factor(df[[col]], levels = sample(unique(as.character(df[[col]]))))
+        } else if (default_sorting == 'fixed') {
+            df[[col]] <- factor(df[[col]], levels = unique(as.character(df[[col]])))
         } else {
             stop(sprintf("default_sorting '%s' is not recognized. Please choose from 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', or 'random'.", default_sorting))
         }
@@ -1477,6 +1479,10 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         if (verbose) message(sprintf("Using column %s as fixed_column for greedy_WOLF by default", column1))
         fixed_column <- column1
     }
+    
+    if (sorting_algorithm == "greedy_WOLF") {
+        default_sorting <- 'fixed'
+    }
     #* Type Checking End
 
 
@@ -1683,7 +1689,10 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         color_bands <- TRUE
     }
     #* Type Checking End
-
+    
+    if (sorting_algorithm == "greedy_WOLF") {
+        default_sorting <- 'fixed'
+    }
     # Preprocess
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
@@ -1724,6 +1733,3 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
 
     return(alluvial_plot)
 }
-
-
-
