@@ -624,7 +624,7 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
     return(clus_df_gather)
 }
 
-find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = "louvain", match_order = 1, set_seed = 42) {
+find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = "louvain", resolution = 1, set_seed = 42) {
     column_int_names <- c()
     for (col_int in seq_along(graphing_columns)) {
         int_name <- paste0("col", col_int, "_int")
@@ -680,7 +680,7 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
                     clus_df_filtered <- rbind(clus_df_filtered, temp_clus_df_filtered)
                 }
                 }
-                compared <- c(compared, comp1, comp2)
+                #compared <- c(compared, comp1, comp2)
             }
         }
     }
@@ -691,13 +691,12 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
     if (graphing_algorithm == "louvain") {
         partition <- igraph::cluster_louvain(g, resolution = resolution)
     } else if (graphing_algorithm == "louvain") {
-        # partition <- leiden::leiden(g, resolution_parameter = resolution, seed = set_seed)
         partition <- igraph::cluster_leiden(g, resolution_parameter = resolution)
     } else {
         stop(sprintf("graphing_algorithm '%s' is not recognized. Please choose from 'louvain' (default) or 'leiden'.", default_sorting))
     }
 
-    clus_df_leiden <- data.frame(group_name=igraph::V(g)$name, leiden=partition)
+    clus_df_leiden <- data.frame(group_name=partition$names, leiden=partition$membership)
     clus_df_leiden <- clus_df_leiden %>% separate_wider_delim(group_name, names=c('col', 'trash', 'group'), delim='_')
     clus_df_leiden <- clus_df_leiden %>% separate_wider_delim(col, names=c('trash2', 'col'), delim='col')
     clus_df_leiden <- clus_df_leiden[, c('col', 'group', "leiden")]
@@ -713,9 +712,6 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
     return(final_colors)
 }
 
-# Does bipartite matching between the two groups to determine the color of group 2.
-# If any entries in group 2 are unmatched, randomly assign remainder. If not enough
-# colors to randomly assign, rerun matching using only the unlabeled entries.
 find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, current_g1_colors,
                                group1_name = "col1_int", group2_name = "col2_int",
                                cutoff=.5) {
@@ -765,7 +761,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                                    color_bands = FALSE, color_band_list = NULL,
                                    color_band_column = NULL, color_band_boundary = FALSE,
                                    alluvial_alpha = 0.5, match_colors = TRUE, match_order = 'left', cutoff=.5,
-                                   output_plot_path = NULL,
+                                   output_plot_path = NULL, color_val = NULL,
                                    include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
                                    include_group_sizes = FALSE, verbose = FALSE,
                                    box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE,
@@ -794,12 +790,18 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
     } else {
         ditto_colors <- default_colors
     }
-
+    
+    # remove user-defined colors from available color list 
+    if (!(is.null(color_val))){
+        ditto_colors <- ditto_colors[!(ditto_colors %in% color_val)]
+    }
+    
     # Extract colors for each factor, assuming ditto_colors is long enough
     if (match_colors) {
         unused_colors <- ditto_colors
         first <- TRUE
         final_colors <- c()
+        
         if (match_order == 'left') {
             n <- 1
             for (col_group in graphing_columns) {
@@ -882,6 +884,37 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
             old_colors <- remaining_colors[1:num_levels]
             final_colors <- c(final_colors, rev(old_colors))
             remaining_colors <- remaining_colors[(1+num_levels):length(remaining_colors)]
+        }
+    }
+    if (!(is.null(color_val))){
+        final_value_order <- c()
+        for (col_int in seq_along(graphing_columns)) {
+            int_name <- paste0("col", col_int, "_int")
+            group_name <- graphing_columns[[col_int]]
+            
+            curr_label <- as.character(unique(clus_df_gather[order(clus_df_gather[[int_name]]), ][[group_name]]))
+            
+            final_value_order <- c(final_value_order, rev(curr_label))
+        }
+        names(final_colors) <- final_value_order
+        
+        for (box_val in names(color_val)) {
+            if (box_val %in% names(final_colors)) {
+                box_val_color <- color_val[names(color_val) == box_val][1]
+                # find where value is in final colors
+                val_match <- which(box_val == names(final_colors))
+                matched_color <- final_colors[val_match[1]]
+                maybe_to_change <- which(matched_color == final_colors)
+                to_change <- c()
+                for (matched in maybe_to_change) {
+                    testing <- names(final_colors)[matched]
+                    if (!(testing %in% names(color_val)) | (testing == box_val)) {
+                        to_change <- c(to_change, matched)
+                    }
+                }
+                
+                final_colors[as.integer(to_change)] <- box_val_color
+            }
         }
     }
 
@@ -1619,7 +1652,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing",
                           column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL,
                           random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE,
-                          color_list = NULL, color_band_list = NULL, color_band_column = NULL,
+                          color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_val = NULL,
                           color_band_boundary = FALSE, match_colors = TRUE, match_order = 'left', graphing_algorithm = "louvain", resolution = 1, cutoff=.5,
                           alluvial_alpha = 0.5,
                           include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
@@ -1723,7 +1756,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         color_list = color_list, color_boxes = color_boxes,
         color_bands = color_bands, color_band_list = color_band_list,
         color_band_column = color_band_column, color_band_boundary = color_band_boundary,
-        match_colors = match_colors, match_order = match_order,cutoff=cutoff,
+        match_colors = match_colors, match_order = match_order,cutoff=cutoff, color_val = color_val,
         alluvial_alpha = alluvial_alpha,
         include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
         include_group_sizes = include_group_sizes,
