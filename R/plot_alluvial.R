@@ -650,10 +650,10 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
                         clus_df_filtered <- clus_df_filtered %>%
                             group_by(group1) %>% mutate(group1_size = sum(value))
                         clus_df_filtered <- clus_df_filtered %>%
-                            group_by(group1) %>% mutate(group1_size = sum(value))
+                            group_by(group1) %>% mutate(group2_size = sum(value))
 
                         clus_df_filtered <- clus_df_filtered %>%
-                            group_by(group1) %>% mutate(group1_size = sum(value))
+                            group_by(group1) %>% mutate(weight = value/group2_size)
 
                         clus_df_filtered$group1 <- sub("^", paste0(group1_name,'_'), clus_df_filtered[['group1']])
                         clus_df_filtered$group2 <- sub("^", paste0(group2_name,'_'), clus_df_filtered[['group2']])
@@ -672,7 +672,7 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
                         group_by(group2) %>% mutate(group2_size = sum(value))
 
                     temp_clus_df_filtered <- temp_clus_df_filtered %>%
-                        group_by(group1) %>% mutate(weight = value/min(group1_size, group2_size))
+                        group_by(group1) %>% mutate(weight = value/group2_size)
 
                     temp_clus_df_filtered$group1 <- sub("^", paste0(group1_name,'_'), temp_clus_df_filtered[['group1']])
                     temp_clus_df_filtered$group2 <- sub("^", paste0(group2_name,'_'), temp_clus_df_filtered[['group2']])
@@ -690,10 +690,10 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
     set.seed(set_seed)
     if (graphing_algorithm == "louvain") {
         partition <- igraph::cluster_louvain(g, resolution = resolution)
-    } else if (graphing_algorithm == "louvain") {
+    } else if (graphing_algorithm == "leiden") {
         partition <- igraph::cluster_leiden(g, resolution_parameter = resolution)
     } else {
-        stop(sprintf("graphing_algorithm '%s' is not recognized. Please choose from 'louvain' (default) or 'leiden'.", default_sorting))
+        stop(sprintf("graphing_algorithm '%s' is not recognized. Please choose from 'louvain' (default) or 'leiden'.", graphing_algorithm))
     }
 
     clus_df_leiden <- data.frame(group_name=partition$names, leiden=partition$membership)
