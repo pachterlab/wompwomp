@@ -67,8 +67,9 @@ df$USC_dice_score_binned_broad <- cut(
 ```
 
 ```{r}
+devtools::load_all()
 graphing_columns <- c("KiTS_dice_score_binned", "USC_dice_score_binned")
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", match_order = "advanced", color_bands=TRUE, resolution = 1, verbose=TRUE, output_plot_path = file.path(output_dir, "Segmentation_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", match_order = "advanced", color_bands=TRUE, resolution = 1, graphing_algorithm = "leiden", verbose=TRUE, output_plot_path = file.path(output_dir, "Segmentation_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 ```
 

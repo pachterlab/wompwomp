@@ -624,7 +624,7 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
     return(clus_df_gather)
 }
 
-find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = "louvain", resolution = 1, set_seed = 42) {
+find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = "leiden", resolution = 1, set_seed = 42) {
     column_int_names <- c()
     for (col_int in seq_along(graphing_columns)) {
         int_name <- paste0("col", col_int, "_int")
@@ -690,10 +690,10 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
     set.seed(set_seed)
     if (graphing_algorithm == "louvain") {
         partition <- igraph::cluster_louvain(g, resolution = resolution)
-    } else if (graphing_algorithm == "louvain") {
+    } else if (graphing_algorithm == "leiden") {
         partition <- igraph::cluster_leiden(g, resolution_parameter = resolution)
     } else {
-        stop(sprintf("graphing_algorithm '%s' is not recognized. Please choose from 'louvain' (default) or 'leiden'.", default_sorting))
+        stop(sprintf("graphing_algorithm '%s' is not recognized. Please choose from 'leiden' (default) or 'louvain'.", graphing_algorithm))
     }
 
     clus_df_leiden <- data.frame(group_name=partition$names, leiden=partition$membership)
@@ -765,7 +765,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                                    include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
                                    include_group_sizes = FALSE, verbose = FALSE,
                                    box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE,
-                                   save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE, keep_y_labels=FALSE, box_line_width=1, do_compute_alluvial_statistics = TRUE, graphing_algorithm = "louvain", resolution = 1, set_seed = 42) {
+                                   save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE, keep_y_labels=FALSE, box_line_width=1, do_compute_alluvial_statistics = TRUE, graphing_algorithm = "leiden", resolution = 1, set_seed = 42) {
     if (verbose && do_compute_alluvial_statistics) compute_alluvial_statistics(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights)
 
     geom_alluvium <- if (rasterise_alluvia) {
@@ -1617,7 +1617,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param color_band_column Optional Character. Which column to use for coloring bands.
 #' @param color_band_boundary Logical. Whether or not to color boundaries between bands
 #' @param match_order Character. Matching colors methods. Choices are 'advanced' (default), 'None', 'left', 'right', or any value in \code{graphing_columns}.
-#' @param graphing_algorithm Character. If \code{match_order == 'advanced'}, then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
+#' @param graphing_algorithm Character. If \code{match_order == 'advanced'}, then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.
 #' @param resolution Numeric If \code{match_order == 'advanced'}, then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.
 #' @param cutoff Numeric If \code{match_order != 'None' and match_order != 'advanced'}, sets the cutoff for color matching, below which a new color will be assigned.
 #' @param alluvial_alpha Numeric between 0 and 1. Transparency level for the alluvial bands.
@@ -1666,7 +1666,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL,
                           random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE,
                           color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_val = NULL,
-                          color_band_boundary = FALSE, match_colors = TRUE, match_order = 'advanced', graphing_algorithm = "louvain", resolution = 1, cutoff=.5,
+                          color_band_boundary = FALSE, match_colors = TRUE, match_order = 'advanced', graphing_algorithm = "leiden", resolution = 1, cutoff=.5,
                           alluvial_alpha = 0.5,
                           include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
                           output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE,

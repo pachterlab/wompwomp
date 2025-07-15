@@ -36,7 +36,7 @@ Optional:
   --color_band_column       Which column to use for coloring bands
   --color_band_boundary     Whether or not to color boundaries between bands
   --match_order Character. Matching colors methods. Choices are 'advanced' (default), 'None', 'left', 'right', or any value in graphing_columns.
-  --graphing_algorithm Character. If match_order == 'advanced', then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
+  --graphing_algorithm Character. If match_order == 'advanced', then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.
   --resolution Numeric If match_order == 'advanced', then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.
   --cutoff Numeric If match_order != 'None' and match_order != 'advanced', sets the cutoff for color matching, below which a new color will be assigned.
   --alluvial_alpha          Numeric between 0 and 1. Transparency level for the alluvial bands.
