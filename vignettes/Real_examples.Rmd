@@ -68,7 +68,7 @@ df$USC_dice_score_binned_broad <- cut(
 
 ```{r}
 graphing_columns <- c("KiTS_dice_score_binned", "USC_dice_score_binned")
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, verbose=TRUE, output_plot_path = file.path(output_dir, "Segmentation_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", match_order = "advanced", color_bands=TRUE, resolution = 1, verbose=TRUE, output_plot_path = file.path(output_dir, "Segmentation_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 ```
 
@@ -122,21 +122,21 @@ df <- read.csv(got_file)
 ```
 
 ```{r}
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "alphabetical", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_alphabetical.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "alphabetical", match_order = "left", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_alphabetical.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "reverse_alphabetical", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_reverse_alphabetical.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "reverse_alphabetical", match_order = "left", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_reverse_alphabetical.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "increasing", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_increasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "increasing", match_order = "left", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_increasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "decreasing", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_decreasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", default_sorting = "decreasing", match_order = "left", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_unsorted_decreasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 ```
 
 ```{r}
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", match_colors=TRUE, color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", match_order="left", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p
 
 # df['Lannister_origin'] <- df["Origin"] == 'House Lannister'
@@ -161,7 +161,7 @@ p
 ```
 
 ```{r}
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_bands=FALSE, min_text = 0.01, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_NN.pdf"), save_height = 24, save_width = 24)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order=FALSE, color_bands=FALSE, match_order = "left", min_text = 0.01, verbose=TRUE, output_plot_path=file.path(output_dir, "GoT_NN.pdf"), save_height = 24, save_width = 24)
 p
 
 # df['Lannister_origin'] <- df["Origin"] == 'House Lannister'
@@ -266,11 +266,12 @@ if (!is.null(sample_size)) {
 ```
 
 ```{r}
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", match_colors=TRUE, color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", match_order="advanced", color_bands=FALSE, verbose=TRUE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
 ```
 
 ```{r}
 p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=FALSE, verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass')
+p2
 ```
 
 
@@ -284,6 +285,7 @@ withCallingHandlers({
   log_msgs <<- c(log_msgs, conditionMessage(m))
   # no muffling → still prints to console
 })
+p2
 ```
 
 ```{r}
@@ -313,6 +315,7 @@ column_sorting_metric <- "edge_crossing"  # edge_crossing or ARI
 optimize_column_order_per_cycle <- TRUE
 
 p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=FALSE, verbose=TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN_optimized_columns.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700"), color_band_column = 'trueclass', cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric)
+p3
 ```
 
 Make legend

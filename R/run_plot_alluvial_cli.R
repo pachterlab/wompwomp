@@ -35,11 +35,10 @@ Optional:
   --color_band_list         List of colors to override default band colors.
   --color_band_column       Which column to use for coloring bands
   --color_band_boundary     Whether or not to color boundaries between bands
-  --disable_match_colors            Assigns consistent colors between column1 and column2 where matched.
-  --match_order Character. Matching colors methods. Choices are 'None', 'random', 'box_labels', 'fixed_column', 'fixed_column_and_propogate', and 'clustering'.
-  --graphing_algorithm Character. If match_order == 'clustering', then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
-  --resolution Numeric If match_order == 'clustering', then choose resolution for the graph clustering algorithm.
-  --cutoff Numeric If match_order == 'fixed_column', match_order == 'fixed_column_and_propogate', or match_order == 'clustering', sets the cutoff for color matching, below which a new color will be assigned.
+  --match_order Character. Matching colors methods. Choices are 'advanced' (default), 'None', 'left', 'right', or any value in graphing_columns.
+  --graphing_algorithm Character. If match_order == 'advanced', then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
+  --resolution Numeric If match_order == 'advanced', then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.
+  --cutoff Numeric If match_order != 'None' and match_order != 'advanced', sets the cutoff for color matching, below which a new color will be assigned.
   --alluvial_alpha          Numeric between 0 and 1. Transparency level for the alluvial bands.
   --disable_include_labels_in_boxes Whether to include text labels inside the rectangular group boxes
   --disable_include_axis_titles     Whether to display axis titles for column1 and column2.
@@ -93,7 +92,6 @@ Optional:
     color_band_list <- get_multi_arg(args, c("--color_band_list"))
     color_band_column <- get_arg(args, c("--color_band_column"))
     color_band_boundary <- store_true(args, c("--color_band_boundary"))
-    match_colors <- store_false(args, c("--disable_match_colors"))
     match_order <- get_arg(args, c("--match_order"))
     graphing_algorithm <- get_arg(args, c("--graphing_algorithm"))
     resolution <- get_numeric_arg(args, c("--resolution"))
@@ -152,7 +150,6 @@ Optional:
     if (!is.null(color_band_list)) args_list$color_band_list <- color_band_list
     if (!is.null(color_band_column)) args_list$color_band_column <- color_band_column
     if (!is.null(color_band_boundary)) args_list$color_band_boundary <- color_band_boundary
-    if (!is.null(match_colors)) args_list$match_colors <- match_colors
     if (!is.null(match_order)) args_list$match_order <- match_order
     if (!is.null(graphing_algorithm)) args_list$graphing_algorithm <- graphing_algorithm
     if (!is.null(resolution)) args_list$resolution <- resolution

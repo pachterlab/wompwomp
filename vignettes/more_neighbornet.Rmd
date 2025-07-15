@@ -232,15 +232,15 @@ df <- data.frame(
 # )
 graphing_columns <- c("tissue", "cluster")
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_unsorted.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", match_order = "None", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_unsorted.pdf"))
 ```
 
 ```{r}
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_NN.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", match_order = "None", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_NN.pdf"))
 ```
 
 ```{r}
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", match_colors_algorithm = "clustering", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_NN.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", match_order = "advanced", color_bands=TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_NN.pdf"))
 ```
 
 ```{r}
@@ -273,7 +273,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neig
 
 ```{r}
 devtools::load_all()
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, match_colors_algorithm = "clustering", color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, match_order = "advanced", color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
 ```
 
 FAILED ARI EXPERIMENTS

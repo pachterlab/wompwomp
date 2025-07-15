@@ -760,7 +760,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                                    color_list = NULL, color_boxes = TRUE,
                                    color_bands = FALSE, color_band_list = NULL,
                                    color_band_column = NULL, color_band_boundary = FALSE,
-                                   alluvial_alpha = 0.5, match_colors = TRUE, match_order = 'left', cutoff=.5,
+                                   alluvial_alpha = 0.5, match_order = 'advanced', cutoff=.5,
                                    output_plot_path = NULL, color_val = NULL,
                                    include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
                                    include_group_sizes = FALSE, verbose = FALSE,
@@ -790,18 +790,29 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
     } else {
         ditto_colors <- default_colors
     }
-    
-    # remove user-defined colors from available color list 
+
+    # remove user-defined colors from available color list
     if (!(is.null(color_val))){
         ditto_colors <- ditto_colors[!(ditto_colors %in% color_val)]
     }
-    
+
+    match_colors <- (match_order != "None")  # we want to match color if match_order is not None
+
+    if (!(match_order %in% c("None", "left", "right", "advanced", graphing_columns))) {
+        stop("Invalid match_order. Options are 'None', 'left', 'right', 'advanced', or any value in graphing_columns.")
+    }
+
+    # warning if match_order is not None but color_boxes is False
+    if (!color_boxes && !color_bands && match_colors) {
+        if (verbose) message("Warning: color_boxes and color_bands are False but match_order is specified. boxes will not be colored.")
+    }
+
     # Extract colors for each factor, assuming ditto_colors is long enough
     if (match_colors) {
         unused_colors <- ditto_colors
         first <- TRUE
         final_colors <- c()
-        
+
         if (match_order == 'left') {
             n <- 1
             for (col_group in graphing_columns) {
@@ -881,6 +892,10 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
         final_colors <- c()
         for (col_group in graphing_columns) {
             num_levels <- length(levels(clus_df_gather[[col_group]]))
+            if (length(remaining_colors) < num_levels) {
+                if (verbose) message("Warning: Some colors will be recycled.")
+                remaining_colors <- ditto_colors
+            }
             old_colors <- remaining_colors[1:num_levels]
             final_colors <- c(final_colors, rev(old_colors))
             remaining_colors <- remaining_colors[(1+num_levels):length(remaining_colors)]
@@ -891,13 +906,13 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
         for (col_int in seq_along(graphing_columns)) {
             int_name <- paste0("col", col_int, "_int")
             group_name <- graphing_columns[[col_int]]
-            
+
             curr_label <- as.character(unique(clus_df_gather[order(clus_df_gather[[int_name]]), ][[group_name]]))
-            
+
             final_value_order <- c(final_value_order, rev(curr_label))
         }
         names(final_colors) <- final_value_order
-        
+
         for (box_val in names(color_val)) {
             if (box_val %in% names(final_colors)) {
                 box_val_color <- color_val[names(color_val) == box_val][1]
@@ -912,7 +927,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                         to_change <- c(to_change, matched)
                     }
                 }
-                
+
                 final_colors[as.integer(to_change)] <- box_val_color
             }
         }
@@ -1512,7 +1527,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         if (verbose) message(sprintf("Using column %s as fixed_column for greedy_WOLF by default", column1))
         fixed_column <- column1
     }
-    
+
     if (sorting_algorithm == "greedy_WOLF") {
         default_sorting <- 'fixed'
     }
@@ -1601,12 +1616,10 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param color_band_list Optional named list or vector of colors to override default band colors.
 #' @param color_band_column Optional Character. Which column to use for coloring bands.
 #' @param color_band_boundary Logical. Whether or not to color boundaries between bands
-#' @param match_colors Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.
-#' @param match_order Character. Matching colors methods. Choices are 'None', 'random', 'box_labels', 'fixed_column', 'fixed_column_and_propogate', and 'clustering'.
-#' @param graphing_algorithm Character. If \code{match_order == 'clustering'}, then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
-#' @param resolution Numeric If \code{match_order == 'clustering'}, then choose resolution for the graph clustering algorithm.
-#' @param cutoff Numeric If \code{match_order == 'fixed_column', match_order == 'fixed_column_and_propogate', or match_order == 'clustering'}, sets the cutoff for color matching, below which a new color will be assigned.
-#' match_order = 'left', graphing_algorithm = "louvain", cutoff=.5
+#' @param match_order Character. Matching colors methods. Choices are 'advanced' (default), 'None', 'left', 'right', or any value in \code{graphing_columns}.
+#' @param graphing_algorithm Character. If \code{match_order == 'advanced'}, then choose graph clustering algorithm. Choices are 'louvain' or 'leiden'.
+#' @param resolution Numeric If \code{match_order == 'advanced'}, then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.
+#' @param cutoff Numeric If \code{match_order != 'None' and match_order != 'advanced'}, sets the cutoff for color matching, below which a new color will be assigned.
 #' @param alluvial_alpha Numeric between 0 and 1. Transparency level for the alluvial bands.
 #' @param include_labels_in_boxes Logical. Whether to include text labels inside the rectangular group boxes.
 #' @param include_axis_titles Logical. Whether to display axis titles for column1 and column2.
@@ -1653,7 +1666,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL,
                           random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE,
                           color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_val = NULL,
-                          color_band_boundary = FALSE, match_colors = TRUE, match_order = 'left', graphing_algorithm = "louvain", resolution = 1, cutoff=.5,
+                          color_band_boundary = FALSE, match_colors = TRUE, match_order = 'advanced', graphing_algorithm = "louvain", resolution = 1, cutoff=.5,
                           alluvial_alpha = 0.5,
                           include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
                           output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE,
@@ -1722,7 +1735,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         color_bands <- TRUE
     }
     #* Type Checking End
-    
+
     if (sorting_algorithm == "greedy_WOLF") {
         default_sorting <- 'fixed'
     }
@@ -1755,8 +1768,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         graphing_columns = graphing_columns, column_weights = column_weights,
         color_list = color_list, color_boxes = color_boxes,
         color_bands = color_bands, color_band_list = color_band_list,
-        color_band_column = color_band_column, color_band_boundary = color_band_boundary,
-        match_colors = match_colors, match_order = match_order,cutoff=cutoff, color_val = color_val,
+        color_band_column = color_band_column, color_band_boundary = color_band_boundary, match_order = match_order,cutoff=cutoff, color_val = color_val,
         alluvial_alpha = alluvial_alpha,
         include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
         include_group_sizes = include_group_sizes,
