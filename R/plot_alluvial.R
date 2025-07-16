@@ -916,19 +916,38 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
         names(final_colors) <- final_value_order
 
         for (box_val in names(color_val)) {
+            # browser()
             if (box_val %in% names(final_colors)) {
                 box_val_color <- color_val[names(color_val) == box_val][1]
                 # find where value is in final colors
                 val_match <- which(box_val == names(final_colors))
-                matched_color <- final_colors[val_match[1]]
-                maybe_to_change <- which(matched_color == final_colors)
+
+                # JR added
                 to_change <- c()
-                for (matched in maybe_to_change) {
-                    testing <- names(final_colors)[matched]
-                    if (!(testing %in% names(color_val)) | (testing == box_val)) {
-                        to_change <- c(to_change, matched)
+                for (vm in val_match) {
+                    matched_color <- final_colors[vm]
+                    maybe_to_change <- which(matched_color == final_colors)
+
+                    for (matched in maybe_to_change) {
+                        testing <- names(final_colors)[matched]
+                        if (!(testing %in% names(color_val)) || (testing == box_val)) {
+                            to_change <- c(to_change, matched)
+                        }
                     }
                 }
+                # JR added
+
+                # JR commented out
+                # matched_color <- final_colors[val_match[1]]
+                # maybe_to_change <- which(matched_color == final_colors)
+                # to_change <- c()
+                # for (matched in maybe_to_change) {
+                #     testing <- names(final_colors)[matched]
+                #     if (!(testing %in% names(color_val)) | (testing == box_val)) {
+                #         to_change <- c(to_change, matched)
+                #     }
+                # }
+                # JR commented out
 
                 final_colors[as.integer(to_change)] <- box_val_color
             }
@@ -1051,8 +1070,14 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
             text = element_text(family = "sans"),
             legend.text = element_text(size = rel(axis_text_size)),
             legend.position = "none",  # to hide legend
-            axis.text.x = element_text(size = axis_text_size, vjust = axis_text_vjust),  # vjust adjusts the vertical position of column titles
+            axis.ticks.x = element_blank()
         )
+    if (include_axis_titles) {
+        p <- p + theme(axis.text.x = element_text(size = axis_text_size, vjust = axis_text_vjust))  # vjust adjusts the vertical position of column titles)
+    } else {
+        p <- p + theme(axis.text.x = element_blank())
+    }
+
     if (keep_y_labels) {
         p <- p + theme(axis.text.y = element_text(size = axis_text_size))
     }

@@ -348,7 +348,7 @@ clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_alg
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_0.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_0.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, match_order = "None", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 
@@ -384,7 +384,7 @@ clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_alg
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_02.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_02.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, match_order = "None", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 ```{r}
@@ -419,7 +419,7 @@ clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_alg
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, match_order = "None", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 
@@ -455,7 +455,7 @@ clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_alg
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_08.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_08.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, match_order = "None", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 ```{r}
@@ -473,7 +473,7 @@ clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_alg
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_1.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_1.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, match_order = "None", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 ```{r}
@@ -493,7 +493,7 @@ clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_alg
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_left.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_left.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, match_order = "None", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 ```{r}
@@ -513,7 +513,7 @@ clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_alg
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_right.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_right.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, match_order = "None", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 
