@@ -34,6 +34,7 @@ Optional:
   --color_list              List of colors to override default group colors.
   --color_band_list         List of colors to override default band colors.
   --color_band_column       Which column to use for coloring bands
+  --color_val Optional named list where the entries are colors and the names correspond to values of the dataframe that should use those colors
   --color_band_boundary     Whether or not to color boundaries between bands
   --match_order Character. Matching colors methods. Choices are 'advanced' (default), 'None', 'left', 'right', or any value in graphing_columns.
   --graphing_algorithm Character. If match_order == 'advanced', then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.
@@ -91,6 +92,7 @@ Optional:
     color_list <- get_multi_arg(args, c("--color_list"))
     color_band_list <- get_multi_arg(args, c("--color_band_list"))
     color_band_column <- get_arg(args, c("--color_band_column"))
+    color_val <- get_arg(args, c("--color_val"))
     color_band_boundary <- store_true(args, c("--color_band_boundary"))
     match_order <- get_arg(args, c("--match_order"))
     graphing_algorithm <- get_arg(args, c("--graphing_algorithm"))
@@ -149,6 +151,7 @@ Optional:
     if (!is.null(color_list)) args_list$color_list <- color_list
     if (!is.null(color_band_list)) args_list$color_band_list <- color_band_list
     if (!is.null(color_band_column)) args_list$color_band_column <- color_band_column
+    if (!is.null(color_val)) args_list$color_val <- color_val
     if (!is.null(color_band_boundary)) args_list$color_band_boundary <- color_band_boundary
     if (!is.null(match_order)) args_list$match_order <- match_order
     if (!is.null(graphing_algorithm)) args_list$graphing_algorithm <- graphing_algorithm

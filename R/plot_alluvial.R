@@ -653,7 +653,7 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
                             group_by(group1) %>% mutate(group2_size = sum(value))
 
                         clus_df_filtered <- clus_df_filtered %>%
-                            group_by(group1) %>% mutate(weight = value/group2_size)
+                            group_by(group1) %>% mutate(weight = value)  # /group2_size)
 
                         clus_df_filtered$group1 <- sub("^", paste0(group1_name,'_'), clus_df_filtered[['group1']])
                         clus_df_filtered$group2 <- sub("^", paste0(group2_name,'_'), clus_df_filtered[['group2']])
@@ -672,7 +672,7 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
                         group_by(group2) %>% mutate(group2_size = sum(value))
 
                     temp_clus_df_filtered <- temp_clus_df_filtered %>%
-                        group_by(group1) %>% mutate(weight = value/group2_size)
+                        group_by(group1) %>% mutate(weight = value)  # /group2_size)
 
                     temp_clus_df_filtered$group1 <- sub("^", paste0(group1_name,'_'), temp_clus_df_filtered[['group1']])
                     temp_clus_df_filtered$group2 <- sub("^", paste0(group2_name,'_'), temp_clus_df_filtered[['group2']])
@@ -689,12 +689,14 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
     g <- igraph::graph_from_data_frame(d = clus_df_extra_filtered, directed = FALSE)
     set.seed(set_seed)
     if (graphing_algorithm == "louvain") {
-        partition <- igraph::cluster_louvain(g, resolution = resolution)
+        partition <- igraph::cluster_louvain(g, weights = E(g)$value, resolution = resolution)
     } else if (graphing_algorithm == "leiden") {
-        partition <- igraph::cluster_leiden(g, resolution_parameter = resolution)
+        partition <- igraph::cluster_leiden(g, weights = E(g)$value, resolution_parameter = resolution)
     } else {
         stop(sprintf("graphing_algorithm '%s' is not recognized. Please choose from 'leiden' (default) or 'louvain'.", graphing_algorithm))
     }
+
+    # browser()
 
     clus_df_leiden <- data.frame(group_name=partition$names, leiden=partition$membership)
     clus_df_leiden <- clus_df_leiden %>% separate_wider_delim(group_name, names=c('col', 'trash', 'group'), delim='_')
@@ -901,6 +903,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
             remaining_colors <- remaining_colors[(1+num_levels):length(remaining_colors)]
         }
     }
+    # browser()
     if (!(is.null(color_val))){
         final_value_order <- c()
         for (col_int in seq_along(graphing_columns)) {
@@ -912,6 +915,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
             final_value_order <- c(final_value_order, rev(curr_label))
         }
         names(final_colors) <- final_value_order
+        # browser()
 
         for (box_val in names(color_val)) {
             if (box_val %in% names(final_colors)) {
@@ -919,6 +923,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                 # find where value is in final colors
                 val_match <- which(box_val == names(final_colors))
                 matched_color <- final_colors[val_match[1]]
+                # browser()
                 maybe_to_change <- which(matched_color == final_colors)
                 to_change <- c()
                 for (matched in maybe_to_change) {
@@ -1615,6 +1620,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param color_list Optional named list or vector of colors to override default group colors.
 #' @param color_band_list Optional named list or vector of colors to override default band colors.
 #' @param color_band_column Optional Character. Which column to use for coloring bands.
+#' @param color_val Optional named list where the entries are colors and the names correspond to values of the dataframe that should use those colors
 #' @param color_band_boundary Logical. Whether or not to color boundaries between bands
 #' @param match_order Character. Matching colors methods. Choices are 'advanced' (default), 'None', 'left', 'right', or any value in \code{graphing_columns}.
 #' @param graphing_algorithm Character. If \code{match_order == 'advanced'}, then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.
