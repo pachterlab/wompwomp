@@ -40,9 +40,6 @@ stopifnot(file.exists(neighbornet_script_path))
 # library(igraph)
 # library(tibble)
 
-axis_text_size <- 1.7
-axis_numbering_size <- 1.4
-
 default_colors <- c(
     "#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700", "#1C91D4", "#007756", "#D5C711", "#005685",
     "#A04700", "#B14380", "#4D4D4D", "#FFBE2D", "#80C7EF", "#00F6B3", "#F4EB71", "#06A5FF", "#FF8320", "#D99BBD", "#8C8C8C", "#FFCB57", "#9AD2F2",
@@ -696,11 +693,9 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
         stop(sprintf("graphing_algorithm '%s' is not recognized. Please choose from 'leiden' (default) or 'louvain'.", graphing_algorithm))
     }
 
-    # browser()
-
     clus_df_leiden <- data.frame(group_name=partition$names, leiden=partition$membership)
-    clus_df_leiden <- clus_df_leiden %>% separate_wider_delim(group_name, names=c('col', 'trash', 'group'), delim='_')
-    clus_df_leiden <- clus_df_leiden %>% separate_wider_delim(col, names=c('trash2', 'col'), delim='col')
+    clus_df_leiden <- clus_df_leiden %>% tidyr::separate_wider_delim(group_name, names=c('col', 'trash', 'group'), delim='_')
+    clus_df_leiden <- clus_df_leiden %>% tidyr::separate_wider_delim(col, names=c('trash2', 'col'), delim='col')
     clus_df_leiden <- clus_df_leiden[, c('col', 'group', "leiden")]
     clus_df_leiden[['colors']] <- unlist(Map(function(x) ditto_colors[x], clus_df_leiden$leiden))
 
@@ -764,9 +759,9 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                                    color_band_column = NULL, color_band_boundary = FALSE,
                                    alluvial_alpha = 0.5, match_order = 'advanced', cutoff=.5,
                                    output_plot_path = NULL, color_val = NULL,
-                                   include_labels_in_boxes = FALSE, include_axis_titles = FALSE,
+                                   include_labels_in_boxes = TRUE, include_axis_titles = FALSE,
                                    include_group_sizes = FALSE, verbose = FALSE,
-                                   box_width = 1 / 3, text_width = 1 / 4, min_text = 4, auto_adjust_text = TRUE,
+                                   box_width = 1 / 3, text_width = 1 / 4, min_text = 4, text_size = 14, auto_adjust_text = TRUE, axis_text_size = 2, axis_text_vjust = 0,
                                    save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE, keep_y_labels=FALSE, box_line_width=1, do_compute_alluvial_statistics = TRUE, graphing_algorithm = "leiden", resolution = 1, set_seed = 42) {
     if (verbose && do_compute_alluvial_statistics) compute_alluvial_statistics(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights)
 
@@ -795,6 +790,10 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
 
     # remove user-defined colors from available color list
     if (!(is.null(color_val))){
+        # convert named list into named vector
+        if (class(color_val) == "list") {
+            color_val <- unlist(color_val)
+        }
         ditto_colors <- ditto_colors[!(ditto_colors %in% color_val)]
     }
 
@@ -903,7 +902,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
             remaining_colors <- remaining_colors[(1+num_levels):length(remaining_colors)]
         }
     }
-    # browser()
+
     if (!(is.null(color_val))){
         final_value_order <- c()
         for (col_int in seq_along(graphing_columns)) {
@@ -915,7 +914,6 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
             final_value_order <- c(final_value_order, rev(curr_label))
         }
         names(final_colors) <- final_value_order
-        # browser()
 
         for (box_val in names(color_val)) {
             if (box_val %in% names(final_colors)) {
@@ -923,7 +921,6 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                 # find where value is in final colors
                 val_match <- which(box_val == names(final_colors))
                 matched_color <- final_colors[val_match[1]]
-                # browser()
                 maybe_to_change <- which(matched_color == final_colors)
                 to_change <- c()
                 for (matched in maybe_to_change) {
@@ -1008,12 +1005,12 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
         if (auto_adjust_text) {
             p <- p +
                 geom_fit_text(
-                    reflow = TRUE, stat = StatStratum, width = text_width, min.size = min_text,
+                    reflow = TRUE, stat = StatStratum, width = text_width, min.size = min_text, size = text_size,
                     aes(label = after_stat(final_label_names))
                 )
         } else {
             p <- p +
-                geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)))
+                geom_text(stat = StatStratum, aes(label = after_stat(final_label_names)), size = text_size)
         }
     }
 
@@ -1031,19 +1028,11 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
     } # top_y1 and top_y2 are probably the same
 
     if (include_axis_titles) {
-        # Offset to place labels a bit above
-        offset <- top_y + top_y / 5
-        # x<-1
-        # for (col_group in graphing_columns) {
         p <- p +
             scale_x_continuous(
                 breaks = 1:length(graphing_columns), labels = graphing_columns,
                 position = "top"
             )
-        # annotate("text", x = seq(1, length(graphing_columns)), y = rep(offset, length(graphing_columns)),
-        # label = graphing_columns, size = 5, hjust = 0.5, vjust=.5)
-        #    x <- x+1
-        # }
     }
 
     if (include_group_sizes) {
@@ -1055,27 +1044,18 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
             x <- x + 1
         }
     }
+
+    p <- p +
+        theme_void() +
+        theme(
+            text = element_text(family = "sans"),
+            legend.text = element_text(size = rel(axis_text_size)),
+            legend.position = "none",  # to hide legend
+            axis.text.x = element_text(size = axis_text_size, vjust = axis_text_vjust),  # vjust adjusts the vertical position of column titles
+        )
     if (keep_y_labels) {
-        p <- p +
-            theme_void() +
-            theme(
-                text = element_text(family = "sans"),
-                legend.text = element_text(size = rel(axis_text_size)),
-                axis.text.x = element_text(),
-                axis.text.y = element_text()
-            )
-    } else{
-        p <- p +
-            theme_void() +
-            theme(
-                text = element_text(family = "sans"),
-                legend.text = element_text(size = rel(axis_text_size)),
-                axis.text.x = element_text()
-            )
-
+        p <- p + theme(axis.text.y = element_text(size = axis_text_size))
     }
-
-    p <- p + theme(legend.position = "none") # to hide legend
 
     if (!is.null(output_plot_path)) {
         if (verbose) message(sprintf("Saving plot to=%s", output_plot_path))
@@ -1637,7 +1617,10 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param box_width Numeric between 0 and 1. Box width
 #' @param text_width Numeric between 0 and 1. Text width
 #' @param min_text Integer greater than 0. Min text
+#' @param text_size Integer greater than 0. Text size (works whether auto_adjust_text is TRUE or FALSE).
 #' @param auto_adjust_text Logical. Whether to automatically adjust text size to fit in box.
+#' @param axis_text_size Integer greater than 0. Axis text size
+#' @param axis_text_vjust Integer. Axis text vjust
 #' @param save_height Integer greater than 0. Save height, in inches
 #' @param save_width Integer greater than 0. Save width, in inches
 #' @param dpi Integer greater than 0. DPI for \code{output_plot_path}, if \code{output_plot_path} is a raster image or \code{rasterise_alluvia} is TRUE
@@ -1674,10 +1657,10 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_val = NULL,
                           color_band_boundary = FALSE, match_colors = TRUE, match_order = 'advanced', graphing_algorithm = "leiden", resolution = 1, cutoff=.5,
                           alluvial_alpha = 0.5,
-                          include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = TRUE,
+                          include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = FALSE,
                           output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE,
-                          default_sorting = "alphabetical", box_width = 1 / 3, text_width = 1 / 4, min_text = 4,
-                          auto_adjust_text = TRUE, save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE,
+                          default_sorting = "alphabetical", box_width = 1 / 3, text_width = 1 / 4, min_text = 4, text_size = 14,
+                          auto_adjust_text = TRUE, axis_text_size = 2, axis_text_vjust = 0, save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE,
                           keep_y_labels=FALSE, box_line_width=1, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
@@ -1779,7 +1762,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
         include_group_sizes = include_group_sizes,
         output_plot_path = output_plot_path, verbose = verbose,
-        box_width = box_width, text_width = text_width, min_text = min_text, auto_adjust_text = auto_adjust_text,
+        box_width = box_width, text_width = text_width, min_text = min_text, text_size = text_size, auto_adjust_text = auto_adjust_text, axis_text_size = axis_text_size, axis_text_vjust = axis_text_vjust,
         save_height = save_height, save_width = save_width, dpi=dpi, rasterise_alluvia=rasterise_alluvia, keep_y_labels=keep_y_labels, box_line_width=box_line_width, do_compute_alluvial_statistics = do_compute_alluvial_statistics, graphing_algorithm = graphing_algorithm, resolution = resolution, set_seed = set_seed)
 
     return(alluvial_plot)

@@ -43,7 +43,7 @@ Optional:
   --alluvial_alpha          Numeric between 0 and 1. Transparency level for the alluvial bands.
   --disable_include_labels_in_boxes Whether to include text labels inside the rectangular group boxes
   --disable_include_axis_titles     Whether to display axis titles for column1 and column2.
-  --disable_include_group_sizes     Includes group sizes in the labels
+  --include_group_sizes     Includes group sizes in the labels
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   --output_df_path          Output path for the output data frame, in CSV format. If NULL, then will not be saved
   --disable_preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
@@ -51,7 +51,10 @@ Optional:
   --box_width Numeric between 0 and 1. Box width
   --text_width Numeric between 0 and 1. Text width
   --min_text Integer greater than 0. Min text
+  --text_size Integer greater than 0. Text size (works whether auto_adjust_text is TRUE or FALSE).
   --auto_adjust_text Whether to automatically adjust text size to fit in box.
+  --axis_text_size Integer greater than 0. Axis text size
+  --axis_text_vjust Integer. Axis text vjust
   --save_height Integer greater than 0. Save height, in inches
   --save_width Integer greater than 0. Save width, in inches
   --dpi Integer greater than 0. DPI for output_plot_path, if output_plot_path is a raster image or rasterise_alluvia is TRUE
@@ -101,14 +104,17 @@ Optional:
     alluvial_alpha <- get_numeric_arg(args, "--alluvial_alpha")
     include_labels_in_boxes <- store_false(args, c("--disable_include_labels_in_boxes"))
     include_axis_titles <- store_false(args, c("--disable_include_axis_titles"))
-    include_group_sizes <- store_false(args, c("--disable_include_group_sizes"))
+    include_group_sizes <- store_true(args, c("--include_group_sizes"))
     output_df_path <- get_arg(args, c("--output_df_path"))
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
     default_sorting <- get_arg(args, c("--default_sorting"))
     box_width <- get_numeric_arg(args, c("--box_width"))
     text_width <- get_numeric_arg(args, c("--text_width"))
     min_text <- get_numeric_arg(args, c("--min_text"))
+    text_size <- get_numeric_arg(args, c("--text_size"))
     auto_adjust_text <- store_false(args, c("--disable_auto_adjust_text"))
+    axis_text_size <- get_numeric_arg(args, c("--axis_text_size"))
+    axis_text_vjust <- get_numeric_arg(args, c("--axis_text_vjust"))
     save_height <- get_numeric_arg(args, c("--save_height"))
     save_width <- get_numeric_arg(args, c("--save_width"))
     keep_y_labels <- store_true(args, c("--keep_y_labels"))
@@ -167,7 +173,10 @@ Optional:
     if (!is.null(box_width)) args_list$box_width <- box_width
     if (!is.null(text_width)) args_list$text_width <- text_width
     if (!is.null(min_text)) args_list$min_text <- min_text
+    if (!is.null(text_size)) args_list$text_size <- text_size
     if (!is.null(auto_adjust_text)) args_list$auto_adjust_text <- auto_adjust_text
+    if (!is.null(axis_text_size)) args_list$axis_text_size <- axis_text_size
+    if (!is.null(axis_text_vjust)) args_list$axis_text_vjust <- axis_text_vjust
     if (!is.null(save_height)) args_list$save_height <- save_height
     if (!is.null(save_width)) args_list$save_width <- save_width
     if (!is.null(dpi)) args_list$dpi <- dpi
