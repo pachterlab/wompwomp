@@ -274,7 +274,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, 
 
     p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order_per_cycle = FALSE)
 
-    vdiffr::expect_doppelganger("more_neighbornet_2layer_neighbornet_optimize_column_order_per_cycle_FALSE", p)
+    vdiffr::expect_doppelganger("more_neighbornet_2layer_neighbornet_oFALSE", p)
 })
 
 test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, optimize_column_order_per_cycle TRUE", {
@@ -287,7 +287,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, 
 
     p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order_per_cycle = TRUE)
 
-    vdiffr::expect_doppelganger("more_neighbornet_2layer_neighbornet_optimize_column_order_per_cycle_TRUE", p)
+    vdiffr::expect_doppelganger("more_neighbornet_2layer_neighbornet_oTRUE", p)
 })
 
 
@@ -382,7 +382,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
 
     p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = FALSE, weight_scalar = 1)
 
-    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderFALSE_optimize_column_order_per_cycleFALSE", p)
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_oFALSE_ocFALSE", p)
 })
 
 
@@ -396,7 +396,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
 
     p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
 
-    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderFALSE_optimize_column_order_per_cycleTRUE", p)
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_oFALSE_ocTRUE", p)
 })
 
 test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE, optimize_column_order_per_cycle FALSE", {
@@ -422,7 +422,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
 
     p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
 
-    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderTRUE_optimize_column_order_per_cycleTRUE", p)
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_ooTRUE_ocTRUE", p)
 })
 
 
@@ -436,7 +436,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identic
 
     p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands = TRUE)
 
-    vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_identical_layers_unsorted", p)
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_2ident", p)
 })
 
 test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order FALSE", {
@@ -449,7 +449,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identic
 
     p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, weight_scalar = 1)
 
-    vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_identical_layers_unsorted_optimize_column_orderFALSE", p)
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2ident_oFALSE", p)
 })
 
 
@@ -463,7 +463,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identic
 
     p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, weight_scalar = 1)
 
-    vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_identical_layers_unsorted_optimize_column_orderTRUE", p)
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_ident_oTRUE", p)
 })
 
 

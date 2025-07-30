@@ -1,4 +1,4 @@
-#' @export
+#' @noRd
 run_determine_crossing_edges_cli <- function(args) {
     if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
         cat("

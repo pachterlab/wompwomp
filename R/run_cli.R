@@ -1,4 +1,4 @@
-#' @export
+#' @noRd
 run_cli <- function(args) {
     if (length(args) == 0 || (length(args) == 1 && args[1] %in% c("--help", "-h"))) {
         cat("

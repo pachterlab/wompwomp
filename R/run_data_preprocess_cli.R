@@ -1,4 +1,4 @@
-#' @export
+#' @noRd
 run_data_preprocess_cli <- function(args) {
     if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
         cat("

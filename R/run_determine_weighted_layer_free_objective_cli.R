@@ -1,4 +1,4 @@
-#' @export
+#' @noRd
 run_determine_weighted_layer_free_objective_cli <- function(args) {
     if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
         cat("

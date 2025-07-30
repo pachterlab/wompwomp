@@ -31,7 +31,6 @@ plot_alluvial(
   color_band_column = NULL,
   color_val = NULL,
   color_band_boundary = FALSE,
-  match_colors = TRUE,
   match_order = "advanced",
   graphing_algorithm = "leiden",
   resolution = 1,
@@ -188,6 +187,9 @@ clus_df_gather <- df |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
-p <- plot_alluvial(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
+p <- plot_alluvial(
+   clus_df_gather,
+   graphing_columns = c("method1", "method2"),
+   column_weights = "value")
 
 }

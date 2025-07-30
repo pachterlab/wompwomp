@@ -109,6 +109,9 @@ clus_df_gather <- df |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
-clus_df_gather <- data_sort(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
+clus_df_gather <- data_sort(
+    clus_df_gather,
+    graphing_columns = c("method1", "method2"),
+    column_weights = "value")
 
 }

@@ -4,6 +4,7 @@
 #'
 #' @param envname Conda environment name
 #' @param packages Packages to install
+#' @param use_conda Use conda vs. virtualenv for python environment
 #'
 #' @export
 setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "numpy==1.23.5", splitspy = "splitspy", pandas = "pandas", scipy = "scipy", leidenalg = "leidenalg", igraph = "python-igraph"), use_conda = TRUE) {

@@ -15,7 +15,7 @@
 #' @importFrom ggplot2 ggplot_build
 
 utils::globalVariables(c(
-    ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"
+    ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement", "calculate_objective_fenwick"
 ))
 
 objective_fenwick_script_path <- system.file("scripts", "calculate_objective.py")
@@ -78,7 +78,10 @@ check_python_setup_with_necessary_packages <- function(necessary_packages_for_th
 #' @examples
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' clus_df_gather <- data_sort(df, graphing_columns = c("method1", "method2"))
-#' crossing_edges_output <- determine_crossing_edges(clus_df_gather, column1 = "method1", column2 = "method2")
+#' crossing_edges_output <- determine_crossing_edges(
+#'     determine_crossing_edges(clus_df_gather, column1 = "method1", column2 = "method2")clus_df_gather,
+#'     column1 = "method1",
+#'     column2 = "method2")
 #' objective <- determine_weighted_layer_free_objective(crossing_edges_output$crossing_edges_df)
 #'
 #' @export

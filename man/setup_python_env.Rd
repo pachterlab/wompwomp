@@ -15,6 +15,8 @@ setup_python_env(
 \item{envname}{Conda environment name}
 
 \item{packages}{Packages to install}
+
+\item{use_conda}{Use conda vs. virtualenv for python environment}
 }
 \description{
 This function installs Miniconda if needed, creates a dedicated environment, and installs the required Python packages.

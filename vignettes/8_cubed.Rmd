@@ -1,7 +1,10 @@
 ---
-output:
-  pdf_document: default
-  html_document: default
+title: "8 cubed"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{8 cubed}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 ```{r}
 # reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase

@@ -19,7 +19,7 @@
 #' @importFrom data.table :=
 
 utils::globalVariables(c(
-    ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count"
+    ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name"
 ))
 
 StatStratum <- ggalluvial::StatStratum # avoid the error Can't find stat called "stratum" - and make sure to do stat = StatStratum instead of stat = "stratum"
@@ -802,7 +802,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
     # remove user-defined colors from available color list
     if (!(is.null(color_val))) {
         # convert named list into named vector
-        if (class(color_val) == "list") {
+        if (is.list(color_val)) {
             color_val <- unlist(color_val)
         }
         ditto_colors <- ditto_colors[!(ditto_colors %in% color_val)]
@@ -1257,7 +1257,10 @@ randomly_map_int_columns <- function(clus_df_gather, set_seed = 42) {
 #'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
 #'     dplyr::group_by_all() |>
 #'     dplyr::count(name = "value")
-#' clus_df_gather <- data_preprocess(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
+#' clus_df_gather <- data_preprocess(
+#'     clus_df_gather,
+#'     graphing_columns = c("method1", "method2"),
+#'     column_weights = "value")
 #'
 #' @export
 data_preprocess <- function(df, graphing_columns, column_weights = NULL, default_sorting = "alphabetical", set_seed = 42, output_df_path = NULL, verbose = FALSE, load_df = TRUE, do_gather_set_data = FALSE, color_band_column = NULL) {
@@ -1475,7 +1478,10 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
 #'     dplyr::group_by_all() |>
 #'     dplyr::count(name = "value")
-#' clus_df_gather <- data_sort(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
+#' clus_df_gather <- data_sort(
+#'     clus_df_gather,
+#'     graphing_columns = c("method1", "method2"),
+#'     column_weights = "value")
 #'
 #' @export
 data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL, random_initializations = 1, set_seed = 42, output_df_path = NULL, preprocess_data = TRUE, default_sorting = "alphabetical", return_updated_graphing_columns = FALSE, verbose = FALSE, load_df = TRUE, make_intermediate_neighbornet_plots = FALSE, do_compute_alluvial_statistics = TRUE) {
@@ -1680,7 +1686,10 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
 #'     dplyr::group_by_all() |>
 #'     dplyr::count(name = "value")
-#' p <- plot_alluvial(clus_df_gather, graphing_columns = c("method1", "method2"), column_weights = "value")
+#' p <- plot_alluvial(
+#'    clus_df_gather,
+#'    graphing_columns = c("method1", "method2"),
+#'    column_weights = "value")
 #'
 #' @export
 plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL,
@@ -1692,7 +1701,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL,
                           random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE,
                           color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_val = NULL,
-                          color_band_boundary = FALSE, match_colors = TRUE, match_order = "advanced", graphing_algorithm = "leiden", resolution = 1, cutoff = .5,
+                          color_band_boundary = FALSE, match_order = "advanced", graphing_algorithm = "leiden", resolution = 1, cutoff = .5,
                           alluvial_alpha = 0.5,
                           include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = FALSE,
                           output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE,

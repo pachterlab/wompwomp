@@ -1,4 +1,4 @@
-^alluvialmatch\.Rproj$
+^wompwomp\.Rproj$
 ^\.Rproj\.user$
 ^doc$
 ^Meta$
@@ -6,3 +6,6 @@
 ^tmp\.Rmd$
 ^tmp_files$
 ^trash$
+^vignettes/8_cubed.Rmd$
+^vignettes/Real_examples.Rmd$
+^.lintr$
