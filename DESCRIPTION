@@ -1,7 +1,7 @@
 Package: wompwomp
 Version: 0.1.0
 Date: 2025-06-07
-Title: Make alluvial plots with order and colors optimized to minimize cluster cross-over
+Title: Optimizing alluvial plots
 Authors@R: c(person("Joseph", "Rich", role = c("aut", "cre"), email = "jmrich@caltech.edu"), person("Conrad", "Oakes", role = "aut", email = "coakes@caltech.edu"), person("Lior", "Pachter", role = "aut"))
 Author: Joseph Rich [aut, cre], Conrad Oakes [aut], Lior Pachter [aut]
 Maintainer: Joseph Rich <jmrich@caltech.edu>
@@ -41,3 +41,4 @@ Suggests:
     DuoClustering2018,
     sessioninfo
 Config/testthat/edition: 3
+biocViews: MathematicalBiology, GraphAndNetwork, Visualization

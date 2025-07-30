@@ -1,8 +1,11 @@
 ---
 title: "More NeighborNet"
-output: rmarkdown::html_vignette
+output:
+    output: BiocStyle::html_document:
+        toc: true
+        toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{More NeighborNet}
+  %\VignetteIndexEntry{2. More NeighborNet}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

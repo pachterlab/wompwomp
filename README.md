@@ -19,7 +19,16 @@ wompwomp solves the **W**eighted (permutation) **O**ptimization of **M**ultiple 
 ## Installation:
 
 ### R - Requires system [R](https://www.r-project.org/) to be installed
+Bioconductor
+```         
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
 
+BiocManager::install("wompwomp")
+wompwomp::setup_python_env()
+```
+
+GitHub
 ```         
 remotes::install_github("pachterlab/wompwomp")
 wompwomp::setup_python_env()

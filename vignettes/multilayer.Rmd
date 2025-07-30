@@ -1,8 +1,11 @@
 ---
 title: "Introduction to wompwomp"
-output: rmarkdown::html_vignette
+output:
+    output: BiocStyle::html_document:
+        toc: true
+        toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Introduction to wompwomp}
+  %\VignetteIndexEntry{3. Introduction to wompwomp}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

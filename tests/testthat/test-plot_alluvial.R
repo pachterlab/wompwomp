@@ -409,7 +409,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
 
     p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, weight_scalar = 1)
 
-    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderTRUE_optimize_column_order_per_cycleFALSE", p)
+    vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_oTRUE_ocFALSE", p)
 })
 
 test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE, optimize_column_order_per_cycle TRUE", {

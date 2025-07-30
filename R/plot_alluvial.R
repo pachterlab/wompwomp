@@ -1470,7 +1470,10 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @examples
 #' # Example 1: df format 1
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data_sort(df, graphing_columns = c("method1", "method2"))
+#' clus_df_gather <- data_sort(
+#'     df,
+#'     graphing_columns = c("method1", "method2"),
+#'     sorting_algorithm = "tsp")
 #'
 #' # Example 2: df format 2
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -1481,7 +1484,8 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' clus_df_gather <- data_sort(
 #'     clus_df_gather,
 #'     graphing_columns = c("method1", "method2"),
-#'     column_weights = "value")
+#'     column_weights = "value",
+#'     sorting_algorithm = "tsp")
 #'
 #' @export
 data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL, random_initializations = 1, set_seed = 42, output_df_path = NULL, preprocess_data = TRUE, default_sorting = "alphabetical", return_updated_graphing_columns = FALSE, verbose = FALSE, load_df = TRUE, make_intermediate_neighbornet_plots = FALSE, do_compute_alluvial_statistics = TRUE) {
@@ -1678,7 +1682,9 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @examples
 #' # Example 1: df format 1
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' p <- plot_alluvial(df, graphing_columns = c("method1", "method2"))
+#' p <- plot_alluvial(df,
+#'     graphing_columns = c("method1", "method2"),
+#'     sorting_algorithm = "tsp")
 #'
 #' # Example 2: df format 2
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -1689,7 +1695,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' p <- plot_alluvial(
 #'    clus_df_gather,
 #'    graphing_columns = c("method1", "method2"),
-#'    column_weights = "value")
+#'    column_weights = "value",
+#'    sorting_algorithm = "tsp")
 #'
 #' @export
 plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL,

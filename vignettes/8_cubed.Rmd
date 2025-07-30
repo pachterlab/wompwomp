@@ -1,6 +1,9 @@
 ---
 title: "8 cubed"
-output: rmarkdown::html_vignette
+output:
+    output: BiocStyle::html_document:
+        toc: true
+        toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{8 cubed}
   %\VignetteEngine{knitr::rmarkdown}

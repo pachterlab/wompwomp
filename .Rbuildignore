@@ -9,3 +9,7 @@
 ^vignettes/8_cubed.Rmd$
 ^vignettes/Real_examples.Rmd$
 ^.lintr$
+^.git$
+^.gitignore$
+^environment.yml$
+^install.R$
