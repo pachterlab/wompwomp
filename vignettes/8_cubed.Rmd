@@ -4,10 +4,10 @@ output:
   html_document: default
 ---
 ```{r}
-reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
-devtools::load_all() # !!! erase
+# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+# devtools::load_all() # !!! erase
 
-# library(wompwomp)  #!!! uncomment
+library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -122,7 +122,6 @@ print(nrow(clus_df_gather_summed2))
 ```
 
 ```{r}
-devtools::load_all()
 p_unsorted_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "None", color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, match_order = "None", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_unsorted.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
 p_unsorted_trimmed2
 ```

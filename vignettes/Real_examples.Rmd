@@ -8,10 +8,10 @@ vignette: >
 ---
 
 ```{r}
-reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
-devtools::load_all() # !!! erase
+# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+# devtools::load_all() # !!! erase
 
-# library(wompwomp)  #!!! uncomment
+library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -67,7 +67,6 @@ df$USC_dice_score_binned_broad <- cut(
 ```
 
 ```{r}
-devtools::load_all()
 graphing_columns <- c("KiTS_dice_score_binned", "USC_dice_score_binned")
 p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands = TRUE, match_order = "left", cutoff = 0.5, resolution = 4, verbose = TRUE, output_plot_path = file.path(output_dir, "Segmentation_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24, text_size = 35, axis_text_size = 35, axis_text_vjust = -5)
 p
@@ -80,7 +79,6 @@ p
 
 WOLF
 ```{r}
-devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "greedy_WOLF", fixed_column = "KiTS_dice_score_binned", color_bands = TRUE, resolution = 4, verbose = TRUE, random_initializations = 3)
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "greedy_WBLF", color_bands = TRUE, resolution = 4, verbose = TRUE, random_initializations = 3)
 ```
@@ -312,7 +310,6 @@ Optional (only if I'm doing a subset of objectives)
 ```
 
 ```{r}
-devtools::load_all()
 cycle_start_positions <- NULL # c(110) - 110 for NN, 34 for TSP  # c(12:25, 130:150)  # c(40:60, 140:160)  # choose based on finding some local optima above
 column_sorting_metric <- "edge_crossing" # edge_crossing or ARI
 optimize_column_order_per_cycle <- TRUE

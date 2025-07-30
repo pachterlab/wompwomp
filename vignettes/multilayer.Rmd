@@ -8,11 +8,10 @@ vignette: >
 ---
 
 ```{r}
-setwd("~/Desktop/local/wompwomp/")
-reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
-devtools::load_all() # !!! erase
+# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+# devtools::load_all() # !!! erase
 
-# library(wompwomp)  #!!! uncomment
+library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -78,14 +77,6 @@ p1
 ```
 
 ```{r}
-devtools::load_all()
-p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), color_band_column = "special", sorting_algorithm = "None")
-p2
-```
-
-#!!! TEMP
-```{r}
-devtools::load_all()
 p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), color_band_column = "special", sorting_algorithm = "None")
 p2
 ```

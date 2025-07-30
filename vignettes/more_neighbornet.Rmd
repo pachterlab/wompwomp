@@ -8,10 +8,10 @@ vignette: >
 ---
 
 ```{r}
-reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
-devtools::load_all() # !!! erase
+# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+# devtools::load_all() # !!! erase
 
-# library(wompwomp)  #!!! uncomment
+library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -73,7 +73,6 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
-devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order_per_cycle = FALSE, output_plot_path = file.path(output_dir, "2layer_NN.pdf"))
 ```
 
@@ -117,7 +116,6 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 # # print(out$crossing_edges_df)
 
 # graph what I did above
-devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, output_plot_path = file.path(output_dir, "3layer_NN_fixed_columns.pdf"), verbose = TRUE)
 ```
 
@@ -181,7 +179,6 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neig
 ```
 
 ```{r}
-devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, verbose = TRUE)
 ```
 
@@ -197,7 +194,6 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
-devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE)
 ```
 
@@ -267,12 +263,10 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None
 ```
 
 ```{r}
-devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
 ```
 
 ```{r}
-devtools::load_all()
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, match_order = "advanced", color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
 ```
 
