@@ -1684,7 +1684,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' p <- plot_alluvial(df,
 #'     graphing_columns = c("method1", "method2"),
-#'     sorting_algorithm = "tsp")
+#'     sorting_algorithm = "tsp",
+#'     match_order = "right")
 #'
 #' # Example 2: df format 2
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -1696,7 +1697,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #'    clus_df_gather,
 #'    graphing_columns = c("method1", "method2"),
 #'    column_weights = "value",
-#'    sorting_algorithm = "tsp")
+#'    sorting_algorithm = "tsp",
+#'    match_order = "right")
 #'
 #' @export
 plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL,

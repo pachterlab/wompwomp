@@ -1,7 +1,7 @@
 ---
 title: "Real examples"
 output:
-    output: BiocStyle::html_document:
+    BiocStyle::html_document:
         toc: true
         toc_depth: 2
 vignette: >

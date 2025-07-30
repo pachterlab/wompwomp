@@ -1,4 +1,3 @@
-^wompwomp\.Rproj$
 ^\.Rproj\.user$
 ^doc$
 ^Meta$
@@ -6,10 +5,15 @@
 ^tmp\.Rmd$
 ^tmp_files$
 ^trash$
+^vignettes/8_cubed_sankey.ipynb$
 ^vignettes/8_cubed.Rmd$
 ^vignettes/Real_examples.Rmd$
-^.lintr$
-^.git$
-^.gitignore$
+^\.lintr$
+^\.git$
+^\.gitignore$
 ^environment.yml$
 ^install.R$
+^\.DS_Store$
+^\.Rhistory$
+^vignettes/output/
+^.*\.Rproj$
