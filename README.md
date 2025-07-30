@@ -18,19 +18,20 @@ wompwomp solves the **W**eighted (permutation) **O**ptimization of **M**ultiple 
 
 ## Installation:
 
-### R - Requires [R](https://www.r-project.org/) to be installed
+### R - Requires system [R](https://www.r-project.org/) to be installed
 
 ```         
 remotes::install_github("pachterlab/wompwomp")
 wompwomp::setup_python_env()
 ```
 
-### Command line - Does not require R to be installed if using conda and environment.yml.
+### Command line - Does not require system R to be installed if using conda.
 
 ```         
 git clone https://github.com/pachterlab/wompwomp
 cd wompwomp
-conda env create -f environment.yml && conda activate wompwomp_env
+conda env create -f environment.yml
+conda activate wompwomp_env
 ```
 
 As an alternative to conda: `Rscript install.R`

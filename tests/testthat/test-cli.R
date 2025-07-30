@@ -16,6 +16,7 @@ type_checking_files <- function(output_path, truth_path, check = TRUE) {
 
     # If ground truth doesn't exist, initialize it
     if (!file.exists(truth_path)) {
+        dir.create(dirname(truth_path), recursive = TRUE, showWarnings = FALSE)
         file.copy(output_path, truth_path)
         message(sprintf("Ground truth image initialized at: %s", truth_path))
         return(invisible(TRUE))  # No comparison needed on first run

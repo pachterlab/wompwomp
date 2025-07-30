@@ -5,12 +5,12 @@
 #' @name wompwomp
 #'
 #' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter bind_rows across matches all_of add_count distinct
-#' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave guides scale_color_manual scale_x_continuous
+#' @importFrom ggplot2 ggplot aes geom_text scale_fill_manual labs after_stat annotate theme_void theme element_text rel ggsave guides scale_color_manual scale_x_continuous element_blank
 #' @importFrom ggalluvial geom_alluvium geom_stratum stat_stratum stat_alluvium
 #' @importFrom ggfittext geom_fit_text
 #' @importFrom ggforce gather_set_data
 #' @importFrom purrr map
-#' @importFrom igraph max_bipartite_match V graph_from_data_frame cluster_louvain cluster_leiden
+#' @importFrom igraph max_bipartite_match V graph_from_data_frame cluster_louvain cluster_leiden E
 #' @importFrom tibble is_tibble
 #' @importFrom utils read.csv write.csv combn
 #' @importFrom stats setNames
@@ -686,9 +686,9 @@ find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns,
     g <- igraph::graph_from_data_frame(d = clus_df_extra_filtered, directed = FALSE)
     set.seed(set_seed)
     if (graphing_algorithm == "louvain") {
-        partition <- igraph::cluster_louvain(g, weights = E(g)$value, resolution = resolution)
+        partition <- igraph::cluster_louvain(g, weights = igraph::E(g)$value, resolution = resolution)
     } else if (graphing_algorithm == "leiden") {
-        partition <- igraph::cluster_leiden(g, weights = E(g)$value, resolution_parameter = resolution)
+        partition <- igraph::cluster_leiden(g, weights = igraph::E(g)$value, resolution_parameter = resolution)
     } else {
         stop(sprintf("graphing_algorithm '%s' is not recognized. Please choose from 'leiden' (default) or 'louvain'.", graphing_algorithm))
     }

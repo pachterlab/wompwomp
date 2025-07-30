@@ -29,12 +29,17 @@ plot_alluvial(
   color_list = NULL,
   color_band_list = NULL,
   color_band_column = NULL,
+  color_val = NULL,
   color_band_boundary = FALSE,
   match_colors = TRUE,
+  match_order = "advanced",
+  graphing_algorithm = "leiden",
+  resolution = 1,
+  cutoff = 0.5,
   alluvial_alpha = 0.5,
   include_labels_in_boxes = TRUE,
   include_axis_titles = TRUE,
-  include_group_sizes = TRUE,
+  include_group_sizes = FALSE,
   output_plot_path = NULL,
   output_df_path = NULL,
   preprocess_data = TRUE,
@@ -42,7 +47,10 @@ plot_alluvial(
   box_width = 1/3,
   text_width = 1/4,
   min_text = 4,
+  text_size = 14,
   auto_adjust_text = TRUE,
+  axis_text_size = 2,
+  axis_text_vjust = 0,
   save_height = 6,
   save_width = 6,
   dpi = 300,
@@ -92,7 +100,7 @@ plot_alluvial(
 
 \item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.}
 
-\item{set_seed}{Integer. Random seed for the \code{random_initializations} parameter, random initialization/shuffling of blocks, and TSP solver for optimizing column order.}
+\item{set_seed}{Integer. Random seed for the \code{random_initializations} parameter (only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}), random initialization/shuffling of blocks (only applies when \code{default_sorting == 'random' or sorting_algorithm == 'random'}), TSP solver for block order or optimizing column order (only applies when \code{sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'}), and louvain/leiden clustering (only applies when \code{match_order == 'advanced'}).}
 
 \item{color_boxes}{Logical. Whether to color the strata/boxes (representing groups).}
 
@@ -104,9 +112,17 @@ plot_alluvial(
 
 \item{color_band_column}{Optional Character. Which column to use for coloring bands.}
 
+\item{color_val}{Optional named list where the entries are colors and the names correspond to values of the dataframe that should use those colors}
+
 \item{color_band_boundary}{Logical. Whether or not to color boundaries between bands}
 
-\item{match_colors}{Logical. If \code{TRUE}, assigns consistent colors between column1 and column2 where matched.}
+\item{match_order}{Character. Matching colors methods. Choices are 'advanced' (default), 'None', 'left', 'right', or any value in \code{graphing_columns}.}
+
+\item{graphing_algorithm}{Character. If \code{match_order == 'advanced'}, then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.}
+
+\item{resolution}{Numeric If \code{match_order == 'advanced'}, then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.}
+
+\item{cutoff}{Numeric If \code{match_order != 'None' and match_order != 'advanced'}, sets the cutoff for color matching, below which a new color will be assigned.}
 
 \item{alluvial_alpha}{Numeric between 0 and 1. Transparency level for the alluvial bands.}
 
@@ -130,7 +146,13 @@ plot_alluvial(
 
 \item{min_text}{Integer greater than 0. Min text}
 
+\item{text_size}{Integer greater than 0. Text size (works whether auto_adjust_text is TRUE or FALSE).}
+
 \item{auto_adjust_text}{Logical. Whether to automatically adjust text size to fit in box.}
+
+\item{axis_text_size}{Integer greater than 0. Axis text size}
+
+\item{axis_text_vjust}{Integer. Axis text vjust}
 
 \item{save_height}{Integer greater than 0. Save height, in inches}
 

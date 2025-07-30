@@ -27,7 +27,12 @@ stopifnot(file.exists(objective_fenwick_script_path))
 
 
 check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "") {
-    if (!py_available(initialize = FALSE)) {
+    ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
+
+    # Skip check if script was run from command line (not interactive)
+    if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) return(invisible(NULL))
+
+    if (!reticulate::py_available(initialize = FALSE)) {
         if (is.null(additional_message)) {
             stop("Python environment is not set up. Please run wompwomp::setup_python_env().")
         } else {
