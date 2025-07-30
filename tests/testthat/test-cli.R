@@ -19,23 +19,27 @@ type_checking_files <- function(output_path, truth_path, check = TRUE) {
         dir.create(dirname(truth_path), recursive = TRUE, showWarnings = FALSE)
         file.copy(output_path, truth_path)
         message(sprintf("Ground truth image initialized at: %s", truth_path))
-        return(invisible(TRUE))  # No comparison needed on first run
+        return(invisible(TRUE)) # No comparison needed on first run
     }
 
-    if (!check) return(invisible(TRUE))  # Allow skipping comparison
+    if (!check) {
+        return(invisible(TRUE))
+    } # Allow skipping comparison
 }
 
 compare_images <- function(output_path, truth_path, tolerance_fraction = 0.01, check = TRUE) {
     # tolerance_fraction of 0.01 means up to 1% difference allowable
-    type_checking_files(output_path=output_path, truth_path=truth_path, check=check)
+    type_checking_files(output_path = output_path, truth_path = truth_path, check = check)
 
     # Load and compare images
-    img_new   <- magick::image_read(output_path)
+    img_new <- magick::image_read(output_path)
     img_truth <- magick::image_read(truth_path)
 
     # Ensure same size before comparing
-    stopifnot(identical(magick::image_info(img_new)[, c("width", "height")],
-                        magick::image_info(img_truth)[, c("width", "height")]))
+    stopifnot(identical(
+        magick::image_info(img_new)[, c("width", "height")],
+        magick::image_info(img_truth)[, c("width", "height")]
+    ))
 
     # Total pixel count
     dims <- magick::image_info(img_new)
@@ -56,7 +60,7 @@ compare_images <- function(output_path, truth_path, tolerance_fraction = 0.01, c
 }
 
 compare_csvs <- function(output_path, truth_path, check = TRUE) {
-    type_checking_files(output_path=output_path, truth_path=truth_path, check=check)
+    type_checking_files(output_path = output_path, truth_path = truth_path, check = check)
 
     df_output <- read.csv(output_path, stringsAsFactors = FALSE)
     df_truth <- read.csv(truth_path, stringsAsFactors = FALSE)
@@ -86,7 +90,7 @@ test_that("CLI plot_alluvial, no sort", {
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
-    compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
+    compare_images(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
 test_that("CLI plot_alluvial, WOLF left fixed", {
@@ -108,7 +112,7 @@ test_that("CLI plot_alluvial, WOLF left fixed", {
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
-    compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
+    compare_images(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
 test_that("CLI plot_alluvial, WOLF right fixed", {
@@ -130,7 +134,7 @@ test_that("CLI plot_alluvial, WOLF right fixed", {
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
-    compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
+    compare_images(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
 test_that("CLI plot_alluvial, WBLF", {
@@ -151,7 +155,7 @@ test_that("CLI plot_alluvial, WBLF", {
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
-    compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
+    compare_images(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
 test_that("CLI plot_alluvial, neighbornet", {
@@ -172,7 +176,7 @@ test_that("CLI plot_alluvial, neighbornet", {
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
-    compare_images(output_path=output_path, truth_path=truth_path, check=TRUE)
+    compare_images(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
 test_that("CLI data_sort, WOLF left fixed", {
@@ -194,7 +198,7 @@ test_that("CLI data_sort, WOLF left fixed", {
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
-    compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
+    compare_csvs(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
 test_that("CLI data_sort, WOLF right fixed", {
@@ -216,7 +220,7 @@ test_that("CLI data_sort, WOLF right fixed", {
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
-    compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
+    compare_csvs(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
 # ./exec/wompwomp data_sort --df tests/testthat/ground_truth/df_tests_cli.csv --output_df_path tests/testthat/ground_truth/sorting_wblf_df.csv --sorting_algorithm greedy_WBLF --graphing_columns tissue leiden
@@ -238,7 +242,7 @@ test_that("CLI data_sort, WBLF", {
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
-    compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
+    compare_csvs(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
 test_that("CLI data_sort, neighbornet", {
@@ -259,7 +263,7 @@ test_that("CLI data_sort, neighbornet", {
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
-    compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
+    compare_csvs(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
 # ./exec/wompwomp determine_crossing_edges --df tests/testthat/ground_truth/sorting_wblf_df.csv --output_df_path tests/testthat/ground_truth/crossing_wblf_df.csv --column1 col1_int --column2 col2_int
@@ -282,7 +286,7 @@ test_that("CLI determine_crossing_edges", {
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
-    compare_csvs(output_path=output_path, truth_path=truth_path, check=TRUE)
+    compare_csvs(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
 # ./exec/wompwomp determine_weighted_layer_free_objective --df tests/testthat/ground_truth/crossing_wblf_df.csv

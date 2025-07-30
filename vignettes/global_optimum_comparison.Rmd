@@ -8,8 +8,8 @@ vignette: >
 ---
 
 ```{r}
-reticulate::use_condaenv("wompwomp_env", required = TRUE)  #!!! erase
-devtools::load_all()  #!!! erase
+reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+devtools::load_all() # !!! erase
 
 # library(wompwomp)  #!!! uncomment
 library(dplyr)
@@ -37,20 +37,20 @@ if (!reticulate::py_module_available("splitspy")) {
 We create a toy data frame that maps tissues (BRAIN, STOMACH, HEART, T cell, B CELL) to clustering (1-5)
 ```{r}
 df <- data.frame(
-  tissue = c(
-    1, 1, 1,
-    2, 2, 2, 2, 2, 2,
-    3, 3, 3, 3, 3, 3, 3,
-    4, 4,
-    5, 5, 5, 5, 5, 5, 5, 5, 5
-  ),
-  cluster = c(
-    2, 2, 1,
-    2, 1, 1, 1, 1, 1,
-    2, 3, 3, 3, 3, 3, 3,
-    4, 4,
-    4, 4, 4, 4, 4, 4, 4, 4, 5
-  )
+    tissue = c(
+        1, 1, 1,
+        2, 2, 2, 2, 2, 2,
+        3, 3, 3, 3, 3, 3, 3,
+        4, 4,
+        5, 5, 5, 5, 5, 5, 5, 5, 5
+    ),
+    cluster = c(
+        2, 2, 1,
+        2, 1, 1, 1, 1, 1,
+        2, 3, 3, 3, 3, 3, 3,
+        4, 4,
+        4, 4, 4, 4, 4, 4, 4, 4, 5
+    )
 )
 column1 <- "tissue"
 column2 <- "cluster"
@@ -60,7 +60,7 @@ head(df)
 
 Implementing a greedy heuristic for weighted one-layer free problem
 ```{r}
-clus_df_gather_sorted <- data_sort(df, column1="tissue", column2="cluster", sorting_algorithm="greedy_WOLF", fixed_column = "tissue")
+clus_df_gather_sorted <- data_sort(df, column1 = "tissue", column2 = "cluster", sorting_algorithm = "greedy_WOLF", fixed_column = "tissue")
 crossing_edges_output <- determine_crossing_edges(clus_df_gather_sorted, column1 = "col1_int", column2 = "col2_int")
 crossing_edges <- crossing_edges_output$crossing_edges_df
 wompwomp_objective_greedy_wolf <- determine_weighted_layer_free_objective(crossing_edges)
@@ -69,7 +69,7 @@ print(wompwomp_objective_greedy_wolf)
 
 Plot the alluvial plot with sorting and color matching
 ```{r}
-p1 <- plot_alluvial(clus_df_gather_sorted, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm="greedy_WOLF", fixed_column = "tissue", color_bands=TRUE)
+p1 <- plot_alluvial(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF", fixed_column = "tissue", color_bands = TRUE)
 p1
 ```
 
@@ -85,27 +85,27 @@ perms <- gtools::permutations(n, n)
 orig_levels <- levels(clus_df_gather_sorted$col2_int)
 
 # Loop over permutations
-objective_minimum = Inf
+objective_minimum <- Inf
 objectives <- numeric(nrow(perms))
 for (i in 1:nrow(perms)) {
-  new_labels <- perms[i, ]  # as.character(perms[i, ])
-  right_map <- setNames(new_labels, orig_levels)
-  
-  # Create a relabeled copy
-  clus_permuted <- clus_df_gather_sorted %>%
-      mutate(
-        col2_int = right_map[as.character(col2_int)]
-      )
+    new_labels <- perms[i, ] # as.character(perms[i, ])
+    right_map <- setNames(new_labels, orig_levels)
 
-  map_dict <- setNames(new_labels, orig_levels)
-  clus_permuted_objective <- determine_crossing_edges(clus_permuted, column1 = "col1_int", column2 = "col2_int", return_weighted_layer_free_objective = TRUE)
-  
-  objectives[i] <- clus_permuted_objective
-  
-  if (clus_permuted_objective < objective_minimum) {
-      clus_permuted_best <- clus_df_gather_sorted %>%
-        mutate(cluster = factor(cluster, levels = orig_levels, labels = new_labels))
-  }
+    # Create a relabeled copy
+    clus_permuted <- clus_df_gather_sorted %>%
+        mutate(
+            col2_int = right_map[as.character(col2_int)]
+        )
+
+    map_dict <- setNames(new_labels, orig_levels)
+    clus_permuted_objective <- determine_crossing_edges(clus_permuted, column1 = "col1_int", column2 = "col2_int", return_weighted_layer_free_objective = TRUE)
+
+    objectives[i] <- clus_permuted_objective
+
+    if (clus_permuted_objective < objective_minimum) {
+        clus_permuted_best <- clus_df_gather_sorted %>%
+            mutate(cluster = factor(cluster, levels = orig_levels, labels = new_labels))
+    }
 }
 ```
 
@@ -115,30 +115,31 @@ clus_permuted_best
 
 
 ```{r}
-p_best_wolf <- plot_alluvial(clus_permuted_best, column1="col1_int", column2="col2_int", column_weights = "value", sorting_algorithm="None", color_bands=TRUE)
+p_best_wolf <- plot_alluvial(clus_permuted_best, column1 = "col1_int", column2 = "col2_int", column_weights = "value", sorting_algorithm = "None", color_bands = TRUE)
 p_best_wolf
 ```
 
 
 ```{r}
 df_plot <- data.frame(
-  perm_id = seq_along(objectives),
-  objective = sort(objectives)
+    perm_id = seq_along(objectives),
+    objective = sort(objectives)
 )
 
 ggplot(df_plot, aes(x = perm_id, y = objective)) +
-  geom_point() +
-  geom_hline(yintercept = wompwomp_objective_greedy_wolf, linetype = "dashed", color = "blue") +
-  annotate("text", x = Inf, y = wompwomp_objective_greedy_wolf, label = "wompwomp objective", 
-           hjust = 1.1, vjust = -0.5, color = "blue", size = 3) +
-  labs(x = "Permutation index", y = "Objective value") +
-  theme_minimal()
-
+    geom_point() +
+    geom_hline(yintercept = wompwomp_objective_greedy_wolf, linetype = "dashed", color = "blue") +
+    annotate("text",
+        x = Inf, y = wompwomp_objective_greedy_wolf, label = "wompwomp objective",
+        hjust = 1.1, vjust = -0.5, color = "blue", size = 3
+    ) +
+    labs(x = "Permutation index", y = "Objective value") +
+    theme_minimal()
 ```
 
 Now do the same for WBLF
 ```{r}
-clus_df_gather_sorted <- data_sort(df, column1="tissue", column2="cluster", sorting_algorithm="greedy_WBLF", random_initializations = 10)
+clus_df_gather_sorted <- data_sort(df, column1 = "tissue", column2 = "cluster", sorting_algorithm = "greedy_WBLF", random_initializations = 10)
 crossing_edges_output <- determine_crossing_edges(clus_df_gather_sorted, column1 = "col1_int", column2 = "col2_int")
 crossing_edges <- crossing_edges_output$crossing_edges_df
 wompwomp_objective_greedy_wblf <- determine_weighted_layer_free_objective(crossing_edges)
@@ -146,7 +147,7 @@ print(wompwomp_objective_greedy_wblf)
 ```
 
 ```{r}
-p2 <- plot_alluvial(clus_df_gather_sorted, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm="greedy_WBLF", color_bands=TRUE)
+p2 <- plot_alluvial(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF", color_bands = TRUE)
 p2
 ```
 
@@ -172,75 +173,78 @@ best_right_map <- NULL
 
 # Loop through all left and right permutations
 for (i in 1:nrow(left_perms)) {
-  # print(i)
-  left_new_labels <- left_perms[i, ]
-  left_map <- setNames(left_new_labels, left_levels)
-  
-  for (j in 1:nrow(right_perms)) {
-    right_new_labels <- right_perms[j, ]
-    right_map <- setNames(right_new_labels, right_levels)
+    # print(i)
+    left_new_labels <- left_perms[i, ]
+    left_map <- setNames(left_new_labels, left_levels)
 
-    # Apply mappings (e.g., to integer relabels)
-    clus_permuted <- clus_df_gather_sorted %>%
-      mutate(
-        col1_int = left_map[as.character(col1_int)],
-        col2_int = right_map[as.character(col2_int)]
-      )
+    for (j in 1:nrow(right_perms)) {
+        right_new_labels <- right_perms[j, ]
+        right_map <- setNames(right_new_labels, right_levels)
 
-    # Compute objective
-    obj <- determine_crossing_edges(
-      clus_permuted,
-      column1 = "col1_int",
-      column2 = "col2_int",
-      return_weighted_layer_free_objective = TRUE
-    )
+        # Apply mappings (e.g., to integer relabels)
+        clus_permuted <- clus_df_gather_sorted %>%
+            mutate(
+                col1_int = left_map[as.character(col1_int)],
+                col2_int = right_map[as.character(col2_int)]
+            )
 
-    objectives[i, j] <- obj
+        # Compute objective
+        obj <- determine_crossing_edges(
+            clus_permuted,
+            column1 = "col1_int",
+            column2 = "col2_int",
+            return_weighted_layer_free_objective = TRUE
+        )
 
-    # Update minimum if needed
-    if (obj < objective_minimum) {
-      objective_minimum <- obj
-      clus_permuted_best <- clus_permuted
-      best_left_map <- left_map
-      best_right_map <- right_map
+        objectives[i, j] <- obj
+
+        # Update minimum if needed
+        if (obj < objective_minimum) {
+            objective_minimum <- obj
+            clus_permuted_best <- clus_permuted
+            best_left_map <- left_map
+            best_right_map <- right_map
+        }
     }
-  }
 }
-
 ```
 
 ```{r}
-p_best_wblf <- plot_alluvial(clus_permuted_best, column1="col1_int", column2="col2_int", column_weights = "value", sorting_algorithm="None", color_bands=TRUE)
+p_best_wblf <- plot_alluvial(clus_permuted_best, column1 = "col1_int", column2 = "col2_int", column_weights = "value", sorting_algorithm = "None", color_bands = TRUE)
 p_best_wblf
 ```
 
 Let's compare neighbornet too
 ```{r}
-clus_df_gather_sorted_neighbornet <- data_sort(df, column1="tissue", column2="cluster", sorting_algorithm="neighbornet")
+clus_df_gather_sorted_neighbornet <- data_sort(df, column1 = "tissue", column2 = "cluster", sorting_algorithm = "neighbornet")
 crossing_edges_output <- determine_crossing_edges(clus_df_gather_sorted_neighbornet, column1 = "col1_int", column2 = "col2_int")
 crossing_edges <- crossing_edges_output$crossing_edges_df
 neighbornet_objective_minimum <- determine_weighted_layer_free_objective(crossing_edges)
 print(neighbornet_objective_minimum)
 
-plot_alluvial(clus_df_gather_sorted_neighbornet, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "None", color_bands=TRUE)
+plot_alluvial(clus_df_gather_sorted_neighbornet, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "None", color_bands = TRUE)
 ```
 
 ```{r}
 df_plot <- data.frame(
-  perm_id = seq_along(objectives),
-  objective = sort(objectives)
+    perm_id = seq_along(objectives),
+    objective = sort(objectives)
 )
 
 ggplot(df_plot, aes(x = perm_id, y = objective)) +
-  geom_point() +
-  geom_hline(yintercept = wompwomp_objective_greedy_wblf, linetype = "dashed", color = "blue") +
-  annotate("text", x = Inf, y = wompwomp_objective_greedy_wblf, label = "wompwomp objective", 
-           hjust = 1.1, vjust = -0.5, color = "blue", size = 3) +
-  geom_hline(yintercept = neighbornet_objective_minimum, linetype = "dashed", color = "orange") +
-  annotate("text", x = Inf, y = neighbornet_objective_minimum, label = "neighbornet objective", 
-           hjust = 1.1, vjust = -0.5, color = "orange", size = 3) +
-  labs(x = "Permutation index", y = "Objective value") +
-  theme_minimal()
+    geom_point() +
+    geom_hline(yintercept = wompwomp_objective_greedy_wblf, linetype = "dashed", color = "blue") +
+    annotate("text",
+        x = Inf, y = wompwomp_objective_greedy_wblf, label = "wompwomp objective",
+        hjust = 1.1, vjust = -0.5, color = "blue", size = 3
+    ) +
+    geom_hline(yintercept = neighbornet_objective_minimum, linetype = "dashed", color = "orange") +
+    annotate("text",
+        x = Inf, y = neighbornet_objective_minimum, label = "neighbornet objective",
+        hjust = 1.1, vjust = -0.5, color = "orange", size = 3
+    ) +
+    labs(x = "Permutation index", y = "Objective value") +
+    theme_minimal()
 ```
 
 ```{r}

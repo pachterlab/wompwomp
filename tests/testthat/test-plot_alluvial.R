@@ -41,16 +41,20 @@ test_that("plot_alluvial returns an error with 2 columns, where column2 is not i
 })
 
 test_that("plot_alluvial returns an error with 3 columns, where graphing_columns is NULL", {
-    df <- data.frame(method1 = sample(1:3, 100, TRUE),
-                     method2 = sample(1:3, 100, TRUE),
-                     method3 = sample(1:3, 100, TRUE))
+    df <- data.frame(
+        method1 = sample(1:3, 100, TRUE),
+        method2 = sample(1:3, 100, TRUE),
+        method3 = sample(1:3, 100, TRUE)
+    )
     expect_error(plot_alluvial(df, graphing_columns = NULL), "dataframe has more than 2 columns")
 })
 
 test_that("plot_alluvial returns an error with 3 columns, where column2 is not in df", {
-    df <- data.frame(method1 = sample(1:3, 100, TRUE),
-                     method2 = sample(1:3, 100, TRUE),
-                     method3 = sample(1:3, 100, TRUE))
+    df <- data.frame(
+        method1 = sample(1:3, 100, TRUE),
+        method2 = sample(1:3, 100, TRUE),
+        method3 = sample(1:3, 100, TRUE)
+    )
     expect_error(plot_alluvial(df, graphing_columns = c("method1", "bad_col")), "column 'bad_col' is not a column in the dataframe")
 })
 
@@ -254,7 +258,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, unsorted", {
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands = TRUE)
 
     vdiffr::expect_doppelganger("more_neighbornet_2layer_unsorted", p)
 })
@@ -268,7 +272,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, 
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order_per_cycle=FALSE)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order_per_cycle = FALSE)
 
     vdiffr::expect_doppelganger("more_neighbornet_2layer_neighbornet_optimize_column_order_per_cycle_FALSE", p)
 })
@@ -281,7 +285,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, 
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order_per_cycle=TRUE)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order_per_cycle = TRUE)
 
     vdiffr::expect_doppelganger("more_neighbornet_2layer_neighbornet_optimize_column_order_per_cycle_TRUE", p)
 })
@@ -361,7 +365,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, unsorted", {
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE, weight_scalar = 1)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands = TRUE, weight_scalar = 1)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted", p)
 })
@@ -376,7 +380,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=FALSE, weight_scalar = 1)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = FALSE, weight_scalar = 1)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderFALSE_optimize_column_order_per_cycleFALSE", p)
 })
@@ -390,7 +394,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE, optimize_column_order_per_cycle=TRUE, weight_scalar = 1)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderFALSE_optimize_column_order_per_cycleTRUE", p)
 })
@@ -403,7 +407,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=FALSE, weight_scalar = 1)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, weight_scalar = 1)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderTRUE_optimize_column_order_per_cycleFALSE", p)
 })
@@ -416,7 +420,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, 
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE, optimize_column_order_per_cycle=TRUE, weight_scalar = 1)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted_optimize_column_orderTRUE_optimize_column_order_per_cycleTRUE", p)
 })
@@ -430,7 +434,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identic
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands=TRUE)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands = TRUE)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_identical_layers_unsorted", p)
 })
@@ -443,7 +447,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identic
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=FALSE, weight_scalar = 1)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, weight_scalar = 1)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_identical_layers_unsorted_optimize_column_orderFALSE", p)
 })
@@ -457,7 +461,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identic
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, optimize_column_order=TRUE, weight_scalar = 1)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, weight_scalar = 1)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_with_2_identical_layers_unsorted_optimize_column_orderTRUE", p)
 })
@@ -470,7 +474,7 @@ test_that("Objective calculation, more_neighbornet.Rmd, 3 layers, unsorted", {
 
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "None", optimize_column_order = FALSE)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "None", optimize_column_order = FALSE)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
 
@@ -484,7 +488,7 @@ test_that("Objective calculation, more_neighbornet.Rmd, 3 layers, neighbornet, o
 
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "neighbornet", optimize_column_order = FALSE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = FALSE, weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
 
@@ -498,7 +502,7 @@ test_that("Objective calculation, more_neighbornet.Rmd, 3 layers, neighbornet, o
 
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
 
@@ -514,7 +518,7 @@ test_that("Objective calculation, more_neighbornet.Rmd, 3 layers with 2 identica
 
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "None", optimize_column_order = FALSE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "None", optimize_column_order = FALSE, weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
 
@@ -528,7 +532,7 @@ test_that("Objective calculation, more_neighbornet.Rmd, 3 layers with 2 identica
 
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "neighbornet", optimize_column_order = FALSE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = FALSE, weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
 
@@ -542,7 +546,7 @@ test_that("Objective calculation, more_neighbornet.Rmd, 3 layers with 2 identica
 
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = 'value', sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
 

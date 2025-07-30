@@ -8,8 +8,8 @@ vignette: >
 ---
 
 ```{r}
-reticulate::use_condaenv("wompwomp_env", required = TRUE)  #!!! erase
-devtools::load_all()  #!!! erase
+reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+devtools::load_all() # !!! erase
 
 # library(wompwomp)  #!!! uncomment
 library(dplyr)
@@ -37,7 +37,7 @@ if (!reticulate::py_module_available("splitspy")) {
 ```{r}
 use_temp_dir <- FALSE
 
-use_temp_dir <- (use_temp_dir || !interactive())  # ensure temp_dire when non-interactive always
+use_temp_dir <- (use_temp_dir || !interactive()) # ensure temp_dire when non-interactive always
 output_dir <- ifelse(!use_temp_dir, here::here("vignettes", "output"), file.path(tempdir(), "vignette_output"))
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 ```
@@ -45,20 +45,20 @@ dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 We create a toy data frame that maps tissues (BRAIN, STOMACH, HEART, T CELL, B CELL) to clustering (1-4)
 ```{r}
 df <- data.frame(
-  tissue = c(
-    "BRAIN", "BRAIN", "BRAIN",
-    "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
-    "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
-    "T CELL", "T CELL",
-    "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
-  ),
-  cluster = c(
-    1, 1, 2,
-    1, 2, 2, 2, 2, 2,
-    1, 3, 3, 3, 3, 3, 3,
-    4, 4,
-    4, 4, 4, 4, 4, 4, 4, 4, 4
-  )
+    tissue = c(
+        "BRAIN", "BRAIN", "BRAIN",
+        "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+        "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+        "T CELL", "T CELL",
+        "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+    ),
+    cluster = c(
+        1, 1, 2,
+        1, 2, 2, 2, 2, 2,
+        1, 3, 3, 3, 3, 3, 3,
+        4, 4,
+        4, 4, 4, 4, 4, 4, 4, 4, 4
+    )
 )
 
 # write.csv(df, file = "vignette_intro_df_ungrouped.csv", row.names = FALSE, quote = FALSE)
@@ -86,7 +86,7 @@ Plot with ggalluvial before sorting - notice especially how B CELLs cross down t
 #     geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
 #     theme_minimal()
 # p1
-p1 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "None", color_boxes = FALSE, color_bands=TRUE, match_order = "None", output_plot_path = file.path(output_dir, "intro_unsorted.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
+p1 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "None", color_boxes = FALSE, color_bands = TRUE, match_order = "None", output_plot_path = file.path(output_dir, "intro_unsorted.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
 p1
 
 # ggsave("wompwomp_unsorted.png", plot = p1, dpi = 300, bg = "white")
@@ -94,20 +94,20 @@ p1
 
 With color
 ```{r}
-p1_5 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "None", color_boxes = TRUE, match_order = "advanced", resolution = 1, color_bands=TRUE, output_plot_path = file.path(output_dir, "intro_unsorted_matched_colors.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
+p1_5 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "None", color_boxes = TRUE, match_order = "advanced", resolution = 1, color_bands = TRUE, output_plot_path = file.path(output_dir, "intro_unsorted_matched_colors.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
 p1_5
 ```
 
 
 Implementing a greedy heuristic for weighted one-layer free problem
 ```{r}
-clus_df_gather_sorted_wolf <- data_sort(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF")
+clus_df_gather_sorted_wolf <- data_sort(clus_df_gather, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF")
 clus_df_gather_sorted_wolf
 ```
 
 Plot the alluvial plot with sorting and color matching
 ```{r}
-p2 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_WOLF", fixed_column = 1, color_bands=TRUE, match_order = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_WOLF.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
+p2 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_WOLF", fixed_column = 1, color_bands = TRUE, match_order = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_WOLF.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
 # alternatively: p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster") sorting_algorithm = "greedy_WOLF", fixed_column = 1)
 p2
 
@@ -116,12 +116,12 @@ p2
 
 Notice how, because we kept the left layer fixed, B CELL and T CELL are separated far apart, even though we would minimize edge crossings if they were next to each other - we can fix this with the weighted both-layers free heuristic
 ```{r}
-clus_df_gather_sorted_wblf <- data_sort(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF")  # output_df_path = "vignette_intro_df_cluster_wblf.csv"
+clus_df_gather_sorted_wblf <- data_sort(clus_df_gather, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF") # output_df_path = "vignette_intro_df_cluster_wblf.csv"
 clus_df_gather_sorted_wblf
 ```
 
 ```{r}
-p3 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_WBLF", color_bands=TRUE, match_order = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_WBLF.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)  # output_plot_path = "vignette_intro_plot.png"
+p3 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_WBLF", color_bands = TRUE, match_order = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_WBLF.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0) # output_plot_path = "vignette_intro_plot.png"
 # alternatively: p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster"), sorting_algorithm = "greedy_WBLF")
 p3
 
@@ -130,13 +130,13 @@ p3
 
 But this still isn't optimal - let's try another algorithm
 ```{r}
-clus_df_gather_sorted_nn <- data_sort(clus_df_gather, column1="tissue", column2="cluster", column_weights = "value", sorting_algorithm = "neighbornet")  # output_df_path = "vignette_intro_df_cluster_wblf.csv"
+clus_df_gather_sorted_nn <- data_sort(clus_df_gather, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "neighbornet") # output_df_path = "vignette_intro_df_cluster_wblf.csv"
 
-plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "neighbornet", color_boxes = FALSE, color_bands=TRUE, match_order = "None", resolution = 2, output_plot_path = file.path(output_dir, "intro_NN_without_color.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0) 
+plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "neighbornet", color_boxes = FALSE, color_bands = TRUE, match_order = "None", resolution = 2, output_plot_path = file.path(output_dir, "intro_NN_without_color.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
 # output_plot_path = "vignette_intro_plot.png"
 # alternatively: p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster"), sorting_algorithm = "neighbornet")
 
-p4 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "neighbornet", color_bands=TRUE, match_order = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_NN.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
+p4 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "neighbornet", color_bands = TRUE, match_order = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_NN.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
 
 p4
 
@@ -147,23 +147,23 @@ p4
 What is our objective value on clus_df_gather_sorted_wolf and clus_df_gather_sorted_wblf, where our objective function is the sum of products of overlapping edge weights?
 ```{r}
 clus_df_gather_ungrouped <- clus_df_gather %>% ungroup()
-clus_df_gather_ungrouped[['col1_int']] <- as.integer(as.factor(clus_df_gather_ungrouped[["tissue"]]))
-clus_df_gather_ungrouped[['col2_int']] <- as.integer(as.factor(clus_df_gather_ungrouped[["cluster"]]))
-crossing_edges_output_unsorted <- determine_crossing_edges(clus_df_gather_ungrouped, column1="col1_int", column2="col2_int", column_weights = "value")
+clus_df_gather_ungrouped[["col1_int"]] <- as.integer(as.factor(clus_df_gather_ungrouped[["tissue"]]))
+clus_df_gather_ungrouped[["col2_int"]] <- as.integer(as.factor(clus_df_gather_ungrouped[["cluster"]]))
+crossing_edges_output_unsorted <- determine_crossing_edges(clus_df_gather_ungrouped, column1 = "col1_int", column2 = "col2_int", column_weights = "value")
 crossing_edges_unsorted <- crossing_edges_output_unsorted$crossing_edges_df
 # str(crossing_edges_unsorted[1:3])
 
-crossing_edges_output_wolf <- determine_crossing_edges(clus_df_gather_sorted_wolf, column1="col1_int", column2="col2_int", column_weights = "value")
+crossing_edges_output_wolf <- determine_crossing_edges(clus_df_gather_sorted_wolf, column1 = "col1_int", column2 = "col2_int", column_weights = "value")
 crossing_edges_wolf <- crossing_edges_output_wolf$crossing_edges_df
 # str(crossing_edges_wolf[1:3])
 
-crossing_edges_output_wblf <- determine_crossing_edges(clus_df_gather_sorted_wblf, column1="col1_int", column2="col2_int", column_weights = "value")  # output_df_path = "vignette_intro_crossing_wblf.csv"
+crossing_edges_output_wblf <- determine_crossing_edges(clus_df_gather_sorted_wblf, column1 = "col1_int", column2 = "col2_int", column_weights = "value") # output_df_path = "vignette_intro_crossing_wblf.csv"
 crossing_edges_wblf <- crossing_edges_output_wblf$crossing_edges_df
 # str(crossing_edges_wblf[1:3])
 # write.csv(crossing_edges_wblf, file = "crossing_edges_wblf.csv", row.names = FALSE, quote = FALSE)
 # write.csv(crossing_edges_output_wblf$lode_df, file = "lodes_wblf.csv", row.names = FALSE, quote = FALSE)
 
-crossing_edges_output_nn <- determine_crossing_edges(clus_df_gather_sorted_nn, column1="col1_int", column2="col2_int", column_weights = "value")  # output_df_path = "vignette_intro_crossing_nn.csv"
+crossing_edges_output_nn <- determine_crossing_edges(clus_df_gather_sorted_nn, column1 = "col1_int", column2 = "col2_int", column_weights = "value") # output_df_path = "vignette_intro_crossing_nn.csv"
 crossing_edges_nn <- crossing_edges_output_nn$crossing_edges_df
 str(crossing_edges_nn[1:3])
 ```

@@ -30,7 +30,9 @@ check_python_setup_with_necessary_packages <- function(necessary_packages_for_th
     ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
 
     # Skip check if script was run from command line (not interactive)
-    if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) return(invisible(NULL))
+    if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
+        return(invisible(NULL))
+    }
 
     if (!reticulate::py_available(initialize = FALSE)) {
         if (is.null(additional_message)) {
@@ -385,12 +387,15 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         # Compare each pair of edges
         if (return_weighted_layer_free_objective) {
             if (use_fenwick_tree_for_objective_calculation) {
-                python_set_up_for_fenwick <- tryCatch({
-                    check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE")
-                    TRUE  # if no error, return TRUE
-                }, error = function(e) {
-                    FALSE  # if error occurs (i.e., it called stop), return FALSE
-                })
+                python_set_up_for_fenwick <- tryCatch(
+                    {
+                        check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE")
+                        TRUE # if no error, return TRUE
+                    },
+                    error = function(e) {
+                        FALSE # if error occurs (i.e., it called stop), return FALSE
+                    }
+                )
 
                 if (!python_set_up_for_fenwick) {
                     if (verbose) message("Python environment is not set up for use of fenwick tree optimization. Turning this optimization off. To turn on, set up the python environment, e.g., with wompwomp::setup_python_env().")
@@ -499,11 +504,11 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     if (normalize_objective) {
         combs <- combn(seq_len(nrow(clus_df_gather)), 2)
         values <- clus_df_gather[[column_weights]]
-        output_objective <- output_objective / sum(values[combs[1,]] * values[combs[2,]])  # take the sum of all products
+        output_objective <- output_objective / sum(values[combs[1, ]] * values[combs[2, ]]) # take the sum of all products
     }
 
     if (return_weighted_layer_free_objective) {
-        return (output_objective)
+        return(output_objective)
     }
 
     if (length(crossing_edges) > 0) {
