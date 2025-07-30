@@ -1,7 +1,7 @@
 .Rproj.user
 *.Rproj
-.DS_Store
-.Rhistory
+**/.Rhistory
+**/.DS_Store
 tmp.Rmd
 tmp_files
 vignettes/output

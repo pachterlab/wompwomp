@@ -93,10 +93,8 @@ If return_weighted_layer_free_objective is TRUE: An integer representing the sum
 Determine overlapping edges of k-partite graph.
 }
 \examples{
-\dontrun{
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 df <- data_sort(df)
 result <- determine_crossing_edges(df, column1 = "col1_int", column2 = "col2_int")
-}
 
 }

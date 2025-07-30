@@ -27,7 +27,7 @@ Optional:
   --cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when sorting_algorithm == 'neighbornet' or 'tsp'.
   --fixed_column            Name or position of the column in graphing_columns to keep fixed during sorting. Only applies when sorting_algorithm == 'greedy_WOLF'.
   --random_initializations  Number of random initializations for the positions of each grouping in graphing_columns. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
-  --set_seed                Random seed for the random_initializations parameter. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'.
+  --set_seed                Random seed for the random_initializations parameter. Only applies when sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'. Depracated (recommended to set seed outside of fucntion call).
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   --disable_preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
   --default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if sorting_algorithm == 'neighbornet' or 'tsp'. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.

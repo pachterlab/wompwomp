@@ -18,6 +18,15 @@ setup_python_env(
 
 \item{use_conda}{Use conda vs. virtualenv for python environment}
 }
+\value{
+Invisibly returns TRUE if the environment is set up successfully.
+}
 \description{
 This function installs Miniconda if needed, creates a dedicated environment, and installs the required Python packages.
+}
+\examples{
+\dontrun{
+setup_python_env()
+}
+
 }
