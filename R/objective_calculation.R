@@ -25,6 +25,37 @@ if (objective_fenwick_script_path == "") {
 }
 stopifnot(file.exists(objective_fenwick_script_path))
 
+
+check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "") {
+    if (!py_available(initialize = FALSE)) {
+        if (is.null(additional_message)) {
+            stop("Python environment is not set up. Please run wompwomp::setup_python_env().")
+        } else {
+            stop(sprintf(
+                "Python environment is not set up. Please run wompwomp::setup_python_env(), or %s.",
+                additional_message
+            ))
+        }
+    }
+    if (!is.null(necessary_packages_for_this_step)) {
+        for (package in necessary_packages_for_this_step) {
+            if (!reticulate::py_module_available(package)) {
+                if (is.null(additional_message)) {
+                    stop(sprintf(
+                        "Python module '%s' is not available. Please run wompwomp::setup_python_env().",
+                        package
+                    ))
+                } else {
+                    stop(sprintf(
+                        "Python module '%s' is not available. Please run wompwomp::setup_python_env(), or %s.",
+                        package, additional_message
+                    ))
+                }
+            }
+        }
+    }
+}
+
 # reticulate::source_python(objective_fenwick_script_path)  # Error: Unable to access object (object is from previous session and is now invalid)
 
 
@@ -98,6 +129,7 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' @param output_lode_df_path Optional character. Output path for the data frame containing lode information on each alluvium, in CSV format (see details below). If not provided, then nothing will be saved.
 #' @param include_output_objective_matrix_vector Logical. Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.
 #' @param return_weighted_layer_free_objective Logical. Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
+#' @param use_fenwick_tree_for_objective_calculation Logical. Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn), but requires python environment.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param stratum_column_and_value_to_keep Internal flag; not recommended to modify.
 #' @param input_objective_matrix_vector Internal flag; not recommended to modify.
@@ -136,7 +168,7 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' }
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical", set_seed = 42) {
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, use_fenwick_tree_for_objective_calculation = TRUE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical", set_seed = 42) {
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
@@ -347,18 +379,35 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
 
         # Compare each pair of edges
         if (return_weighted_layer_free_objective) {
-            # # option 1 for objective (best): fenwick (only good if I only need objective, ie no matrix or data frame)
-            if (verbose) message("Calculating objective with fenwick tree")
-            reticulate::source_python(objective_fenwick_script_path)
-            output_objective <- output_objective + calculate_objective_fenwick(lode_df)
+            if (use_fenwick_tree_for_objective_calculation) {
+                python_set_up_for_fenwick <- tryCatch({
+                    check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE")
+                    TRUE  # if no error, return TRUE
+                }, error = function(e) {
+                    FALSE  # if error occurs (i.e., it called stop), return FALSE
+                })
+
+                if (!python_set_up_for_fenwick) {
+                    if (verbose) message("Python environment is not set up for use of fenwick tree optimization. Turning this optimization off. To turn on, set up the python environment, e.g., with wompwomp::setup_python_env().")
+                    use_fenwick_tree_for_objective_calculation <- FALSE
+                }
+            }
+
+            if (use_fenwick_tree_for_objective_calculation) {
+                # # option 1 for objective (best): fenwick (only good if I only need objective, ie no matrix or data frame) - also requires python
+                # check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE")  # checked above
+                if (verbose) message("Calculating objective with fenwick tree")
+                reticulate::source_python(objective_fenwick_script_path)
+                output_objective <- output_objective + calculate_objective_fenwick(lode_df)
+            } else {
+                # # option 2 for objective: vectorized (only good if I only need objective, ie no matrix or data frame) - doesn't require python
+                if (verbose) message("Calculating objective with vectorized sum")
+                objective_matrix <- make_crossing_matrix_vectorized(lode_df$y1, lode_df$y2, lode_df$count)
+                output_objective <- sum(objective_matrix)
+            }
         } else {
-            if (verbose) message("Looping through alluvia")
-
-            # # option 2 for objective: vectorized (only good if I don't need data frame)
-            # objective_matrix <- make_crossing_matrix_vectorized(lode_df$y1, lode_df$y2, lode_df$count)
-            # output_objective <- sum(objective_matrix)
-
             # # option 3 for objective (worst): double for loop (good if I need data frame)
+            if (verbose) message("Looping through alluvia")
             if (is.null(stratum_column_and_value_to_keep)) {
                 for (i in 1:(lode_df_length - 1)) {
                     for (j in (i + 1):lode_df_length) {

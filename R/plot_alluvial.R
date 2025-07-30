@@ -859,6 +859,7 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
                 }
             }
         } else if (match_order == 'advanced') {
+            check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("igraph", "leidenalg"), additional_message = "do not set match_order to 'advanced'")
             final_colors <- find_colors_advanced(clus_df_gather, ditto_colors, graphing_columns, graphing_algorithm = graphing_algorithm, resolution = resolution, set_seed = set_seed)
         } else {
             col_group <- match_order
@@ -1306,8 +1307,8 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, default
 
 
 sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_weights = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", sorting_algorithm = "neighbornet", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE, set_seed = 42) {
-    if (!reticulate::py_module_available("splitspy")) {
-        stop("Python module 'splitspy' is not available, which is required for the neighbornet algorithm (default). Please run wompwomp::setup_python_env().")
+    if (sorting_algorithm == "neighbornet" || column_sorting_algorithm == "neighbornet") {
+        check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("splitspy", "numpy"), additional_message = "do not set sorting_algorithm or column_sorting_algorithm to 'neighbornet'")
     }
     if (verbose) message("Running neighbornet")
     cycle <- run_neighbornet(clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, sorting_algorithm = sorting_algorithm, set_seed = set_seed, verbose = verbose)

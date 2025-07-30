@@ -19,6 +19,7 @@ Optional:
   --output_lode_df_path     Output path for the data frame containing lode information on each alluvium, in CSV format (see details below). If not provided, then will not be saved.
   --include_output_objective_matrix_vector            Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.
   --return_weighted_layer_free_objective  Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
+  --disable_use_fenwick_tree_for_objective_calculation  Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn), but requires python environment.
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
@@ -38,6 +39,7 @@ Optional:
     output_lode_df_path <- get_arg(args, c("--output_lode_df_path"))
     include_output_objective_matrix_vector <- store_true(args, "--include_output_objective_matrix_vector")
     return_weighted_layer_free_objective <- store_true(args, "--return_weighted_layer_free_objective")
+    use_fenwick_tree_for_objective_calculation <- store_false(args, "--disable_use_fenwick_tree_for_objective_calculation")
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
@@ -62,6 +64,7 @@ Optional:
     if (!is.null(output_lode_df_path)) args_list$output_lode_df_path <- output_lode_df_path
     if (!is.null(include_output_objective_matrix_vector)) args_list$include_output_objective_matrix_vector <- include_output_objective_matrix_vector
     if (!is.null(return_weighted_layer_free_objective)) args_list$return_weighted_layer_free_objective <- return_weighted_layer_free_objective
+    if (!is.null(use_fenwick_tree_for_objective_calculation)) args_list$use_fenwick_tree_for_objective_calculation <- use_fenwick_tree_for_objective_calculation
     if (!is.null(verbose)) args_list$verbose <- verbose
     if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
     if (!is.null(load_df)) args_list$load_df <- load_df
