@@ -29,7 +29,9 @@ wompwomp::setup_python_env()
 ```
 
 GitHub
-```         
+```
+if (!require("remotes", quietly = TRUE))
+    install.packages("remotes")
 remotes::install_github("pachterlab/wompwomp")
 wompwomp::setup_python_env()
 ```

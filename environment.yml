@@ -17,6 +17,9 @@ dependencies:
   - r-magrittr
   - r-data.table
   - r-reticulate
+  - r-purrr
+  - r-ggfittext
+  - r-tsp
   - r-testthat>=3.0.0
   - r-vdiffr
   - r-magick
@@ -24,7 +27,11 @@ dependencies:
   - r-rmarkdown
   - r-gtools
   - r-mclust
+  - r-here
+  - r-ggrastr
+  - r-stringr
   - r-sessioninfo
+  - r-remotes
   - pip=25.1
   - python=3.10
   - pip:

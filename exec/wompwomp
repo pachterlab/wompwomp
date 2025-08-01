@@ -2,7 +2,7 @@
 
 args <- commandArgs(trailingOnly = TRUE)
 
-DEV_MODE = "--dev" %in% args  # True iff --dev is passed
+DEV_MODE <- "--dev" %in% args || tolower(Sys.getenv("WOMPWOMP_DEV_MODE")) == "true"  # True iff --dev is passed OR WOMPWOMP_DEV_MODE=true (case-insensitive)
 
 download_missing_pkgs <- function() {
     # Install your package's runtime dependencies if missing
@@ -75,10 +75,12 @@ if (DEV_MODE) {
         if (interactive()) {
             install <- askYesNo("wompwomp is required but not installed. Install it now?")
             if (isTRUE(install)) {
-                install.packages("wompwomp", repos = "https://cloud.r-project.org")
+                remotes::install_github('pachterlab/wompwomp')
             } else {
-                stop("Aborted. Please install wompwomp manually with install.packages('wompwomp') or Rscript -e \"install.packages(c('wompwomp'), repos='https://cloud.r-project.org')\".")
+                stop("The wompwomp is not installed. Please install it with `Rscript -e \"remotes::install_github('pachterlab/wompwomp')\"`, or run `export WOMPWOMP_DEV_MODE=TRUE` (requires devtools)\".")
             }
+        } else {
+            stop("The wompwomp is not installed. Please install it with `Rscript -e \"remotes::install_github('pachterlab/wompwomp')\"`, or run `export WOMPWOMP_DEV_MODE=TRUE` (requires devtools)\".")
         }
     }
     # Use installed package (standard behavior during R CMD check or after install)

@@ -11,6 +11,9 @@ required_packages <- c(
     "magrittr",
     "data.table",
     "reticulate",
+    "purrr",
+    "ggfittext",
+    "TSP",
 
     # Suggests
     "testthat",
@@ -20,7 +23,11 @@ required_packages <- c(
     "rmarkdown",
     "gtools",
     "mclust",
-    "sessioninfo"
+    "here",
+    "ggrastr",
+    "stringr",
+    "sessioninfo",
+    "remotes"
 )
 
 # Optionally filter out already-installed packages
