@@ -1756,7 +1756,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
     }
     
-    if len(df) == 0 {
+    if (length(df) == 0) {
         stop("Length of df is 0.")
     }
 
