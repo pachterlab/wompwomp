@@ -56,10 +56,10 @@ install_devtools <- function() {
             if (isTRUE(install)) {
                 install.packages("devtools", repos = "https://cloud.r-project.org")
             } else {
-                stop("Aborted. Please install devtools manually with install.packages('devtools') or Rscript -e \"install.packages(c('devtools'), repos='https://cloud.r-project.org')\".")
+                stop("Aborted. Please install devtools manually with `conda install -c conda-forge r-devtools` (conda) or `Rscript -e \"install.packages(c('devtools'), repos='https://cloud.r-project.org')` (system R)\".")
             }
         } else {
-            stop("The devtools package is required. Please install devtools manually with install.packages('devtools') or Rscript -e \"install.packages(c('devtools'), repos='https://cloud.r-project.org')\".")
+            stop("The devtools package is required. Please install devtools manually with `conda install -c conda-forge r-devtools` (conda) or `Rscript -e \"install.packages(c('devtools'), repos='https://cloud.r-project.org')` (system R)\".")
         }
     }
 }
