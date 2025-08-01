@@ -185,4 +185,3 @@ ggsave(file.path(output_dir, "8cubed_legend.pdf"), plot = legend_plot)
 ```{r}
 sessioninfo::session_info()
 ```
-

@@ -929,7 +929,6 @@ plot_alluvial_internal <- function(clus_df_gather, graphing_columns, column_weig
         names(final_colors) <- final_value_order
 
         for (box_val in names(color_val)) {
-            # browser()
             if (box_val %in% names(final_colors)) {
                 box_val_color <- color_val[names(color_val) == box_val][1]
                 # find where value is in final colors
@@ -1755,6 +1754,10 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
     if (preprocess_data) {
         if (verbose) message("Loading in data")
         df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
+    }
+    
+    if len(df) == 0 {
+        stop("Length of df is 0.")
     }
 
     if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
