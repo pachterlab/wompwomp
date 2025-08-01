@@ -1,4 +1,10 @@
-#' @noRd
+#' Run CLI entry point for data preprocessing
+#'
+#' This function is called internally to handle command line arguments.
+#'
+#' @param args A character vector of command-line arguments.
+#' @return Called for side effects. Invisibly returns `NULL`.
+#' @export
 run_cli <- function(args) {
     if (length(args) == 0 || (length(args) == 1 && args[1] %in% c("--help", "-h"))) {
         cat("
@@ -14,6 +20,8 @@ Commands:
 
 Use:
   wompwomp COMMAND --help
+
+All commands have a --dev argument. If passed, will load the package dynamically with devtools rather than installing in R.
 ")
         quit(save = "no", status = 0)
     }

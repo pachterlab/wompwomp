@@ -103,7 +103,7 @@ test_that("data_sort works with unsorted algorithm", {
     unsorted_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "None")
     # unsorted_df <- dplyr::ungroup(unsorted_df)
 
-    ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "unsorted_df.rds")
+    ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "unsorted_df.rds"))
 
     if (!file.exists(ground_truth_df_path)) {
         saveRDS(unsorted_df, file = ground_truth_df_path)
@@ -126,7 +126,7 @@ test_that("data_sort works with greedy_WOLF algorithm", {
     df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
     greedy_wolf_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "greedy_WOLF")
 
-    ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "greedy_wolf_df.rds")
+    ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "greedy_wolf_df.rds"))
 
     if (!file.exists(ground_truth_df_path)) {
         saveRDS(greedy_wolf_df, file = ground_truth_df_path)
@@ -150,7 +150,7 @@ test_that("data_sort works with greedy_WBLF algorithm", {
 
     greedy_wblf_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "greedy_WBLF")
 
-    ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "greedy_wblf_df.rds")
+    ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "greedy_wblf_df.rds"))
 
     if (!file.exists(ground_truth_df_path)) {
         saveRDS(greedy_wblf_df, file = ground_truth_df_path)
@@ -175,7 +175,7 @@ test_that("data_sort works with neighbornet algorithm", {
 
     neighbornet_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "neighbornet")
 
-    ground_truth_df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "neighbornet_df.rds")
+    ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "neighbornet_df.rds"))
 
     if (!file.exists(ground_truth_df_path)) {
         saveRDS(neighbornet_df, file = ground_truth_df_path)

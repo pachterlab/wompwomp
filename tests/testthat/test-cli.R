@@ -1,4 +1,12 @@
-cli_cmd_path <- file.path(here::here(), "exec", "wompwomp")
+# skip("Skipping this test file during development or check")
+
+# dev mode for testing, not for compiling
+dev <- !("wompwomp" %in% installed.packages())  # !requireNamespace("wompwomp", quietly = TRUE)
+
+cli_cmd_path <- system.file("exec", "wompwomp", package = "wompwomp")
+if (cli_cmd_path == "") {  # file not installed
+    cli_cmd_path <- file.path(here::here(), "exec", "wompwomp")  # cli_cmd_path <- testthat::test_path("..", "..", "exec", "wompwomp")
+}
 
 type_checking_files <- function(output_path, truth_path, check = TRUE) {
     # check for file path type
@@ -74,10 +82,10 @@ compare_csvs <- function(output_path, truth_path, check = TRUE) {
 test_that("CLI plot_alluvial, no sort", {
     # Paths
     command <- "plot_alluvial"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".png")
     # output_path <- file.path(here::here(), "tmp_files", "tmp_image21.png")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_none.png")
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_none.png"))
 
     # Run CLI
     args <- c(
@@ -87,6 +95,9 @@ test_that("CLI plot_alluvial, no sort", {
         "--sorting_algorithm", "None",
         "--quiet", "TRUE"
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
@@ -96,9 +107,9 @@ test_that("CLI plot_alluvial, no sort", {
 test_that("CLI plot_alluvial, WOLF left fixed", {
     # Paths
     command <- "plot_alluvial"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".png")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_left.png")
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_wolf_left.png"))
 
     # Run CLI
     args <- c(
@@ -109,6 +120,9 @@ test_that("CLI plot_alluvial, WOLF left fixed", {
         "--fixed_column", 1,
         "--quiet", "TRUE"
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
@@ -118,9 +132,9 @@ test_that("CLI plot_alluvial, WOLF left fixed", {
 test_that("CLI plot_alluvial, WOLF right fixed", {
     # Paths
     command <- "plot_alluvial"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".png")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_right.png")
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_wolf_right.png"))
 
     # Run CLI
     args <- c(
@@ -131,6 +145,9 @@ test_that("CLI plot_alluvial, WOLF right fixed", {
         "--fixed_column", 2,
         "--quiet", "TRUE"
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
@@ -140,9 +157,9 @@ test_that("CLI plot_alluvial, WOLF right fixed", {
 test_that("CLI plot_alluvial, WBLF", {
     # Paths
     command <- "plot_alluvial"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".png")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wblf.png")
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_wblf.png"))
 
     # Run CLI
     args <- c(
@@ -152,6 +169,9 @@ test_that("CLI plot_alluvial, WBLF", {
         "--sorting_algorithm", "greedy_WBLF",
         "--quiet", "TRUE"
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
@@ -161,9 +181,9 @@ test_that("CLI plot_alluvial, WBLF", {
 test_that("CLI plot_alluvial, neighbornet", {
     # Paths
     command <- "plot_alluvial"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".png")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_neighbornet.png")
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_neighbornet.png"))
 
     # Run CLI
     args <- c(
@@ -173,6 +193,9 @@ test_that("CLI plot_alluvial, neighbornet", {
         "--sorting_algorithm", "neighbornet",
         "--quiet", "TRUE"
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
@@ -182,9 +205,9 @@ test_that("CLI plot_alluvial, neighbornet", {
 test_that("CLI data_sort, WOLF left fixed", {
     # Paths
     command <- "data_sort"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".csv")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_left_df.csv")
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_wolf_left_df.csv"))
 
     # Run CLI
     args <- c(
@@ -195,6 +218,9 @@ test_that("CLI data_sort, WOLF left fixed", {
         "--fixed_column", 1,
         "--quiet", "TRUE"
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
@@ -204,9 +230,9 @@ test_that("CLI data_sort, WOLF left fixed", {
 test_that("CLI data_sort, WOLF right fixed", {
     # Paths
     command <- "data_sort"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".csv")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wolf_right_df.csv")
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_wolf_right_df.csv"))
 
     # Run CLI
     args <- c(
@@ -217,6 +243,9 @@ test_that("CLI data_sort, WOLF right fixed", {
         "--fixed_column", 2,
         "--quiet", "TRUE"
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
@@ -227,9 +256,9 @@ test_that("CLI data_sort, WOLF right fixed", {
 test_that("CLI data_sort, WBLF", {
     # Paths
     command <- "data_sort"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".csv")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wblf_df.csv")
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_wblf_df.csv"))
 
     # Run CLI
     args <- c(
@@ -239,6 +268,9 @@ test_that("CLI data_sort, WBLF", {
         "--sorting_algorithm", "greedy_WBLF",
         "--quiet", "TRUE"
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
@@ -248,9 +280,9 @@ test_that("CLI data_sort, WBLF", {
 test_that("CLI data_sort, neighbornet", {
     # Paths
     command <- "data_sort"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "df_tests_cli.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".csv")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_neighbornet_df.csv")
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_neighbornet_df.csv"))
 
     # Run CLI
     args <- c(
@@ -260,6 +292,9 @@ test_that("CLI data_sort, neighbornet", {
         "--sorting_algorithm", "neighbornet",
         "--quiet", "TRUE"
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
@@ -270,9 +305,9 @@ test_that("CLI data_sort, neighbornet", {
 test_that("CLI determine_crossing_edges", {
     # Paths
     command <- "determine_crossing_edges"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "sorting_wblf_df.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "sorting_wblf_df.csv"))
     output_path <- tempfile(fileext = ".csv")
-    truth_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "crossing_wblf_df.csv")
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "crossing_wblf_df.csv"))
 
     # Run CLI
     args <- c(
@@ -283,6 +318,9 @@ test_that("CLI determine_crossing_edges", {
         "--column2", "col2_int",
         "--quiet", "TRUE"
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     system2(cli_cmd_path, args)
 
@@ -293,13 +331,16 @@ test_that("CLI determine_crossing_edges", {
 test_that("CLI determine_weighted_layer_free_objective", {
     # Paths
     command <- "determine_weighted_layer_free_objective"
-    df_path <- file.path(here::here(), "tests", "testthat", "ground_truth", "crossing_wblf_df.csv")
+    df_path <- normalizePath(testthat::test_path("ground_truth", "crossing_wblf_df.csv"))
 
     # Run CLI
     args <- c(
         command,
         "--df", df_path
     )
+    if (dev) {
+        args <- c(args, "--dev")
+    }
     # cat(cli_cmd_path, paste(args, collapse = " "), "\n")
     output <- system2(cli_cmd_path, args, stdout = TRUE)
     num <- as.integer(gsub(".*\\s", "", output))
