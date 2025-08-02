@@ -61,6 +61,8 @@ Optional:
   --rasterise_alluvia Logical. Whether to rasterize the alluvia ifoutput_plot_path is a PDF. Can save space if DPI low enough
   --keep_y_labels Keep y labels
   --box_line_width Box line width
+  --environment  Python environment (if applicable). Default: 'wompwomp_env'
+  --disable_use_conda  Whether or not to use conda for Python (if applicable)
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
@@ -121,6 +123,8 @@ Optional:
     dpi <- get_integer_arg(args, c("--dpi"))
     rasterise_alluvia <- store_true(args, c("--rasterise_alluvia"))
     box_line_width <- get_numeric_arg(args, c("--box_line_width"))
+    environment <- get_arg(args, c("--environment"), default = "wompwomp_env")
+    use_conda <- store_false(args, c("--disable_use_conda"))
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
@@ -184,6 +188,8 @@ Optional:
     if (!is.null(keep_y_labels)) args_list$keep_y_labels <- keep_y_labels
     if (!is.null(box_line_width)) args_list$box_line_width <- box_line_width
     if (!is.null(verbose)) args_list$verbose <- verbose
+    if (!is.null(environment)) args_list$environment <- environment
+    if (!is.null(use_conda)) args_list$use_conda <- use_conda
     if (!is.null(make_intermediate_neighbornet_plots)) args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
 
     # Dynamically call function

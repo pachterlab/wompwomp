@@ -4,6 +4,13 @@
 #'
 #' @param args A character vector of command-line arguments.
 #' @return Called for side effects. Invisibly returns `NULL`.
+#' 
+#' @examples
+#' \dontrun{
+#' # set up args before as a string
+#' run_cli(args)
+#' }
+#' 
 #' @export
 run_cli <- function(args) {
     if (length(args) == 0 || (length(args) == 1 && args[1] %in% c("--help", "-h"))) {

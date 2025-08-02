@@ -26,41 +26,44 @@ if (objective_fenwick_script_path == "") {
 stopifnot(file.exists(objective_fenwick_script_path))
 
 
-check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "") {
+check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "", environment = "wompwomp_env", use_conda = TRUE) {
     ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
+    
+    detect_and_setup_python_env(environment = environment, use_conda = use_conda)
 
-    # Skip check if script was run from command line (not interactive)
-    if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
-        return(invisible(NULL))
-    }
-
-    if (!reticulate::py_available(initialize = FALSE)) {
-        if (is.null(additional_message)) {
-            stop("Python environment is not set up. Please run wompwomp::setup_python_env().")
-        } else {
-            stop(sprintf(
-                "Python environment is not set up. Please run wompwomp::setup_python_env(), or %s.",
-                additional_message
-            ))
-        }
-    }
-    if (!is.null(necessary_packages_for_this_step)) {
-        for (package in necessary_packages_for_this_step) {
-            if (!reticulate::py_module_available(package)) {
-                if (is.null(additional_message)) {
-                    stop(sprintf(
-                        "Python module '%s' is not available. Please run wompwomp::setup_python_env().",
-                        package
-                    ))
-                } else {
-                    stop(sprintf(
-                        "Python module '%s' is not available. Please run wompwomp::setup_python_env(), or %s.",
-                        package, additional_message
-                    ))
-                }
-            }
-        }
-    }
+    # # Skip check if script was run from command line
+    # if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
+    #     return(invisible(NULL))
+    # }
+    
+    # # not relevant now that I call wompwomp::setup_python_env() in here
+    # if (!reticulate::py_available(initialize = FALSE)) {
+    #     if (is.null(additional_message)) {
+    #         stop("Python environment is not set up. Please run wompwomp::setup_python_env().")
+    #     } else {
+    #         stop(sprintf(
+    #             "Python environment is not set up. Please run wompwomp::setup_python_env(), or %s.",
+    #             additional_message
+    #         ))
+    #     }
+    # }
+    # if (!is.null(necessary_packages_for_this_step)) {
+    #     for (package in necessary_packages_for_this_step) {
+    #         if (!reticulate::py_module_available(package)) {
+    #             if (is.null(additional_message)) {
+    #                 stop(sprintf(
+    #                     "Python module '%s' is not available. Please run wompwomp::setup_python_env().",
+    #                     package
+    #                 ))
+    #             } else {
+    #                 stop(sprintf(
+    #                     "Python module '%s' is not available. Please run wompwomp::setup_python_env(), or %s.",
+    #                     package, additional_message
+    #                 ))
+    #             }
+    #         }
+    #     }
+    # }
 }
 
 # reticulate::source_python(objective_fenwick_script_path)  # Error: Unable to access object (object is from previous session and is now invalid)
@@ -180,7 +183,7 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' result <- determine_crossing_edges(df, column1 = "col1_int", column2 = "col2_int")
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, use_fenwick_tree_for_objective_calculation = TRUE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical", set_seed = 42) {
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, use_fenwick_tree_for_objective_calculation = TRUE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical", set_seed = 42, environment = "wompwomp_env", use_conda = TRUE) {
     #* Set seed
     if (!is.null(set_seed)) {
         if (exists(".Random.seed")) {
@@ -403,7 +406,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
             if (use_fenwick_tree_for_objective_calculation) {
                 python_set_up_for_fenwick <- tryCatch(
                     {
-                        check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE")
+                        check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE", environment = environment, use_conda = use_conda)
                         TRUE # if no error, return TRUE
                     },
                     error = function(e) {

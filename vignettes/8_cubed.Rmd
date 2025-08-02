@@ -185,3 +185,41 @@ ggsave(file.path(output_dir, "8cubed_legend.pdf"), plot = legend_plot)
 ```{r}
 sessioninfo::session_info()
 ```
+
+
+```{r}
+
+```
+
+```{r}
+setwd("/Users/joeyrich/Desktop/local/wompwomp")
+reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+devtools::load_all() # !!! erase
+
+# library(wompwomp)  #!!! uncomment
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+library(ggforce)
+library(igraph)
+library(tibble)
+library(reticulate)
+```
+
+
+```{r}
+devtools::load_all() # !!! erase
+
+# ./exec/wompwomp plot_alluvial --df '/Users/joeyrich/Downloads/alluvial_df.csv' --graphing_columns sex Age celltype_final --column_weights umi_total -o '/Users/joeyrich/Downloads/alluvial.png'
+eight_cubed_file_path_new <- '/Users/joeyrich/Desktop/cube/alluvial_df.csv'
+clus_df_gather <- read.csv(eight_cubed_file_path_new)
+# clus_df_gather$umi_total <- sample(0:10, size = nrow(clus_df_gather), replace = TRUE)
+# write.csv(clus_df_gather, file = "/Users/joeyrich/Desktop/cube/alluvial_df_better_umi.csv", row.names = FALSE)
+plot_alluvial(clus_df_gather, graphing_columns=c("sex", "Age", "celltype_final"), column_weights="umi_total", output_plot_path="/Users/joeyrich/Downloads/alluvial.png", sorting_algorithm="tsp", match_order="left")
+```
+
+
+```{r}
+clus_df_gather
+```
+

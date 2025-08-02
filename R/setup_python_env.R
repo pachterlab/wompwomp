@@ -119,3 +119,12 @@ setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "num
         }
     }
 }
+
+detect_and_setup_python_env <- function(environment = environment, use_conda = use_conda) {
+    python_path <- reticulate::py_discover_config(use_environment = environment)$python
+    current_env <- basename(dirname(dirname(python_path)))  # Works for Conda envs: path typically ends in ".../envs/ENVIRONMENT/bin/python"
+    if (current_env != environment) {
+        if (verbose) message("Setting up python environment")
+        setup_python_env(environment, use_conda=use_conda)
+    }
+}

@@ -20,6 +20,8 @@ Optional:
   --include_output_objective_matrix_vector            Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.
   --return_weighted_layer_free_objective  Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
   --disable_use_fenwick_tree_for_objective_calculation  Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn), but requires python environment.
+  --environment  Python environment (if applicable). Default: 'wompwomp_env'
+  --disable_use_conda  Whether or not to use conda for Python (if applicable)
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
@@ -40,6 +42,8 @@ Optional:
     include_output_objective_matrix_vector <- store_true(args, "--include_output_objective_matrix_vector")
     return_weighted_layer_free_objective <- store_true(args, "--return_weighted_layer_free_objective")
     use_fenwick_tree_for_objective_calculation <- store_false(args, "--disable_use_fenwick_tree_for_objective_calculation")
+    environment <- get_arg(args, c("--environment"), default = "wompwomp_env")
+    use_conda <- store_false(args, c("--disable_use_conda"))
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
@@ -65,6 +69,8 @@ Optional:
     if (!is.null(include_output_objective_matrix_vector)) args_list$include_output_objective_matrix_vector <- include_output_objective_matrix_vector
     if (!is.null(return_weighted_layer_free_objective)) args_list$return_weighted_layer_free_objective <- return_weighted_layer_free_objective
     if (!is.null(use_fenwick_tree_for_objective_calculation)) args_list$use_fenwick_tree_for_objective_calculation <- use_fenwick_tree_for_objective_calculation
+    if (!is.null(environment)) args_list$environment <- environment
+    if (!is.null(use_conda)) args_list$use_conda <- use_conda
     if (!is.null(verbose)) args_list$verbose <- verbose
     if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
     if (!is.null(load_df)) args_list$load_df <- load_df

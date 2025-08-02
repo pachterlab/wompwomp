@@ -32,6 +32,8 @@ Optional:
   --disable_preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
   --default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if sorting_algorithm == 'neighbornet' or 'tsp'. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
   --return_updated_graphing_columns         If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.
+  --environment  Python environment (if applicable). Default: 'wompwomp_env'
+  --disable_use_conda  Whether or not to use conda for Python (if applicable)
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
@@ -64,6 +66,8 @@ Optional:
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
     default_sorting <- get_arg(args, c("--default_sorting"))
     return_updated_graphing_columns <- store_true(args, "--return_updated_graphing_columns")
+    environment <- get_arg(args, c("--environment"), default = "wompwomp_env")
+    use_conda <- store_false(args, c("--disable_use_conda"))
     verbose <- store_true(args, c("-v", "--verbose"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
@@ -100,6 +104,8 @@ Optional:
     if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
     if (!is.null(default_sorting)) args_list$default_sorting <- default_sorting
     if (!is.null(return_updated_graphing_columns)) args_list$return_updated_graphing_columns <- return_updated_graphing_columns
+    if (!is.null(environment)) args_list$environment <- environment
+    if (!is.null(use_conda)) args_list$use_conda <- use_conda
     if (!is.null(verbose)) args_list$verbose <- verbose
     if (!is.null(load_df)) args_list$load_df <- load_df
     if (!is.null(make_intermediate_neighbornet_plots)) args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
