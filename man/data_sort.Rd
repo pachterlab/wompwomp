@@ -92,6 +92,10 @@ data_sort(
 \item{make_intermediate_neighbornet_plots}{Internal flag; not recommended to modify.}
 
 \item{do_compute_alluvial_statistics}{Internal flag; not recommended to modify.}
+
+\item{environment}{Character. Python environment (if applicable). Default: 'wompwomp_env'}
+
+\item{use_conda}{Logical. Whether or not to use conda for Python (if applicable)}
 }
 \value{
 If return_updated_graphing_columns == FALSE (default): A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc. The position mappings in these columns, as well as the order of the columns (if \code{optimize_column_order} is TRUE), will be sorted according to \code{sorting_algorithm}.
@@ -106,7 +110,8 @@ df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TR
 clus_df_gather <- data_sort(
     df,
     graphing_columns = c("method1", "method2"),
-    sorting_algorithm = "tsp")
+    sorting_algorithm = "tsp",
+    column_sorting_algorithm = "tsp")
 
 # Example 2: df format 2
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -118,6 +123,7 @@ clus_df_gather <- data_sort(
     clus_df_gather,
     graphing_columns = c("method1", "method2"),
     column_weights = "value",
-    sorting_algorithm = "tsp")
+    sorting_algorithm = "tsp",
+    column_sorting_algorithm = "tsp")
 
 }

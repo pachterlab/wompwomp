@@ -170,6 +170,10 @@ plot_alluvial(
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
 \item{make_intermediate_neighbornet_plots}{Internal flag; not recommended to modify.}
+
+\item{environment}{Character. Python environment (if applicable). Default: 'wompwomp_env'}
+
+\item{use_conda}{Logical. Whether or not to use conda for Python (if applicable)}
 }
 \value{
 A \code{ggplot2} object representing the alluvial plot.
@@ -184,6 +188,7 @@ df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TR
 p <- plot_alluvial(df,
     graphing_columns = c("method1", "method2"),
     sorting_algorithm = "tsp",
+    column_sorting_algorithm = "tsp",
     match_order = "right")
 
 # Example 2: df format 2
@@ -197,6 +202,7 @@ p <- plot_alluvial(
    graphing_columns = c("method1", "method2"),
    column_weights = "value",
    sorting_algorithm = "tsp",
+   column_sorting_algorithm = "tsp",
    match_order = "right")
 
 }

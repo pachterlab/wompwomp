@@ -1464,6 +1464,8 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @param preprocess_data Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.
 #' @param default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if \code{sorting_algorithm == 'neighbornet'}. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
 #' @param return_updated_graphing_columns Logical. If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.
+#' @param environment Character. Python environment (if applicable). Default: 'wompwomp_env'
+#' @param use_conda Logical. Whether or not to use conda for Python (if applicable)
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param load_df Internal flag; not recommended to modify.
 #' @param make_intermediate_neighbornet_plots Internal flag; not recommended to modify.
@@ -1479,7 +1481,8 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' clus_df_gather <- data_sort(
 #'     df,
 #'     graphing_columns = c("method1", "method2"),
-#'     sorting_algorithm = "tsp")
+#'     sorting_algorithm = "tsp",
+#'     column_sorting_algorithm = "tsp")
 #'
 #' # Example 2: df format 2
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -1491,7 +1494,8 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #'     clus_df_gather,
 #'     graphing_columns = c("method1", "method2"),
 #'     column_weights = "value",
-#'     sorting_algorithm = "tsp")
+#'     sorting_algorithm = "tsp",
+#'     column_sorting_algorithm = "tsp")
 #'
 #' @export
 data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL, random_initializations = 1, set_seed = 42, output_df_path = NULL, preprocess_data = TRUE, default_sorting = "alphabetical", return_updated_graphing_columns = FALSE, verbose = FALSE, load_df = TRUE, make_intermediate_neighbornet_plots = FALSE, do_compute_alluvial_statistics = TRUE, environment = "wompwomp_env", use_conda = TRUE) {
@@ -1689,6 +1693,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param rasterise_alluvia Logical. Whether to rasterize the alluvia if \code{output_plot_path} is a PDF. Can save space if DPI low enough
 #' @param keep_y_labels Keep y labels
 #' @param box_line_width Box line width
+#' @param environment Character. Python environment (if applicable). Default: 'wompwomp_env'
+#' @param use_conda Logical. Whether or not to use conda for Python (if applicable)
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param make_intermediate_neighbornet_plots Internal flag; not recommended to modify.
 #'
@@ -1700,6 +1706,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' p <- plot_alluvial(df,
 #'     graphing_columns = c("method1", "method2"),
 #'     sorting_algorithm = "tsp",
+#'     column_sorting_algorithm = "tsp",
 #'     match_order = "right")
 #'
 #' # Example 2: df format 2
@@ -1713,6 +1720,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #'    graphing_columns = c("method1", "method2"),
 #'    column_weights = "value",
 #'    sorting_algorithm = "tsp",
+#'    column_sorting_algorithm = "tsp",
 #'    match_order = "right")
 #'
 #' @export
@@ -1757,7 +1765,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
     }
     
     if (nrow(df) == 0) {
-        stop("Length of df is 0.")
+        stop("df has no rows.")
     }
 
     if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {

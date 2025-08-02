@@ -29,41 +29,41 @@ stopifnot(file.exists(objective_fenwick_script_path))
 check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "", environment = "wompwomp_env", use_conda = TRUE) {
     ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
     
-    detect_and_setup_python_env(environment = environment, use_conda = use_conda)
-
-    # # Skip check if script was run from command line
-    # if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
-    #     return(invisible(NULL))
-    # }
+    # Skip check if script was run from command line (including checking from build/check) - this is ok because I set up my python environment in exec/wompwomp now
+    if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
+        return(invisible(NULL))
+    }
     
-    # # not relevant now that I call wompwomp::setup_python_env() in here
-    # if (!reticulate::py_available(initialize = FALSE)) {
-    #     if (is.null(additional_message)) {
-    #         stop("Python environment is not set up. Please run wompwomp::setup_python_env().")
-    #     } else {
-    #         stop(sprintf(
-    #             "Python environment is not set up. Please run wompwomp::setup_python_env(), or %s.",
-    #             additional_message
-    #         ))
-    #     }
-    # }
-    # if (!is.null(necessary_packages_for_this_step)) {
-    #     for (package in necessary_packages_for_this_step) {
-    #         if (!reticulate::py_module_available(package)) {
-    #             if (is.null(additional_message)) {
-    #                 stop(sprintf(
-    #                     "Python module '%s' is not available. Please run wompwomp::setup_python_env().",
-    #                     package
-    #                 ))
-    #             } else {
-    #                 stop(sprintf(
-    #                     "Python module '%s' is not available. Please run wompwomp::setup_python_env(), or %s.",
-    #                     package, additional_message
-    #                 ))
-    #             }
-    #         }
-    #     }
-    # }
+    # detect_and_setup_python_env(environment = environment, use_conda = use_conda)  #!!! uncomment later if I want python to be set up upon function call
+    
+    # can comment out relevant if I call wompwomp::setup_python_env() in here (above)
+    if (!reticulate::py_available(initialize = FALSE)) {
+        if (is.null(additional_message)) {
+            stop("Python environment is not set up. Please run wompwomp::setup_python_env().")
+        } else {
+            stop(sprintf(
+                "Python environment is not set up. Please run wompwomp::setup_python_env(), or %s.",
+                additional_message
+            ))
+        }
+    }
+    if (!is.null(necessary_packages_for_this_step)) {
+        for (package in necessary_packages_for_this_step) {
+            if (!reticulate::py_module_available(package)) {
+                if (is.null(additional_message)) {
+                    stop(sprintf(
+                        "Python module '%s' is not available. Please run wompwomp::setup_python_env().",
+                        package
+                    ))
+                } else {
+                    stop(sprintf(
+                        "Python module '%s' is not available. Please run wompwomp::setup_python_env(), or %s.",
+                        package, additional_message
+                    ))
+                }
+            }
+        }
+    }
 }
 
 # reticulate::source_python(objective_fenwick_script_path)  # Error: Unable to access object (object is from previous session and is now invalid)
@@ -147,6 +147,8 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' @param include_output_objective_matrix_vector Logical. Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.
 #' @param return_weighted_layer_free_objective Logical. Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
 #' @param use_fenwick_tree_for_objective_calculation Logical. Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn), but requires python environment.
+#' @param environment Character. Python environment (if applicable). Default: 'wompwomp_env'
+#' @param use_conda Logical. Whether or not to use conda for Python (if applicable)
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param stratum_column_and_value_to_keep Internal flag; not recommended to modify.
 #' @param input_objective_matrix_vector Internal flag; not recommended to modify.

@@ -20,9 +20,9 @@ test_that("plot_alluvial returns a ggplot object", {
     expect_s3_class(p, "ggplot")
 })
 
-test_that("plot_alluvial returns an error with 0 columns", {
+test_that("plot_alluvial returns an error with 0 rows", {
     df <- data.frame()
-    expect_error(plot_alluvial(df), "at least 2 columns")
+    expect_error(plot_alluvial(df), "no rows")
 })
 
 test_that("plot_alluvial returns an error with 1 column", {

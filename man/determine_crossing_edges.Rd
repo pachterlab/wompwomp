@@ -68,6 +68,10 @@ determine_crossing_edges(
 \item{default_sorting}{Internal flag; not recommended to modify.}
 
 \item{set_seed}{Internal flag; not recommended to modify.}
+
+\item{environment}{Character. Python environment (if applicable). Default: 'wompwomp_env'}
+
+\item{use_conda}{Logical. Whether or not to use conda for Python (if applicable)}
 }
 \value{
 If return_weighted_layer_free_objective is FALSE (default): A list of values, as follows:
