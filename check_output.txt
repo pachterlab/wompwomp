@@ -1,1508 +1,0 @@
-══ Documenting ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-
-══ Building ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-Setting env vars:
-• CFLAGS    : -Wall -pedantic
-• CXXFLAGS  : -Wall -pedantic
-• CXX11FLAGS: -Wall -pedantic
-• CXX14FLAGS: -Wall -pedantic
-• CXX17FLAGS: -Wall -pedantic
-• CXX20FLAGS: -Wall -pedantic
-── R CMD build ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-     checking for file ‘/Users/joeyrich/Desktop/local/wompwomp/DESCRIPTION’ ...  ✔  checking for file ‘/Users/joeyrich/Desktop/local/wompwomp/DESCRIPTION’
-  ─  preparing ‘wompwomp’: (3.7s)
-   checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-  ─  checking for LF line-endings in source and make files and shell scripts
-  ─  checking for empty or unneeded directories
-  ─  building ‘wompwomp_0.1.0.tar.gz’
-     Warning in utils::tar(filepath, pkgname, compression = compression, compression_level = 9L,  :
-     storing paths of more than 100 bytes is not portable:
-     ‘wompwomp/tests/testthat/_snaps/plot_alluvial/more-neighbornet-3layer-with-2-identical-layers-unsorted.svg’
-     
-══ Checking ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-Setting env vars:
-• _R_CHECK_CRAN_INCOMING_REMOTE_               : FALSE
-• _R_CHECK_CRAN_INCOMING_                      : FALSE
-• _R_CHECK_FORCE_SUGGESTS_                     : FALSE
-• _R_CHECK_PACKAGES_USED_IGNORE_UNUSED_IMPORTS_: FALSE
-• NOT_CRAN                                     : true
-── R CMD check ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-  ─  using log directory ‘/private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck’
-─  using R version 4.3.1 (2023-06-16)
--  ─  using platform: aarch64-apple-darwin20 (64-bit)
-─  R was compiled by
-       Apple clang version 14.0.0 (clang-1400.0.29.202)
-       GNU Fortran (GCC) 12.2.0
-─  running under: macOS Ventura 13.5.2
-─  using session charset: UTF-8
-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-  ─  using options ‘--no-manual --ignore-vignettes --as-cran’ (21.7s)
-\  ✔  checking for file ‘wompwomp/DESCRIPTION’
-─  this is package ‘wompwomp’ version ‘0.1.0’
-─  package encoding: UTF-8
-✔  checking package namespace information
-   checking package dependencies ...|/-  ✔  checking package dependencies (441ms)
-   checking if this is a source package ...\  ✔  checking if this is a source package
-✔  checking if there is a namespace
-|     checking for executable files .../-  ✔  checking for executable files
-\  ✔  checking for hidden files and directories
-   checking for portable file names ...|  N  checking for portable file names
-   Found the following non-portable file path:
-     wompwomp/tests/testthat/_snaps/plot_alluvial/more-neighbornet-3layer-with-2-identical-layers-unsorted.svg
-   
-   Tarballs are only required to store paths of up to 100 bytes and cannot
-   store those of more than 256 bytes, with restrictions including to 100
-   bytes for the final component.
-   See section ‘Package structure’ in the ‘Writing R Extensions’ manual.
-   checking for sufficient/correct file permissions .../  ✔  checking for sufficient/correct file permissions
--     checking whether package ‘wompwomp’ can be installed ...\|/-\|/-\|/  ✔  checking whether package ‘wompwomp’ can be installed (2.1s)
-   checking installed package size ...-  ✔  checking installed package size
-\  ✔  checking package directory
-|     checking for future file timestamps .../-  N  checking for future file timestamps
-   unable to verify current time
-\     checking DESCRIPTION meta-information ...|  ✔  checking DESCRIPTION meta-information
-   checking top-level files .../  ✔  checking top-level files
-✔  checking for left-over files
-✔  checking index information
-   checking package subdirectories ...-  ✔  checking package subdirectories
-   checking R files for non-ASCII characters ...\  ✔  checking R files for non-ASCII characters
-   checking R files for syntax errors ...|  ✔  checking R files for syntax errors
-   checking whether the package can be loaded .../-  ✔  checking whether the package can be loaded (386ms)
-   checking whether the package can be loaded with stated dependencies ...\|  ✔  checking whether the package can be loaded with stated dependencies
-   checking whether the package can be unloaded cleanly .../-  ✔  checking whether the package can be unloaded cleanly (335ms)
-   checking whether the namespace can be loaded with stated dependencies ...\|  ✔  checking whether the namespace can be loaded with stated dependencies
-   checking whether the namespace can be unloaded cleanly .../-  ✔  checking whether the namespace can be unloaded cleanly (385ms)
-\     checking loading without being on the library search path ...|/  ✔  checking loading without being on the library search path (404ms)
--\     checking dependencies in R code ...|/-\  ✔  checking dependencies in R code (1.1s)
-   checking S3 generic/method consistency ...|/  ✔  checking S3 generic/method consistency (403ms)
-   checking replacement functions ...-\  ✔  checking replacement functions
-   checking foreign function calls ...|/-  ✔  checking foreign function calls (418ms)
-   checking R code for possible problems ...\|/-\|/-\|/-\|/-\|  ✔  checking R code for possible problems (3.5s)
-   checking Rd files .../  ✔  checking Rd files
-   checking Rd metadata ...-  ✔  checking Rd metadata
-   checking \     checking Rd line widths ...|  ✔  checking Rd line widths
-   checking Rd cross-references .../  ✔  checking Rd cross-references
-   checking for missing documentation entries ...-\  ✔  checking for missing documentation entries
-   checking for code/documentation mismatches ...|/-\|  ✔  checking for code/documentation mismatches (1s)
-   checking Rd \usage sections .../-\  ✔  checking Rd \usage sections (478ms)
-   checking Rd contents ...|  ✔  checking Rd contents
-   checking for unstated dependencies in examples .../  ✔  checking for unstated dependencies in examples
--  ─  checking files in ‘vignettes’ ... SKIPPED
-   checking examples ...\|/-\  E  checking examples (949ms)
-|     Running examples in ‘wompwomp-Ex.R’ failed
-   The error most likely occurred in:
-   
-   > base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-   > ### Name: data_sort
-   > ### Title: Sorts a dataframe.
-   > ### Aliases: data_sort
-   > 
-   > ### ** Examples
-   > 
-   > # Example 1: df format 1
-   > df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-   > clus_df_gather <- data_sort(df, graphing_columns = c("method1", "method2"))
-   Error in check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("splitspy",  : 
-     Python environment is not set up. Please run wompwomp::setup_python_env(), or do not set sorting_algorithm or column_sorting_algorithm to 'neighbornet'.
-   Calls: data_sort ... sort_neighbornet -> check_python_setup_with_necessary_packages
-   Execution halted
-   checking for unstated dependencies in ‘tests’ .../  ✔  checking for unstated dependencies in ‘tests’
-   checking tests ...-  ─  checking tests
-\     Running ‘testthat.R’|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/  -    [25s/26s]\  |     Running the tests in ‘tests/testthat.R’ failed.
-/     Last 13 lines of output:
-         ▆
-      1. └─base::saveRDS(greedy_wblf_df, file = ground_truth_df_path) at test-plot_alluvial.R:156:8
-      2.   └─base::gzfile(file, mode)
-     ── Error ('test-plot_alluvial.R:181:9'): data_sort works with neighbornet algorithm ──
-     Error in `gzfile(file, mode)`: cannot open the connection
-     Backtrace:
-         ▆
-      1. └─base::saveRDS(neighbornet_df, file = ground_truth_df_path) at test-plot_alluvial.R:181:8
-      2.   └─base::gzfile(file, mode)
-     
-     [ FAIL 15 | WARN 59 | SKIP 0 | PASS 32 ]
-     Deleting unused snapshots:
-     • plot_alluvial/more-neighbornet-3layer-with-2-identical-layers-unsorted.svg
-     Error: Test failures
-     Execution halted
-✔  checking for non-standard things in the check directory
--  ✔  checking for detritus in the temp directory
-   
-   See
-     ‘/private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/00check.log’
-   for details.
-   
-\|/-\      
-── R CMD check results ───────────────────────────────────────────────────────────────────────────────────────────────── wompwomp 0.1.0 ────
-Duration: 1m 20.4s
-
-❯ checking examples ... ERROR
-  Running examples in ‘wompwomp-Ex.R’ failed
-  The error most likely occurred in:
-  
-  > base::assign(".ptime", proc.time(), pos = "CheckExEnv")
-  > ### Name: data_sort
-  > ### Title: Sorts a dataframe.
-  > ### Aliases: data_sort
-  > 
-  > ### ** Examples
-  > 
-  > # Example 1: df format 1
-  > df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-  > clus_df_gather <- data_sort(df, graphing_columns = c("method1", "method2"))
-  Error in check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("splitspy",  : 
-    Python environment is not set up. Please run wompwomp::setup_python_env(), or do not set sorting_algorithm or column_sorting_algorithm to 'neighbornet'.
-  Calls: data_sort ... sort_neighbornet -> check_python_setup_with_necessary_packages
-  Execution halted
-
-❯ checking tests ...
-  See below...
-
-❯ checking for portable file names ... NOTE
-  Found the following non-portable file path:
-    wompwomp/tests/testthat/_snaps/plot_alluvial/more-neighbornet-3layer-with-2-identical-layers-unsorted.svg
-  
-  Tarballs are only required to store paths of up to 100 bytes and cannot
-  store those of more than 256 bytes, with restrictions including to 100
-  bytes for the final component.
-  See section ‘Package structure’ in the ‘Writing R Extensions’ manual.
-
-❯ checking for future file timestamps ... NOTE
-  unable to verify current time
-
-── Test failures ───────────────────────────────────────────────────────────────────────────────────────────────────────────── testthat ────
-
-> # This file is part of the standard setup for testthat.
-> # It is recommended that you do not modify it.
-> #
-> # Where should you do additional test configuration?
-> # Learn more about the roles of various files in:
-> # * https://r-pkgs.org/testing-design.html#sec-tests-files-overview
-> # * https://testthat.r-lib.org/articles/special-files.html
-> 
-> library(testthat)
-> library(wompwomp)
-> 
-> test_check("wompwomp")
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-sh: /private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/exec/wompwomp: No such file or directory
-[ FAIL 15 | WARN 59 | SKIP 0 | PASS 32 ]
-
-══ Warnings ════════════════════════════════════════════════════════════════════
-── Warning ('test-cli.R:91:5'): CLI plot_alluvial, no sort ─────────────────────
-error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args) at test-cli.R:91:4
-── Warning ('test-cli.R:113:5'): CLI plot_alluvial, WOLF left fixed ────────────
-error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args) at test-cli.R:113:4
-── Warning ('test-cli.R:135:5'): CLI plot_alluvial, WOLF right fixed ───────────
-error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args) at test-cli.R:135:4
-── Warning ('test-cli.R:156:5'): CLI plot_alluvial, WBLF ───────────────────────
-error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args) at test-cli.R:156:4
-── Warning ('test-cli.R:177:5'): CLI plot_alluvial, neighbornet ────────────────
-error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args) at test-cli.R:177:4
-── Warning ('test-cli.R:199:5'): CLI data_sort, WOLF left fixed ────────────────
-error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args) at test-cli.R:199:4
-── Warning ('test-cli.R:221:5'): CLI data_sort, WOLF right fixed ───────────────
-error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args) at test-cli.R:221:4
-── Warning ('test-cli.R:243:5'): CLI data_sort, WBLF ───────────────────────────
-error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args) at test-cli.R:243:4
-── Warning ('test-cli.R:264:5'): CLI data_sort, neighbornet ────────────────────
-error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args) at test-cli.R:264:4
-── Warning ('test-cli.R:287:5'): CLI determine_crossing_edges ──────────────────
-error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args) at test-cli.R:287:4
-── Warning ('test-plot_alluvial.R:109:9'): data_sort works with unsorted algorithm ──
-cannot open compressed file '/private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/tests/testthat/ground_truth/unsorted_df.rds', probable reason 'No such file or directory'
-Backtrace:
-    ▆
- 1. └─base::saveRDS(unsorted_df, file = ground_truth_df_path) at test-plot_alluvial.R:109:8
- 2.   └─base::gzfile(file, mode)
-── Warning ('test-plot_alluvial.R:132:9'): data_sort works with greedy_WOLF algorithm ──
-cannot open compressed file '/private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/tests/testthat/ground_truth/greedy_wolf_df.rds', probable reason 'No such file or directory'
-Backtrace:
-    ▆
- 1. └─base::saveRDS(greedy_wolf_df, file = ground_truth_df_path) at test-plot_alluvial.R:132:8
- 2.   └─base::gzfile(file, mode)
-── Warning ('test-plot_alluvial.R:156:9'): data_sort works with greedy_WBLF algorithm ──
-cannot open compressed file '/private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/tests/testthat/ground_truth/greedy_wblf_df.rds', probable reason 'No such file or directory'
-Backtrace:
-    ▆
- 1. └─base::saveRDS(greedy_wblf_df, file = ground_truth_df_path) at test-plot_alluvial.R:156:8
- 2.   └─base::gzfile(file, mode)
-── Warning ('test-plot_alluvial.R:181:9'): data_sort works with neighbornet algorithm ──
-cannot open compressed file '/private/var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T/RtmpgNDuS0/file10ba75ae55691/wompwomp.Rcheck/tests/testthat/tests/testthat/ground_truth/neighbornet_df.rds', probable reason 'No such file or directory'
-Backtrace:
-    ▆
- 1. └─base::saveRDS(neighbornet_df, file = ground_truth_df_path) at test-plot_alluvial.R:181:8
- 2.   └─base::gzfile(file, mode)
-── Warning ('test-plot_alluvial.R:195:5'): VDIFFR - plot_alluvial works with 2 columns, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_unsorted", p) at test-plot_alluvial.R:195:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:195:5'): VDIFFR - plot_alluvial works with 2 columns, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_unsorted", p) at test-plot_alluvial.R:195:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:195:5'): VDIFFR - plot_alluvial works with 2 columns, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_unsorted", p) at test-plot_alluvial.R:195:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:204:5'): VDIFFR - plot_alluvial works with 2 columns, greedy_WOLF ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_WOLF", p) at test-plot_alluvial.R:204:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:204:5'): VDIFFR - plot_alluvial works with 2 columns, greedy_WOLF ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_WOLF", p) at test-plot_alluvial.R:204:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:204:5'): VDIFFR - plot_alluvial works with 2 columns, greedy_WOLF ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_WOLF", p) at test-plot_alluvial.R:204:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:213:5'): VDIFFR - plot_alluvial works with 2 columns, greedy_WBLF ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_WBLF", p) at test-plot_alluvial.R:213:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:213:5'): VDIFFR - plot_alluvial works with 2 columns, greedy_WBLF ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_WBLF", p) at test-plot_alluvial.R:213:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:213:5'): VDIFFR - plot_alluvial works with 2 columns, greedy_WBLF ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_WBLF", p) at test-plot_alluvial.R:213:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:222:5'): VDIFFR - plot_alluvial works with 2 columns, greedy_NN ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_NN", p) at test-plot_alluvial.R:222:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:222:5'): VDIFFR - plot_alluvial works with 2 columns, greedy_NN ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_NN", p) at test-plot_alluvial.R:222:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:222:5'): VDIFFR - plot_alluvial works with 2 columns, greedy_NN ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger("basic_alluvial_plot_NN", p) at test-plot_alluvial.R:222:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:263:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:263:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:263:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:263:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:263:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:263:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:277:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, optimize_column_order_per_cycle FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:277:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:277:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, optimize_column_order_per_cycle FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:277:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:277:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, optimize_column_order_per_cycle FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:277:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:290:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, optimize_column_order_per_cycle TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:290:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:290:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, optimize_column_order_per_cycle TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:290:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:290:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, neighbornet, optimize_column_order_per_cycle TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:290:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:370:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:370:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:370:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:370:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:370:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:370:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:385:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order FALSE, optimize_column_order_per_cycle FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:385:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:385:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order FALSE, optimize_column_order_per_cycle FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:385:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:385:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order FALSE, optimize_column_order_per_cycle FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:385:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:399:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order FALSE, optimize_column_order_per_cycle TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:399:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:399:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order FALSE, optimize_column_order_per_cycle TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:399:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:399:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order FALSE, optimize_column_order_per_cycle TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:399:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:412:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE, optimize_column_order_per_cycle FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:412:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:412:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE, optimize_column_order_per_cycle FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:412:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:412:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE, optimize_column_order_per_cycle FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:412:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:425:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE, optimize_column_order_per_cycle TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:425:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:425:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE, optimize_column_order_per_cycle TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:425:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:425:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, neighbornet, optimize_column_order TRUE, optimize_column_order_per_cycle TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:425:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:439:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:439:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:439:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:439:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:439:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, unsorted ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:439:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:452:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:452:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:452:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:452:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:452:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order FALSE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:452:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:466:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:466:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:466:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:466:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-── Warning ('test-plot_alluvial.R:466:5'): VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identical layers, neighbornet, optimize_column_order TRUE ──
-Some strata appear at multiple axes.
-Backtrace:
-     ▆
-  1. └─vdiffr::expect_doppelganger(...) at test-plot_alluvial.R:466:4
-  2.   └─vdiffr (local) writer(fig, testcase, title)
-  3.     ├─vdiffr:::print_plot(plot, title)
-  4.     └─vdiffr:::print_plot.ggplot(plot, title)
-  5.       ├─base::print(p)
-  6.       └─ggplot2:::print.ggplot(p)
-  7.         ├─ggplot2::ggplot_build(x)
-  8.         └─ggplot2:::ggplot_build.ggplot(x)
-  9.           └─ggplot2:::by_layer(...)
- 10.             ├─rlang::try_fetch(...)
- 11.             │ ├─base::tryCatch(...)
- 12.             │ │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
- 13.             │ │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
- 14.             │ │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
- 15.             │ └─base::withCallingHandlers(...)
- 16.             └─ggplot2 (local) f(l = layers[[i]], d = data[[i]])
- 17.               └─l$compute_statistic(d, layout)
- 18.                 └─ggplot2 (local) compute_statistic(..., self = self)
- 19.                   └─self$stat$setup_data(data, self$computed_stat_params)
- 20.                     └─ggalluvial (local) setup_data(...)
- 21.                       └─ggalluvial::to_lodes_form(data = data, axes = axis_ind, discern = params$discern)
-
-══ Failed tests ════════════════════════════════════════════════════════════════
-── Error ('test-cli.R:93:5'): CLI plot_alluvial, no sort ───────────────────────
-Error in `type_checking_files(output_path = output_path, truth_path = truth_path, 
-    check = check)`: Output file not found at: /var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T//RtmpVeyZ1O/working_dir/Rtmp382r1j/file30df607c6a72.png
-Backtrace:
-    ▆
- 1. └─wompwomp (local) compare_images(...) at test-cli.R:93:4
- 2.   └─wompwomp (local) type_checking_files(...) at test-cli.R:32:4
-── Error ('test-cli.R:115:5'): CLI plot_alluvial, WOLF left fixed ──────────────
-Error in `type_checking_files(output_path = output_path, truth_path = truth_path, 
-    check = check)`: Output file not found at: /var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T//RtmpVeyZ1O/working_dir/Rtmp382r1j/file30df83093db.png
-Backtrace:
-    ▆
- 1. └─wompwomp (local) compare_images(...) at test-cli.R:115:4
- 2.   └─wompwomp (local) type_checking_files(...) at test-cli.R:32:4
-── Error ('test-cli.R:137:5'): CLI plot_alluvial, WOLF right fixed ─────────────
-Error in `type_checking_files(output_path = output_path, truth_path = truth_path, 
-    check = check)`: Output file not found at: /var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T//RtmpVeyZ1O/working_dir/Rtmp382r1j/file30df2d3b1310.png
-Backtrace:
-    ▆
- 1. └─wompwomp (local) compare_images(...) at test-cli.R:137:4
- 2.   └─wompwomp (local) type_checking_files(...) at test-cli.R:32:4
-── Error ('test-cli.R:158:5'): CLI plot_alluvial, WBLF ─────────────────────────
-Error in `type_checking_files(output_path = output_path, truth_path = truth_path, 
-    check = check)`: Output file not found at: /var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T//RtmpVeyZ1O/working_dir/Rtmp382r1j/file30df16096a3.png
-Backtrace:
-    ▆
- 1. └─wompwomp (local) compare_images(...) at test-cli.R:158:4
- 2.   └─wompwomp (local) type_checking_files(...) at test-cli.R:32:4
-── Error ('test-cli.R:179:5'): CLI plot_alluvial, neighbornet ──────────────────
-Error in `type_checking_files(output_path = output_path, truth_path = truth_path, 
-    check = check)`: Output file not found at: /var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T//RtmpVeyZ1O/working_dir/Rtmp382r1j/file30df6c41a809.png
-Backtrace:
-    ▆
- 1. └─wompwomp (local) compare_images(...) at test-cli.R:179:4
- 2.   └─wompwomp (local) type_checking_files(...) at test-cli.R:32:4
-── Error ('test-cli.R:201:5'): CLI data_sort, WOLF left fixed ──────────────────
-Error in `type_checking_files(output_path = output_path, truth_path = truth_path, 
-    check = check)`: Output file not found at: /var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T//RtmpVeyZ1O/working_dir/Rtmp382r1j/file30df4a7f1e65.csv
-Backtrace:
-    ▆
- 1. └─wompwomp (local) compare_csvs(...) at test-cli.R:201:4
- 2.   └─wompwomp (local) type_checking_files(...) at test-cli.R:63:4
-── Error ('test-cli.R:223:5'): CLI data_sort, WOLF right fixed ─────────────────
-Error in `type_checking_files(output_path = output_path, truth_path = truth_path, 
-    check = check)`: Output file not found at: /var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T//RtmpVeyZ1O/working_dir/Rtmp382r1j/file30df5fa49f18.csv
-Backtrace:
-    ▆
- 1. └─wompwomp (local) compare_csvs(...) at test-cli.R:223:4
- 2.   └─wompwomp (local) type_checking_files(...) at test-cli.R:63:4
-── Error ('test-cli.R:245:5'): CLI data_sort, WBLF ─────────────────────────────
-Error in `type_checking_files(output_path = output_path, truth_path = truth_path, 
-    check = check)`: Output file not found at: /var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T//RtmpVeyZ1O/working_dir/Rtmp382r1j/file30df30c911b6.csv
-Backtrace:
-    ▆
- 1. └─wompwomp (local) compare_csvs(...) at test-cli.R:245:4
- 2.   └─wompwomp (local) type_checking_files(...) at test-cli.R:63:4
-── Error ('test-cli.R:266:5'): CLI data_sort, neighbornet ──────────────────────
-Error in `type_checking_files(output_path = output_path, truth_path = truth_path, 
-    check = check)`: Output file not found at: /var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T//RtmpVeyZ1O/working_dir/Rtmp382r1j/file30df60a9dcbf.csv
-Backtrace:
-    ▆
- 1. └─wompwomp (local) compare_csvs(...) at test-cli.R:266:4
- 2.   └─wompwomp (local) type_checking_files(...) at test-cli.R:63:4
-── Error ('test-cli.R:289:5'): CLI determine_crossing_edges ────────────────────
-Error in `type_checking_files(output_path = output_path, truth_path = truth_path, 
-    check = check)`: Output file not found at: /var/folders/wr/wdr46lxn7fbc_kty6kwbfhxc0000gn/T//RtmpVeyZ1O/working_dir/Rtmp382r1j/file30df2fdbb12d.csv
-Backtrace:
-    ▆
- 1. └─wompwomp (local) compare_csvs(...) at test-cli.R:289:4
- 2.   └─wompwomp (local) type_checking_files(...) at test-cli.R:63:4
-── Error ('test-cli.R:304:5'): CLI determine_weighted_layer_free_objective ─────
-<cmdError/error/condition>
-Error in `system2(cli_cmd_path, args, stdout = TRUE)`: error in running command
-Backtrace:
-    ▆
- 1. └─base::system2(cli_cmd_path, args, stdout = TRUE) at test-cli.R:304:4
-── Error ('test-plot_alluvial.R:109:9'): data_sort works with unsorted algorithm ──
-Error in `gzfile(file, mode)`: cannot open the connection
-Backtrace:
-    ▆
- 1. └─base::saveRDS(unsorted_df, file = ground_truth_df_path) at test-plot_alluvial.R:109:8
- 2.   └─base::gzfile(file, mode)
-── Error ('test-plot_alluvial.R:132:9'): data_sort works with greedy_WOLF algorithm ──
-Error in `gzfile(file, mode)`: cannot open the connection
-Backtrace:
-    ▆
- 1. └─base::saveRDS(greedy_wolf_df, file = ground_truth_df_path) at test-plot_alluvial.R:132:8
- 2.   └─base::gzfile(file, mode)
-── Error ('test-plot_alluvial.R:156:9'): data_sort works with greedy_WBLF algorithm ──
-Error in `gzfile(file, mode)`: cannot open the connection
-Backtrace:
-    ▆
- 1. └─base::saveRDS(greedy_wblf_df, file = ground_truth_df_path) at test-plot_alluvial.R:156:8
- 2.   └─base::gzfile(file, mode)
-── Error ('test-plot_alluvial.R:181:9'): data_sort works with neighbornet algorithm ──
-Error in `gzfile(file, mode)`: cannot open the connection
-Backtrace:
-    ▆
- 1. └─base::saveRDS(neighbornet_df, file = ground_truth_df_path) at test-plot_alluvial.R:181:8
- 2.   └─base::gzfile(file, mode)
-
-[ FAIL 15 | WARN 59 | SKIP 0 | PASS 32 ]
-Deleting unused snapshots:
-• plot_alluvial/more-neighbornet-3layer-with-2-identical-layers-unsorted.svg
-Error: Test failures
-Execution halted
-
-2 errors ✖ | 0 warnings ✔ | 2 notes ✖

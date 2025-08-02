@@ -31,7 +31,9 @@ data_sort(
   verbose = FALSE,
   load_df = TRUE,
   make_intermediate_neighbornet_plots = FALSE,
-  do_compute_alluvial_statistics = TRUE
+  do_compute_alluvial_statistics = TRUE,
+  environment = "wompwomp_env",
+  use_conda = TRUE
 )
 }
 \arguments{

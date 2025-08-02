@@ -57,7 +57,9 @@ plot_alluvial(
   keep_y_labels = FALSE,
   box_line_width = 1,
   verbose = FALSE,
-  make_intermediate_neighbornet_plots = FALSE
+  make_intermediate_neighbornet_plots = FALSE,
+  environment = "wompwomp_env",
+  use_conda = TRUE
 )
 }
 \arguments{

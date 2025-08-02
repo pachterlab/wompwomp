@@ -15,3 +15,10 @@ Called for side effects. Invisibly returns \code{NULL}.
 \description{
 This function is called internally to handle command line arguments.
 }
+\examples{
+\dontrun{
+# set up args before as a string
+run_cli(args)
+}
+
+}
