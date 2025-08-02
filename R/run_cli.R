@@ -6,10 +6,8 @@
 #' @return Called for side effects. Invisibly returns `NULL`.
 #' 
 #' @examples
-#' \dontrun{
-#' # set up args before as a string
-#' run_cli(args)
-#' }
+#' 
+#' run_cli(c("plot_alluvial", "--help"))
 #' 
 #' @export
 run_cli <- function(args) {

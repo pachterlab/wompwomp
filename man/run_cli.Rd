@@ -16,9 +16,7 @@ Called for side effects. Invisibly returns \code{NULL}.
 This function is called internally to handle command line arguments.
 }
 \examples{
-\dontrun{
-# set up args before as a string
-run_cli(args)
-}
+
+run_cli(c("plot_alluvial", "--help"))
 
 }
