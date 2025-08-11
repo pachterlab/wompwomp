@@ -23,6 +23,8 @@ library(igraph)
 library(tibble)
 library(tidyr)
 library(reticulate)
+
+set.seed(42)
 ```
 
 Set up our python environment

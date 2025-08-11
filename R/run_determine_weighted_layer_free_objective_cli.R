@@ -9,6 +9,7 @@ Required:
 
 Optional:
   -v, --verbose             If TRUE, will display messages during the function.
+  --print_params            If TRUE, will print function params.
   -q, --quiet               Don't show stdout
 ")
         quit(save = "no", status = 0)
@@ -19,6 +20,7 @@ Optional:
 
     # Optional arguments
     verbose <- store_true(args, c("-v", "--verbose"))
+    print_params <- store_true(args, c("--print_params"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
     # Base argument list with required args
@@ -28,6 +30,7 @@ Optional:
 
     # Conditionally add optional args if not NULL
     if (!is.null(verbose)) args_list$verbose <- verbose
+    if (!is.null(print_params)) args_list$print_params <- print_params
 
     # Dynamically call function
     result <- do.call(determine_weighted_layer_free_objective, args_list)

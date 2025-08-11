@@ -22,6 +22,7 @@ Optional:
   --disable_use_fenwick_tree_for_objective_calculation  Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn), but requires python environment.
   --environment  Python environment (if applicable). Default: 'wompwomp_env'
   --disable_use_conda  Whether or not to use conda for Python (if applicable)
+  --print_params            If TRUE, will print function params.
   -v, --verbose             If TRUE, will display messages during the function.
   -q, --quiet               Don't show stdout
 ")
@@ -45,6 +46,7 @@ Optional:
     environment <- get_arg(args, c("--environment"), default = "wompwomp_env")
     use_conda <- store_false(args, c("--disable_use_conda"))
     verbose <- store_true(args, c("-v", "--verbose"))
+    print_params <- store_true(args, c("--print_params"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
     # Hidden arguments
@@ -72,6 +74,7 @@ Optional:
     if (!is.null(environment)) args_list$environment <- environment
     if (!is.null(use_conda)) args_list$use_conda <- use_conda
     if (!is.null(verbose)) args_list$verbose <- verbose
+    if (!is.null(print_params)) args_list$print_params <- print_params
     if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
     if (!is.null(load_df)) args_list$load_df <- load_df
     if (!is.null(default_sorting)) args_list$default_sorting <- default_sorting

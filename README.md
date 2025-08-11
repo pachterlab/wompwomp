@@ -118,6 +118,18 @@ p
 ./exec/wompwomp determine_weighted_layer_free_objective --df tmp_files/crossing.csv
 ```
 
-For help on any command, run `./exec/wompwomp plot_alluvial COMMAND --help`
+For help on any command, run `./exec/wompwomp COMMAND --help`
+
+Notes about command line usage:
+- all parameter values should be space-separted
+ex. ./exec/wompwomp plot_alluvial --df data.csv, NOT --df=data.csv
+- all parameters that take a single argument have identical names between R and command line, with the value immediately following the argument
+ex. plot_alluvial(df=data.csv), ./exec/wompwomp plot_alluvial --df data.csv
+- all parameters that take a vector/list of arguments have identical names between R and command line, with the values immediately following the argument, all separated by spaced
+ex. plot_alluvial(graphing_columns=c("tissue", "cluster")), ./exec/wompwomp plot_alluvial --graphing_columns tissue cluster
+- all boolean parameters are passed with the flag without any following arguments; boolean parameters that default to FALSE have identical names between R and command line, while boolean parameters that default to TRUE have "disable_" prepended to the name in the command line
+ex. (note that the defaults for include_group_sizes=FALSE and include_axis_titles=TRUE): plot_alluvial(include_group_sizes=TRUE, include_axis_titles=FALSE), ./exec/wompwomp plot_alluvial --include_group_sizes --disable_include_axis_titles
+
+
 
 ## See a full tutorial in our introductory vignette [wompwomp-intro.Rmd](vignettes/wompwomp-intro.Rmd)

@@ -35,6 +35,7 @@ Optional:
   --environment  Python environment (if applicable). Default: 'wompwomp_env'
   --disable_use_conda  Whether or not to use conda for Python (if applicable)
   -v, --verbose             If TRUE, will display messages during the function.
+  --print_params            If TRUE, will print function params.
   -q, --quiet               Don't show stdout
 ")
         quit(save = "no", status = 0)
@@ -69,6 +70,7 @@ Optional:
     environment <- get_arg(args, c("--environment"), default = "wompwomp_env")
     use_conda <- store_false(args, c("--disable_use_conda"))
     verbose <- store_true(args, c("-v", "--verbose"))
+    print_params <- store_true(args, c("--print_params"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
     # Hidden arguments
@@ -107,6 +109,7 @@ Optional:
     if (!is.null(environment)) args_list$environment <- environment
     if (!is.null(use_conda)) args_list$use_conda <- use_conda
     if (!is.null(verbose)) args_list$verbose <- verbose
+    if (!is.null(print_params)) args_list$print_params <- print_params
     if (!is.null(load_df)) args_list$load_df <- load_df
     if (!is.null(make_intermediate_neighbornet_plots)) args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
 

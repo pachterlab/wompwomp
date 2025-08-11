@@ -25,6 +25,31 @@ if (objective_fenwick_script_path == "") {
 }
 stopifnot(file.exists(objective_fenwick_script_path))
 
+convert_args_to_lowercase <- function(arg_names) {
+    for (nm in arg_names) {
+        val <- get(nm, envir = parent.frame())
+        if (is.character(val)) {
+            assign(nm, tolower(val), envir = parent.frame())
+        }
+    }
+}
+
+print_function_params <- function() {
+    # Get calling function (one level up)
+    f <- sys.function(sys.parent())
+    
+    # Get call args and defaults
+    call_args <- as.list(sys.call(sys.parent()))[-1]
+    defaults  <- formals(f)
+    
+    # Merge defaults with explicitly set args
+    all_args <- modifyList(as.list(defaults), call_args)
+    
+    # Print nicely
+    for (nm in names(all_args)) {
+        message(nm, " = ", all_args[[nm]])
+    }
+}
 
 check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "", environment = "wompwomp_env", use_conda = TRUE) {
     ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
@@ -75,6 +100,7 @@ check_python_setup_with_necessary_packages <- function(necessary_packages_for_th
 #'
 #' @param df A CSV path or data frame as outputted with \code{crossing_edges_df} (in R) or \code{output_df_path} (as a file) from \code{determine_crossing_edges}.
 #' @param verbose Logical. If TRUE, will display messages during the function.
+#' @param print_params Logical. If TRUE, will print function params.
 #'
 #' @return A non-negative integer.
 #'
@@ -92,7 +118,8 @@ check_python_setup_with_necessary_packages <- function(necessary_packages_for_th
 #' objective <- determine_weighted_layer_free_objective(crossing_edges_output$crossing_edges_df)
 #'
 #' @export
-determine_weighted_layer_free_objective <- function(df, verbose = FALSE) {
+determine_weighted_layer_free_objective <- function(df, verbose = FALSE, print_params = FALSE) {
+    if (print_params) print_function_params()
     # Case 1: CSV
     if (is.character(df) && length(df) == 1 && file.exists(df)) {
         # Read the file
@@ -150,6 +177,7 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' @param environment Character. Python environment (if applicable). Default: 'wompwomp_env'
 #' @param use_conda Logical. Whether or not to use conda for Python (if applicable)
 #' @param verbose Logical. If TRUE, will display messages during the function.
+#' @param print_params Logical. If TRUE, will print function params.
 #' @param stratum_column_and_value_to_keep Internal flag; not recommended to modify.
 #' @param input_objective_matrix_vector Internal flag; not recommended to modify.
 #' @param input_objective Internal flag; not recommended to modify.
@@ -185,7 +213,10 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' result <- determine_crossing_edges(df, column1 = "col1_int", column2 = "col2_int")
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, use_fenwick_tree_for_objective_calculation = TRUE, verbose = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical", set_seed = 42, environment = "wompwomp_env", use_conda = TRUE) {
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, use_fenwick_tree_for_objective_calculation = TRUE, verbose = FALSE, print_params = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical", set_seed = 42, environment = "wompwomp_env", use_conda = TRUE) {
+    if (print_params) print_function_params()
+    # lowercase_args(c("default_sorting"))
+    
     #* Set seed
     if (!is.null(set_seed)) {
         if (exists(".Random.seed")) {

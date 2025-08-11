@@ -23,6 +23,8 @@ library(igraph)
 library(tibble)
 library(tidyr)
 library(reticulate)
+
+set.seed(42)
 ```
 
 Set up our python environment
@@ -188,3 +190,25 @@ print(paste0("Objective (NeighborNet): ", objective_nn))
 ```{r}
 sessioninfo::session_info()
 ```
+
+```{r}
+
+lowercase_args <- function(arg_names) {
+  for (nm in arg_names) {
+    val <- get(nm, envir = parent.frame())
+    if (is.character(val)) {
+      assign(nm, tolower(val), envir = parent.frame())
+    }
+  }
+}
+
+my_func <- function(a = "Foo", b = "Bar", c = 42) {
+  lowercase_args(c("a", "b"))
+  print(list(a = a, b = b, c = c))
+  browser()
+}
+
+my_func(a = "HELLO", b = "WORLD", c = 99)
+
+```
+

@@ -16,6 +16,7 @@ Optional:
   --set_seed Integer. Random seed for when default_sorting == 'random' parameter.
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   -v, --verbose             If TRUE, will display messages during the function.
+  --print_params            If TRUE, will print function params.
   -q, --quiet               Don't show stdout
 ")
         quit(save = "no", status = 0)
@@ -31,6 +32,7 @@ Optional:
     set_seed <- get_integer_arg(args, c("--set_seed"))
     output_df_path <- get_arg(args, c("-o", "--output_df_path"))
     verbose <- store_true(args, c("-v", "--verbose"))
+    print_params <- store_true(args, c("--print_params"))
     quiet <- store_true(args, c("-q", "--quiet"))
 
     # Hidden arguments
@@ -50,6 +52,7 @@ Optional:
     if (!is.null(set_seed)) args_list$set_seed <- set_seed
     if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
     if (!is.null(verbose)) args_list$verbose <- verbose
+    if (!is.null(print_params)) args_list$print_params <- print_params
     if (!is.null(load_df)) args_list$load_df <- load_df
     if (!is.null(do_gather_set_data)) args_list$do_gather_set_data <- do_gather_set_data
     if (!is.null(color_band_column)) args_list$color_band_column <- color_band_column

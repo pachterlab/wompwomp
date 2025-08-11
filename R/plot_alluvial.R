@@ -1238,6 +1238,7 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' @param set_seed Integer. Random seed for the \code{random_initializations} parameter, random initialization/shuffling of blocks, and TSP solver for optimizing column order. Depracated (recommended to set seed outside of fucntion call).
 #' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
 #' @param verbose Logical. If TRUE, will display messages during the function.
+#' @param print_params Logical. If TRUE, will print function params.
 #' @param load_df Internal flag; not recommended to modify.
 #' @param do_gather_set_data Internal flag; not recommended to modify.
 #' @param color_band_column Internal flag; not recommended to modify.
@@ -1261,7 +1262,10 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #'     column_weights = "value")
 #'
 #' @export
-data_preprocess <- function(df, graphing_columns, column_weights = NULL, default_sorting = "alphabetical", set_seed = 42, output_df_path = NULL, verbose = FALSE, load_df = TRUE, do_gather_set_data = FALSE, color_band_column = NULL) {
+data_preprocess <- function(df, graphing_columns, column_weights = NULL, default_sorting = "alphabetical", set_seed = 42, output_df_path = NULL, verbose = FALSE, print_params = FALSE, load_df = TRUE, do_gather_set_data = FALSE, color_band_column = NULL) {
+    if (print_params) print_function_params()
+    # lowercase_args(c("default_sorting"))
+    
     #* Set seed
     if (!is.null(set_seed)) {
         if (exists(".Random.seed")) {
@@ -1467,6 +1471,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @param environment Character. Python environment (if applicable). Default: 'wompwomp_env'
 #' @param use_conda Logical. Whether or not to use conda for Python (if applicable)
 #' @param verbose Logical. If TRUE, will display messages during the function.
+#' @param print_params Logical. If TRUE, will print function params.
 #' @param load_df Internal flag; not recommended to modify.
 #' @param make_intermediate_neighbornet_plots Internal flag; not recommended to modify.
 #' @param do_compute_alluvial_statistics Internal flag; not recommended to modify.
@@ -1498,7 +1503,10 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #'     column_sorting_algorithm = "tsp")
 #'
 #' @export
-data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL, random_initializations = 1, set_seed = 42, output_df_path = NULL, preprocess_data = TRUE, default_sorting = "alphabetical", return_updated_graphing_columns = FALSE, verbose = FALSE, load_df = TRUE, make_intermediate_neighbornet_plots = FALSE, do_compute_alluvial_statistics = TRUE, environment = "wompwomp_env", use_conda = TRUE) {
+data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL, random_initializations = 1, set_seed = 42, output_df_path = NULL, preprocess_data = TRUE, default_sorting = "alphabetical", return_updated_graphing_columns = FALSE, verbose = FALSE, verbose = FALSE, load_df = TRUE, make_intermediate_neighbornet_plots = FALSE, do_compute_alluvial_statistics = TRUE, environment = "wompwomp_env", use_conda = TRUE) {
+    if (print_params) print_function_params()
+    # lowercase_args(c("sorting_algorithm", "column_sorting_metric", "column_sorting_algorithm", "default_sorting"))
+    
     #* Set seed
     if (!is.null(set_seed)) {
         if (exists(".Random.seed")) {
@@ -1696,6 +1704,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param environment Character. Python environment (if applicable). Default: 'wompwomp_env'
 #' @param use_conda Logical. Whether or not to use conda for Python (if applicable)
 #' @param verbose Logical. If TRUE, will display messages during the function.
+#' @param print_params Logical. If TRUE, will print function params.
 #' @param make_intermediate_neighbornet_plots Internal flag; not recommended to modify.
 #'
 #' @return A \code{ggplot2} object representing the alluvial plot.
@@ -1739,7 +1748,10 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE,
                           default_sorting = "alphabetical", box_width = 1 / 3, text_width = 1 / 4, min_text = 4, text_size = 14,
                           auto_adjust_text = TRUE, axis_text_size = 2, axis_text_vjust = 0, save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE,
-                          keep_y_labels = FALSE, box_line_width = 1, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE, environment = "wompwomp_env", use_conda = TRUE) {
+                          keep_y_labels = FALSE, box_line_width = 1, verbose = FALSE, print_params = FALSE, make_intermediate_neighbornet_plots = FALSE, environment = "wompwomp_env", use_conda = TRUE) {
+    if (print_params) print_function_params()
+    # lowercase_args(c("sorting_algorithm", "column_sorting_metric", "column_sorting_algorithm", "match_order", "graphing_algorithm", "default_sorting"))
+    
     #* Set seed
     if (!is.null(set_seed)) {
         if (exists(".Random.seed")) {

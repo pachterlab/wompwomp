@@ -21,6 +21,8 @@ library(ggforce)
 library(igraph)
 library(tibble)
 library(reticulate)
+
+set.seed(42)
 ```
 
 ```{r}
