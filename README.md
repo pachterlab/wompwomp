@@ -4,13 +4,7 @@ Make alluvial plots with node order and colors optimized to minimize edge crossi
 
 wompwomp solves the **W**eighted (permutation) **O**ptimization of **M**ultiple **P**artitions--**W**eighted (label) **O**ptimization of **M**ultiple **P**artitions (W<sub>P</sub>OMP--W<sub>L</sub>OMP) problem.
 
-## Before wompwomp
-
-![alt text](https://github.com/pachterlab/wompwomp/blob/main/figures/wompwomp_unsorted.png)
-
-## After wompwomp
-
-![alt text](https://github.com/pachterlab/wompwomp/blob/main/figures/wompwomp_NN.png)
+![alt text](https://github.com/pachterlab/wompwomp/blob/main/figures/wompwomp_before_after.png)
 
 ## wompwomp functions/commands
 
