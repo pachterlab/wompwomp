@@ -13,7 +13,7 @@ wompwomp solves the **W**eighted (permutation) **O**ptimization of **M**ultiple 
 ## Installation:
 
 ### R - Requires system [R](https://www.r-project.org/) to be installed
-Bioconductor
+Bioconductor (not yet released on Bioconductor - please install from GitHub)
 ```         
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
