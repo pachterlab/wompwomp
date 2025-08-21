@@ -75,12 +75,13 @@ if (DEV_MODE) {
         if (interactive()) {
             install <- askYesNo("wompwomp is required but not installed. Install it now?")
             if (isTRUE(install)) {
-                remotes::install_github('pachterlab/wompwomp')
+                # remotes::install_github('pachterlab/wompwomp')
+                remotes::install_local(here::here(), dependencies = FALSE)
             } else {
-                stop("The wompwomp is not installed. Please install it with `Rscript -e \"remotes::install_github('pachterlab/wompwomp')\"`, or run `export WOMPWOMP_DEV_MODE=TRUE` (requires devtools)\".")
+                stop("The wompwomp is not installed. Please install it with `Rscript -e \"remotes::install_local('.', dependencies = FALSE)\"`, or run `export WOMPWOMP_DEV_MODE=TRUE` (requires devtools)\".")
             }
         } else {
-            stop("The wompwomp is not installed. Please install it with `Rscript -e \"remotes::install_github('pachterlab/wompwomp')\"`, or run `export WOMPWOMP_DEV_MODE=TRUE` (requires devtools)\".")
+            stop("The wompwomp is not installed. Please install it with `Rscript -e \"remotes::install_local('.', dependencies = FALSE)\"`, or run `export WOMPWOMP_DEV_MODE=TRUE` (requires devtools)\".")
         }
     }
     # Use installed package (standard behavior during R CMD check or after install)
@@ -101,11 +102,11 @@ Sys.setenv(R_SCRIPT_FROM_CLI = "true")
 # setup python environment
 sub_args <- args[-1]
 environment <- wompwomp:::get_arg(sub_args, c("--environment"), default = "wompwomp_env")
-use_conda <- store_false(sub_args, c("--disable_use_conda"))
+use_conda <- wompwomp:::store_false(sub_args, c("--disable_use_conda"))
 wompwomp::setup_python_env(environment, use_conda = use_conda)
 
 # set random seed
-set_seed <- get_integer_arg(sub_args, "--set_seed")
+set_seed <- wompwomp:::get_integer_arg(sub_args, "--set_seed")
 if (!is.null(set_seed)) {
     set.seed(set_seed)
 }

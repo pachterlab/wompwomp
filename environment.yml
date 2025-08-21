@@ -33,7 +33,7 @@ dependencies:  # one day, replace all dependencies with simply bioconductor-womp
   - r-sessioninfo
   - r-remotes
   - pip=25.1
-  - python=3.10
+  - python>=3.9,<3.12
   - pip:
       - numpy==1.23.5
       - splitspy==0.0.10
