@@ -65,7 +65,7 @@ head(df)
 
 Implementing a greedy heuristic for weighted one-layer free problem
 ```{r}
-clus_df_gather_sorted <- data_sort(df, column1 = "tissue", column2 = "cluster", sorting_algorithm = "greedy_WOLF", fixed_column = "tissue")
+clus_df_gather_sorted <- data_sort(df, column1 = "tissue", column2 = "cluster", sorting_algorithm = "greedy_wolf", fixed_column = "tissue")
 crossing_edges_output <- determine_crossing_edges(clus_df_gather_sorted, column1 = "col1_int", column2 = "col2_int")
 crossing_edges <- crossing_edges_output$crossing_edges_df
 wompwomp_objective_greedy_wolf <- determine_weighted_layer_free_objective(crossing_edges)
@@ -74,7 +74,7 @@ print(wompwomp_objective_greedy_wolf)
 
 Plot the alluvial plot with sorting and color matching
 ```{r}
-p1 <- plot_alluvial(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy_WOLF", fixed_column = "tissue", color_bands = TRUE)
+p1 <- plot_alluvial(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy_wolf", fixed_column = "tissue", color_bands = TRUE)
 p1
 ```
 
@@ -120,7 +120,7 @@ clus_permuted_best
 
 
 ```{r}
-p_best_wolf <- plot_alluvial(clus_permuted_best, column1 = "col1_int", column2 = "col2_int", column_weights = "value", sorting_algorithm = "None", color_bands = TRUE)
+p_best_wolf <- plot_alluvial(clus_permuted_best, column1 = "col1_int", column2 = "col2_int", column_weights = "value", sorting_algorithm = "none", color_bands = TRUE)
 p_best_wolf
 ```
 
@@ -144,7 +144,7 @@ ggplot(df_plot, aes(x = perm_id, y = objective)) +
 
 Now do the same for WBLF
 ```{r}
-clus_df_gather_sorted <- data_sort(df, column1 = "tissue", column2 = "cluster", sorting_algorithm = "greedy_WBLF", random_initializations = 10)
+clus_df_gather_sorted <- data_sort(df, column1 = "tissue", column2 = "cluster", sorting_algorithm = "greedy_wblf", random_initializations = 10)
 crossing_edges_output <- determine_crossing_edges(clus_df_gather_sorted, column1 = "col1_int", column2 = "col2_int")
 crossing_edges <- crossing_edges_output$crossing_edges_df
 wompwomp_objective_greedy_wblf <- determine_weighted_layer_free_objective(crossing_edges)
@@ -152,7 +152,7 @@ print(wompwomp_objective_greedy_wblf)
 ```
 
 ```{r}
-p2 <- plot_alluvial(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy_WBLF", color_bands = TRUE)
+p2 <- plot_alluvial(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy_wblf", color_bands = TRUE)
 p2
 ```
 
@@ -215,7 +215,7 @@ for (i in 1:nrow(left_perms)) {
 ```
 
 ```{r}
-p_best_wblf <- plot_alluvial(clus_permuted_best, column1 = "col1_int", column2 = "col2_int", column_weights = "value", sorting_algorithm = "None", color_bands = TRUE)
+p_best_wblf <- plot_alluvial(clus_permuted_best, column1 = "col1_int", column2 = "col2_int", column_weights = "value", sorting_algorithm = "none", color_bands = TRUE)
 p_best_wblf
 ```
 
@@ -227,7 +227,7 @@ crossing_edges <- crossing_edges_output$crossing_edges_df
 neighbornet_objective_minimum <- determine_weighted_layer_free_objective(crossing_edges)
 print(neighbornet_objective_minimum)
 
-plot_alluvial(clus_df_gather_sorted_neighbornet, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "None", color_bands = TRUE)
+plot_alluvial(clus_df_gather_sorted_neighbornet, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "none", color_bands = TRUE)
 ```
 
 ```{r}

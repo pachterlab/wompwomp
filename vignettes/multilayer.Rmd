@@ -77,12 +77,12 @@ head(df)
 ```
 
 ```{r}
-p1 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex", "special"), sorting_algorithm = "None")
+p1 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex", "special"), sorting_algorithm = "none")
 p1
 ```
 
 ```{r}
-p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), color_band_column = "special", sorting_algorithm = "None")
+p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), color_band_column = "special", sorting_algorithm = "none")
 p2
 ```
 

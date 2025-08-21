@@ -78,7 +78,7 @@ plot_alluvial(
 
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
 
-\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'tsp', 'greedy_WOLF', 'greedy_WBLF', 'random', 'None'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_WOLF' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_WBLF' implements the 'greedy_WOLF' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_WOLF' and 'greedy_WBLF' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'None' keeps the mappings as-is when passed into the function.}
+\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.}
 
 \item{optimize_column_order}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.}
 
@@ -100,11 +100,11 @@ plot_alluvial(
 
 \item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
 
-\item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_WOLF'}.}
+\item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_wolf'}.}
 
-\item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}.}
+\item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}.}
 
-\item{set_seed}{Integer. Random seed for the \code{random_initializations} parameter (only applies when \code{sorting_algorithm == 'greedy_WOLF' or sorting_algorithm == 'greedy_WBLF'}), random initialization/shuffling of blocks (only applies when \code{default_sorting == 'random' or sorting_algorithm == 'random'}), TSP solver for block order or optimizing column order (only applies when \code{sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'}), and louvain/leiden clustering (only applies when \code{match_order == 'advanced'}). Depracated (recommended to set seed outside of fucntion call).}
+\item{set_seed}{Integer. Random seed for the \code{random_initializations} parameter (only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}), random initialization/shuffling of blocks (only applies when \code{default_sorting == 'random' or sorting_algorithm == 'random'}), TSP solver for block order or optimizing column order (only applies when \code{sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'}), and louvain/leiden clustering (only applies when \code{match_order == 'advanced'}). Depracated (recommended to set seed outside of fucntion call).}
 
 \item{color_boxes}{Logical. Whether to color the strata/boxes (representing groups).}
 
@@ -120,13 +120,13 @@ plot_alluvial(
 
 \item{color_band_boundary}{Logical. Whether or not to color boundaries between bands}
 
-\item{match_order}{Character. Matching colors methods. Choices are 'advanced' (default), 'None', 'left', 'right', or any value in \code{graphing_columns}.}
+\item{match_order}{Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{graphing_columns}.}
 
 \item{graphing_algorithm}{Character. If \code{match_order == 'advanced'}, then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.}
 
 \item{resolution}{Numeric If \code{match_order == 'advanced'}, then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.}
 
-\item{cutoff}{Numeric If \code{match_order != 'None' and match_order != 'advanced'}, sets the cutoff for color matching, below which a new color will be assigned.}
+\item{cutoff}{Numeric If \code{match_order != 'none' and match_order != 'advanced'}, sets the cutoff for color matching, below which a new color will be assigned.}
 
 \item{alluvial_alpha}{Numeric between 0 and 1. Transparency level for the alluvial bands.}
 

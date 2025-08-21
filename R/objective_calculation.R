@@ -51,6 +51,15 @@ print_function_params <- function() {
     }
 }
 
+lowercase_args <- function(arg_names) {
+    for (nm in arg_names) {
+        val <- get(nm, envir = parent.frame())
+        if (is.character(val)) {
+            assign(nm, tolower(val), envir = parent.frame())
+        }
+    }
+}
+
 check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "", environment = "wompwomp_env", use_conda = TRUE) {
     ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
     
@@ -215,7 +224,7 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' @export
 determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, use_fenwick_tree_for_objective_calculation = TRUE, verbose = FALSE, print_params = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical", set_seed = 42, environment = "wompwomp_env", use_conda = TRUE) {
     if (print_params) print_function_params()
-    # lowercase_args(c("default_sorting"))
+    lowercase_args(c("default_sorting"))
     
     #* Set seed
     if (!is.null(set_seed)) {

@@ -100,7 +100,7 @@ test_that("data_sort works with unsorted algorithm", {
     # Aggregate by combination
     df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
 
-    unsorted_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "None")
+    unsorted_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "none")
     # unsorted_df <- dplyr::ungroup(unsorted_df)
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "unsorted_df.rds"))
@@ -114,7 +114,7 @@ test_that("data_sort works with unsorted algorithm", {
     expect_equal(unsorted_df, ground_truth_df)
 })
 
-test_that("data_sort works with greedy_WOLF algorithm", {
+test_that("data_sort works with greedy_wolf algorithm", {
     set.seed(42)
     # Generate raw data
     raw_df <- data.frame(
@@ -124,7 +124,7 @@ test_that("data_sort works with greedy_WOLF algorithm", {
 
     # Aggregate by combination
     df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
-    greedy_wolf_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "greedy_WOLF")
+    greedy_wolf_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "greedy_wolf")
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "greedy_wolf_df.rds"))
 
@@ -137,7 +137,7 @@ test_that("data_sort works with greedy_WOLF algorithm", {
     expect_equal(greedy_wolf_df, ground_truth_df)
 })
 
-test_that("data_sort works with greedy_WBLF algorithm", {
+test_that("data_sort works with greedy_wblf algorithm", {
     set.seed(42)
     # Generate raw data
     raw_df <- data.frame(
@@ -148,7 +148,7 @@ test_that("data_sort works with greedy_WBLF algorithm", {
     # Aggregate by combination
     df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
 
-    greedy_wblf_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "greedy_WBLF")
+    greedy_wblf_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "greedy_wblf")
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "greedy_wblf_df.rds"))
 
@@ -191,25 +191,25 @@ test_that("VDIFFR - plot_alluvial works with 2 columns, unsorted", {
 
     set.seed(42)
     df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-    p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "None")
+    p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "none")
     vdiffr::expect_doppelganger("basic_alluvial_plot_unsorted", p)
 })
 
-test_that("VDIFFR - plot_alluvial works with 2 columns, greedy_WOLF", {
+test_that("VDIFFR - plot_alluvial works with 2 columns, greedy_wolf", {
     skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
 
     set.seed(42)
     df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-    p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "greedy_WOLF")
+    p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "greedy_wolf")
     vdiffr::expect_doppelganger("basic_alluvial_plot_WOLF", p)
 })
 
-test_that("VDIFFR - plot_alluvial works with 2 columns, greedy_WBLF", {
+test_that("VDIFFR - plot_alluvial works with 2 columns, greedy_wblf", {
     skip_if_not(requireNamespace("vdiffr", quietly = TRUE), "vdiffr not installed")
 
     set.seed(42)
     df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-    p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "greedy_WBLF")
+    p <- plot_alluvial(df, graphing_columns = c("method1", "method2"), sorting_algorithm = "greedy_wblf")
     vdiffr::expect_doppelganger("basic_alluvial_plot_WBLF", p)
 })
 
@@ -258,7 +258,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 2 layers, unsorted", {
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands = TRUE)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands = TRUE)
 
     vdiffr::expect_doppelganger("more_neighbornet_2layer_unsorted", p)
 })
@@ -365,7 +365,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers, unsorted", {
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands = TRUE, weight_scalar = 1)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands = TRUE, weight_scalar = 1)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_unsorted", p)
 })
@@ -434,7 +434,7 @@ test_that("VDIFFR - plot_alluvial, more_neighbornet.Rmd, 3 layers with 2 identic
     df <- input$df
     graphing_columns <- input$graphing_columns
 
-    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "None", color_bands = TRUE)
+    p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands = TRUE)
 
     vdiffr::expect_doppelganger("more_neighbornet_3layer_2ident", p)
 })
@@ -474,7 +474,7 @@ test_that("Objective calculation, more_neighbornet.Rmd, 3 layers, unsorted", {
 
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "None", optimize_column_order = FALSE)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "none", optimize_column_order = FALSE)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
 
@@ -518,7 +518,7 @@ test_that("Objective calculation, more_neighbornet.Rmd, 3 layers with 2 identica
 
     clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "None", optimize_column_order = FALSE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "none", optimize_column_order = FALSE, weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
 

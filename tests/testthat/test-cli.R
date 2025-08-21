@@ -78,7 +78,7 @@ compare_csvs <- function(output_path, truth_path, check = TRUE) {
     invisible(TRUE)
 }
 
-# ./exec/wompwomp plot_alluvial --df tests/testthat/ground_truth/df_tests_cli.csv --output_plot_path tests/testthat/ground_truth/sorting_none.png --sorting_algorithm None
+# ./exec/wompwomp plot_alluvial --df tests/testthat/ground_truth/df_tests_cli.csv --output_plot_path tests/testthat/ground_truth/sorting_none.png --sorting_algorithm none
 test_that("CLI plot_alluvial, no sort", {
     # Paths
     command <- "plot_alluvial"
@@ -92,7 +92,7 @@ test_that("CLI plot_alluvial, no sort", {
         command,
         "--df", df_path,
         "--output_plot_path", output_path,
-        "--sorting_algorithm", "None",
+        "--sorting_algorithm", "none",
         "--quiet", "TRUE"
     )
     if (dev) {
@@ -116,7 +116,7 @@ test_that("CLI plot_alluvial, WOLF left fixed", {
         command,
         "--df", df_path,
         "--output_plot_path", output_path,
-        "--sorting_algorithm", "greedy_WOLF",
+        "--sorting_algorithm", "greedy_wolf",
         "--fixed_column", 1,
         "--quiet", "TRUE"
     )
@@ -141,7 +141,7 @@ test_that("CLI plot_alluvial, WOLF right fixed", {
         command,
         "--df", df_path,
         "--output_plot_path", output_path,
-        "--sorting_algorithm", "greedy_WOLF",
+        "--sorting_algorithm", "greedy_wolf",
         "--fixed_column", 2,
         "--quiet", "TRUE"
     )
@@ -166,7 +166,7 @@ test_that("CLI plot_alluvial, WBLF", {
         command,
         "--df", df_path,
         "--output_plot_path", output_path,
-        "--sorting_algorithm", "greedy_WBLF",
+        "--sorting_algorithm", "greedy_wblf",
         "--quiet", "TRUE"
     )
     if (dev) {
@@ -214,7 +214,7 @@ test_that("CLI data_sort, WOLF left fixed", {
         command,
         "--df", df_path,
         "--output_df_path", output_path,
-        "--sorting_algorithm", "greedy_WOLF",
+        "--sorting_algorithm", "greedy_wolf",
         "--fixed_column", 1,
         "--quiet", "TRUE"
     )
@@ -239,7 +239,7 @@ test_that("CLI data_sort, WOLF right fixed", {
         command,
         "--df", df_path,
         "--output_df_path", output_path,
-        "--sorting_algorithm", "greedy_WOLF",
+        "--sorting_algorithm", "greedy_wolf",
         "--fixed_column", 2,
         "--quiet", "TRUE"
     )
@@ -252,7 +252,7 @@ test_that("CLI data_sort, WOLF right fixed", {
     compare_csvs(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
-# ./exec/wompwomp data_sort --df tests/testthat/ground_truth/df_tests_cli.csv --output_df_path tests/testthat/ground_truth/sorting_wblf_df.csv --sorting_algorithm greedy_WBLF --graphing_columns tissue leiden
+# ./exec/wompwomp data_sort --df tests/testthat/ground_truth/df_tests_cli.csv --output_df_path tests/testthat/ground_truth/sorting_wblf_df.csv --sorting_algorithm greedy_wblf --graphing_columns tissue leiden
 test_that("CLI data_sort, WBLF", {
     # Paths
     command <- "data_sort"
@@ -265,7 +265,7 @@ test_that("CLI data_sort, WBLF", {
         command,
         "--df", df_path,
         "--output_df_path", output_path,
-        "--sorting_algorithm", "greedy_WBLF",
+        "--sorting_algorithm", "greedy_wblf",
         "--quiet", "TRUE"
     )
     if (dev) {
