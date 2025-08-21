@@ -35,12 +35,10 @@ wompwomp::setup_python_env()
 ```         
 git clone https://github.com/pachterlab/wompwomp
 cd wompwomp
-conda env create -f environment.yml
-conda activate wompwomp_env
-remotes::install_local(".")  # or use --dev flag
+conda env create -f environment.yml  # or to avoid conda: Rscript install.R
+conda activate wompwomp_env  # skip if used install.R above
+remotes::install_local(".")  # or use --dev flag in commands
 ```
-
-As an alternative to conda: `Rscript install.R`
 
 The first time any command is run on the command line, a prompt will appear asking to install any missing R dependencies.
 
