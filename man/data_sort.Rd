@@ -29,6 +29,7 @@ data_sort(
   default_sorting = "alphabetical",
   return_updated_graphing_columns = FALSE,
   verbose = FALSE,
+  print_params = FALSE,
   load_df = TRUE,
   make_intermediate_neighbornet_plots = FALSE,
   do_compute_alluvial_statistics = TRUE,
@@ -86,6 +87,8 @@ data_sort(
 \item{return_updated_graphing_columns}{Logical. If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
+
+\item{print_params}{Logical. If TRUE, will print function params.}
 
 \item{load_df}{Internal flag; not recommended to modify.}
 

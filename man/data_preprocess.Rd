@@ -12,6 +12,7 @@ data_preprocess(
   set_seed = 42,
   output_df_path = NULL,
   verbose = FALSE,
+  print_params = FALSE,
   load_df = TRUE,
   do_gather_set_data = FALSE,
   color_band_column = NULL
@@ -33,6 +34,8 @@ data_preprocess(
 \item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
+
+\item{print_params}{Logical. If TRUE, will print function params.}
 
 \item{load_df}{Internal flag; not recommended to modify.}
 

@@ -17,6 +17,7 @@ determine_crossing_edges(
   return_weighted_layer_free_objective = FALSE,
   use_fenwick_tree_for_objective_calculation = TRUE,
   verbose = FALSE,
+  print_params = FALSE,
   stratum_column_and_value_to_keep = NULL,
   input_objective_matrix_vector = NULL,
   input_objective = NULL,
@@ -54,6 +55,8 @@ determine_crossing_edges(
 \item{use_fenwick_tree_for_objective_calculation}{Logical. Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn), but requires python environment.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
+
+\item{print_params}{Logical. If TRUE, will print function params.}
 
 \item{stratum_column_and_value_to_keep}{Internal flag; not recommended to modify.}
 

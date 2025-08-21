@@ -57,9 +57,12 @@ plot_alluvial(
   keep_y_labels = FALSE,
   box_line_width = 1,
   verbose = FALSE,
+  print_params = FALSE,
   make_intermediate_neighbornet_plots = FALSE,
   environment = "wompwomp_env",
-  use_conda = TRUE
+  use_conda = TRUE,
+  add_legend = FALSE,
+  legend_loc = "right"
 )
 }
 \arguments{
@@ -169,11 +172,17 @@ plot_alluvial(
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
+\item{print_params}{Logical. If TRUE, will print function params.}
+
 \item{make_intermediate_neighbornet_plots}{Internal flag; not recommended to modify.}
 
 \item{environment}{Character. Python environment (if applicable). Default: 'wompwomp_env'}
 
 \item{use_conda}{Logical. Whether or not to use conda for Python (if applicable)}
+
+\item{add_legend}{Logical. If TRUE, will generate a legend of the colors of boxes and alluvial}
+
+\item{legend_loc}{Character. Location of legend. Only applies if \code{add_legened == TRUE}. Choices are 'right' (default), 'left', 'bottom', 'top'}
 }
 \value{
 A \code{ggplot2} object representing the alluvial plot.
