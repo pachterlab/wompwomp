@@ -28,7 +28,7 @@ Optional:
   --cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when sorting_algorithm == 'neighbornet' or 'tsp'.
   --fixed_column            Name or position of the column in graphing_columns to keep fixed during sorting. Only applies when sorting_algorithm == 'greedy_wolf'.
   --random_initializations  Number of random initializations for the positions of each grouping in graphing_columns. Only applies when sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'.
-  --set_seed                Random seed for the random_initializations parameter (only applies when sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'), random initialization/shuffling of blocks (only applies when default_sorting == 'random' or sorting_algorithm == 'random'), TSP solver for block order or optimizing column order (only applies when sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'), and louvain/leiden clustering (only applies when match_order == 'advanced').
+  --set_seed                Random seed for the random_initializations parameter (only applies when sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'), random initialization/shuffling of blocks (only applies when default_sorting == 'random' or sorting_algorithm == 'random'), TSP solver for block order or optimizing column order (only applies when sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'), and louvain/leiden clustering (only applies when coloring_algorithm == 'advanced').
   --disable_color_boxes     Whether to color the strata/boxes (representing groups)
   --color_bands             Whether to color the alluvia/edges (connecting the strata)
   --color_list              List of colors to override default group colors.
@@ -36,10 +36,10 @@ Optional:
   --color_band_column       Which column to use for coloring bands
   --color_val Optional named list where the entries are colors and the names correspond to values of the dataframe that should use those colors
   --color_band_boundary     Whether or not to color boundaries between bands
-  --match_order Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in graphing_columns.
-  --graphing_algorithm Character. If match_order == 'advanced', then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.
-  --resolution Numeric If match_order == 'advanced', then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.
-  --cutoff Numeric If match_order != 'none' and match_order != 'advanced', sets the cutoff for color matching, below which a new color will be assigned.
+  --coloring_algorithm Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in graphing_columns.
+  --coloring_algorithm_advanced_option Character. If coloring_algorithm == 'advanced', then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.
+  --resolution Numeric If coloring_algorithm == 'advanced', then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.
+  --cutoff Numeric If coloring_algorithm != 'none' and coloring_algorithm != 'advanced', sets the cutoff for color matching, below which a new color will be assigned.
   --alluvial_alpha          Numeric between 0 and 1. Transparency level for the alluvial bands.
   --disable_include_labels_in_boxes Whether to include text labels inside the rectangular group boxes
   --disable_include_axis_titles     Whether to display axis titles for column1 and column2.
@@ -100,8 +100,8 @@ Optional:
     color_band_column <- get_arg(args, c("--color_band_column"))
     color_val <- get_arg(args, c("--color_val"))
     color_band_boundary <- store_true(args, c("--color_band_boundary"))
-    match_order <- get_arg(args, c("--match_order"))
-    graphing_algorithm <- get_arg(args, c("--graphing_algorithm"))
+    coloring_algorithm <- get_arg(args, c("--coloring_algorithm"))
+    coloring_algorithm_advanced_option <- get_arg(args, c("--coloring_algorithm_advanced_option"))
     resolution <- get_numeric_arg(args, c("--resolution"))
     cutoff <- get_numeric_arg(args, c("--cutoff"))
     alluvial_alpha <- get_numeric_arg(args, "--alluvial_alpha")
@@ -165,8 +165,8 @@ Optional:
     if (!is.null(color_band_column)) args_list$color_band_column <- color_band_column
     if (!is.null(color_val)) args_list$color_val <- color_val
     if (!is.null(color_band_boundary)) args_list$color_band_boundary <- color_band_boundary
-    if (!is.null(match_order)) args_list$match_order <- match_order
-    if (!is.null(graphing_algorithm)) args_list$graphing_algorithm <- graphing_algorithm
+    if (!is.null(coloring_algorithm)) args_list$coloring_algorithm <- coloring_algorithm
+    if (!is.null(coloring_algorithm_advanced_option)) args_list$coloring_algorithm_advanced_option <- coloring_algorithm_advanced_option
     if (!is.null(resolution)) args_list$resolution <- resolution
     if (!is.null(cutoff)) args_list$cutoff <- cutoff
     if (!is.null(alluvial_alpha)) args_list$alluvial_alpha <- alluvial_alpha

@@ -31,8 +31,8 @@ plot_alluvial(
   color_band_column = NULL,
   color_val = NULL,
   color_band_boundary = FALSE,
-  match_order = "advanced",
-  graphing_algorithm = "leiden",
+  coloring_algorithm = "advanced",
+  coloring_algorithm_advanced_option = "leiden",
   resolution = 1,
   cutoff = 0.5,
   alluvial_alpha = 0.5,
@@ -104,7 +104,7 @@ plot_alluvial(
 
 \item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}.}
 
-\item{set_seed}{Integer. Random seed for the \code{random_initializations} parameter (only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}), random initialization/shuffling of blocks (only applies when \code{default_sorting == 'random' or sorting_algorithm == 'random'}), TSP solver for block order or optimizing column order (only applies when \code{sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'}), and louvain/leiden clustering (only applies when \code{match_order == 'advanced'}). Depracated (recommended to set seed outside of fucntion call).}
+\item{set_seed}{Integer. Random seed for the \code{random_initializations} parameter (only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}), random initialization/shuffling of blocks (only applies when \code{default_sorting == 'random' or sorting_algorithm == 'random'}), TSP solver for block order or optimizing column order (only applies when \code{sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'}), and louvain/leiden clustering (only applies when \code{coloring_algorithm == 'advanced'}). Depracated (recommended to set seed outside of fucntion call).}
 
 \item{color_boxes}{Logical. Whether to color the strata/boxes (representing groups).}
 
@@ -120,13 +120,13 @@ plot_alluvial(
 
 \item{color_band_boundary}{Logical. Whether or not to color boundaries between bands}
 
-\item{match_order}{Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{graphing_columns}.}
+\item{coloring_algorithm}{Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{graphing_columns}.}
 
-\item{graphing_algorithm}{Character. If \code{match_order == 'advanced'}, then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.}
+\item{coloring_algorithm_advanced_option}{Character. If \code{coloring_algorithm == 'advanced'}, then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.}
 
-\item{resolution}{Numeric If \code{match_order == 'advanced'}, then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.}
+\item{resolution}{Numeric If \code{coloring_algorithm == 'advanced'}, then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.}
 
-\item{cutoff}{Numeric If \code{match_order != 'none' and match_order != 'advanced'}, sets the cutoff for color matching, below which a new color will be assigned.}
+\item{cutoff}{Numeric If \code{coloring_algorithm != 'none' and coloring_algorithm != 'advanced'}, sets the cutoff for color matching, below which a new color will be assigned.}
 
 \item{alluvial_alpha}{Numeric between 0 and 1. Transparency level for the alluvial bands.}
 
@@ -198,7 +198,7 @@ p <- plot_alluvial(df,
     graphing_columns = c("method1", "method2"),
     sorting_algorithm = "tsp",
     column_sorting_algorithm = "tsp",
-    match_order = "right")
+    coloring_algorithm = "right")
 
 # Example 2: df format 2
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -212,6 +212,6 @@ p <- plot_alluvial(
    column_weights = "value",
    sorting_algorithm = "tsp",
    column_sorting_algorithm = "tsp",
-   match_order = "right")
+   coloring_algorithm = "right")
 
 }

@@ -88,7 +88,7 @@ p2
 
 Now with sorting
 ```{r}
-p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex", "special"), sorting_algorithm = "neighbornet", match_order = "advanced")
+p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex", "special"), sorting_algorithm = "neighbornet", coloring_algorithm = "advanced")
 p3
 ```
 

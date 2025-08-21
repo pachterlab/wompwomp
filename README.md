@@ -42,7 +42,7 @@ remotes::install_local(".")  # or use --dev flag in commands
 
 The first time any command is run on the command line, a prompt will appear asking to install any missing R dependencies.
 
-While Python is not strictly required for use of the package, it is required for some options, including default package options (i.e., NeighborNet algorithm for sorting_algorithm == "neighbornet" or column_sorting_algorithm == "neighbornet", Leiden clustering for match_order == "advanced", fenwick tree optimization for objective calculation).
+While Python is not strictly required for use of the package, it is required for some options, including default package options (i.e., NeighborNet algorithm for sorting_algorithm == "neighbornet" or column_sorting_algorithm == "neighbornet", Leiden clustering for coloring_algorithm == "advanced", fenwick tree optimization for objective calculation).
 
 ## Usage
 

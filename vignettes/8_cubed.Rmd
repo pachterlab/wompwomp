@@ -53,7 +53,7 @@ clus_df_gather
 # unsorted_objective <- determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", return_weighted_layer_free_objective = TRUE)
 # print(unsorted_objective)
 
-p_unsorted <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "none", color_bands = TRUE, color_boxes = FALSE, match_order = "left", resolution = 12, verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_unsorted <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "none", color_bands = TRUE, color_boxes = FALSE, coloring_algorithm = "left", resolution = 12, verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p_unsorted
 ```
 
@@ -62,7 +62,7 @@ optimize_column_order <- FALSE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_fixed_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, match_order = "left", resolution = 12, color_bands = TRUE, color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_fixed_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, coloring_algorithm = "left", resolution = 12, color_bands = TRUE, color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_fixed_columns
@@ -73,7 +73,7 @@ optimize_column_order <- TRUE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_optimized_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, match_order = "left", resolution = 12, color_bands = TRUE, color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_optimized_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, coloring_algorithm = "left", resolution = 12, color_bands = TRUE, color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_optimized_columns
@@ -93,7 +93,7 @@ print(nrow(clus_df_gather_summed))
 # unsorted_objective_trimmed <- determine_crossing_edges(clus_df_gather_summed_processed, graphing_columns = graphing_columns_summed, column_weights = "value", return_weighted_layer_free_objective = TRUE)
 # print(unsorted_objective_trimmed)
 
-p_unsorted_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "none", color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, match_order = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_unsorted_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "none", color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 p_unsorted_trimmed
 ```
 
@@ -102,7 +102,7 @@ optimize_column_order <- FALSE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_fixed_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, match_order = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_fixed_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_fixed_columns_trimmed
@@ -113,7 +113,7 @@ optimize_column_order <- TRUE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_optimized_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, match_order = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_optimized_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 
 print(Sys.time())
 
@@ -130,12 +130,12 @@ print(nrow(clus_df_gather_summed2))
 ```
 
 ```{r}
-p_unsorted_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "none", color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, match_order = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_unsorted.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
+p_unsorted_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "none", color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_unsorted.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
 p_unsorted_trimmed2
 ```
 
 ```{r}
-p_unsorted_trimmed_random2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "random", color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, match_order = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_unsorted_random.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
+p_unsorted_trimmed_random2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "random", color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_unsorted_random.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
 p_unsorted_trimmed_random2
 ```
 
@@ -144,7 +144,7 @@ optimize_column_order <- FALSE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_fixed_columns_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, match_order = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_NN_fixed_columns.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_fixed_columns_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_NN_fixed_columns.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_fixed_columns_trimmed2
@@ -155,7 +155,7 @@ optimize_column_order <- TRUE
 optimize_column_order_per_cycle <- TRUE
 
 print(Sys.time())
-p_sorted_optimized_columns_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, match_order = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_NN_optimized_columns.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_optimized_columns_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("#D55E00", "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_NN_optimized_columns.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_optimized_columns_trimmed2
