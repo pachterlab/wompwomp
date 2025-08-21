@@ -37,6 +37,7 @@ git clone https://github.com/pachterlab/wompwomp
 cd wompwomp
 conda env create -f environment.yml
 conda activate wompwomp_env
+remotes::install_local(".")  # or use --dev flag
 ```
 
 As an alternative to conda: `Rscript install.R`
