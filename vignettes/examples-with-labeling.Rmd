@@ -101,6 +101,4 @@ p4
 sessioninfo::session_info()
 ```
 
-```{r}
-```
 
