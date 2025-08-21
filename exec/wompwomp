@@ -100,7 +100,7 @@ Sys.setenv(R_SCRIPT_FROM_CLI = "true")
 
 # setup python environment
 sub_args <- args[-1]
-environment <- get_arg(sub_args, c("--environment"), default = "wompwomp_env")
+environment <- wompwomp:::get_arg(sub_args, c("--environment"), default = "wompwomp_env")
 use_conda <- store_false(sub_args, c("--disable_use_conda"))
 wompwomp::setup_python_env(environment, use_conda = use_conda)
 
