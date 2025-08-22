@@ -1053,24 +1053,9 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
     
     # if color_bands, add to named list
     
-    if (color_bands) {
-        if (is.null(color_band_column)) {
-            if (is.null(color_band_list)) {
-                # neither a color_band_column nor a color_band_list; use column 1 by default
-                color_band_list <- rev(final_colors[1:length(levels(df[["col1_int"]]))])
-                names(color_band_list) <- levels(df[["col1_int"]])
-            }  # have a color list but no color column? Error?
-        } else{
-            if (is.null(color_band_list)) {
-                # have a color band column but no pre-defined colors. 
-                color_band_list <- remaining_colors[1:length(unique(df[[color_band_column]]))]
-                names(color_band_list) <- unique(df[[color_band_column]])
-            } 
-            #levels(df[[color_band_column]])
-            # else have a color band column and specified list. Just add to final colors
-        } 
+    if (!is.null(color_band_list)) {
         final_colors <- c(color_band_list, final_colors)
-    }
+    } 
     # remove duplicate names
     final_colors <- final_colors[!duplicated(names(final_colors))]
     # remove duplicate dims
@@ -1083,36 +1068,17 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
     }
 
     if (color_bands) {
-        if (!is.null(color_band_column)) {
-            if (!is.null(color_band_list)) {
-                if (color_band_boundary) {
-                    p <- p +
-                        geom_alluvium(aes(fill = !!sym(color_band_column), color = !!sym(color_band_column)),
-                                      alpha = alluvial_alpha
-                        ) 
-                } else {
-                    p <- p +
-                        geom_alluvium(aes(fill = !!sym(color_band_column)), alpha = alluvial_alpha) 
-                }
-            } else {
-            if (color_band_boundary) {
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym(color_band_column), color = !!sym(color_band_column)),
-                        alpha = alluvial_alpha
-                    ) 
-            } else {
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym(color_band_column)), alpha = alluvial_alpha) 
-            }
-            }
+        if (is.null(color_band_column)) {
+            color_band_column <- graphing_columns[1]
+        }
+        if (color_band_boundary) {
+            p <- p +
+                geom_alluvium(aes(fill = !!sym(color_band_column), color = !!sym(color_band_column)),
+                    alpha = alluvial_alpha
+                ) 
         } else {
-            if (color_band_boundary) {
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym("col1_int"), color = !!sym("col1_int")), alpha = alluvial_alpha) 
-            } else {
-                p <- p +
-                    geom_alluvium(aes(fill = !!sym("col1_int")), alpha = alluvial_alpha) 
-            }
+            p <- p +
+                geom_alluvium(aes(fill = !!sym(color_band_column)), alpha = alluvial_alpha) 
         }
     } else {
         if (color_band_boundary) {
