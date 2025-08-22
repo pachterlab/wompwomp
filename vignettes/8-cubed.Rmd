@@ -10,10 +10,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 ```{r}
-reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
-devtools::load_all() # !!! erase
+# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+# devtools::load_all() # !!! erase
 
-# library(wompwomp)  #!!! uncomment
+library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -147,6 +147,7 @@ p_unsorted_trimmed2
 ```
 
 ```{r}
+set.seed(42)
 p_unsorted_trimmed_random2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "random", color_bands = TRUE, color_band_column = "Gene", color_band_list = c("Akr1c21" = "#D55E00", "Slc7a12" = "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_unsorted_random.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
 p_unsorted_trimmed_random2
 ```

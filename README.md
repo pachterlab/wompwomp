@@ -46,14 +46,14 @@ While Python is not strictly required for use of the package, it is required for
 
 ## Usage
 
-The wompwomp library has four functions: plot_alluvial, greedy_wolf, determine_crossing_edges, and determine_weighted_layer_free_objective. plot_alluvial plots data as an alluvial plot using ggalluvial as a framework, running maximum weighted matching to maximize color concordance and optionally running a greedy_wolf sorting algorithm implementation of the weighted one-layer free problem. greedy_wolf runs the sorting algorithm and returns the dataframe object without plotting. determine_crossing_edges determines the edges of a graph structure that cross. determine_weighted_layer_free_objective returns the sum of products of crossing edge weights from the output of determine_crossing_edges.
-
-The I/O for each function is as follows:
+The I/O for each of wompwomp's functions is as follows:
 
 1.  plot_alluvial: dataframe, csv, or tibble (grouped or ungrouped) --\> plot
-2.  greedy_wolf: dataframe, csv, or tibble (grouped or ungrouped) --\> grouped dataframe/csv (sorted)
-3.  determine_crossing_edges: grouped dataframe/csv --\> list of lists
-4.  determine_weighted_layer_free_objective: list of lists (from determine_crossing_edges) --\> integer
+1.  data_preprocess: dataframe, csv, or tibble (grouped or ungrouped) --\> dataframe (grouped)
+1.  data_sort: dataframe, csv, or tibble (grouped or ungrouped) --\> dataframe (grouped)
+1.  plot_alluvial_internal: dataframe, csv, or tibble (grouped) --\> plot
+1.  determine_crossing_edges: dataframe, csv, or tibble (grouped or ungrouped) --\> list
+1.  determine_weighted_layer_free_objective: dataframe, csv, or tibble (grouped or ungrouped) --\> integer
 
 The input table can have one of two formats: 1) Ungrouped: columns specified by column1 and column2, where each row corresponds to a separate entity 2) Grouped: columns specified by column1, column2, and column_weights, where each row corresponds to a combination of column1 and column2, and column_weights specified the number of items in this combination
 
@@ -105,10 +105,7 @@ p
 ## Examples in Command Line:
 
 ``` bash
-./exec/wompwomp plot_alluvial --df mydata.csv --column1 method1 --column2 method2
-./exec/wompwomp greedy_wolf --df mydata.csv --column1 method1 --column2 method2
-./exec/wompwomp determine_crossing_edges --df tmp_files/clus_df_gather_new2.csv --column1 tissue --column2 leiden --output_df_path tmp_files/crossing.csv
-./exec/wompwomp determine_weighted_layer_free_objective --df tmp_files/crossing.csv
+./exec/wompwomp plot_alluvial --df mydata.csv --graphing_columns column1 column2
 ```
 
 For help on any command, run `./exec/wompwomp COMMAND --help`
@@ -122,7 +119,5 @@ ex. plot_alluvial(df=data.csv), ./exec/wompwomp plot_alluvial --df data.csv
 ex. plot_alluvial(graphing_columns=c("tissue", "cluster")), ./exec/wompwomp plot_alluvial --graphing_columns tissue cluster
 - all boolean parameters are passed with the flag without any following arguments; boolean parameters that default to FALSE have identical names between R and command line, while boolean parameters that default to TRUE have "disable_" prepended to the name in the command line
 ex. (note that the defaults for include_group_sizes=FALSE and include_axis_titles=TRUE): plot_alluvial(include_group_sizes=TRUE, include_axis_titles=FALSE), ./exec/wompwomp plot_alluvial --include_group_sizes --disable_include_axis_titles
-
-
 
 ## See a full tutorial in our introductory vignette [wompwomp-intro.Rmd](vignettes/wompwomp-intro.Rmd)

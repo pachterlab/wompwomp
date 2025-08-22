@@ -767,7 +767,7 @@ find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, curr
 #'
 #' Just the plotting.......
 #'
-#' @param df A data frame, tibble, or CSV file path. Must be in the format as the output of wompwomp::data_sort().
+#' @param df A data frame, tibble, or CSV file path. Must be in the format as the output of wompwomp::data_sort.
 #' @param graphing_columns Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.
 #' @param column_weights Character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
 #' @param color_boxes Logical. Whether to color the strata/boxes (representing groups).

@@ -11,10 +11,10 @@ vignette: >
 ---
 
 ```{r}
-reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
-devtools::load_all() # !!! erase
+# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+# devtools::load_all() # !!! erase
 
-# library(wompwomp)  #!!! uncomment
+library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -209,12 +209,12 @@ if (!is.null(sample_size)) {
 
 ```{r}
 set.seed(42)
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", coloring_algorithm = "left", resolution = 12, verbose = TRUE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("0" = "#D55E00", "1" = "#56B4E9", "2" = "#009E73", "3" = "#F0E442", "4" = "#0072B2", "5" = "#E69F00", "6" = "#CC79A7", "7" = "#666666", "8" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", coloring_algorithm = "left", resolution = 12, verbose = TRUE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
 p
 ```
 
 ```{r}
-p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = FALSE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("0" = "#D55E00", "1" = "#56B4E9", "2" = "#009E73", "3" = "#F0E442", "4" = "#0072B2", "5" = "#E69F00", "6" = "#CC79A7", "7" = "#666666", "8" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = FALSE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
 p2
 ```
 
@@ -223,7 +223,7 @@ Optional (only if I'm doing a subset of objectives)
 # log_msgs <- character()
 #
 # withCallingHandlers({
-#   p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("0" = "#D55E00", "1" = "#56B4E9", "2" = "#009E73", "3" = "#F0E442", "4" = "#0072B2", "5" = "#E69F00", "6" = "#CC79A7", "7" = "#666666", "8" = "#AD7700")), color_band_column = 'trueclass')
+#   p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = 'trueclass')
 # }, message = function(m) {
 #   log_msgs <<- c(log_msgs, conditionMessage(m))
 #   # no muffling → still prints to console
@@ -256,7 +256,8 @@ cycle_start_positions <- NULL # c(110) - 110 for NN, 34 for TSP  # c(12:25, 130:
 column_sorting_metric <- "edge_crossing" # edge_crossing or ARI
 optimize_column_order_per_cycle <- TRUE
 
-p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN_optimized_columns.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("0" = "#D55E00", "1" = "#56B4E9", "2" = "#009E73", "3" = "#F0E442", "4" = "#0072B2", "5" = "#E69F00", "6" = "#CC79A7", "7" = "#666666", "8" = "#AD7700"), color_band_column = "trueclass", cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric, text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+set.seed(42)
+p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN_optimized_columns.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric, text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
 p3
 ```
 
@@ -284,15 +285,15 @@ ggsave(file.path(output_dir, "GoT_legend.pdf"), plot = legend_plot)
 ```{r}
 # Ensure color_band_list is a named vector
 color_band_list <- c(
-    "H7_dreived_D2.25_Smtmrs" = "#D55E00",
-    "H7_derived_Sclrtm" = "#56B4E9",
-    "H7_derived_D2LtM" = "#009E73",
-    "H7_derived_D5CntrlDrmmtm" = "#F0E442",
+    "H7hESC" = "#D55E00",
+    "H7_derived_APS" = "#56B4E9",
+    "H7_derived_MPS" = "#009E73",
+    "H7_derived_DLL1pPXM" = "#F0E442",
     "H7_derived_ESMT" = "#0072B2",
-    "H7_derived_APS" = "#E69F00",
-    "H7_derived_MPS" = "#CC79A7",
-    "H7_derived_DLL1pPXM" = "#666666",
-    "H7hESC" = "#AD7700"
+    "H7_derived_Sclrtm" = "#E69F00",
+    "H7_derived_D5CntrlDrmmtm" = "#CC79A7",
+    "H7_derived_D2LtM" = "#666666",
+    "H7_dreived_D2.25_Smtmrs" = "#AD7700"
 )
 
 # Make a dummy data frame just for the legend

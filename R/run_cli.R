@@ -20,6 +20,7 @@ Commands:
   plot_alluvial     Generate an Alluvial Plot with Minimal Cluster Cross-over (runs data_preprocess and data_sort internally)
   data_preprocess   Preprocess data
   data_sort       Sorts a dataframe (runs data_preprocess internally)
+  plot_alluvial_internal    Plots internally...
   determine_crossing_edges    Determine overlapping edges
   determine_weighted_layer_free_objective    Compute crossing objective
 
@@ -40,6 +41,8 @@ All commands have a --dev argument. If passed, will load the package dynamically
         run_data_preprocess_cli(sub_args)
     } else if (command == "data_sort") {
         run_data_sort_cli(sub_args)
+    } else if (command == "determine_crossing_edges") {
+        run_plot_alluvial_internal_cli(sub_args)
     } else if (command == "determine_crossing_edges") {
         run_determine_crossing_edges_cli(sub_args)
     } else if (command == "determine_weighted_layer_free_objective") {
