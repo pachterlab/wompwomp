@@ -275,59 +275,6 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neig
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, coloring_algorithm = "advanced", color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
 ```
 
-FAILED ARI EXPERIMENTS
-```{r}
-graphing_columns <- c("a", "b")
-
-m <- 100
-
-# Create perfectly conflicting clusterings
-a <- rep(c(1, 1, 2, 2), each = m / 4)
-b <- rep(c(1, 2, 1, 2), each = m / 4)
-
-df <- data.frame(a = a, b = b)
-clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
-determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
-
-
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE)
-```
-
-
-```{r}
-set.seed(123)
-m <- 101 # number of elements
-
-a <- rep(1:2, each = m / 2)
-b <- rep(1:2, each = m / 2)
-b[1:(m / 4)] <- sample(3:4, m / 4, replace = TRUE) # inject some disorder
-df <- data.frame(a = a, b = b)
-clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
-determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
-
-# debugonce(mclustcomp)
-# mclustcomp(df$a, df$b, types = c("wallace2"))
-
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE)
-```
-
-```{r}
-set.seed(123)
-m <- 101
-
-a <- rep(1:4, each = m / 4)
-b <- a
-b[sample(m, 5)] <- sample(1:4, 5, replace = TRUE) # small noise
-df <- data.frame(a = a, b = b)
-clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
-determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
-
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE)
-```
-
-
-
-
 ARI of 0
 ```{r}
 graphing_columns <- c("a", "b")
