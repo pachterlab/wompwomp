@@ -41,7 +41,7 @@ All commands have a --dev argument. If passed, will load the package dynamically
         run_data_preprocess_cli(sub_args)
     } else if (command == "data_sort") {
         run_data_sort_cli(sub_args)
-    } else if (command == "determine_crossing_edges") {
+    } else if (command == "plot_alluvial_internal") {
         run_plot_alluvial_internal_cli(sub_args)
     } else if (command == "determine_crossing_edges") {
         run_determine_crossing_edges_cli(sub_args)

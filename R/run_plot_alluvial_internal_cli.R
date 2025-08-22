@@ -1,8 +1,8 @@
 #' @noRd
-run_plot_alluvial_cli <- function(args) {
+run_plot_alluvial_internal_cli <- function(args) {
     if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
         cat("
-Usage: wompwomp plot_alluvial --input INPUT [options]
+Usage: wompwomp plot_alluvial_internal --input INPUT --column_weights COLUMN_WEIGHT --graphing columns COLUMN1 COLUMN2 ... [options]
 
 Required:
   -i, --input, --df               A data frame, tibble, or CSV file path. Must be in the format as the output of wompwomp::data_sort.
