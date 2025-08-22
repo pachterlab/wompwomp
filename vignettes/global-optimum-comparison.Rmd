@@ -240,7 +240,7 @@ ggplot(df_plot, aes(x = perm_id, y = objective)) +
     geom_point() +
     geom_hline(yintercept = wompwomp_objective_greedy_wblf, linetype = "dashed", color = "blue") +
     annotate("text",
-        x = Inf, y = wompwomp_objective_greedy_wblf, label = "wompwomp objective",
+        x = Inf, y = wompwomp_objective_greedy_wblf, label = "greedy WBLF objective",
         hjust = 1.1, vjust = -0.5, color = "blue", size = 3
     ) +
     geom_hline(yintercept = neighbornet_objective_minimum, linetype = "dashed", color = "orange") +
