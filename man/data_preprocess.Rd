@@ -9,7 +9,6 @@ data_preprocess(
   graphing_columns,
   column_weights = NULL,
   default_sorting = "alphabetical",
-  set_seed = 42,
   output_df_path = NULL,
   verbose = FALSE,
   print_params = FALSE,
@@ -28,8 +27,6 @@ data_preprocess(
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
 
 \item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if \code{sorting_algorithm == 'neighbornet'}. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
-
-\item{set_seed}{Integer. Random seed for the \code{random_initializations} parameter, random initialization/shuffling of blocks, and TSP solver for optimizing column order. Depracated (recommended to set seed outside of fucntion call).}
 
 \item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
 

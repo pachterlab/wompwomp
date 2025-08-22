@@ -23,7 +23,6 @@ data_sort(
   cycle_start_positions = NULL,
   fixed_column = NULL,
   random_initializations = 1,
-  set_seed = 42,
   output_df_path = NULL,
   preprocess_data = TRUE,
   default_sorting = "alphabetical",
@@ -75,8 +74,6 @@ data_sort(
 \item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_wolf'}.}
 
 \item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}.}
-
-\item{set_seed}{Integer. Random seed for the \code{random_initializations} parameter. Only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}. Depracated (recommended to set seed outside of fucntion call).}
 
 \item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
 

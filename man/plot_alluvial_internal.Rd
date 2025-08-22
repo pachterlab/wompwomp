@@ -47,7 +47,7 @@ plot_alluvial_internal(
 )
 }
 \arguments{
-\item{df}{A data frame, tibble, or CSV file path. Must be in the format as the output of wompwomp::data_sort().}
+\item{df}{A data frame, tibble, or CSV file path. Must be in the format as the output of wompwomp::data_sort.}
 
 \item{graphing_columns}{Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.}
 

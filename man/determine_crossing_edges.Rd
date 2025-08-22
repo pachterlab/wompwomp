@@ -24,7 +24,6 @@ determine_crossing_edges(
   preprocess_data = TRUE,
   load_df = TRUE,
   default_sorting = "alphabetical",
-  set_seed = 42,
   environment = "wompwomp_env",
   use_conda = TRUE
 )
@@ -69,8 +68,6 @@ determine_crossing_edges(
 \item{load_df}{Internal flag; not recommended to modify.}
 
 \item{default_sorting}{Internal flag; not recommended to modify.}
-
-\item{set_seed}{Internal flag; not recommended to modify.}
 
 \item{environment}{Character. Python environment (if applicable). Default: 'wompwomp_env'}
 

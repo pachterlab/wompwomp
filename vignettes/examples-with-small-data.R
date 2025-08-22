@@ -1,0 +1,414 @@
+## -----------------------------------------------------------------------------
+# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+# devtools::load_all() # !!! erase
+
+library(wompwomp)  #!!! uncomment
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+library(ggforce)
+library(igraph)
+library(tibble)
+library(tidyr)
+library(reticulate)
+
+set.seed(42)
+
+## ----setup-env, eval = FALSE--------------------------------------------------
+#  wompwomp::setup_python_env()
+
+## ----check-python, include = FALSE--------------------------------------------
+if (!reticulate::py_module_available("splitspy")) {
+    message("❌ 'splitspy' not found. Run wompwomp::setup_python_env() and restart R.")
+    knitr::knit_exit()
+}
+
+## -----------------------------------------------------------------------------
+use_temp_dir <- FALSE
+
+use_temp_dir <- (use_temp_dir || !interactive()) # ensure temp_dire when non-interactive always
+output_dir <- ifelse(!use_temp_dir, here::here("vignettes", "output"), file.path(tempdir(), "vignette_output"))
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
+## -----------------------------------------------------------------------------
+df <- data.frame(
+    tissue = c(
+        1, 1, 1,
+        2, 2, 2, 2, 2, 2,
+        3, 3, 3, 3, 3, 3, 3,
+        4, 4,
+        5, 5, 5, 5, 5, 5, 5, 5, 5
+    ),
+    cluster = c(
+        6, 6, 7,
+        6, 7, 7, 7, 7, 7,
+        6, 8, 8, 8, 8, 8, 8,
+        8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8
+    )
+)
+column1 <- "tissue"
+column2 <- "cluster"
+graphing_columns <- c(column1, column2)
+
+# clus_df_gather_raw <- df |>
+#     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+#     dplyr::group_by_all() |>
+#     dplyr::count(name = "value")
+# gather_set_data(clus_df_gather_raw, 1:2)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands = TRUE, output_plot_path = file.path(output_dir, "2layer_unsorted.pdf"))
+
+## -----------------------------------------------------------------------------
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order_per_cycle = FALSE, output_plot_path = file.path(output_dir, "2layer_NN.pdf"))
+
+## -----------------------------------------------------------------------------
+df <- data.frame(
+    tissue = c(
+        "BRAIN", "BRAIN", "BRAIN",
+        "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+        "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+        "T CELL", "T CELL",
+        "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+    ),
+    cluster = c(
+        1, 1, 2,
+        1, 2, 2, 2, 2, 2,
+        1, 3, 3, 3, 3, 3, 3,
+        4, 4,
+        4, 4, 4, 4, 4, 4, 4, 4, 4
+    ),
+    sex = c(
+        "male", "female", "male",
+        "female", "male", "female", "female", "male", "female",
+        "male", "female", "male", "female", "male", "female", "male",
+        "female", "male",
+        "male", "male", "male", "male", "male", "male", "male", "male", "male"
+    )
+)
+graphing_columns <- c("tissue", "cluster", "sex")
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands = TRUE, resolution = 2, output_plot_path = file.path(output_dir, "3layer_unsorted.pdf"), verbose = TRUE)
+
+## -----------------------------------------------------------------------------
+# clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
+# data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
+# clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
+# graphing_columns_reordered <- data_sort_output$graphing_columns
+# out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = graphing_columns_reordered, column_weights = "value", return_weighted_layer_free_objective = FALSE)
+# print(out$output_objective)
+# # print(out$crossing_edges_df)
+
+# graph what I did above
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, output_plot_path = file.path(output_dir, "3layer_NN_fixed_columns.pdf"), verbose = TRUE)
+
+## -----------------------------------------------------------------------------
+# clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
+# data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
+# clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
+# graphing_columns_reordered <- data_sort_output$graphing_columns
+# out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = graphing_columns_reordered, column_weights = "value", return_weighted_layer_free_objective = FALSE)
+# print(out$output_objective)
+# # print(out$crossing_edges_df)
+#
+# # print(out$crossing_edges_df[out$crossing_edges_df$strat_layer == 1,
+# #       c("alluvium1", "alluvium2", "strat_layer",
+# #         "stratum1_char1", "stratum2_char1",
+# #         "stratum1_char2", "stratum2_char2",
+# #         "weight1", "weight2")])
+#
+# # print(out$crossing_edges_df[out$crossing_edges_df$strat_layer == 2,
+# #       c("alluvium1", "alluvium2", "strat_layer",
+# #         "stratum2_char1", "stratum3_char1",
+# #         "stratum2_char2", "stratum3_char2",
+# #         "weight1", "weight2")])
+
+# graph what I did above
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, output_plot_path = file.path(output_dir, "3layer_NN_optimized_columns.pdf"), verbose = TRUE)
+
+## -----------------------------------------------------------------------------
+df <- data.frame(
+    tissue = c(
+        "BRAIN", "BRAIN", "BRAIN",
+        "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+        "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+        "T CELL", "T CELL",
+        "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+    ),
+    sex = c(
+        "male", "female", "male",
+        "female", "male", "female", "female", "male", "female",
+        "male", "female", "male", "female", "male", "female", "male",
+        "female", "male",
+        "female", "male", "female", "male", "female", "male", "female", "female", "male"
+    ),
+    cluster = c(
+        "BRAIN", "BRAIN", "BRAIN",
+        "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+        "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+        "T CELL", "T CELL",
+        "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+    )
+)
+graphing_columns <- c("tissue", "sex", "cluster")
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands = TRUE, resolution = 2, verbose = TRUE)
+
+## -----------------------------------------------------------------------------
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, verbose = TRUE)
+
+## -----------------------------------------------------------------------------
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, verbose = TRUE)
+
+## -----------------------------------------------------------------------------
+df <- data.frame(
+    tissue = c("BRAIN", "STOMACH"),
+    cluster = c(2, 1)
+)
+graphing_columns <- c("tissue", "cluster")
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands = TRUE)
+
+## -----------------------------------------------------------------------------
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE)
+
+## -----------------------------------------------------------------------------
+df <- data.frame(
+    tissue = c(
+        "BRAIN", "BRAIN", "BRAIN", "BRAIN",
+        "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+        "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART"
+    ),
+    cluster = c(
+        1, 1, 2, 3,
+        1, 2, 2, 2, 2, 3,
+        1, 2, 2, 3, 3, 3, 3
+    )
+)
+# df <- data.frame(
+#   tissue = c(
+#     "BRAIN", "BRAIN", "BRAIN", "BRAIN", "BRAIN", "BRAIN",
+#     "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+#     "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART"
+#   ),
+#   cluster = c(
+#     1, 1, 1, 2, 2, 3,
+#     1, 2, 2, 2, 2, 2, 3,
+#     1, 2, 2, 3, 3, 3, 3, 3
+#   )
+# )
+graphing_columns <- c("tissue", "cluster")
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", coloring_algorithm = "none", color_bands = TRUE, color_band_column = "tissue", color_band_list = c("#D55E00", "#56B4E9", "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_unsorted.pdf"))
+
+## -----------------------------------------------------------------------------
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "none", color_bands = TRUE, color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_NN.pdf"))
+
+## -----------------------------------------------------------------------------
+df <- data.frame(
+    tissue = c(
+        "BRAIN", "BRAIN", "BRAIN", "BRAIN",
+        "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+        "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART"
+    ),
+    cluster = c(
+        1, 1, 2, 3,
+        1, 2, 2, 2, 2, 3,
+        1, 2, 2, 3, 3, 3, 3
+    ),
+    batch = c(
+        "A", "A", "A", "A",
+        "B", "B", "B", "B", "B", "B",
+        "C", "C", "C", "C", "C", "C", "C"
+    )
+)
+graphing_columns <- c("tissue", "cluster", "batch")
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands = TRUE, color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_unsorted.pdf"))
+
+## -----------------------------------------------------------------------------
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
+
+## -----------------------------------------------------------------------------
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, coloring_algorithm = "advanced", color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
+
+## -----------------------------------------------------------------------------
+graphing_columns <- c("a", "b")
+
+set.seed(123)
+m <- 250 # total number of entries
+n_groups <- 5
+stopifnot(m %% (n_groups^2) == 0)
+
+block_size <- m / (n_groups^2) # number of rows per a-b pairing (10 if m = 250)
+
+a <- rep(1:n_groups, each = block_size * n_groups) # each a group appears in n_groups blocks
+b <- rep(1:n_groups, times = n_groups * block_size) # each b group repeats across each a group
+
+df <- data.frame(a = a, b = b)
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_0.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+
+## -----------------------------------------------------------------------------
+set.seed(123)
+m <- 250
+n_groups <- 5
+rows_per_group <- m / n_groups # = 50 rows per group in `a`
+
+# Heavier diagonal mapping: 20 to diagonal, 7.5 to each off-diagonal (→ 50 total)
+strong <- 30
+weak <- (rows_per_group - strong) / (n_groups - 1) # = 7.5
+
+stopifnot(weak == floor(weak) || weak == ceiling(weak)) # ensure integers
+
+a <- c()
+b <- c()
+for (i in 1:n_groups) {
+    # Diagonal: strong connection
+    a <- c(a, rep(i, strong))
+    b <- c(b, rep(i, strong))
+
+    # Off-diagonal: weaker connections
+    for (j in setdiff(1:n_groups, i)) {
+        a <- c(a, rep(i, weak))
+        b <- c(b, rep(j, weak))
+    }
+}
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_02.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+
+## -----------------------------------------------------------------------------
+set.seed(123)
+m <- 250
+n_groups <- 5
+rows_per_group <- m / n_groups # = 50 rows per group in `a`
+
+# Heavier diagonal mapping: 20 to diagonal, 7.5 to each off-diagonal (→ 50 total)
+strong <- 38
+weak <- (rows_per_group - strong) / (n_groups - 1) # = 7.5
+
+stopifnot(weak == floor(weak) || weak == ceiling(weak)) # ensure integers
+
+a <- c()
+b <- c()
+for (i in 1:n_groups) {
+    # Diagonal: strong connection
+    a <- c(a, rep(i, strong))
+    b <- c(b, rep(i, strong))
+
+    # Off-diagonal: weaker connections
+    for (j in setdiff(1:n_groups, i)) {
+        a <- c(a, rep(i, weak))
+        b <- c(b, rep(j, weak))
+    }
+}
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+
+## -----------------------------------------------------------------------------
+set.seed(123)
+m <- 250
+n_groups <- 5
+rows_per_group <- m / n_groups # = 50 rows per group in `a`
+
+# Heavier diagonal mapping: 20 to diagonal, 7.5 to each off-diagonal (→ 50 total)
+strong <- 46
+weak <- (rows_per_group - strong) / (n_groups - 1) # = 7.5
+
+stopifnot(weak == floor(weak) || weak == ceiling(weak)) # ensure integers
+
+a <- c()
+b <- c()
+for (i in 1:n_groups) {
+    # Diagonal: strong connection
+    a <- c(a, rep(i, strong))
+    b <- c(b, rep(i, strong))
+
+    # Off-diagonal: weaker connections
+    for (j in setdiff(1:n_groups, i)) {
+        a <- c(a, rep(i, weak))
+        b <- c(b, rep(j, weak))
+    }
+}
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_08.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+
+## -----------------------------------------------------------------------------
+set.seed(123)
+m <- 250
+n_groups <- 5
+rows_per_group <- m / n_groups # = 50 rows per group in `a`
+
+a <- rep(1:n_groups, each = rows_per_group)
+b <- rep(1:n_groups, each = rows_per_group)
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_1.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+
+## -----------------------------------------------------------------------------
+m <- 250
+rows_per_group <- m / 5 # = 50
+
+a <- rep(1:5, each = rows_per_group)
+b <- c(
+    rep(1, rows_per_group), # a = 1 → b = 1
+    rep(2, rows_per_group), # a = 2 → b = 2
+    rep(3, rows_per_group * 3) # a = 3,4,5 → b = 3
+)
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_left.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+
+## -----------------------------------------------------------------------------
+m <- 250
+rows_per_group <- m / 5 # = 50
+
+b <- rep(1:5, each = rows_per_group)
+a <- c(
+    rep(1, rows_per_group), # a = 1 → b = 1
+    rep(2, rows_per_group), # a = 2 → b = 2
+    rep(3, rows_per_group * 3) # a = 3,4,5 → b = 3
+)
+
+df <- data.frame(a = a, b = b)
+
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
+mclust::adjustedRandIndex(df$a, df$b)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_right.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+
+## -----------------------------------------------------------------------------
+sessioninfo::session_info()
+

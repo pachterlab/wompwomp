@@ -1,0 +1,272 @@
+## -----------------------------------------------------------------------------
+# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+# devtools::load_all() # !!! erase
+
+library(wompwomp)  #!!! uncomment
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+library(ggforce)
+library(igraph)
+library(tibble)
+library(tidyr)
+library(reticulate)
+
+set.seed(42)
+
+## ----setup-env, eval = FALSE--------------------------------------------------
+#  wompwomp::setup_python_env()
+
+## ----check-python, include = FALSE--------------------------------------------
+if (!reticulate::py_module_available("splitspy")) {
+    message("❌ 'splitspy' not found. Run wompwomp::setup_python_env() and restart R.")
+    knitr::knit_exit()
+}
+
+## -----------------------------------------------------------------------------
+use_temp_dir <- FALSE
+
+use_temp_dir <- (use_temp_dir || !interactive()) # ensure temp_dire when non-interactive always
+output_dir <- ifelse(!use_temp_dir, here::here("vignettes", "output"), file.path(tempdir(), "vignette_output"))
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+
+## -----------------------------------------------------------------------------
+url <- "https://raw.githubusercontent.com/MattLunkes/GoT_Affiliations/master/got_char.csv"
+got_file <- file.path(output_dir, "got_char.csv")
+graphing_columns <- c("Origin", "Starting.Affiliation", "End.of.S1", "End.of.S2", "End.of.S3", "End.of.S4", "End.of.S5", "End.of.S6", "End.of.S7")
+
+if (!file.exists(got_file)) {
+    download.file(url, got_file, method = "curl")
+}
+
+df <- read.csv(got_file)
+
+## -----------------------------------------------------------------------------
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", default_sorting = "alphabetical", coloring_algorithm = "left", color_bands = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_unsorted_alphabetical.pdf"), min_text = 0.01, save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p
+
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", default_sorting = "reverse_alphabetical", coloring_algorithm = "left", color_bands = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_unsorted_reverse_alphabetical.pdf"), min_text = 0.01, save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p
+
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", default_sorting = "increasing", coloring_algorithm = "left", color_bands = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_unsorted_increasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p
+
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", default_sorting = "decreasing", coloring_algorithm = "left", color_bands = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_unsorted_decreasing.pdf"), min_text = 0.01, save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p
+
+## -----------------------------------------------------------------------------
+set.seed(42)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", coloring_algorithm = "left", color_bands = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p
+
+# df['Lannister_origin'] <- df["Origin"] == 'House Lannister'
+df <- df %>%
+    mutate(Lannister_origin = case_when(
+        Origin == "House Lannister" ~ 1,
+        Origin == "Westeros" ~ 2,
+        TRUE ~ 0
+    ))
+set.seed(42)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = FALSE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_origin", output_plot_path = file.path(output_dir, "GoT_random_lannister_origin.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p
+
+# df['Lannister_ending'] <- df["End.of.S7"] == 'Queen Cersei Lannister'
+df <- df %>%
+    mutate(Lannister_ending = case_when(
+        End.of.S7 == "Queen Cersei Lannister" ~ 1,
+        End.of.S7 == "Other, Westeros" ~ 2,
+        TRUE ~ 0
+    ))
+set.seed(42)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = FALSE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_ending", output_plot_path = file.path(output_dir, "GoT_random_lannister_ending.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p
+
+## -----------------------------------------------------------------------------
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_bands = FALSE, coloring_algorithm = "left", min_text = 0.01, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_NN.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p
+
+# df['Lannister_origin'] <- df["Origin"] == 'House Lannister'
+df <- df %>%
+    mutate(Lannister_origin = case_when(
+        Origin == "House Lannister" ~ 1,
+        Origin == "Westeros" ~ 2,
+        TRUE ~ 0
+    ))
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = TRUE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_origin", output_plot_path = file.path(output_dir, "GoT_NN_lannister_origin.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p
+
+# df['Lannister_ending'] <- df["End.of.S7"] == 'Queen Cersei Lannister'
+df <- df %>%
+    mutate(Lannister_ending = case_when(
+        End.of.S7 == "Queen Cersei Lannister" ~ 1,
+        End.of.S7 == "Other, Westeros" ~ 2,
+        TRUE ~ 0
+    ))
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = TRUE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_ending", output_plot_path = file.path(output_dir, "GoT_NN_lannister_ending.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p
+
+## -----------------------------------------------------------------------------
+if (!requireNamespace("DuoClustering2018", quietly = TRUE)) {
+    stop("Package 'DuoClustering2018' is needed for this vignette. Please install it with BiocManager::install('DuoClustering2018').")
+}
+
+## -----------------------------------------------------------------------------
+# library(DuoClustering2018)
+df_long <- DuoClustering2018::clustering_summary_filteredExpr10_Koh_v2()
+# print(unique(df_long$method))
+# graphing_columns <- c("PCAKmeans", "RtsneKmeans", "Seurat", "SC3")
+graphing_columns <- c("RaceID2", "FlowSOM", "CIDR", "TSCAN", "PCAKmeans", "PCAHC", "SAFE", "pcaReduce", "RtsneKmeans", "monocle", "SC3svm", "Seurat", "SC3") # the order from the original study; ascend has no data
+
+# shuffle graphing_columns
+set.seed(43)
+graphing_columns <- sample(graphing_columns)
+
+head(df_long)
+
+## -----------------------------------------------------------------------------
+for (method_name in graphing_columns) {
+    cat("Method:", method_name, "\n")
+
+    df_sub <- df_long[df_long$method == method_name, ]
+
+    cat("  Unique runs:       ", sort(unique(df_sub$run)), "\n")
+    cat("  Unique k values:   ", sort(unique(df_sub$k)), "\n")
+    cat("  Unique resolutions:", sort(unique(df_sub$resolution)), "\n\n")
+}
+
+## -----------------------------------------------------------------------------
+# keep only rows where run = 1, k = 9, and (for df_long$Seurat only) resolution = 2
+df_long <- df_long %>%
+    mutate(resolution = as.numeric(as.character(resolution))) %>%
+    filter(
+        run == 1,
+        k == 9,
+        method != "Seurat" | (method == "Seurat" & resolution == 2)
+    )
+
+## -----------------------------------------------------------------------------
+# Add a unique row index per observation
+df_long <- df_long %>%
+    group_by(method) %>%
+    mutate(obs_id = row_number()) %>%
+    ungroup()
+
+df <- df_long %>%
+    select(obs_id, trueclass, method, cluster) %>%
+    pivot_wider(
+        id_cols = c(obs_id, trueclass),
+        names_from = method,
+        values_from = cluster
+    ) %>%
+    select(-obs_id) # optional: remove if obs_id is no longer needed
+
+# df$FlowSOM <- NULL
+df$ascend <- NULL
+
+head(df)
+
+## -----------------------------------------------------------------------------
+sample_size <- NULL # NULL for full sample
+if (!is.null(sample_size)) {
+    set.seed(42)
+    df <- df %>% slice_sample(n = sample_size)
+} else {
+    sample_size <- "full"
+}
+
+## -----------------------------------------------------------------------------
+set.seed(42)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", coloring_algorithm = "left", resolution = 12, verbose = TRUE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+p
+
+## -----------------------------------------------------------------------------
+p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = FALSE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+p2
+
+## -----------------------------------------------------------------------------
+# log_msgs <- character()
+#
+# withCallingHandlers({
+#   p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = 'trueclass')
+# }, message = function(m) {
+#   log_msgs <<- c(log_msgs, conditionMessage(m))
+#   # no muffling → still prints to console
+# })
+# p2
+
+## -----------------------------------------------------------------------------
+# objectives <- stringr::str_match(log_msgs, "neighbornet_objective for iteration \\d+ = (\\d+)")[, 2]
+# objectives <- as.numeric(na.omit(objectives))
+#
+# df_obj <- data.frame(
+#   iteration = seq_along(objectives),
+#   objective = objectives
+# )
+#
+# ggplot(df_obj, aes(x = iteration, y = objective)) +
+#   geom_line(color = "blue") +
+#   scale_x_continuous(
+#     breaks = seq(0, length(objectives), by = 5),     # major ticks
+#     minor_breaks = seq(0, length(objectives), by = 1)  # minor ticks
+#   ) +
+#   labs(title = "NeighborNet Objective Over Iterations",
+#        x = "Iteration", y = "Objective") +
+#   theme_minimal()
+
+## ----long-runtime, eval = FALSE-----------------------------------------------
+#  cycle_start_positions <- NULL # c(110) - 110 for NN, 34 for TSP  # c(12:25, 130:150)  # c(40:60, 140:160)  # choose based on finding some local optima above
+#  column_sorting_metric <- "edge_crossing" # edge_crossing or ARI
+#  optimize_column_order_per_cycle <- TRUE
+#  
+#  set.seed(42)
+#  p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN_optimized_columns.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric, text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+#  p3
+
+## -----------------------------------------------------------------------------
+# Ensure color_band_list is a named vector
+color_band_list <- c(
+    "Lannister" = "#D55E00",
+    "Westeros" = "#56B4E9"
+)
+
+# Make a dummy data frame just for the legend
+legend_df <- data.frame(Gene = names(color_band_list))
+
+# Plot with invisible points to show only the legend
+legend_plot <- ggplot(legend_df, aes(x = 1, y = Gene, color = Gene)) +
+    geom_line(linewidth = 5) +
+    scale_color_manual(values = color_band_list, name = "Affiliation") +
+    theme_void() +
+    theme(legend.position = "right")
+
+ggsave(file.path(output_dir, "GoT_legend.pdf"), plot = legend_plot)
+
+## -----------------------------------------------------------------------------
+# Ensure color_band_list is a named vector
+color_band_list <- c(
+    "H7hESC" = "#D55E00",
+    "H7_derived_APS" = "#56B4E9",
+    "H7_derived_MPS" = "#009E73",
+    "H7_derived_DLL1pPXM" = "#F0E442",
+    "H7_derived_ESMT" = "#0072B2",
+    "H7_derived_Sclrtm" = "#E69F00",
+    "H7_derived_D5CntrlDrmmtm" = "#CC79A7",
+    "H7_derived_D2LtM" = "#666666",
+    "H7_dreived_D2.25_Smtmrs" = "#AD7700"
+)
+
+# Make a dummy data frame just for the legend
+legend_df <- data.frame(trueclass = names(color_band_list))
+
+# Plot with invisible points to show only the legend
+legend_plot <- ggplot(legend_df, aes(x = 1, y = trueclass, color = trueclass)) +
+    geom_line(linewidth = 5) +
+    scale_color_manual(values = color_band_list, name = "True Class") +
+    theme_void() +
+    theme(legend.position = "right")
+
+ggsave(file.path(output_dir, sprintf("clustering_%s_legend.pdf", sample_size)), plot = legend_plot)
+
+## -----------------------------------------------------------------------------
+sessioninfo::session_info()
+
