@@ -11,10 +11,10 @@ vignette: >
 ---
 
 ```{r}
-# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
-# devtools::load_all() # !!! erase
+reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+devtools::load_all() # !!! erase
 
-library(wompwomp)  #!!! uncomment
+#library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -75,26 +75,46 @@ df <- data.frame(
 # write.csv(df, file = "vignette_intro_df_ungrouped.csv", row.names = FALSE, quote = FALSE)
 head(df)
 ```
-
+Default Labeling
 ```{r}
-p1 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex", "special"), sorting_algorithm = "none")
+p1 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), sorting_algorithm = "none",
+                    coloring_algorithm = "none")
 p1
 ```
 
+Adding a legend
 ```{r}
-p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), color_band_column = "special", sorting_algorithm = "none")
+p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), sorting_algorithm = "none",
+                    coloring_algorithm = "none",
+                    add_legend = TRUE)
 p2
 ```
 
-Now with sorting
+Manually Adjusting Label Text Size
 ```{r}
-p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex", "special"), sorting_algorithm = "neighbornet", coloring_algorithm = "advanced")
+p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), sorting_algorithm = "none",
+                    coloring_algorithm = "none",
+                    add_legend = TRUE,
+                    text_size = 6, auto_adjust_text = FALSE, )
 p3
 ```
-
+Adjusting Label Text Size to Require Larger Labels
 ```{r}
-p4 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), color_band_column = "special", sorting_algorithm = "neighbornet")
+p4 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), sorting_algorithm = "none",
+                    coloring_algorithm = "none",
+                    add_legend = TRUE,
+                    min_text = 10, auto_adjust_text = TRUE, )
 p4
+```
+Adjusting Axis Labels
+```{r}
+p5 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster", "sex"), sorting_algorithm = "none",
+                    coloring_algorithm = "none",
+                    add_legend = TRUE,
+                    min_text = 10, auto_adjust_text = TRUE, 
+                    keep_y_labels = TRUE, axis_text_size = 10, include_axis_titles = TRUE,
+                    include_group_sizes = TRUE)
+p5
 ```
 
 ```{r}
