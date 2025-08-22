@@ -1128,10 +1128,9 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
 
     
     if (color_boxes) {
-        p <- p + geom_stratum(width = box_width, aes(fill = after_stat(!!sym("final_label_names"))), linewidth = box_line_width)+
-                scale_fill_manual(values = final_colors) 
-    } else {p
-        p <- p + geom_stratum(width = box_width, linewidth = box_line_width)
+        p <- p + geom_stratum(width = box_width, aes(fill = after_stat(!!sym("final_label_names"))), linewidth = box_line_width) + scale_fill_manual(values = final_colors) 
+    } else {
+        p <- p + geom_stratum(width = box_width, linewidth = box_line_width) + scale_fill_manual(values = final_colors) 
     }
 
     
