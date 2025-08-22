@@ -1069,7 +1069,7 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
             #levels(df[[color_band_column]])
             # else have a color band column and specified list. Just add to final colors
         } 
-        final_colors <- c(final_colors, color_band_list)
+        final_colors <- c(color_band_list, final_colors)
     }
     # remove duplicate names
     final_colors <- final_colors[!duplicated(names(final_colors))]
