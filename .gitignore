@@ -9,3 +9,6 @@ trash
 /doc/
 /Meta/
 */.build.timestamp
+.DS_Store
+.Rhistory
+.Rproj.user/

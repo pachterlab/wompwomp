@@ -8,6 +8,7 @@
 ^vignettes/8_cubed_sankey.ipynb$
 ^vignettes/8-cubed.Rmd$
 ^vignettes/kits-vs-inst.Rmd$
+^vignettes/global-optimum-comparison.Rmd$
 ^\.lintr$
 ^\.git$
 ^\.gitignore$
