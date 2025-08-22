@@ -1,5 +1,6 @@
 ^\.Rproj\.user$
 ^doc$
+^.*\.html$
 ^Meta$
 ^figures$
 ^tmp\.Rmd$
