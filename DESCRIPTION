@@ -42,4 +42,4 @@ Suggests:
     BiocStyle,
     sessioninfo
 Config/testthat/edition: 3
-biocViews: MathematicalBiology, GraphAndNetwork, Visualization
+biocViews: MathematicalBiology, Clustering, GraphAndNetwork, Visualization
