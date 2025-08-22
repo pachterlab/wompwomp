@@ -11,10 +11,10 @@ vignette: >
 ---
 
 ```{r}
-# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
-# devtools::load_all() # !!! erase
+reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+devtools::load_all() # !!! erase
 
-library(wompwomp)  #!!! uncomment
+# library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
