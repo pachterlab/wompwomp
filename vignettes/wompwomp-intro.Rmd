@@ -91,7 +91,8 @@ Plot with ggalluvial before sorting - notice especially how B CELLs cross down t
 #     geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
 #     theme_minimal()
 # p1
-p1 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "none", color_boxes = FALSE, color_bands = TRUE, coloring_algorithm = "none", output_plot_path = file.path(output_dir, "intro_unsorted.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
+
+p1 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "none", color_boxes = FALSE, color_bands = TRUE, coloring_algorithm = "none", color_band_list = c("B CELL" = "#D55E00", "BRAIN" = "#56B4E9", "HEART" = "#009E73", "STOMACH" = "#F0E442", "T CELL" = "#0072B2"), output_plot_path = file.path(output_dir, "intro_unsorted.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
 p1
 
 # ggsave("wompwomp_unsorted.png", plot = p1, dpi = 300, bg = "white")
