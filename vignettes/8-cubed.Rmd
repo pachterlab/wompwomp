@@ -10,10 +10,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 ```{r}
-# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
-# devtools::load_all() # !!! erase
+reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+devtools::load_all() # !!! erase
 
-library(wompwomp)  #!!! uncomment
+# library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -23,6 +23,18 @@ library(tibble)
 library(reticulate)
 
 set.seed(42)
+```
+
+Set up our python environment
+```{r setup-env, eval = FALSE}
+wompwomp::setup_python_env()
+```
+
+```{r check-python, include = FALSE}
+if (!reticulate::py_module_available("splitspy")) {
+    message("❌ 'splitspy' not found. Run wompwomp::setup_python_env() and restart R.")
+    knitr::knit_exit()
+}
 ```
 
 ```{r}
