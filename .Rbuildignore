@@ -6,8 +6,8 @@
 ^tmp_files$
 ^trash$
 ^vignettes/8_cubed_sankey.ipynb$
-^vignettes/8_cubed.Rmd$
-^vignettes/Real_examples.Rmd$
+^vignettes/8-cubed.Rmd$
+^vignettes/kits-vs-inst.Rmd$
 ^\.lintr$
 ^\.git$
 ^\.gitignore$

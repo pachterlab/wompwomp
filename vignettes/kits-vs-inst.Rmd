@@ -1,0 +1,118 @@
+---
+title: "KiTS vs INST"
+output:
+    BiocStyle::html_document:
+        toc: true
+        toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{KiTS vs INST}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
+# devtools::load_all() # !!! erase
+
+library(wompwomp)  #!!! uncomment
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+library(ggforce)
+library(igraph)
+library(tibble)
+library(tidyr)
+library(reticulate)
+
+set.seed(42)
+```
+
+Set up our python environment
+```{r setup-env, eval = FALSE}
+wompwomp::setup_python_env()
+```
+
+```{r check-python, include = FALSE}
+if (!reticulate::py_module_available("splitspy")) {
+    message("❌ 'splitspy' not found. Run wompwomp::setup_python_env() and restart R.")
+    knitr::knit_exit()
+}
+```
+
+```{r}
+use_temp_dir <- FALSE
+
+use_temp_dir <- (use_temp_dir || !interactive()) # ensure temp_dire when non-interactive always
+output_dir <- ifelse(!use_temp_dir, here::here("vignettes", "output"), file.path(tempdir(), "vignette_output"))
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+```
+
+```{r}
+kits_file <- file.path(output_dir, "kits_alluvial_data.csv")
+
+if (!file.exists(kits_file)) {
+    stop(sprintf("KiTS file not found, and is currently not available for download. Please place the file in '%s'", kits_file))
+}
+
+df <- read.csv(kits_file)
+
+df$KiTS_dice_score_binned_broad <- cut(
+    df$KiTS_dice_score,
+    breaks = c(-Inf, 0.2, 0.7, 1),
+    labels = c("0-0.2", "0.2-0.7", "0.7-1"),
+    right = FALSE # means intervals are [a, b)
+)
+
+df$USC_dice_score_binned_broad <- cut(
+    df$USC_dice_score,
+    breaks = c(-Inf, 0.2, 0.7, 1),
+    labels = c("0-0.2", "0.2-0.7", "0.7-1"),
+    right = FALSE # means intervals are [a, b)
+)
+```
+
+```{r}
+graphing_columns <- c("KiTS_dice_score_binned", "USC_dice_score_binned")
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands = TRUE, coloring_algorithm = "left", cutoff = 0.5, resolution = 4, verbose = TRUE, output_plot_path = file.path(output_dir, "Segmentation_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24, text_size = 35, axis_text_size = 35, axis_text_vjust = -5)
+p
+```
+
+```{r}
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, coloring_algorithm = "left", cutoff = 0.5, resolution = 4, verbose = TRUE, output_plot_path = file.path(output_dir, "Segmentation_NN.pdf"), min_text = 0.01, save_height = 24, save_width = 24, text_size = 35, axis_text_size = 35, axis_text_vjust = -5)
+p
+```
+
+WOLF
+```{r}
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "greedy_wolf", fixed_column = "KiTS_dice_score_binned", color_bands = TRUE, resolution = 4, verbose = TRUE, random_initializations = 3)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "greedy_wblf", color_bands = TRUE, resolution = 4, verbose = TRUE, random_initializations = 3)
+```
+
+
+
+```{r}
+graphing_columns <- c("gender", "Race", "radiographic_size_binned", "KiTS_dice_score_binned_broad")
+# plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_KiTS_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+# plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_KiTS_NN.pdf"), min_text = 0.01, save_height = 24, save_width = 24, optimize_column_order = FALSE)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", optimize_column_order = FALSE, color_bands = TRUE, coloring_algorithm = "none", color_band_column = "KiTS_dice_score_binned_broad", color_val = list("0-0.2" = "#009E73", "0.2-0.7" = "#D55E00", "0.7-1" = "#56B4E9"), output_plot_path = file.path(output_dir, "Segmentation_stratified_KiTS_unsorted_colored_dice.pdf"), min_text = 0.01, save_height = 24, save_width = 24, verbose = TRUE, text_size = 35, axis_text_size = 35, axis_text_vjust = -5)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_bands = TRUE, coloring_algorithm = "none", color_band_column = "KiTS_dice_score_binned_broad", color_val = list("0-0.2" = "#009E73", "0.2-0.7" = "#D55E00", "0.7-1" = "#56B4E9"), output_plot_path = file.path(output_dir, "Segmentation_stratified_KiTS_NN_colored_dice.pdf"), min_text = 0.01, save_height = 24, save_width = 24, verbose = TRUE, text_size = 35, axis_text_size = 35, axis_text_vjust = -5)
+# plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_KiTS_NN_colored_ethnicity.pdf"), color_band_list = c("#009E73", "#F0E442", "#56B4E9", "#0072B2", "#E69F00", "#D55E00"), color_band_column = 'Race', min_text = 0.01, save_height = 24, save_width = 24, optimize_column_order = FALSE)
+# plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_KiTS_NN_colored_size.pdf"), color_band_list = c("#009E73", "#D55E00", "green", "#E69F00", "#56B4E9"), color_band_column = 'radiographic_size_binned', min_text = 0.01, save_height = 24, save_width = 24, optimize_column_order = FALSE)
+```
+
+```{r}
+graphing_columns <- c("gender", "Race", "radiographic_size_binned", "USC_dice_score_binned_broad")
+# plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_USC_unsorted.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+# plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_USC_NN.pdf"), min_text = 0.01, save_height = 24, save_width = 24, optimize_column_order = FALSE)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none", optimize_column_order = FALSE, color_bands = FALSE, coloring_algorithm = "none", color_band_column = "USC_dice_score_binned_broad", color_val = list("0-0.2" = "#009E73", "0.2-0.7" = "#D55E00", "0.7-1" = "#56B4E9"), output_plot_path = file.path(output_dir, "Segmentation_stratified_USC_unsorted_colored_dice.pdf"), min_text = 0.01, save_height = 24, save_width = 24, verbose = TRUE, text_size = 35, axis_text_size = 35, axis_text_vjust = -5)
+
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_bands = TRUE, coloring_algorithm = "none", color_band_column = "USC_dice_score_binned_broad", color_val = list("0-0.2" = "#009E73", "0.2-0.7" = "#D55E00", "0.7-1" = "#56B4E9"), output_plot_path = file.path(output_dir, "Segmentation_stratified_USC_NN_colored_dice.pdf"), min_text = 0.01, save_height = 24, save_width = 24, verbose = TRUE, text_size = 35, axis_text_size = 35, axis_text_vjust = -5)
+# plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands=TRUE, output_plot_path = file.path(output_dir, "Segmentation_stratified_USC_NN_colored_ethnicity.pdf"), color_band_list = c("#0072B2", "#009E73", "#56B4E9", "#F0E442", "#E69F00", "#D55E00"), color_band_column = 'Race', min_text = 0.01, save_height = 24, save_width = 24, optimize_column_order = FALSE)
+```
+
+```{r}
+sessioninfo::session_info()
+```
