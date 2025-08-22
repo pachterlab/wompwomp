@@ -1039,6 +1039,8 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
     }
 
     remaining_colors <- ditto_colors[!(ditto_colors %in% final_colors)]
+    
+    final_colors_legend <- final_colors
     # generate label names
     final_label_names <- c()
     for (col_int in seq_along(graphing_columns)) {
@@ -1049,15 +1051,15 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
         
         final_label_names <- c(final_label_names, rev(curr_label))
     }
-    names(final_colors) <- final_label_names
+    names(final_colors_legend) <- final_label_names
     
     # if color_bands, add to named list
     
     if (!is.null(color_band_list)) {
-        final_colors <- c(color_band_list, final_colors)
+        final_colors_legend <- c(color_band_list, final_colors_legend)
     } 
     # remove duplicate names
-    final_colors <- final_colors[!duplicated(names(final_colors))]
+    final_colors_legend <- final_colors_legend[!duplicated(names(final_colors_legend))]
     # remove duplicate dims
     temp_df <- df # [1:as.integer(dim(df)[1]/2),1:dim(df)[2]]
 
@@ -1080,6 +1082,7 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
             p <- p +
                 geom_alluvium(aes(fill = !!sym(color_band_column)), alpha = alluvial_alpha) 
         }
+        p <- p + scale_fill_manual(values = final_colors_legend)
     } else {
         if (color_band_boundary) {
             p <- p + geom_alluvium(color = "grey2", alpha = alluvial_alpha)
@@ -1089,13 +1092,22 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
     }
     
     if (color_band_boundary) {
-        p <- p + scale_color_manual(values = final_colors, guide='none')
+        if (add_legend) {
+            p <- p + scale_color_manual(values = final_colors_legend, guide='none')
+            
+        } else{
+            p <- p + scale_color_manual(values = color_band_list, guide='none')
+        }
     }
 
     
     if (color_boxes) {
-        p <- p + geom_stratum(width = box_width, aes(fill = after_stat(!!sym("final_label_names"))), linewidth = box_line_width) + scale_fill_manual(values = final_colors) 
-    } else {
+        if (add_legend) {   
+            p <- p + geom_stratum(width = box_width, aes(fill = after_stat(!!sym("final_label_names"))), linewidth = box_line_width) + scale_fill_manual(values = final_colors_legend) 
+        } else { 
+            p <- p + geom_stratum(width = box_width, fill = final_colors, linewidth = box_line_width) 
+        }
+     } else {
         p <- p + geom_stratum(width = box_width, linewidth = box_line_width) + scale_fill_manual(values = final_colors) 
     }
 
