@@ -25,15 +25,6 @@ if (objective_fenwick_script_path == "") {
 }
 stopifnot(file.exists(objective_fenwick_script_path))
 
-convert_args_to_lowercase <- function(arg_names) {
-    for (nm in arg_names) {
-        val <- get(nm, envir = parent.frame())
-        if (is.character(val)) {
-            assign(nm, tolower(val), envir = parent.frame())
-        }
-    }
-}
-
 print_function_params <- function() {
     # Get calling function (one level up)
     f <- sys.function(sys.parent())
