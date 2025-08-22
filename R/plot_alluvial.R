@@ -1055,7 +1055,16 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
     
     if (!is.null(color_band_list)) {
         final_colors_legend <- c(color_band_list, final_colors_legend)
-    } 
+    } else {
+        if (!is.null(color_band_column)) {
+            if (!(color_band_column %in% graphing_columns)) {
+                num_levels <- length(unique(df[[color_band_column]]))
+                color_band_list <- remaining_colors[1:num_levels]
+                names(color_band_list) <- unique(df[[color_band_column]])
+                final_colors_legend <- c(color_band_list, final_colors_legend)
+            }
+        }
+    }
     # remove duplicate names
     final_colors_legend <- final_colors_legend[!duplicated(names(final_colors_legend))]
     # remove duplicate dims
@@ -1932,3 +1941,4 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
 
     return(alluvial_plot)
 }
+
