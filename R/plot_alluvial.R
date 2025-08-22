@@ -847,7 +847,7 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
     if (print_params) print_function_params()
     lowercase_args(c("coloring_algorithm", "coloring_algorithm_advanced_option", "legend_loc"))
     
-    if (verbose && do_compute_alluvial_statistics) compute_alluvial_statistics(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
+    if (verbose && do_compute_alluvial_statistics) compute_alluvial_statistics(clus_df_gather = df, graphing_columns = graphing_columns, column_weights = column_weights)
 
     geom_alluvium <- if (rasterise_alluvia) {
         function(...) ggrastr::rasterise(ggalluvial::geom_alluvium(...), dpi = dpi)
@@ -1454,7 +1454,7 @@ sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_wei
     return(clus_df_gather_neighbornet)
 }
 
-sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = NULL, column2 = NULL, fixed_column = NULL, random_initializations = 1, column_weights = "value", sorting_algorithm = "greedy_wblf", verbose = FALSE) {
+sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = NULL, column2 = NULL, fixed_column = NULL, random_initializations = 1, column_weights = "value", sorting_algorithm = "greedy_wblf", verbose = FALSE, environment = "wompwomp_env", use_conda = TRUE) {
     if (length(graphing_columns) != 2) {
         stop(sprintf("graphing_columns must be of length 2 for greedy_wblf/greedy_wolf"))
     }
@@ -1719,7 +1719,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, matrix_initialization_value_column_order = matrix_initialization_value_column_order, weight_scalar_column_order = weight_scalar_column_order, column_sorting_metric = column_sorting_metric, sorting_algorithm = sorting_algorithm, column_sorting_algorithm = column_sorting_algorithm, cycle_start_positions = cycle_start_positions, verbose = verbose, make_intermediate_neighbornet_plots = make_intermediate_neighbornet_plots, environment = environment, use_conda = use_conda)
     } else if (sorting_algorithm == "greedy_wblf" || sorting_algorithm == "greedy_wolf") {
         # O(n_1 * n_2) complexity, where n1 is the number of blocks in layer 1, and n2 is the number of blocks in layer 2
-        clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, sorting_algorithm = sorting_algorithm, verbose = verbose)
+        clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, sorting_algorithm = sorting_algorithm, verbose = verbose, environment = environment, use_conda = use_conda)
     } else if (sorting_algorithm == "random") {
         clus_df_gather_sorted <- randomly_map_int_columns(clus_df_gather)
     } else if (sorting_algorithm == "none") {

@@ -7,7 +7,7 @@
 #' @importFrom dplyr mutate group_by summarise arrange desc ungroup slice n pull filter row_number left_join rename_with rename
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble is_tibble
-#' @importFrom utils read.csv
+#' @importFrom utils read.csv modifyList
 #' @importFrom rlang sym .data
 #' @importFrom magrittr %>%
 #' @importFrom data.table :=
