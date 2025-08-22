@@ -75,6 +75,7 @@ p
 ```
 
 ```{r}
+set.seed(42)
 p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", coloring_algorithm = "left", color_bands = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_random.pdf"), min_text = 0.01, save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
 p
 
@@ -85,7 +86,8 @@ df <- df %>%
         Origin == "Westeros" ~ 2,
         TRUE ~ 0
     ))
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = FALSE, color_band_list = c("grey", "#D55E00", "#56B4E9"), color_band_column = "Lannister_origin", output_plot_path = file.path(output_dir, "GoT_random_lannister_origin.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+set.seed(42)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = FALSE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_origin", output_plot_path = file.path(output_dir, "GoT_random_lannister_origin.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
 p
 
 # df['Lannister_ending'] <- df["End.of.S7"] == 'Queen Cersei Lannister'
@@ -95,7 +97,8 @@ df <- df %>%
         End.of.S7 == "Other, Westeros" ~ 2,
         TRUE ~ 0
     ))
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = FALSE, color_band_list = c("grey", "#D55E00", "#56B4E9"), color_band_column = "Lannister_ending", output_plot_path = file.path(output_dir, "GoT_random_lannister_ending.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+set.seed(42)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = FALSE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_ending", output_plot_path = file.path(output_dir, "GoT_random_lannister_ending.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
 p
 ```
 
@@ -110,7 +113,7 @@ df <- df %>%
         Origin == "Westeros" ~ 2,
         TRUE ~ 0
     ))
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = TRUE, color_band_list = c("grey", "#D55E00", "#56B4E9"), color_band_column = "Lannister_origin", output_plot_path = file.path(output_dir, "GoT_NN_lannister_origin.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = TRUE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_origin", output_plot_path = file.path(output_dir, "GoT_NN_lannister_origin.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
 p
 
 # df['Lannister_ending'] <- df["End.of.S7"] == 'Queen Cersei Lannister'
@@ -120,7 +123,7 @@ df <- df %>%
         End.of.S7 == "Other, Westeros" ~ 2,
         TRUE ~ 0
     ))
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = TRUE, color_band_list = c("grey", "#D55E00", "#56B4E9"), color_band_column = "Lannister_ending", output_plot_path = file.path(output_dir, "GoT_NN_lannister_ending.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = TRUE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_ending", output_plot_path = file.path(output_dir, "GoT_NN_lannister_ending.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
 p
 ```
 
@@ -205,12 +208,13 @@ if (!is.null(sample_size)) {
 ```
 
 ```{r}
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", coloring_algorithm = "left", resolution = 12, verbose = TRUE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c(0 = "#D55E00", 1 = "#56B4E9", 2 = "#009E73", 3 = "#F0E442", 4 = "#0072B2", 5 = "#E69F00", 6 = "#CC79A7", 7 = "#666666", 8 = "#AD7700")), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+set.seed(42)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "random", coloring_algorithm = "left", resolution = 12, verbose = TRUE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_random.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("0" = "#D55E00", "1" = "#56B4E9", "2" = "#009E73", "3" = "#F0E442", "4" = "#0072B2", "5" = "#E69F00", "6" = "#CC79A7", "7" = "#666666", "8" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
 p
 ```
 
 ```{r}
-p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = FALSE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c(0 = "#D55E00", 1 = "#56B4E9", 2 = "#009E73", 3 = "#F0E442", 4 = "#0072B2", 5 = "#E69F00", 6 = "#CC79A7", 7 = "#666666", 8 = "#AD7700")), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = FALSE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("0" = "#D55E00", "1" = "#56B4E9", "2" = "#009E73", "3" = "#F0E442", "4" = "#0072B2", "5" = "#E69F00", "6" = "#CC79A7", "7" = "#666666", "8" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
 p2
 ```
 
@@ -219,7 +223,7 @@ Optional (only if I'm doing a subset of objectives)
 # log_msgs <- character()
 #
 # withCallingHandlers({
-#   p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c(0 = "#D55E00", 1 = "#56B4E9", 2 = "#009E73", 3 = "#F0E442", 4 = "#0072B2", 5 = "#E69F00", 6 = "#CC79A7", 7 = "#666666", 8 = "#AD7700")), color_band_column = 'trueclass')
+#   p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("0" = "#D55E00", "1" = "#56B4E9", "2" = "#009E73", "3" = "#F0E442", "4" = "#0072B2", "5" = "#E69F00", "6" = "#CC79A7", "7" = "#666666", "8" = "#AD7700")), color_band_column = 'trueclass')
 # }, message = function(m) {
 #   log_msgs <<- c(log_msgs, conditionMessage(m))
 #   # no muffling → still prints to console
@@ -252,7 +256,7 @@ cycle_start_positions <- NULL # c(110) - 110 for NN, 34 for TSP  # c(12:25, 130:
 column_sorting_metric <- "edge_crossing" # edge_crossing or ARI
 optimize_column_order_per_cycle <- TRUE
 
-p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN_optimized_columns.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c(0 = "#D55E00", 1 = "#56B4E9", 2 = "#009E73", 3 = "#F0E442", 4 = "#0072B2", 5 = "#E69F00", 6 = "#CC79A7", 7 = "#666666", 8 = "#AD7700")), color_band_column = "trueclass", cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric, text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN_optimized_columns.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_band_list = c("0" = "#D55E00", "1" = "#56B4E9", "2" = "#009E73", "3" = "#F0E442", "4" = "#0072B2", "5" = "#E69F00", "6" = "#CC79A7", "7" = "#666666", "8" = "#AD7700"), color_band_column = "trueclass", cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric, text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
 p3
 ```
 

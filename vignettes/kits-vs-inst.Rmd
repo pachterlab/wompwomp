@@ -84,7 +84,10 @@ p
 
 WOLF
 ```{r}
+set.seed(42)
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "greedy_wolf", fixed_column = "KiTS_dice_score_binned", color_bands = TRUE, resolution = 4, verbose = TRUE, random_initializations = 3)
+
+set.seed(42)
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "greedy_wblf", color_bands = TRUE, resolution = 4, verbose = TRUE, random_initializations = 3)
 ```
 

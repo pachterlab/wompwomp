@@ -62,7 +62,6 @@ Optional:
     cycle_start_positions <- get_multi_arg(args, c("--cycle_start_positions"))
     fixed_column <- get_fixed_column(args, "--fixed_column")
     random_initializations <- get_integer_arg(args, "--random_initializations")
-    set_seed <- get_integer_arg(args, "--set_seed")
     output_df_path <- get_arg(args, c("-o", "--output_df_path"))
     preprocess_data <- store_false(args, c("--disable_preprocess_data"))
     default_sorting <- get_arg(args, c("--default_sorting"))
@@ -101,7 +100,6 @@ Optional:
     if (!is.null(cycle_start_positions)) args_list$cycle_start_positions <- cycle_start_positions
     if (!is.null(fixed_column)) args_list$fixed_column <- fixed_column
     if (!is.null(random_initializations)) args_list$random_initializations <- random_initializations
-    if (!is.null(set_seed)) args_list$set_seed <- set_seed
     if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
     if (!is.null(preprocess_data)) args_list$preprocess_data <- preprocess_data
     if (!is.null(default_sorting)) args_list$default_sorting <- default_sorting

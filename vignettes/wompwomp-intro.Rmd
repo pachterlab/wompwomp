@@ -92,7 +92,7 @@ Plot with ggalluvial before sorting - notice especially how B CELLs cross down t
 #     theme_minimal()
 # p1
 
-p1 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "none", color_boxes = FALSE, color_bands = TRUE, coloring_algorithm = "none", color_band_list = c("B CELL" = "#D55E00", "BRAIN" = "#56B4E9", "HEART" = "#009E73", "STOMACH" = "#F0E442", "T CELL" = "#0072B2"), output_plot_path = file.path(output_dir, "intro_unsorted.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
+p1 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "none", color_boxes = FALSE, color_bands = TRUE, coloring_algorithm = "none", output_plot_path = file.path(output_dir, "intro_unsorted.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
 p1
 
 # ggsave("wompwomp_unsorted.png", plot = p1, dpi = 300, bg = "white")
@@ -147,7 +147,6 @@ p3_5
 
 ```{r}
 p4 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "neighbornet", color_bands = TRUE, coloring_algorithm = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_NN.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
-
 p4
 
 # ggsave("wompwomp_NN.png", plot = p4, dpi = 300, bg = "white")

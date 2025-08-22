@@ -121,8 +121,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns,
                 return_weighted_layer_free_objective = TRUE,
                 load_df = FALSE,
                 # verbose = verbose,
-                preprocess_data = FALSE,
-                set_seed = NULL, environment = environment, use_conda = use_conda
+                preprocess_data = FALSE, environment = environment, use_conda = use_conda
             )
             neighbornet_objective <- weight_scalar_column_order * log1p(neighbornet_objective) # log1p to avoid issue of log(0)
         } else {
@@ -438,8 +437,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             graphing_columns = graphing_columns_tmp,
             column_weights = column_weights,
             # verbose = verbose,
-            return_weighted_layer_free_objective = TRUE,
-            set_seed = NULL, environment = environment, use_conda = use_conda
+            return_weighted_layer_free_objective = TRUE, environment = environment, use_conda = use_conda
         )
 
         # # if ((optimize_column_order_per_cycle) || (i == 0)) {
@@ -453,7 +451,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         #         verbose = verbose,
         #         include_output_objective_matrix_vector = TRUE,
         #         return_weighted_layer_free_objective = FALSE,
-        #         set_seed = NULL, environment = environment, use_conda = use_conda
+        #         environment = environment, use_conda = use_conda
         #     )
         # } else {
         #     swapped_node <- cycle_shifted[length(cycle_shifted)]
@@ -480,7 +478,7 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         #         verbose = verbose,
         #         include_output_objective_matrix_vector = TRUE,
         #         return_weighted_layer_free_objective = FALSE,
-        #         set_seed = NULL, environment = environment, use_conda = use_conda
+        #         environment = environment, use_conda = use_conda
         #     )
         # }
         #
@@ -1105,7 +1103,7 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
         if (add_legend) {   
             p <- p + geom_stratum(width = box_width, aes(fill = after_stat(!!sym("final_label_names"))), linewidth = box_line_width) + scale_fill_manual(values = final_colors_legend) 
         } else { 
-            p <- p + geom_stratum(width = box_width, fill = final_colors, linewidth = box_line_width)  + scale_fill_manual(values = final_colors) 
+            p <- p + geom_stratum(width = box_width, fill = final_colors, linewidth = box_line_width)
         }
      } else {
         p <- p + geom_stratum(width = box_width, linewidth = box_line_width)
@@ -1320,7 +1318,6 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' @param graphing_columns Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting).
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
 #' @param default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if \code{sorting_algorithm == 'neighbornet'}. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
-#' @param set_seed Integer. Random seed for the \code{random_initializations} parameter, random initialization/shuffling of blocks, and TSP solver for optimizing column order. Depracated (recommended to set seed outside of fucntion call).
 #' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param print_params Logical. If TRUE, will print function params.
@@ -1347,18 +1344,9 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #'     column_weights = "value")
 #'
 #' @export
-data_preprocess <- function(df, graphing_columns, column_weights = NULL, default_sorting = "alphabetical", set_seed = 42, output_df_path = NULL, verbose = FALSE, print_params = FALSE, load_df = TRUE, do_gather_set_data = FALSE, color_band_column = NULL) {
+data_preprocess <- function(df, graphing_columns, column_weights = NULL, default_sorting = "alphabetical", output_df_path = NULL, verbose = FALSE, print_params = FALSE, load_df = TRUE, do_gather_set_data = FALSE, color_band_column = NULL) {
     if (print_params) print_function_params()
     lowercase_args(c("default_sorting"))
-    
-    #* Set seed
-    if (!is.null(set_seed)) {
-        if (exists(".Random.seed")) {
-            old_seed <- .Random.seed
-            on.exit(assign(".Random.seed", old_seed, envir = globalenv()), add = TRUE)
-        }
-        # set.seed(set_seed)
-    }
 
     if (load_df) {
         df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
@@ -1500,7 +1488,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
             crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp,
                 column1 = column1, column2 = column2,
                 column_weights = column_weights, load_df = FALSE, preprocess_data = FALSE, # verbose = verbose,
-                output_df_path = NULL, return_weighted_layer_free_objective = TRUE, set_seed = NULL, environment = environment, use_conda = use_conda
+                output_df_path = NULL, return_weighted_layer_free_objective = TRUE, environment = environment, use_conda = use_conda
             )
             if (crossing_edges_objective < crossing_edges_objective_minimum) {
                 crossing_edges_objective_minimum <- crossing_edges_objective
@@ -1548,7 +1536,6 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @param cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'neighbornet'}.
 #' @param fixed_column Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_wolf'}.
 #' @param random_initializations Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}.
-#' @param set_seed Integer. Random seed for the \code{random_initializations} parameter. Only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}. Depracated (recommended to set seed outside of fucntion call).
 #' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
 #' @param preprocess_data Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.
 #' @param default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if \code{sorting_algorithm == 'neighbornet'}. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
@@ -1588,18 +1575,9 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #'     column_sorting_algorithm = "tsp")
 #'
 #' @export
-data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL, random_initializations = 1, set_seed = 42, output_df_path = NULL, preprocess_data = TRUE, default_sorting = "alphabetical", return_updated_graphing_columns = FALSE, verbose = FALSE, print_params = FALSE, load_df = TRUE, make_intermediate_neighbornet_plots = FALSE, do_compute_alluvial_statistics = TRUE, environment = "wompwomp_env", use_conda = TRUE) {
+data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL, random_initializations = 1, output_df_path = NULL, preprocess_data = TRUE, default_sorting = "alphabetical", return_updated_graphing_columns = FALSE, verbose = FALSE, print_params = FALSE, load_df = TRUE, make_intermediate_neighbornet_plots = FALSE, do_compute_alluvial_statistics = TRUE, environment = "wompwomp_env", use_conda = TRUE) {
     if (print_params) print_function_params()
     lowercase_args(c("sorting_algorithm", "column_sorting_metric", "column_sorting_algorithm", "default_sorting"))
-    
-    #* Set seed
-    if (!is.null(set_seed)) {
-        if (exists(".Random.seed")) {
-            old_seed <- .Random.seed
-            on.exit(assign(".Random.seed", old_seed, envir = globalenv()), add = TRUE)
-        }
-        # set.seed(set_seed)
-    }
 
     #* Type Checking Start
     valid_algorithms <- c("neighbornet", "tsp", "greedy_wolf", "greedy_wblf", "none", "random")
@@ -1681,7 +1659,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     # Preprocess (i.e., add int columns and do the grouping)
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
-        clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, default_sorting = default_sorting, set_seed = NULL, load_df = load_df, do_gather_set_data = FALSE)
+        clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, default_sorting = default_sorting, load_df = load_df, do_gather_set_data = FALSE)
         if (is.null(column_weights)) {
             column_weights <- "value" # is set during data_preprocess
         }
@@ -1708,7 +1686,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     # print objective - don't do for neighbornet because I did it right before
     if ((verbose) && (sorting_algorithm != "neighbornet")) {
         message("Determining crossing edges objective (to disable, use verbose==FALSE)")
-        objective <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE, default_sorting = default_sorting, set_seed = NULL, environment = environment, use_conda = use_conda) # verbose = verbose
+        objective <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE, default_sorting = default_sorting, environment = environment, use_conda = use_conda) # verbose = verbose
         message(sprintf("crossing edges objective = %s", objective))
     }
 
@@ -1753,7 +1731,6 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
 #' @param fixed_column Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_wolf'}.
 #' @param random_initializations Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}.
-#' @param set_seed Integer. Random seed for the \code{random_initializations} parameter (only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}), random initialization/shuffling of blocks (only applies when \code{default_sorting == 'random' or sorting_algorithm == 'random'}), TSP solver for block order or optimizing column order (only applies when \code{sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'}), and louvain/leiden clustering (only applies when \code{coloring_algorithm == 'advanced'}). Depracated (recommended to set seed outside of fucntion call).
 #' @param color_boxes Logical. Whether to color the strata/boxes (representing groups).
 #' @param color_bands Logical. Whether to color the alluvia/edges (connecting the strata).
 #' @param color_list Optional named list or vector of colors to override default group colors.
@@ -1827,7 +1804,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6,
                           weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing",
                           column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL,
-                          random_initializations = 1, set_seed = 42, color_boxes = TRUE, color_bands = FALSE,
+                          random_initializations = 1, color_boxes = TRUE, color_bands = FALSE,
                           color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_val = NULL,
                           color_band_boundary = FALSE, coloring_algorithm = "advanced", coloring_algorithm_advanced_option = "leiden", resolution = 1, cutoff = .5,
                           alluvial_alpha = 0.5,
@@ -1840,14 +1817,6 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           add_legend = FALSE, legend_loc = 'right') {
     if (print_params) print_function_params()
     lowercase_args(c("sorting_algorithm", "column_sorting_metric", "column_sorting_algorithm", "coloring_algorithm", "coloring_algorithm_advanced_option", "default_sorting", "legend_loc"))
-    #* Set seed
-    if (!is.null(set_seed)) {
-        if (exists(".Random.seed")) {
-            old_seed <- .Random.seed
-            on.exit(assign(".Random.seed", old_seed, envir = globalenv()), add = TRUE)
-        }
-        # set.seed(set_seed)
-    }
 
     #* Type Checking Start
     # ensure someone doesn't specify both graphing_columns and column1/2
@@ -1922,7 +1891,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
     # Preprocess
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
-        clus_df_gather_unsorted <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, color_band_column = color_band_column, default_sorting = default_sorting, set_seed = NULL, load_df = FALSE, do_gather_set_data = FALSE)
+        clus_df_gather_unsorted <- data_preprocess(df = df, graphing_columns = graphing_columns, column_weights = column_weights, color_band_column = color_band_column, default_sorting = default_sorting, load_df = FALSE, do_gather_set_data = FALSE)
         if (is.null(column_weights)) {
             column_weights <- "value" # is set during data_preprocess
         }
@@ -1938,7 +1907,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
 
     # Sort
     if (verbose) message(sprintf("Sorting data with sorting_algorithm=%s", sorting_algorithm))
-    data_sort_output <- data_sort(df = clus_df_gather_unsorted, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = sorting_algorithm, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, matrix_initialization_value_column_order = matrix_initialization_value_column_order, weight_scalar_column_order = weight_scalar_column_order, column_sorting_metric = column_sorting_metric, column_sorting_algorithm = column_sorting_algorithm, cycle_start_positions = cycle_start_positions, fixed_column = fixed_column, random_initializations = random_initializations, set_seed = NULL, output_df_path = output_df_path, return_updated_graphing_columns = TRUE, preprocess_data = FALSE, load_df = FALSE, verbose = verbose, make_intermediate_neighbornet_plots = make_intermediate_neighbornet_plots, do_compute_alluvial_statistics = do_compute_alluvial_statistics, environment = environment, use_conda = use_conda)
+    data_sort_output <- data_sort(df = clus_df_gather_unsorted, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = sorting_algorithm, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, matrix_initialization_value_column_order = matrix_initialization_value_column_order, weight_scalar_column_order = weight_scalar_column_order, column_sorting_metric = column_sorting_metric, column_sorting_algorithm = column_sorting_algorithm, cycle_start_positions = cycle_start_positions, fixed_column = fixed_column, random_initializations = random_initializations, output_df_path = output_df_path, return_updated_graphing_columns = TRUE, preprocess_data = FALSE, load_df = FALSE, verbose = verbose, make_intermediate_neighbornet_plots = make_intermediate_neighbornet_plots, do_compute_alluvial_statistics = do_compute_alluvial_statistics, environment = environment, use_conda = use_conda)
     clus_df_gather <- data_sort_output$clus_df_gather
     graphing_columns <- data_sort_output$graphing_columns
 

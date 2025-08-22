@@ -29,7 +29,6 @@ Optional:
     # Optional arguments
     column_weights <- get_arg(args, c("-w", "--column_weights"))
     default_sorting <- get_arg(args, c("--default_sorting"))
-    set_seed <- get_integer_arg(args, c("--set_seed"))
     output_df_path <- get_arg(args, c("-o", "--output_df_path"))
     verbose <- store_true(args, c("-v", "--verbose"))
     print_params <- store_true(args, c("--print_params"))
@@ -49,7 +48,6 @@ Optional:
     # Conditionally add optional args if not NULL
     if (!is.null(column_weights)) args_list$column_weights <- column_weights
     if (!is.null(default_sorting)) args_list$default_sorting <- default_sorting
-    if (!is.null(set_seed)) args_list$set_seed <- set_seed
     if (!is.null(output_df_path)) args_list$output_df_path <- output_df_path
     if (!is.null(verbose)) args_list$verbose <- verbose
     if (!is.null(print_params)) args_list$print_params <- print_params

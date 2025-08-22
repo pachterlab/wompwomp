@@ -92,7 +92,6 @@ Optional:
     cycle_start_positions <- get_multi_arg(args, c("--cycle_start_positions"))
     fixed_column <- get_fixed_column(args, "--fixed_column")
     random_initializations <- get_integer_arg(args, "--random_initializations")
-    set_seed <- get_integer_arg(args, "--set_seed")
     color_boxes <- store_false(args, c("--disable_color_boxes"))
     color_bands <- store_true(args, c("--color_bands"))
     color_list <- get_multi_arg(args, c("--color_list"))
@@ -157,7 +156,6 @@ Optional:
     if (!is.null(cycle_start_positions)) args_list$cycle_start_positions <- cycle_start_positions
     if (!is.null(fixed_column)) args_list$fixed_column <- fixed_column
     if (!is.null(random_initializations)) args_list$random_initializations <- random_initializations
-    if (!is.null(set_seed)) args_list$set_seed <- set_seed
     if (!is.null(color_boxes)) args_list$color_boxes <- color_boxes
     if (!is.null(color_bands)) args_list$color_bands <- color_bands
     if (!is.null(color_list)) args_list$color_list <- color_list
