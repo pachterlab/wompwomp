@@ -1,11 +1,11 @@
 ---
-title: "More NeighborNet"
+title: "Examples with Small Data"
 output:
     BiocStyle::html_document:
         toc: true
         toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{2. More NeighborNet}
+  %\VignetteIndexEntry{Examples with Small Data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
