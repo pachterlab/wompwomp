@@ -5,9 +5,9 @@
 #' @param envname Conda environment name
 #' @param packages Packages to install
 #' @param use_conda Use conda vs. virtualenv for python environment
-#' 
+#'
 #' @return Invisibly returns TRUE if the environment is set up successfully.
-#' 
+#'
 #' @examples
 #' \dontrun{
 #' setup_python_env()
@@ -122,9 +122,9 @@ setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "num
 
 detect_and_setup_python_env <- function(environment = environment, use_conda = use_conda, verbose = FALSE) {
     python_path <- reticulate::py_discover_config(use_environment = environment)$python
-    current_env <- basename(dirname(dirname(python_path)))  # Works for Conda envs: path typically ends in ".../envs/ENVIRONMENT/bin/python"
+    current_env <- basename(dirname(dirname(python_path))) # Works for Conda envs: path typically ends in ".../envs/ENVIRONMENT/bin/python"
     if (current_env != environment) {
         if (verbose) message("Setting up python environment")
-        setup_python_env(environment, use_conda=use_conda)
+        setup_python_env(environment, use_conda = use_conda)
     }
 }

@@ -4,11 +4,11 @@
 #'
 #' @param args A character vector of command-line arguments.
 #' @return Called for side effects. Invisibly returns `NULL`.
-#' 
+#'
 #' @examples
-#' 
+#'
 #' run_cli(c("plot_alluvial", "--help"))
-#' 
+#'
 #' @export
 run_cli <- function(args) {
     if (length(args) == 0 || (length(args) == 1 && args[1] %in% c("--help", "-h"))) {

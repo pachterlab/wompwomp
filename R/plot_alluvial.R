@@ -820,12 +820,14 @@ find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, curr
 #'     clus_df_gather,
 #'     graphing_columns = c("method1", "method2"),
 #'     column_weights = "value",
-#'     sorting_algorithm = "none")
+#'     sorting_algorithm = "none"
+#' )
 #' p <- plot_alluvial_internal(
-#'    clus_df_gather,
-#'    graphing_columns = c("method1", "method2"),
-#'    column_weights = "value",
-#'    coloring_algorithm = "right")
+#'     clus_df_gather,
+#'     graphing_columns = c("method1", "method2"),
+#'     column_weights = "value",
+#'     coloring_algorithm = "right"
+#' )
 #'
 #' @export
 plot_alluvial_internal <- function(df, graphing_columns, column_weights,
@@ -836,15 +838,15 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
                                    output_plot_path = NULL, color_val = NULL,
                                    include_labels_in_boxes = TRUE, include_axis_titles = FALSE,
                                    include_group_sizes = FALSE, verbose = FALSE, print_params = FALSE,
-                                   box_width = 1 / 3, text_width = 1 / 4, min_text = 4, text_size = 14, 
+                                   box_width = 1 / 3, text_width = 1 / 4, min_text = 4, text_size = 14,
                                    auto_adjust_text = TRUE, axis_text_size = 2, axis_text_vjust = 0,
-                                   save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE, 
-                                   keep_y_labels = FALSE, box_line_width = 1, do_compute_alluvial_statistics = TRUE, 
+                                   save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE,
+                                   keep_y_labels = FALSE, box_line_width = 1, do_compute_alluvial_statistics = TRUE,
                                    coloring_algorithm_advanced_option = "leiden", resolution = 1, environment = "wompwomp_env", use_conda = TRUE,
-                                   add_legend = FALSE, legend_loc = 'right') {
+                                   add_legend = FALSE, legend_loc = "right") {
     if (print_params) print_function_params()
     lowercase_args(c("coloring_algorithm", "coloring_algorithm_advanced_option", "legend_loc"))
-    
+
     if (verbose && do_compute_alluvial_statistics) compute_alluvial_statistics(clus_df_gather = df, graphing_columns = graphing_columns, column_weights = column_weights)
 
     geom_alluvium <- if (rasterise_alluvia) {
@@ -1037,22 +1039,22 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
     }
 
     remaining_colors <- ditto_colors[!(ditto_colors %in% final_colors)]
-    
+
     final_colors_legend <- final_colors
     # generate label names
     final_label_names <- c()
     for (col_int in seq_along(graphing_columns)) {
         int_name <- paste0("col", col_int, "_int")
         group_name <- graphing_columns[[col_int]]
-        
+
         curr_label <- as.character(unique(df[order(df[[int_name]]), ][[group_name]]))
-        
+
         final_label_names <- c(final_label_names, rev(curr_label))
     }
     names(final_colors_legend) <- final_label_names
-    
+
     # if color_bands, add to named list
-    
+
     if (!is.null(color_band_list)) {
         final_colors_legend <- c(color_band_list, final_colors_legend)
     } else {
@@ -1084,10 +1086,10 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
             p <- p +
                 geom_alluvium(aes(fill = !!sym(color_band_column), color = !!sym(color_band_column)),
                     alpha = alluvial_alpha
-                ) 
+                )
         } else {
             p <- p +
-                geom_alluvium(aes(fill = !!sym(color_band_column)), alpha = alluvial_alpha) 
+                geom_alluvium(aes(fill = !!sym(color_band_column)), alpha = alluvial_alpha)
         }
         p <- p + scale_fill_manual(values = final_colors_legend)
     } else {
@@ -1097,28 +1099,27 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
             p <- p + geom_alluvium(alpha = alluvial_alpha)
         }
     }
-    
+
     if (color_band_boundary) {
         if (add_legend) {
-            p <- p + scale_color_manual(values = final_colors_legend, guide='none')
-            
-        } else{
-            p <- p + scale_color_manual(values = color_band_list, guide='none')
+            p <- p + scale_color_manual(values = final_colors_legend, guide = "none")
+        } else {
+            p <- p + scale_color_manual(values = color_band_list, guide = "none")
         }
     }
 
-    
+
     if (color_boxes) {
-        if (add_legend) {   
-            p <- p + geom_stratum(width = box_width, aes(fill = after_stat(!!sym("final_label_names"))), linewidth = box_line_width) + scale_fill_manual(values = final_colors_legend) 
-        } else { 
+        if (add_legend) {
+            p <- p + geom_stratum(width = box_width, aes(fill = after_stat(!!sym("final_label_names"))), linewidth = box_line_width) + scale_fill_manual(values = final_colors_legend)
+        } else {
             p <- p + geom_stratum(width = box_width, fill = final_colors, linewidth = box_line_width)
         }
-     } else {
+    } else {
         p <- p + geom_stratum(width = box_width, linewidth = box_line_width)
     }
 
-    
+
     if (!(include_labels_in_boxes == FALSE)) {
         if (auto_adjust_text) {
             p <- p +
@@ -1169,13 +1170,13 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
             text = element_text(family = "sans"),
             axis.ticks.x = element_blank()
         )
-    
+
     if (add_legend) {
-        p <- p + theme(legend.position = legend_loc) + labs(fill = '')
+        p <- p + theme(legend.position = legend_loc) + labs(fill = "")
     } else {
-        p <- p + theme(legend.position = 'none')
+        p <- p + theme(legend.position = "none")
     }
-    
+
     if (include_axis_titles) {
         p <- p + theme(axis.text.x = element_text(size = axis_text_size, vjust = axis_text_vjust)) # vjust adjusts the vertical position of column titles)
     } else {
@@ -1350,7 +1351,8 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' clus_df_gather <- data_preprocess(
 #'     clus_df_gather,
 #'     graphing_columns = c("method1", "method2"),
-#'     column_weights = "value")
+#'     column_weights = "value"
+#' )
 #'
 #' @export
 data_preprocess <- function(df, graphing_columns, column_weights = NULL, default_sorting = "alphabetical", output_df_path = NULL, verbose = FALSE, print_params = FALSE, load_df = TRUE, do_gather_set_data = FALSE, color_band_column = NULL) {
@@ -1568,7 +1570,8 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #'     df,
 #'     graphing_columns = c("method1", "method2"),
 #'     sorting_algorithm = "tsp",
-#'     column_sorting_algorithm = "tsp")
+#'     column_sorting_algorithm = "tsp"
+#' )
 #'
 #' # Example 2: df format 2
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -1581,7 +1584,8 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #'     graphing_columns = c("method1", "method2"),
 #'     column_weights = "value",
 #'     sorting_algorithm = "tsp",
-#'     column_sorting_algorithm = "tsp")
+#'     column_sorting_algorithm = "tsp"
+#' )
 #'
 #' @export
 data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, fixed_column = NULL, random_initializations = 1, output_df_path = NULL, preprocess_data = TRUE, default_sorting = "alphabetical", return_updated_graphing_columns = FALSE, verbose = FALSE, print_params = FALSE, load_df = TRUE, make_intermediate_neighbornet_plots = FALSE, do_compute_alluvial_statistics = TRUE, environment = "wompwomp_env", use_conda = TRUE) {
@@ -1789,7 +1793,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #'     graphing_columns = c("method1", "method2"),
 #'     sorting_algorithm = "tsp",
 #'     column_sorting_algorithm = "tsp",
-#'     coloring_algorithm = "right")
+#'     coloring_algorithm = "right"
+#' )
 #'
 #' # Example 2: df format 2
 #' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -1798,12 +1803,13 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #'     dplyr::group_by_all() |>
 #'     dplyr::count(name = "value")
 #' p <- plot_alluvial(
-#'    clus_df_gather,
-#'    graphing_columns = c("method1", "method2"),
-#'    column_weights = "value",
-#'    sorting_algorithm = "tsp",
-#'    column_sorting_algorithm = "tsp",
-#'    coloring_algorithm = "right")
+#'     clus_df_gather,
+#'     graphing_columns = c("method1", "method2"),
+#'     column_weights = "value",
+#'     sorting_algorithm = "tsp",
+#'     column_sorting_algorithm = "tsp",
+#'     coloring_algorithm = "right"
+#' )
 #'
 #' @export
 plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL,
@@ -1821,9 +1827,9 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE,
                           default_sorting = "alphabetical", box_width = 1 / 3, text_width = 1 / 4, min_text = 4, text_size = 14,
                           auto_adjust_text = TRUE, axis_text_size = 2, axis_text_vjust = 0, save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE,
-                          keep_y_labels = FALSE, box_line_width = 1, verbose = FALSE, print_params = FALSE, 
+                          keep_y_labels = FALSE, box_line_width = 1, verbose = FALSE, print_params = FALSE,
                           make_intermediate_neighbornet_plots = FALSE, environment = "wompwomp_env", use_conda = TRUE,
-                          add_legend = FALSE, legend_loc = 'right') {
+                          add_legend = FALSE, legend_loc = "right") {
     if (print_params) print_function_params()
     lowercase_args(c("sorting_algorithm", "column_sorting_metric", "column_sorting_algorithm", "coloring_algorithm", "coloring_algorithm_advanced_option", "default_sorting", "legend_loc"))
 
@@ -1841,7 +1847,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         if (verbose) message("Loading in data")
         df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
     }
-    
+
     if (nrow(df) == 0) {
         stop("df has no rows.")
     }
@@ -1926,19 +1932,19 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         graphing_columns = graphing_columns, column_weights = column_weights,
         color_list = color_list, color_boxes = color_boxes,
         color_bands = color_bands, color_band_list = color_band_list,
-        color_band_column = color_band_column, color_band_boundary = color_band_boundary, 
+        color_band_column = color_band_column, color_band_boundary = color_band_boundary,
         coloring_algorithm = coloring_algorithm, cutoff = cutoff, color_val = color_val,
         alluvial_alpha = alluvial_alpha,
         include_labels_in_boxes = include_labels_in_boxes, include_axis_titles = include_axis_titles,
         include_group_sizes = include_group_sizes,
         output_plot_path = output_plot_path, verbose = verbose,
-        box_width = box_width, text_width = text_width, min_text = min_text, text_size = text_size, 
+        box_width = box_width, text_width = text_width, min_text = min_text, text_size = text_size,
         auto_adjust_text = auto_adjust_text, axis_text_size = axis_text_size, axis_text_vjust = axis_text_vjust,
-        save_height = save_height, save_width = save_width, dpi = dpi, rasterise_alluvia = rasterise_alluvia, 
-        keep_y_labels = keep_y_labels, box_line_width = box_line_width, do_compute_alluvial_statistics = do_compute_alluvial_statistics, 
+        save_height = save_height, save_width = save_width, dpi = dpi, rasterise_alluvia = rasterise_alluvia,
+        keep_y_labels = keep_y_labels, box_line_width = box_line_width, do_compute_alluvial_statistics = do_compute_alluvial_statistics,
         coloring_algorithm_advanced_option = coloring_algorithm_advanced_option, resolution = resolution, environment = environment, use_conda = use_conda,
-        add_legend = add_legend, legend_loc = legend_loc)
+        add_legend = add_legend, legend_loc = legend_loc
+    )
 
     return(alluvial_plot)
 }
-

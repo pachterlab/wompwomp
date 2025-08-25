@@ -28,14 +28,14 @@ stopifnot(file.exists(objective_fenwick_script_path))
 print_function_params <- function() {
     # Get calling function (one level up)
     f <- sys.function(sys.parent())
-    
+
     # Get call args and defaults
     call_args <- as.list(sys.call(sys.parent()))[-1]
-    defaults  <- formals(f)
-    
+    defaults <- formals(f)
+
     # Merge defaults with explicitly set args
     all_args <- modifyList(as.list(defaults), call_args)
-    
+
     # Print nicely
     for (nm in names(all_args)) {
         message(nm, " = ", all_args[[nm]])
@@ -53,14 +53,14 @@ lowercase_args <- function(arg_names) {
 
 check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "", environment = "wompwomp_env", use_conda = TRUE) {
     ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
-    
+
     # Skip check if script was run from command line (including checking from build/check) - this is ok because I set up my python environment in exec/wompwomp now
     if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
         return(invisible(NULL))
     }
-    
+
     # detect_and_setup_python_env(environment = environment, use_conda = use_conda)  #!!! uncomment later if I want python to be set up upon function call
-    
+
     # can comment out relevant if I call wompwomp::setup_python_env() in here (above)
     if (!reticulate::py_available(initialize = FALSE)) {
         if (is.null(additional_message)) {
@@ -109,12 +109,14 @@ check_python_setup_with_necessary_packages <- function(necessary_packages_for_th
 #' clus_df_gather <- data_sort(
 #'     df,
 #'     graphing_columns = c("method1", "method2"),
-#'     sorting_algorithm = "tsp")
+#'     sorting_algorithm = "tsp"
+#' )
 #'
 #' crossing_edges_output <- determine_crossing_edges(
 #'     clus_df_gather,
 #'     column1 = "method1",
-#'     column2 = "method2")
+#'     column2 = "method2"
+#' )
 #' objective <- determine_weighted_layer_free_objective(crossing_edges_output$crossing_edges_df)
 #'
 #' @export
