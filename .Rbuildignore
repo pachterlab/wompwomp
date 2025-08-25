@@ -16,5 +16,6 @@
 ^install.R$
 ^.*\.DS_Store$
 ^.*\.Rhistory$
-^vignettes/output/$
+^vignettes/output$
 ^.*\.Rproj$
+^doc/.*\.html$
