@@ -142,11 +142,13 @@ clus_df_gather <- data_sort(
     clus_df_gather,
     graphing_columns = c("method1", "method2"),
     column_weights = "value",
-    sorting_algorithm = "none")
+    sorting_algorithm = "none"
+)
 p <- plot_alluvial_internal(
-   clus_df_gather,
-   graphing_columns = c("method1", "method2"),
-   column_weights = "value",
-   coloring_algorithm = "right")
+    clus_df_gather,
+    graphing_columns = c("method1", "method2"),
+    column_weights = "value",
+    coloring_algorithm = "right"
+)
 
 }

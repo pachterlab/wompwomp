@@ -1,6 +1,5 @@
 ^\.Rproj\.user$
 ^doc$
-^.*\.html$
 ^Meta$
 ^figures$
 ^tmp\.Rmd$
@@ -17,5 +16,5 @@
 ^install.R$
 ^.*\.DS_Store$
 ^.*\.Rhistory$
-^vignettes/output/
+^vignettes/output/$
 ^.*\.Rproj$

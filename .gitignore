@@ -12,3 +12,4 @@ trash
 .DS_Store
 .Rhistory
 .Rproj.user/
+inst/doc

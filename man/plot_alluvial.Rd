@@ -195,7 +195,8 @@ p <- plot_alluvial(df,
     graphing_columns = c("method1", "method2"),
     sorting_algorithm = "tsp",
     column_sorting_algorithm = "tsp",
-    coloring_algorithm = "right")
+    coloring_algorithm = "right"
+)
 
 # Example 2: df format 2
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -204,11 +205,12 @@ clus_df_gather <- df |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
 p <- plot_alluvial(
-   clus_df_gather,
-   graphing_columns = c("method1", "method2"),
-   column_weights = "value",
-   sorting_algorithm = "tsp",
-   column_sorting_algorithm = "tsp",
-   coloring_algorithm = "right")
+    clus_df_gather,
+    graphing_columns = c("method1", "method2"),
+    column_weights = "value",
+    sorting_algorithm = "tsp",
+    column_sorting_algorithm = "tsp",
+    coloring_algorithm = "right"
+)
 
 }

@@ -111,7 +111,8 @@ clus_df_gather <- data_sort(
     df,
     graphing_columns = c("method1", "method2"),
     sorting_algorithm = "tsp",
-    column_sorting_algorithm = "tsp")
+    column_sorting_algorithm = "tsp"
+)
 
 # Example 2: df format 2
 df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
@@ -124,6 +125,7 @@ clus_df_gather <- data_sort(
     graphing_columns = c("method1", "method2"),
     column_weights = "value",
     sorting_algorithm = "tsp",
-    column_sorting_algorithm = "tsp")
+    column_sorting_algorithm = "tsp"
+)
 
 }

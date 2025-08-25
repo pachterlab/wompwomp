@@ -5,7 +5,7 @@ output:
         toc: true
         toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{1. Quick Start: An Introduction to wompwomp}
+  %\VignetteIndexEntry{Quick Start: An Introduction to wompwomp}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -60,6 +60,7 @@ clus_df_gather <- df |>
 clus_df_gather <- data_preprocess(
     clus_df_gather,
     graphing_columns = c("method1", "method2"),
-    column_weights = "value")
+    column_weights = "value"
+)
 
 }

@@ -1,11 +1,11 @@
 ---
-title: "Introduction to wompwomp"
+title: "Examples with Labeling"
 output:
     BiocStyle::html_document:
         toc: true
         toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{3. Introduction to wompwomp}
+  %\VignetteIndexEntry{Examples with Labeling}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
