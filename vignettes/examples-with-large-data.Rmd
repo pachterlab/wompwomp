@@ -301,7 +301,7 @@ legend_df <- data.frame(trueclass = names(color_band_list))
 
 # Plot with invisible points to show only the legend
 legend_plot <- ggplot(legend_df, aes(x = 1, y = trueclass, color = trueclass)) +
-    geom_line(linewidth = 5) +
+    geom_line(linewidth = 5, alpha = 0.5) +
     scale_color_manual(values = color_band_list, name = "True Class") +
     theme_void() +
     theme(legend.position = "right")

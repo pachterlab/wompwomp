@@ -50,13 +50,15 @@ While Python is not strictly required for use of the package, it is required for
 The I/O for each of wompwomp's functions is as follows:
 
 1.  plot_alluvial: dataframe, csv, or tibble (grouped or ungrouped) --\> plot
-1.  data_preprocess: dataframe, csv, or tibble (grouped or ungrouped) --\> dataframe (grouped)
-1.  data_sort: dataframe, csv, or tibble (grouped or ungrouped) --\> dataframe (grouped)
-1.  plot_alluvial_internal: dataframe, csv, or tibble (grouped) --\> plot
-1.  determine_crossing_edges: dataframe, csv, or tibble (grouped or ungrouped) --\> list
-1.  determine_weighted_layer_free_objective: dataframe, csv, or tibble (grouped or ungrouped) --\> integer
+2.  data_preprocess: dataframe, csv, or tibble (grouped or ungrouped) --\> dataframe (grouped)
+3.  data_sort: dataframe, csv, or tibble (grouped or ungrouped) --\> dataframe (grouped)
+4.  plot_alluvial_internal: dataframe, csv, or tibble (grouped) --\> plot
+5.  determine_crossing_edges: dataframe, csv, or tibble (grouped or ungrouped) --\> list
+6.  determine_weighted_layer_free_objective: dataframe, csv, or tibble (grouped or ungrouped) --\> integer
 
-The input table can have one of two formats: 1) Ungrouped: columns specified by column1 and column2, where each row corresponds to a separate entity 2) Grouped: columns specified by column1, column2, and column_weights, where each row corresponds to a combination of column1 and column2, and column_weights specified the number of items in this combination
+The input table can have one of two formats:
+1. Ungrouped: columns specified by column1 and column2, where each row corresponds to a separate entity
+2. Grouped: columns specified by column1, column2, and column_weights, where each row corresponds to a combination of column1 and column2, and column_weights specified the number of items in this combination
 
 ## Examples in R
 
@@ -122,3 +124,5 @@ ex. plot_alluvial(graphing_columns=c("tissue", "cluster")), ./exec/wompwomp plot
 ex. (note that the defaults for include_group_sizes=FALSE and include_axis_titles=TRUE): plot_alluvial(include_group_sizes=TRUE, include_axis_titles=FALSE), ./exec/wompwomp plot_alluvial --include_group_sizes --disable_include_axis_titles
 
 ## See a full tutorial in our introductory vignette [wompwomp-intro.Rmd](vignettes/wompwomp-intro.Rmd)
+
+Read our preprint on arXiv [here](https://doi.org/10.48550/arXiv.2509.03761).

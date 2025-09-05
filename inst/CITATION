@@ -1,13 +1,10 @@
 citHeader("To cite the wompwomp package in publications, use the following:")
 
-# Once manuscript is out, replace bibtype = "Manual" with bibtype = "Article", and replace bioRxiv with journal
 bibentry(
-  # bibtype = "Article"
-  bibtype = "Manual",
+  bibtype = "Article",
   title = "Optimizing alluvial plots",
   author = c(person("Joseph", "Rich", role = c("aut", "cre"), email = "jmrich@caltech.edu"), person("Conrad", "Oakes", role = "aut", email = "coakes@caltech.edu"), person("Lior", "Pachter", role = "aut")),
-  journal = "bioRxiv",
+  journal = "arXiv",
   year = "2025",
-  note = "R package version 0.1.0",
-  url = "https://github.com/pachterlab/wompwomp"
+  doi = "https://doi.org/10.48550/arXiv.2509.03761"
 )
