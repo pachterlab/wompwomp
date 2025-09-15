@@ -1690,8 +1690,32 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
         clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, sorting_algorithm = sorting_algorithm, verbose = verbose, environment = environment, use_conda = use_conda)
     } else if (sorting_algorithm == "random") {
         clus_df_gather_sorted <- randomly_map_int_columns(clus_df_gather)
+        #!!! check this
+        if (optimize_column_order) {
+            graphing_columns_tmp <- determine_column_order(clus_df_gather_sorted, graphing_columns = graphing_columns, column_weights = column_weights, matrix_initialization_value_column_order = matrix_initialization_value_column_order, weight_scalar_column_order = weight_scalar_column_order, column_sorting_metric = column_sorting_metric, column_sorting_algorithm = column_sorting_algorithm, verbose = verbose, environment = environment, use_conda = use_conda)
+            clus_df_gather_tmp <- reorder_and_rename_columns(clus_df_gather_sorted, graphing_columns_tmp)
+            # make factors
+            for (j in seq_along(graphing_columns_tmp)) {
+                int_col_name <- paste0("col", j, "_int")
+                clus_df_gather_tmp[[int_col_name]] <- factor(clus_df_gather_tmp[[int_col_name]])
+            }
+            clus_df_gather_sorted <- clus_df_gather_tmp
+        }
+        #!!! check this
     } else if (sorting_algorithm == "none") {
         clus_df_gather_sorted <- clus_df_gather
+        #!!! check this
+        if (optimize_column_order) {
+            graphing_columns_tmp <- determine_column_order(clus_df_gather_sorted, graphing_columns = graphing_columns, column_weights = column_weights, matrix_initialization_value_column_order = matrix_initialization_value_column_order, weight_scalar_column_order = weight_scalar_column_order, column_sorting_metric = column_sorting_metric, column_sorting_algorithm = column_sorting_algorithm, verbose = verbose, environment = environment, use_conda = use_conda)
+            clus_df_gather_tmp <- reorder_and_rename_columns(clus_df_gather_sorted, graphing_columns_tmp)
+            # make factors
+            for (j in seq_along(graphing_columns_tmp)) {
+                int_col_name <- paste0("col", j, "_int")
+                clus_df_gather_tmp[[int_col_name]] <- factor(clus_df_gather_tmp[[int_col_name]])
+            }
+            clus_df_gather_sorted <- clus_df_gather_tmp
+        }
+        #!!! check this
     } else {
         stop(sprintf("Invalid sorting_algorithm: '%s'. Must be one of: %s", sorting_algorithm, paste(valid_algorithms, collapse = ", ")))
     }
