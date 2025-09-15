@@ -24,7 +24,7 @@ utils::globalVariables(c(
 
 StatStratum <- ggalluvial::StatStratum # avoid the error Can't find stat called "stratum" - and make sure to do stat = StatStratum instead of stat = "stratum"
 
-neighbornet_script_path <- system.file("scripts", "run_neighbornet.py")
+neighbornet_script_path <- system.file("scripts", "run_neighbornet.py", package = "wompwomp")
 if (neighbornet_script_path == "") {
     # Fallback to development location
     neighbornet_script_path <- file.path(here::here("inst", "scripts", "run_neighbornet.py"))

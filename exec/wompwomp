@@ -36,7 +36,7 @@ download_missing_pkgs <- function() {
             paste0(
                 "Missing packages: ", paste(missing, collapse = ", "), "\n",
                 "To install them, run:\n",
-                "Rscript install.R",
+                "Rscript inst/install.R",
                 "or",
                 "Rscript -e 'install.packages(c(",
                 paste0(sprintf('\"%s\"', missing), collapse = ", "),

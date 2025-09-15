@@ -49,13 +49,17 @@ dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 GOT
 ```{r}
-url <- "https://raw.githubusercontent.com/MattLunkes/GoT_Affiliations/master/got_char.csv"
-got_file <- file.path(output_dir, "got_char.csv")
 graphing_columns <- c("Origin", "Starting.Affiliation", "End.of.S1", "End.of.S2", "End.of.S3", "End.of.S4", "End.of.S5", "End.of.S6", "End.of.S7")
 
-if (!file.exists(got_file)) {
-    download.file(url, got_file, method = "curl")
+got_file <- system.file("extdata", "got_char.csv", package = "wompwomp")
+if (got_file == "") {
+    # Fallback to development location
+    got_file <- file.path(here::here("extdata", "got_char.csv"))
 }
+# got_file <- file.path(output_dir, "got_char.csv")
+# if (!file.exists(got_file)) {
+#     download.file("https://raw.githubusercontent.com/MattLunkes/GoT_Affiliations/master/got_char.csv", got_file, method = "curl")
+# }
 
 df <- read.csv(got_file)
 ```

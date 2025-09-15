@@ -18,7 +18,7 @@ utils::globalVariables(c(
     ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement", "calculate_objective_fenwick"
 ))
 
-objective_fenwick_script_path <- system.file("scripts", "calculate_objective.py")
+objective_fenwick_script_path <- system.file("scripts", "calculate_objective.py", package = "wompwomp")
 if (objective_fenwick_script_path == "") {
     # Fallback to development location
     objective_fenwick_script_path <- file.path(here::here("inst", "scripts", "calculate_objective.py"))

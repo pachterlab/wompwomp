@@ -14,6 +14,7 @@
 ^\.gitignore$
 ^environment.yml$
 ^install.R$
+^inst/install.R$
 ^.*\.DS_Store$
 ^.*\.Rhistory$
 ^vignettes/output$

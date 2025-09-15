@@ -36,7 +36,7 @@ wompwomp::setup_python_env()
 ```         
 git clone https://github.com/pachterlab/wompwomp
 cd wompwomp
-conda env create -f environment.yml  # or to avoid conda: Rscript install.R
+conda env create -f environment.yml  # or to avoid conda: Rscript inst/install.R
 conda activate wompwomp_env  # skip if used install.R above
 remotes::install_local(".")  # or use --dev flag in commands
 ```
