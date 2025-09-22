@@ -75,7 +75,7 @@ get_fixed_column <- function(args, flag, default = 1) {
     }
 }
 
-# --inputs A B C --outputs ...
+# --inputs A B C --outputs ... (vector) OR --inputs A=1 B=2 C=3 outputs ... (named vector)
 get_multi_arg <- function(args, flags, required = FALSE) {
     i <- which(args %in% flags)
 
@@ -97,6 +97,23 @@ get_multi_arg <- function(args, flags, required = FALSE) {
     if (required && length(vals) == 0) {
         stop(sprintf("No values provided for required argument: %s", flags))
     }
+    
+    # Parse key=value pairs if present
+    out <- sapply(vals, function(x) {
+        if (grepl("=", x)) {
+            kv <- strsplit(x, "=", fixed = TRUE)[[1]]
+            setNames(kv[2], kv[1])
+        } else {
+            x
+        }
+    }, simplify = FALSE)
+    
+    out <- unlist(out, use.names = TRUE)
+    
+    # If names are just duplicates of values, strip them
+    if (all(names(out) == "" | names(out) == out)) {
+        names(out) <- NULL
+    }
 
-    return(vals)
+    return(out)
 }

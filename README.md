@@ -120,6 +120,8 @@ ex. ./exec/wompwomp plot_alluvial --df data.csv, NOT --df=data.csv
 ex. plot_alluvial(df=data.csv), ./exec/wompwomp plot_alluvial --df data.csv
 - all parameters that take a vector/list of arguments have identical names between R and command line, with the values immediately following the argument, all separated by spaced
 ex. plot_alluvial(graphing_columns=c("tissue", "cluster")), ./exec/wompwomp plot_alluvial --graphing_columns tissue cluster
+- all parameters that take a named vector/list as argument will be passed with format KEY=VALUE on command line
+ex. plot_alluvial(color_band_list=c("A"="blue", "B"="green"), ./exec/wompwomp plot_alluvial --color_band_list A=blue B=green
 - all boolean parameters are passed with the flag without any following arguments; boolean parameters that default to FALSE have identical names between R and command line, while boolean parameters that default to TRUE have "disable_" prepended to the name in the command line
 ex. (note that the defaults for include_group_sizes=FALSE and include_axis_titles=TRUE): plot_alluvial(include_group_sizes=TRUE, include_axis_titles=FALSE), ./exec/wompwomp plot_alluvial --include_group_sizes --disable_include_axis_titles
 
