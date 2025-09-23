@@ -16,7 +16,7 @@ Optional:
   -c2, --column2            Can be used along with column1 in place of graphing_columns if working with two columns only. Mutually exclusive with graphing_columns.
   -w, --column_weights      Column name from df that contains the weights of each combination of groupings if df is in format (2) (see above).
   -s, --sorting_algorithm       Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when graphing_columns has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
-  --optimize_column_order   If TRUE, will optimize the order of graphing_columns to minimize edge overlap. Only applies when sorting_algorithm == 'neighbornet' or 'tsp' and length(graphing_columns) > 2.
+  --disable_optimize_column_order   If TRUE, will optimize the order of graphing_columns to minimize edge overlap. Only applies when sorting_algorithm == 'neighbornet' or 'tsp' and length(graphing_columns) > 2.
   --optimize_column_order_per_cycle         If TRUE, will optimize the order of graphing_columns to minimize edge overlap upon each cycle. If FALSE, will optimize the order of graphing_columns to minimize edge overlap on the beginning cycle only. Only applies when sorting_algorithm == 'neighbornet' or 'tsp' and length(graphing_columns) > 2.
   --matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when sorting_algorithm == 'neighbornet' or 'tsp'.
   --same_side_matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when sorting_algorithm == 'neighbornet' or 'tsp'.
@@ -80,7 +80,7 @@ Optional:
     column2 <- get_arg(args, c("-c2", "--column2"))
     column_weights <- get_arg(args, c("-w", "--column_weights"))
     sorting_algorithm <- get_arg(args, c("-s", "--sorting_algorithm"))
-    optimize_column_order <- store_true(args, c("--optimize_column_order"))
+    optimize_column_order <- store_false(args, c("--disable_optimize_column_order"))
     optimize_column_order_per_cycle <- store_true(args, c("--optimize_column_order_per_cycle"))
     matrix_initialization_value <- get_numeric_arg(args, c("--matrix_initialization_value"))
     same_side_matrix_initialization_value <- get_numeric_arg(args, c("--same_side_matrix_initialization_value"))

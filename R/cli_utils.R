@@ -60,7 +60,7 @@ store_false <- function(args, flags) {
 }
 
 # --fixed_column abc --> "abc" (str); --fixed_column 123 --> 123 (int); --fixed_column "123" --> 123 (int); --fixed_column str:123 --> "123" (str)
-get_fixed_column <- function(args, flag, default = 1) {
+get_fixed_column <- function(args, flag, default = NULL) {
     val <- get_arg(args, flag)
     if (is.null(val)) {
         return(default)
@@ -78,42 +78,45 @@ get_fixed_column <- function(args, flag, default = 1) {
 # --inputs A B C --outputs ... (vector) OR --inputs A=1 B=2 C=3 outputs ... (named vector)
 get_multi_arg <- function(args, flags, required = FALSE) {
     i <- which(args %in% flags)
-
+    
     if (length(i) == 0) {
         if (required) stop(sprintf("Missing required argument: one of %s", paste(flags, collapse = ", ")))
         return(NULL)
     }
-
-    i <- i[1] # Use the first match if multiple flags found
-
-    # Collect all values until the next flag (starting with "-") or end of args
+    
+    i <- i[1]
+    
+    # Collect values until next flag
     vals <- character()
     j <- i + 1
     while (j <= length(args) && !grepl("^-", args[j])) {
         vals <- c(vals, args[j])
         j <- j + 1
     }
-
+    
     if (required && length(vals) == 0) {
         stop(sprintf("No values provided for required argument: %s", flags))
     }
     
-    # Parse key=value pairs if present
-    out <- sapply(vals, function(x) {
-        if (grepl("=", x)) {
-            kv <- strsplit(x, "=", fixed = TRUE)[[1]]
-            setNames(kv[2], kv[1])
+    # Parse into named/unnamed values
+    keys <- character(length(vals))
+    vals_out <- character(length(vals))
+    
+    for (k in seq_along(vals)) {
+        if (grepl("=", vals[k])) {
+            kv <- strsplit(vals[k], "=", fixed = TRUE)[[1]]
+            keys[k] <- kv[1]
+            vals_out[k] <- kv[2]
         } else {
-            x
+            vals_out[k] <- vals[k]
         }
-    }, simplify = FALSE)
-    
-    out <- unlist(out, use.names = TRUE)
-    
-    # If names are just duplicates of values, strip them
-    if (all(names(out) == "" | names(out) == out)) {
-        names(out) <- NULL
     }
-
-    return(out)
+    
+    # Apply names only if at least one key is non-empty
+    if (any(nzchar(keys))) {
+        names(vals_out) <- keys
+    }
+    
+    return(vals_out)
 }
+

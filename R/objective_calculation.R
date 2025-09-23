@@ -71,6 +71,55 @@ print_function_params <- function() {
     }
 }
 
+lowercase_args <- function(arg_names) {
+    for (nm in arg_names) {
+        val <- get(nm, envir = parent.frame())
+        if (is.character(val)) {
+            assign(nm, tolower(val), envir = parent.frame())
+        }
+    }
+}
+
+check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "", environment = "wompwomp_env", use_conda = TRUE) {
+    ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
+    
+    # Skip check if script was run from command line (including checking from build/check) - this is ok because I set up my python environment in exec/wompwomp now
+    if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
+        return(invisible(NULL))
+    }
+    
+    # detect_and_setup_python_env(environment = environment, use_conda = use_conda)  #!!! uncomment later if I want python to be set up upon function call
+    
+    # can comment out relevant if I call wompwomp::setup_python_env() in here (above)
+    if (!reticulate::py_available(initialize = FALSE)) {
+        if (is.null(additional_message)) {
+            stop("Python environment is not set up. Please run wompwomp::setup_python_env().")
+        } else {
+            stop(sprintf(
+                "Python environment is not set up. Please run wompwomp::setup_python_env(), or %s.",
+                additional_message
+            ))
+        }
+    }
+    if (!is.null(necessary_packages_for_this_step)) {
+        for (package in necessary_packages_for_this_step) {
+            if (!reticulate::py_module_available(package)) {
+                if (is.null(additional_message)) {
+                    stop(sprintf(
+                        "Python module '%s' is not available. Please run wompwomp::setup_python_env().",
+                        package
+                    ))
+                } else {
+                    stop(sprintf(
+                        "Python module '%s' is not available. Please run wompwomp::setup_python_env(), or %s.",
+                        package, additional_message
+                    ))
+                }
+            }
+        }
+    }
+}
+
 
 # reticulate::source_python(objective_fenwick_script_path)  # Error: Unable to access object (object is from previous session and is now invalid)
 
