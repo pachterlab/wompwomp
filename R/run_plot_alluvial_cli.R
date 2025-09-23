@@ -58,11 +58,14 @@ Optional:
   --save_height Integer greater than 0. Save height, in inches
   --save_width Integer greater than 0. Save width, in inches
   --dpi Integer greater than 0. DPI for output_plot_path, if output_plot_path is a raster image or rasterise_alluvia is TRUE
-  --rasterise_alluvia Logical. Whether to rasterize the alluvia ifoutput_plot_path is a PDF. Can save space if DPI low enough
+  --rasterise_alluvia Logical. Whether to rasterize the alluvia if output_plot_path is a PDF. Can save space if DPI low enough
   --keep_y_labels Keep y labels
   --box_line_width Box line width
   --environment  Python environment (if applicable). Default: 'wompwomp_env'
   --disable_use_conda  Whether or not to use conda for Python (if applicable)
+  --add_legend  If TRUE, will generate a legend of the colors of boxes and alluvial
+  --legend_loc  Location of legend. Only applies if add_legened == TRUE. Choices are 'right' (default), 'left', 'bottom', 'top'
+  --flip_xy  Flip x and y (rotate plot 90 degrees).
   -v, --verbose             If TRUE, will display messages during the function.
   --print_params            If TRUE, will print function params.
   -q, --quiet               Don't show stdout
@@ -125,6 +128,9 @@ Optional:
     box_line_width <- get_numeric_arg(args, c("--box_line_width"))
     environment <- get_arg(args, c("--environment"), default = "wompwomp_env")
     use_conda <- store_false(args, c("--disable_use_conda"))
+    add_legend <- store_true(args, c("--add_legend"))
+    legend_loc <- get_arg(args, c("--legend_loc"))
+    flip_xy <- store_true(args, c("--flip_xy"))
     verbose <- store_true(args, c("-v", "--verbose"))
     print_params <- store_true(args, c("--print_params"))
     quiet <- store_true(args, c("-q", "--quiet"))
@@ -191,6 +197,9 @@ Optional:
     if (!is.null(print_params)) args_list$print_params <- print_params
     if (!is.null(environment)) args_list$environment <- environment
     if (!is.null(use_conda)) args_list$use_conda <- use_conda
+    if (!is.null(add_legend)) args_list$add_legend <- add_legend
+    if (!is.null(legend_loc)) args_list$legend_loc <- legend_loc
+    if (!is.null(flip_xy)) args_list$flip_xy <- flip_xy
     if (!is.null(make_intermediate_neighbornet_plots)) args_list$make_intermediate_neighbornet_plots <- make_intermediate_neighbornet_plots
 
     # Dynamically call function

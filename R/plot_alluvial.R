@@ -805,6 +805,7 @@ find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, curr
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param add_legend Logical. If TRUE, will generate a legend of the colors of boxes and alluvial
 #' @param legend_loc Character. Location of legend. Only applies if \code{add_legened == TRUE}. Choices are 'right' (default), 'left', 'bottom', 'top'
+#' @param flip_xy Logical. Flip x and y (rotate plot 90 degrees).
 #' @param do_compute_alluvial_statistics Internal flag; not recommended to modify.
 #'
 #' @return A \code{ggplot2} object representing the alluvial plot.
@@ -1813,6 +1814,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param make_intermediate_neighbornet_plots Internal flag; not recommended to modify.
 #' @param add_legend Logical. If TRUE, will generate a legend of the colors of boxes and alluvial
 #' @param legend_loc Character. Location of legend. Only applies if \code{add_legened == TRUE}. Choices are 'right' (default), 'left', 'bottom', 'top'
+#' @param flip_xy Logical. Flip x and y (rotate plot 90 degrees).
 #'
 #' @return A \code{ggplot2} object representing the alluvial plot.
 #'
@@ -1860,7 +1862,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           keep_y_labels = FALSE, keep_x_labels = TRUE, 
                           box_line_width = 1, verbose = FALSE, print_params = FALSE,
                           make_intermediate_neighbornet_plots = FALSE, environment = "wompwomp_env", use_conda = TRUE,
-                          add_legend = FALSE, legend_loc = "right") {
+                          add_legend = FALSE, legend_loc = "right", flip_xy=FALSE) {
     if (print_params) print_function_params()
     lowercase_args(c("sorting_algorithm", "column_sorting_metric", "column_sorting_algorithm", "coloring_algorithm", "coloring_algorithm_advanced_option", "default_sorting", "legend_loc"))
 
