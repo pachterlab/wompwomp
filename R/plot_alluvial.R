@@ -1166,7 +1166,7 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
     }
     
     if (flip_xy) {
-        p <- p + coord_flip()
+        p <- p + ggplot2::coord_flip()
     }
 
     p <- p +
