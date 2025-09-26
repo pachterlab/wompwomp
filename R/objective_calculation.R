@@ -494,7 +494,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 # # option 2 for objective: vectorized (only good if I only need objective, ie no matrix or data frame) - doesn't require python
                 if (verbose) message("Calculating objective with vectorized sum")
                 objective_matrix <- make_crossing_matrix_vectorized(lode_df$y1, lode_df$y2, lode_df$count)
-                output_objective <- sum(objective_matrix)
+                output_objective <- output_objective + sum(objective_matrix)
             }
         } else {
             # # option 3 for objective (worst): double for loop (good if I need data frame)
@@ -587,7 +587,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
         values <- clus_df_gather[[column_weights]]
         output_objective <- output_objective / sum(values[combs[1, ]] * values[combs[2, ]]) # take the sum of all products
     }
-
+    
     if (return_weighted_layer_free_objective) {
         return(output_objective)
     }
@@ -627,7 +627,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 by = c("alluvium2" = "alluvium")
             )
     }
-
+    
     if (isTRUE(include_output_objective_matrix_vector)) {
         return(list(crossing_edges_df = crossing_edges_df, lode_df = lode_df_full, output_objective = output_objective, objective_matrix_vector = output_objective_matrix_vector))
     } else {

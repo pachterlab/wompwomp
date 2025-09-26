@@ -180,6 +180,7 @@ test_that("CLI plot_alluvial, WBLF", {
 
 test_that("CLI plot_alluvial, neighbornet", {
     # Paths
+    python_test()
     command <- "plot_alluvial"
     df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".png")
@@ -279,6 +280,7 @@ test_that("CLI data_sort, WBLF", {
 
 test_that("CLI data_sort, neighbornet", {
     # Paths
+    python_test()
     command <- "data_sort"
     df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".csv")
