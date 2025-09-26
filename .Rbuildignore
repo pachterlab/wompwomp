@@ -12,11 +12,15 @@
 ^\.lintr$
 ^\.git$
 ^\.gitignore$
+^\.here$
 ^environment.yml$
 ^install.R$
 ^inst/install.R$
 ^.*\.DS_Store$
+\.DS_Store$
+^inst/.DS_Store$
 ^.*\.Rhistory$
+\.Rhistory$
 ^vignettes/output$
 ^.*\.Rproj$
 ^doc/.*\.html$

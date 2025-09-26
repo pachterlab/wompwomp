@@ -18,12 +18,21 @@ utils::globalVariables(c(
     ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement", "calculate_objective_fenwick"
 ))
 
-objective_fenwick_script_path <- system.file("scripts", "calculate_objective.py", package = "wompwomp")
-if (objective_fenwick_script_path == "") {
-    # Fallback to development location
-    objective_fenwick_script_path <- file.path(here::here("inst", "scripts", "calculate_objective.py"))
+# devtools::document() needs package = "wompwomp"; but R CMD build wompwomp needs it not there stored globally - so I make this function
+get_objective_fenwick_script_path <- function() {
+    objective_fenwick_script_path <- system.file("scripts", "calculate_objective.py", package = "wompwomp")  # don't include package = "wompwomp"
+    if (objective_fenwick_script_path == "") {
+        # Fallback to development location
+        objective_fenwick_script_path <- file.path(here::here("inst", "scripts", "calculate_objective.py"))
+        if (!grepl("wompwomp", objective_fenwick_script_path)) {
+            # if here::here isn't putting it inside wompwomp
+            objective_fenwick_script_path <- file.path("inst", "scripts", "calculate_objective.py")
+        }
+    }
+    objective_fenwick_script_path <- normalizePath(objective_fenwick_script_path, mustWork = TRUE)
+    stopifnot(file.exists(objective_fenwick_script_path))
+    return (objective_fenwick_script_path)
 }
-stopifnot(file.exists(objective_fenwick_script_path))
 
 print_function_params <- function() {
     f <- sys.function(sys.parent())
@@ -479,7 +488,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 # # option 1 for objective (best): fenwick (only good if I only need objective, ie no matrix or data frame) - also requires python
                 # check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE")  # checked above
                 if (verbose) message("Calculating objective with fenwick tree")
-                reticulate::source_python(objective_fenwick_script_path)
+                reticulate::source_python(get_objective_fenwick_script_path())
                 output_objective <- output_objective + calculate_objective_fenwick(lode_df)
             } else {
                 # # option 2 for objective: vectorized (only good if I only need objective, ie no matrix or data frame) - doesn't require python

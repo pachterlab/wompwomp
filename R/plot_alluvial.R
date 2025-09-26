@@ -24,12 +24,21 @@ utils::globalVariables(c(
 
 StatStratum <- ggalluvial::StatStratum # avoid the error Can't find stat called "stratum" - and make sure to do stat = StatStratum instead of stat = "stratum"
 
-neighbornet_script_path <- system.file("scripts", "run_neighbornet.py", package = "wompwomp")
-if (neighbornet_script_path == "") {
-    # Fallback to development location
-    neighbornet_script_path <- file.path(here::here("inst", "scripts", "run_neighbornet.py"))
+# devtools::document() needs package = "wompwomp"; but R CMD build wompwomp needs it not there stored globally - so I make this function
+get_neighbornet_script_path <- function() {
+    neighbornet_script_path <- system.file("scripts", "run_neighbornet.py", package = "wompwomp")
+    if (neighbornet_script_path == "") {
+        # Fallback to development location
+        neighbornet_script_path <- file.path(here::here("inst", "scripts", "run_neighbornet.py"))
+        if (!grepl("wompwomp", neighbornet_script_path)) {
+            # if here::here isn't putting it inside wompwomp
+            neighbornet_script_path <- file.path("inst", "scripts", "run_neighbornet.py")
+        }
+    }
+    neighbornet_script_path <- normalizePath(neighbornet_script_path, mustWork = TRUE)
+    stopifnot(file.exists(neighbornet_script_path))
+    return (neighbornet_script_path)
 }
-stopifnot(file.exists(neighbornet_script_path))
 
 #reticulate::source_python(neighbornet_script_path)  # Error: Unable to access object (object is from previous session and is now invalid)
 
@@ -143,7 +152,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns,
         tour <- TSP::solve_TSP(tsp_instance)
         cycle <- as.integer(tour)
     } else if (column_sorting_algorithm == "neighbornet") {
-        reticulate::source_python(neighbornet_script_path)
+        reticulate::source_python(get_neighbornet_script_path())
         result <- neighbor_net(labels, column_dist_matrix) # from python
         cycle <- result[[1]]
     } else {
@@ -272,7 +281,7 @@ run_neighbornet <- function(df, graphing_columns = NULL, column1 = NULL, column2
         tour <- TSP::solve_TSP(tsp_instance)
         cycle <- as.integer(tour)
     } else if (sorting_algorithm == "neighbornet") {
-        reticulate::source_python(neighbornet_script_path)
+        reticulate::source_python(get_neighbornet_script_path())
         result <- neighbor_net(labels, mat) # from python
         cycle <- result[[1]]
         # splits <- result[[2]]
@@ -798,6 +807,7 @@ find_group2_colors <- function(clus_df_gather, ditto_colors, unused_colors, curr
 #' @param dpi Integer greater than 0. DPI for \code{output_plot_path}, if \code{output_plot_path} is a raster image or \code{rasterise_alluvia} is TRUE
 #' @param rasterise_alluvia Logical. Whether to rasterize the alluvia if \code{output_plot_path} is a PDF. Can save space if DPI low enough
 #' @param keep_y_labels Keep y labels
+#' @param keep_x_labels Keep x labels
 #' @param box_line_width Box line width
 #' @param environment Character. Python environment (if applicable). Default: 'wompwomp_env'
 #' @param use_conda Logical. Whether or not to use conda for Python (if applicable)
@@ -1806,6 +1816,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param dpi Integer greater than 0. DPI for \code{output_plot_path}, if \code{output_plot_path} is a raster image or \code{rasterise_alluvia} is TRUE
 #' @param rasterise_alluvia Logical. Whether to rasterize the alluvia if \code{output_plot_path} is a PDF. Can save space if DPI low enough
 #' @param keep_y_labels Keep y labels
+#' @param keep_x_labels Keep x labels
 #' @param box_line_width Box line width
 #' @param environment Character. Python environment (if applicable). Default: 'wompwomp_env'
 #' @param use_conda Logical. Whether or not to use conda for Python (if applicable)

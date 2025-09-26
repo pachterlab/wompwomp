@@ -36,7 +36,7 @@ plot_alluvial(
   cutoff = 0.5,
   alluvial_alpha = 0.5,
   include_labels_in_boxes = TRUE,
-  include_axis_titles = TRUE,
+  include_axis_titles = FALSE,
   include_group_sizes = FALSE,
   output_plot_path = NULL,
   output_df_path = NULL,
@@ -54,6 +54,7 @@ plot_alluvial(
   dpi = 300,
   rasterise_alluvia = FALSE,
   keep_y_labels = FALSE,
+  keep_x_labels = TRUE,
   box_line_width = 1,
   verbose = FALSE,
   print_params = FALSE,
@@ -61,7 +62,8 @@ plot_alluvial(
   environment = "wompwomp_env",
   use_conda = TRUE,
   add_legend = FALSE,
-  legend_loc = "right"
+  legend_loc = "right",
+  flip_xy = FALSE
 )
 }
 \arguments{
@@ -165,6 +167,8 @@ plot_alluvial(
 
 \item{keep_y_labels}{Keep y labels}
 
+\item{keep_x_labels}{Keep x labels}
+
 \item{box_line_width}{Box line width}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
@@ -180,6 +184,8 @@ plot_alluvial(
 \item{add_legend}{Logical. If TRUE, will generate a legend of the colors of boxes and alluvial}
 
 \item{legend_loc}{Character. Location of legend. Only applies if \code{add_legened == TRUE}. Choices are 'right' (default), 'left', 'bottom', 'top'}
+
+\item{flip_xy}{Logical. Flip x and y (rotate plot 90 degrees).}
 }
 \value{
 A \code{ggplot2} object representing the alluvial plot.

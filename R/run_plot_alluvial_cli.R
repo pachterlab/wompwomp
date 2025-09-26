@@ -60,6 +60,7 @@ Optional:
   --dpi Integer greater than 0. DPI for output_plot_path, if output_plot_path is a raster image or rasterise_alluvia is TRUE
   --rasterise_alluvia Logical. Whether to rasterize the alluvia if output_plot_path is a PDF. Can save space if DPI low enough
   --keep_y_labels Keep y labels
+  --keep_x_labels Keep x labels
   --box_line_width Box line width
   --environment  Python environment (if applicable). Default: 'wompwomp_env'
   --disable_use_conda  Whether or not to use conda for Python (if applicable)
@@ -123,6 +124,7 @@ Optional:
     save_height <- get_numeric_arg(args, c("--save_height"))
     save_width <- get_numeric_arg(args, c("--save_width"))
     keep_y_labels <- store_true(args, c("--keep_y_labels"))
+    keep_x_labels <- store_true(args, c("--keep_x_labels"))
     dpi <- get_integer_arg(args, c("--dpi"))
     rasterise_alluvia <- store_true(args, c("--rasterise_alluvia"))
     box_line_width <- get_numeric_arg(args, c("--box_line_width"))
@@ -192,6 +194,7 @@ Optional:
     if (!is.null(dpi)) args_list$dpi <- dpi
     if (!is.null(rasterise_alluvia)) args_list$rasterise_alluvia <- rasterise_alluvia
     if (!is.null(keep_y_labels)) args_list$keep_y_labels <- keep_y_labels
+    if (!is.null(keep_x_labels)) args_list$keep_x_labels <- keep_x_labels
     if (!is.null(box_line_width)) args_list$box_line_width <- box_line_width
     if (!is.null(verbose)) args_list$verbose <- verbose
     if (!is.null(print_params)) args_list$print_params <- print_params

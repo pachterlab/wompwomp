@@ -36,6 +36,7 @@ plot_alluvial_internal(
   dpi = 300,
   rasterise_alluvia = FALSE,
   keep_y_labels = FALSE,
+  keep_x_labels = TRUE,
   box_line_width = 1,
   do_compute_alluvial_statistics = TRUE,
   coloring_algorithm_advanced_option = "leiden",
@@ -43,7 +44,8 @@ plot_alluvial_internal(
   environment = "wompwomp_env",
   use_conda = TRUE,
   add_legend = FALSE,
-  legend_loc = "right"
+  legend_loc = "right",
+  flip_xy = FALSE
 )
 }
 \arguments{
@@ -109,6 +111,8 @@ plot_alluvial_internal(
 
 \item{keep_y_labels}{Keep y labels}
 
+\item{keep_x_labels}{Keep x labels}
+
 \item{box_line_width}{Box line width}
 
 \item{do_compute_alluvial_statistics}{Internal flag; not recommended to modify.}
@@ -124,6 +128,8 @@ plot_alluvial_internal(
 \item{add_legend}{Logical. If TRUE, will generate a legend of the colors of boxes and alluvial}
 
 \item{legend_loc}{Character. Location of legend. Only applies if \code{add_legened == TRUE}. Choices are 'right' (default), 'left', 'bottom', 'top'}
+
+\item{flip_xy}{Logical. Flip x and y (rotate plot 90 degrees).}
 }
 \value{
 A \code{ggplot2} object representing the alluvial plot.
