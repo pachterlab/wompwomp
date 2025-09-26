@@ -1,5 +1,5 @@
 Package: wompwomp
-Version: 0.99.1
+Version: 0.99.2
 Date: 2025-06-07
 Title: Optimizing alluvial plots
 Authors@R: c(person("Joseph", "Rich", role = c("aut", "cre"), email = "jmrich@caltech.edu"), person("Conrad", "Oakes", role = "aut", email = "coakes@caltech.edu"), person("Lior", "Pachter", role = "aut"))
@@ -26,7 +26,7 @@ Imports:
     TSP,
     stats,
     utils
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.1.0)
 Suggests: 
     testthat (>= 3.0.0),
     vdiffr,
