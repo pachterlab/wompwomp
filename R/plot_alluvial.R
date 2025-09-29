@@ -1205,7 +1205,7 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
     
 
     if (!is.null(output_plot_path)) {
-        if (verbose) message(sprintf("Saving plot to=%s", output_plot_path))
+        if (verbose) message(sprintf("Saving plot to: %s", output_plot_path))
         ggsave(output_plot_path,
             plot = p,
             height = save_height, width = save_width, dpi = dpi, bg = "white"
