@@ -210,10 +210,10 @@ Optional:
 
     if (!quiet) {
         if (!is.null(output_df_path)) {
-            print(sprintf("Data frame saved to to=%s", output_df_path))
+            print(sprintf("Data frame saved to: %s", output_df_path))
         }
         if (!is.null(output_plot_path)) {
-            print(sprintf("Plot saved to to=%s", output_plot_path))
+            print(sprintf("Plot saved to: %s", output_plot_path))
         }
     }
 }

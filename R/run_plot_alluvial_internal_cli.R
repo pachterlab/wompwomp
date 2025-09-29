@@ -154,7 +154,7 @@ Optional:
 
     if (!quiet) {
         if (!is.null(output_plot_path)) {
-            print(sprintf("Plot saved to to=%s", output_plot_path))
+            print(sprintf("Plot saved to: %s", output_plot_path))
         }
     }
 }
