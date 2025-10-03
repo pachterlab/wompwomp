@@ -11,7 +11,7 @@ import itertools
 import warnings
 from python_tsp.exact import solve_tsp_dynamic_programming
 from sklearn.metrics import adjusted_rand_score
-from typing import Tuple
+from typing import Tuple, List
 from splitspy.nnet import nnet_cycle, nnet_splits
 import random
 
@@ -20,7 +20,7 @@ def _plot_alluvium(df, xaxis_names, y_name='value', alluvium=None,
                    color_alluvium = False, color_alluvium_boundary = False,
                    order_dict=None, all_color_dict=None, ax=None, x_init=0,
                   objective_calc=False, invert_xy = False, alluvial_alpha = 0.5,
-                  box_line_width = 1,box_width = 0.4):
+                  box_line_width = 1,box_width = 0.4, alluvial_edge_width = 0.1):
     # if no specified reference, make column 0 the alluvial reference
     if alluvium is None:
         alluvium = xaxis_names[0]
@@ -78,32 +78,34 @@ def _plot_alluvium(df, xaxis_names, y_name='value', alluvium=None,
                         label_key = None
                     if invert_xy:
                         if all_color_dict is None or not color_alluvium:
-                            ax.fill_betweenx(xs + x_init, ys_under, ys_upper, alpha=alluvial_alpha, color='grey', edgecolor='black', label = label_key)
+                            ax.fill_betweenx(xs + x_init, ys_under, ys_upper, alpha=alluvial_alpha, color='grey', 
+                                             edgecolor='black', label = label_key,
+                                                linewidth = alluvial_edge_width)
                         else:
-                            if color_alluvium_boundary:
-                                ax.fill_betweenx(xs + x_init, ys_under, ys_upper, alpha=alluvial_alpha, 
-                                                 color=all_color_dict[color_key], edgecolor=all_color_dict[color_key], label = label_key)
-                            else:
-                                ax.fill_betweenx(xs + x_init, ys_under, ys_upper, alpha=alluvial_alpha, 
-                                                 color=all_color_dict[color_key], edgecolor='black', label = label_key)
+                            ax.fill_betweenx(xs + x_init, ys_under, ys_upper, alpha=alluvial_alpha, 
+                                                 color=all_color_dict[color_key], 
+                                                 edgecolor=all_color_dict[color_key] if color_alluvium_boundary else 'black', 
+                                                 label = label_key,
+                                                linewidth = alluvial_edge_width)
                     else:
                         if all_color_dict is None or not color_alluvium:
                             ax.fill_between(xs + x_init, ys_under, ys_upper, alpha=alluvial_alpha, color='grey', 
-                                            edgecolor='black', label = label_key)
+                                            edgecolor='black', label = label_key,
+                                                linewidth = alluvial_edge_width)
                         else:
-                            if color_alluvium_boundary:
-                                ax.fill_between(xs + x_init, ys_under, ys_upper, alpha=alluvial_alpha, color=all_color_dict[color_key], 
-                                            edgecolor=all_color_dict[color_key], label = label_key)
-                            else:
-                                ax.fill_between(xs + x_init, ys_under, ys_upper, alpha=alluvial_alpha, color=all_color_dict[color_key], 
-                                            edgecolor='black', label = label_key)
+                            ax.fill_between(xs + x_init, ys_under, ys_upper, alpha=alluvial_alpha, 
+                                                 color=all_color_dict[color_key], 
+                                                 edgecolor=all_color_dict[color_key] if color_alluvium_boundary else 'black', 
+                                                 label = label_key,
+                                                linewidth = alluvial_edge_width)
 
 
 
 def plot_alluvial_internal(df, xaxis_names, y_name, alluvium_column = None, order_dict=None, color_dict = None,
          color_boxes = True, color_alluvium = False, alluvial_alpha = 0.5, color_alluvium_boundary = False,
          ignore_continuity=False, cmap_name='tab20', 
-        include_labels_in_boxes = True, box_line_width = 1,box_width = 0.4, 
+        include_labels_in_boxes = True, min_text = 4, default_text_size = 14, autofit_text = True,
+        box_line_width = 1,box_width = 0.4, alluvial_edge_width = 0.1,
          figsize=(6.4, 4.8),
         y_axis_label = False, invert_xy = False, include_stratum_legend = False, include_alluvium_legend = False, verbose = False
         ):
@@ -248,14 +250,14 @@ def plot_alluvial_internal(df, xaxis_names, y_name, alluvium_column = None, orde
                 _plot_alluvium(df_agg, xaxis_names[i: i+2], y_name, alluvium = alluvium_column, 
                                color_alluvium = color_alluvium, color_alluvium_boundary = color_alluvium_boundary,
                                order_dict=order_dict, all_color_dict = color_dict, ax=ax, x_init=i,
-                              invert_xy=invert_xy, alluvial_alpha = alluvial_alpha)
+                              invert_xy=invert_xy, alluvial_alpha = alluvial_alpha, alluvial_edge_width = alluvial_edge_width)
                 alluvium = None
     else:
         _plot_alluvium(df, xaxis_names, y_name, alluvium = alluvium_column, 
                        color_alluvium = color_alluvium, color_alluvium_boundary = color_alluvium_boundary,
                        order_dict=order_dict, all_color_dict = color_dict, ax=ax, x_init=0,
                       invert_xy=invert_xy, alluvial_alpha = alluvial_alpha,
-                      box_line_width = box_line_width,box_width = box_width)
+                      box_line_width = box_line_width,box_width = box_width, alluvial_edge_width = alluvial_edge_width)
     
     #ax.set_axis_off()
     if invert_xy:
@@ -285,9 +287,10 @@ def plot_alluvial_internal(df, xaxis_names, y_name, alluvium_column = None, orde
             for name in stratum_labels[xaxis]:
                 rect, y = stratum_labels[xaxis][name]
                 bar_label = ax.text(x=xaxis, y=y, s=name, horizontalalignment='center', verticalalignment='center',
-                                    wrap=True)
+                                    wrap=True, size = default_text_size)
                 bar_label._get_wrap_line_width = lambda : rect.get_width()
-                auto_fit_fontsize(text=bar_label, rectangle=rect, fig=fig, ax=ax)
+                if autofit_text:
+                    auto_fit_fontsize(text=bar_label, rectangle=rect, fig=fig, ax=ax, text_min = min_text)
     if include_stratum_legend or include_alluvium_legend:
         lgd = plt.legend(bbox_to_anchor=(1.01, 1), loc='upper left')
         place_legend(fig, ax, lgd)
@@ -364,7 +367,7 @@ def compute_custom(labels: [str], matrix) -> [int]:
 
     return cycle
 
-def neighbor_net(labels: list[str], mat: list[list[float]], cutoff=0.0001, constrained=True, compute_splits=False) -> Tuple[list, list]:
+def neighbor_net(labels: List[str], mat: List[List[float]], cutoff=0.0001, constrained=True, compute_splits=False):
     mat = mat.astype(np.float64)
     cycle = compute_custom(labels, mat)
     if compute_splits:
@@ -797,7 +800,7 @@ def plot_alluvial(df,
                   # user-defined order arguments
                   order_dict=None, return_order_dict = False,
                   # alluvium arguments
-                alluvium_column = None, color_alluvium = False, color_alluvium_boundary = False, alluvial_alpha = 0.5,
+                alluvium_column = None, color_alluvium = False, color_alluvium_boundary = False, alluvial_alpha = 0.5, alluvial_edge_width = 0.1,
 
                   # coloring algorithm arguments
                   match_colors = True,
@@ -809,7 +812,7 @@ def plot_alluvial(df,
                   # stratum customization options
                   color_boxes = True, include_labels_in_boxes = True, box_line_width = 1,box_width = 0.4, 
                     # stratum text_customization options
-                  min_text = 4, default_text_size = 14,
+                  min_text = 4, default_text_size = 14, autofit_text = True,
                   # axis options
                  y_axis_label = False, invert_xy = False,
                     # legend options
@@ -817,7 +820,7 @@ def plot_alluvial(df,
                     # figure size options
                   save_height = 6, save_width = 6,
 
-                  verbose = False
+                  verbose = False, savefig = False
                  ):
     df_gather = df.copy()
     figsize=(save_height, save_width)
@@ -855,15 +858,19 @@ def plot_alluvial(df,
                                      col_weights=column_weights,
                       matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value,
                               weight_scalar = weight_scalar)
-            
+            if verbose:
+                print(f'Sorting Distance matrix with algorithm {sorting_algorithm}')
             cycle = sort_dist_matrix(dist_mat, nodes, sorting_algorithm = sorting_algorithm)
+            if verbose:
+                print(f'Determining Optimal Cycle Start')
             
             cycle, graphing_columns = determine_optimal_cycle_start(df_gather, cycle, graphing_columns, column_weights=column_weights, 
                                                                     optimize_column_order = optimize_column_order,
                                      optimize_column_order_per_cycle = optimize_column_order_per_cycle, cycle_start_positions = cycle_start_positions,
                                       matrix_initialization_value_column_order = matrix_initialization_value_column_order,
                                       weight_scalar_column_order = weight_scalar_column_order, 
-                                        column_sorting_metric = column_sorting_metric,column_sorting_algorithm = column_sorting_algorithm
+                                        column_sorting_metric = column_sorting_metric,column_sorting_algorithm = column_sorting_algorithm,
+                                                                    verbose = verbose
                                                  )
             order_dict = get_order_dict(cycle, graphing_columns)
     if verbose:
@@ -878,10 +885,16 @@ def plot_alluvial(df,
                                  alluvium_column = alluvium_column, color_alluvium = color_alluvium, 
                                  alluvial_alpha = alluvial_alpha,color_alluvium_boundary = color_alluvium_boundary,
                                  order_dict=order_dict, color_dict = color_dict,
-         color_boxes = color_boxes,cmap_name=cmap_name, figsize=figsize,
+                                 color_boxes = color_boxes,cmap_name=cmap_name, figsize=figsize,
                                  include_labels_in_boxes = include_labels_in_boxes, box_line_width = box_line_width,box_width = box_width, 
-                                 y_axis_label = y_axis_label, invert_xy = invert_xy, include_stratum_legend = include_stratum_legend, include_alluvium_legend = include_alluvium_legend
+                                 y_axis_label = y_axis_label, invert_xy = invert_xy, include_stratum_legend = include_stratum_legend, 
+                                 include_alluvium_legend = include_alluvium_legend, alluvial_edge_width = alluvial_edge_width,
+                                 min_text = min_text, default_text_size = default_text_size, autofit_text = autofit_text,
         )
+
+    if type(savefig) == str:
+        plt.savefig(savefig)
+    
     if return_order_dict:
         return fig, order_dict
     return fig
