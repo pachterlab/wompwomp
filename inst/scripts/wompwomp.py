@@ -635,9 +635,9 @@ def sort_greedy_wolf(df, graphing_columns, fixed_column=None,
         order_dict = {}
         for key in graphing_columns:
             if (key == reordered_column) or (sorting_algorithm == 'greedy_wblf'):
-                order_dict[key] = random.sample(list(df_gather[key].astype('str').unique()), len(list(df_gather[key].astype('str').unique())))
+                order_dict[key] = random.sample(list(df[key].astype('str').unique()), len(list(df[key].astype('str').unique())))
             else:
-                order_dict[key] = list(df_gather[key].astype('str').unique())
+                order_dict[key] = list(df[key].astype('str').unique())
                 
         temp_df = df
         if sorting_algorithm == 'greedy_wblf': 
