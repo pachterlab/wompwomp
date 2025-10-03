@@ -103,8 +103,8 @@ def _plot_alluvium(df, xaxis_names, y_name='value', alluvium=None,
 
 def plot_alluvial_internal(df, xaxis_names, y_name, alluvium_column = None, order_dict=None, color_dict = None,
          color_boxes = True, color_alluvium = False, alluvial_alpha = 0.5, color_alluvium_boundary = False,
-         ignore_continuity=False, cmap_name='tab20', 
-        include_labels_in_boxes = True, min_text = 4, default_text_size = 14, autofit_text = True,
+         ignore_continuity=False,
+        include_labels_in_boxes = True, min_text = 4, default_text_size = 14, autofit_text = True, drop_if_min = False,
         box_line_width = 1,box_width = 0.4, alluvial_edge_width = 0.1,
          figsize=(6.4, 4.8),
         y_axis_label = False, invert_xy = False, include_stratum_legend = False, include_alluvium_legend = False, verbose = False
@@ -142,11 +142,6 @@ def plot_alluvial_internal(df, xaxis_names, y_name, alluvium_column = None, orde
         Example) True
     color_dict: dict
         manual selection of colors 
-    cmap_name: str
-        Specify any matplotlib's colormap name you want to use in the following link.
-        It is recommended to choose from the Qualitative colormaps.
-        ref) https://matplotlib.org/examples/color/colormaps_reference.html
-        Example) 'tab10'
     figsize: tuple of float
         Specify the figsize.
         Example) (10, 10)
@@ -156,21 +151,6 @@ def plot_alluvial_internal(df, xaxis_names, y_name, alluvium_column = None, orde
     fig: matplotlib figure object
     '''
     df = df.copy()
-    if verbose:
-        print('Assigning colors')
-    if color_boxes or alluvium_column is not None:
-        if color_dict is None:
-            color_dict = {}
-        if alluvium_column in xaxis_names or alluvium_column is None:
-            keys = pd.melt(df[xaxis_names])['value'].unique().tolist()
-        else:
-            keys = pd.melt(df[xaxis_names+ [alluvium_column]])['value'].unique().tolist()
-        if len(color_dict.keys()) < len(keys):
-            cmap = plt.get_cmap(name=cmap_name, lut=len(keys))
-            available_colors = cmap(np.arange(0,cmap.N)) 
-            for index, key in enumerate(keys):
-                if key not in color_dict.keys():
-                    color_dict[key] = available_colors[index]
     if verbose:
         print('Plotting Stratum')
         
@@ -290,7 +270,7 @@ def plot_alluvial_internal(df, xaxis_names, y_name, alluvium_column = None, orde
                                     wrap=True, size = default_text_size)
                 bar_label._get_wrap_line_width = lambda : rect.get_width()
                 if autofit_text:
-                    auto_fit_fontsize(text=bar_label, rectangle=rect, fig=fig, ax=ax, text_min = min_text)
+                    auto_fit_fontsize(text=bar_label, rectangle=rect, fig=fig, ax=ax, text_min = min_text, drop_if_min=drop_if_min)
     if include_stratum_legend or include_alluvium_legend:
         lgd = plt.legend(bbox_to_anchor=(1.01, 1), loc='upper left')
         place_legend(fig, ax, lgd)
@@ -308,7 +288,7 @@ def place_legend(fig, ax, lgd):
     shift = 1 - (lgd_xmax - ax_xmax)
     plt.gcf().tight_layout(rect=(0, 0, shift, 1))
 
-def auto_fit_fontsize(text,rectangle, fig, ax, text_min=1):
+def auto_fit_fontsize(text,rectangle, fig, ax, text_min=1, drop_if_min = False):
     '''Auto-decrease the fontsize of a text object.
 
     Args:
@@ -328,11 +308,13 @@ def auto_fit_fontsize(text,rectangle, fig, ax, text_min=1):
     # evaluate fit and recursively decrease fontsize until text fits
     fits_width = bbox_text.width < rect_bbox_text.width 
     fits_height = bbox_text.height < rect_bbox_text.height 
-    
+
     if not all((fits_width, fits_height)):
         text.set_fontsize(text.get_fontsize()-1)
         if text.get_fontsize() > text_min:
-            auto_fit_fontsize(text, rectangle, fig, ax)
+            auto_fit_fontsize(text, rectangle, fig, ax, text_min, drop_if_min)
+        elif (text.get_fontsize() <= text_min) and drop_if_min:
+            text.set_visible(False)
 
 
 def __setup_matrix_custom(labels: [str], matrix: [float]) -> np.array:
@@ -678,7 +660,7 @@ def find_colors_advanced(df_gather, graphing_columns, column_weights = 'value',
                         coloring_algorithm_advanced_option = 'leiden', resolution = 1):
     
     dist_mat, nodes = generate_distance_matrix(df_gather, graphing_columns,
-                    col_weights = 'counts', matrix_initialization_value = 0, same_side_matrix_initialization_value = 0, 
+                    col_weights = column_weights, matrix_initialization_value = 0, same_side_matrix_initialization_value = 0, 
                      weight_scalar = 1, nn_normalize = False)
     g = igraph.Graph.Weighted_Adjacency(dist_mat, mode = 'undirected')
     g.vs['name'] = nodes
@@ -781,6 +763,44 @@ def generate_matched_color_dict(df_gather, graphing_columns, column_weights = 'v
         color_dict[key] = available_colors[group_dict[key]]
     return color_dict
 
+def assign_colors(df_gather, graphing_columns, alluvium_column, match_colors = False, color_dict = None, column_weights = 'value', 
+             coloring_algorithm = 'advanced', coloring_algorithm_advanced_option = 'leiden', 
+                              resolution = 1, cmap_name = 'tab_20', fill_missing_colors = True):
+    # generate temporary color dictionary for matching
+    tmp_color_dict = {}
+    if match_colors:
+        tmp_color_dict = generate_matched_color_dict(df_gather, graphing_columns, column_weights = column_weights, 
+             coloring_algorithm = coloring_algorithm, coloring_algorithm_advanced_option = coloring_algorithm_advanced_option, 
+                              resolution = resolution, cmap_name = cmap_name)
+        
+    # if matching and user defined, override colors
+    if color_dict is None:
+        color_dict = {}
+    else:
+        if match_colors:
+            print("Overriding Auto-generated Colors with User Defined Ones")
+        for x in set(color_dict.keys()).intersection(set(tmp_color_dict.keys())):
+            tmp_color_dict[x] = color_dict[x]
+    color_dict = color_dict | tmp_color_dict
+
+    # generate list of objects that need colors
+    if alluvium_column in graphing_columns or alluvium_column is None:
+        keys = pd.melt(df_gather[graphing_columns])['value'].unique().tolist()
+    else:
+        keys = pd.melt(df_gather[graphing_columns+ [alluvium_column]])['value'].unique().tolist()
+
+    # randomly assign colors to unmapped objects
+    if len(color_dict.keys()) < len(keys):
+        cmap = plt.get_cmap(name=cmap_name, lut=len(keys))
+        available_colors = cmap(np.arange(0,cmap.N)) 
+        for index, key in enumerate(keys):
+            if key not in color_dict.keys():
+                if fill_missing_colors == True:
+                    color_dict[key] = available_colors[index]
+                else:
+                    color_dict[key] = fill_missing_colors
+    return color_dict
+
 def plot_alluvial(df, 
                   # general function arguments
                   graphing_columns = None, column_weights = None, 
@@ -807,12 +827,12 @@ def plot_alluvial(df,
                    coloring_algorithm = "advanced", coloring_algorithm_advanced_option = "leiden", resolution = 1, threshold = .5,
                   
                   # user-defined color arguments
-                  color_dict = None, cmap_name='tab20', 
+                  color_dict = None, fill_missing_colors = True, cmap_name='tab20', 
                   
                   # stratum customization options
                   color_boxes = True, include_labels_in_boxes = True, box_line_width = 1,box_width = 0.4, 
                     # stratum text_customization options
-                  min_text = 4, default_text_size = 14, autofit_text = True,
+                  min_text = 4, default_text_size = 14, autofit_text = True, drop_if_min = False,
                   # axis options
                  y_axis_label = False, invert_xy = False,
                     # legend options
@@ -875,18 +895,22 @@ def plot_alluvial(df,
             order_dict = get_order_dict(cycle, graphing_columns)
     if verbose:
         print("Plotting Data")
-
-    if match_colors:
-        color_dict = generate_matched_color_dict(df_gather, graphing_columns, column_weights = column_weights, 
-                 coloring_algorithm = coloring_algorithm, coloring_algorithm_advanced_option = coloring_algorithm_advanced_option, 
-                                  resolution = resolution, cmap_name = cmap_name)
+    
+    if color_boxes or alluvium_column is not None:
+        if verbose:
+            print('Assigning colors')
+        color_dict = assign_colors(df_gather, graphing_columns, alluvium_column, match_colors = match_colors, 
+                                   color_dict = color_dict, column_weights = column_weights, 
+             coloring_algorithm = coloring_algorithm, coloring_algorithm_advanced_option = coloring_algorithm_advanced_option, 
+                              resolution = resolution, cmap_name = cmap_name, fill_missing_colors = fill_missing_colors)
     
     fig = plot_alluvial_internal(df_gather, graphing_columns, column_weights, 
                                  alluvium_column = alluvium_column, color_alluvium = color_alluvium, 
                                  alluvial_alpha = alluvial_alpha,color_alluvium_boundary = color_alluvium_boundary,
                                  order_dict=order_dict, color_dict = color_dict,
-                                 color_boxes = color_boxes,cmap_name=cmap_name, figsize=figsize,
+                                 color_boxes = color_boxes, figsize=figsize,
                                  include_labels_in_boxes = include_labels_in_boxes, box_line_width = box_line_width,box_width = box_width, 
+                                 drop_if_min = drop_if_min,
                                  y_axis_label = y_axis_label, invert_xy = invert_xy, include_stratum_legend = include_stratum_legend, 
                                  include_alluvium_legend = include_alluvium_legend, alluvial_edge_width = alluvial_edge_width,
                                  min_text = min_text, default_text_size = default_text_size, autofit_text = autofit_text,
