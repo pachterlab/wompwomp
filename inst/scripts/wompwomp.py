@@ -104,7 +104,8 @@ def _plot_alluvium(df, xaxis_names, y_name='value', alluvium=None,
 def plot_alluvial_internal(df, xaxis_names, y_name, alluvium_column = None, order_dict=None, color_dict = None,
          color_boxes = True, color_alluvium = False, alluvial_alpha = 0.5, color_alluvium_boundary = False,
          ignore_continuity=False,
-        include_labels_in_boxes = True, min_text = 4, default_text_size = 14, autofit_text = True, drop_if_min = False,
+        include_labels_in_boxes = True, min_text = 4, default_text_size = 14, default_axis_text_size = None, default_label_text_size = None,
+                           autofit_text = True, drop_if_min = False,
         box_line_width = 1,box_width = 0.4, alluvial_edge_width = 0.1,
          figsize=(6.4, 4.8),
         y_axis_label = False, invert_xy = False, include_stratum_legend = False, include_alluvium_legend = False, verbose = False
@@ -246,14 +247,16 @@ def plot_alluvial_internal(df, xaxis_names, y_name, alluvium_column = None, orde
             ax.spines['bottom'].set_visible(False)  
         # set xticklabels
         ax.set_yticks(list(range(len(stratum_dict))))
-        ax.set_yticklabels([stratum.index.name for stratum in stratum_dict.values()])
+        ax.set_yticklabels([stratum.index.name for stratum in stratum_dict.values()], 
+                           fontsize = default_text_size if default_axis_text_size is None else default_axis_text_size)
     else:
         if not y_axis_label:
             ax.get_yaxis().set_visible(False)    
             ax.spines['left'].set_visible(False)  
         # set xticklabels
         ax.set_xticks(list(range(len(stratum_dict))))
-        ax.set_xticklabels([stratum.index.name for stratum in stratum_dict.values()])
+        ax.set_xticklabels([stratum.index.name for stratum in stratum_dict.values()],
+                           fontsize = default_text_size if default_axis_text_size is None else default_axis_text_size)
 
 
     ax.spines['right'].set_visible(False)
@@ -267,7 +270,7 @@ def plot_alluvial_internal(df, xaxis_names, y_name, alluvium_column = None, orde
             for name in stratum_labels[xaxis]:
                 rect, y = stratum_labels[xaxis][name]
                 bar_label = ax.text(x=xaxis, y=y, s=name, horizontalalignment='center', verticalalignment='center',
-                                    wrap=True, size = default_text_size)
+                                    wrap=True, size = default_text_size if default_label_text_size is None else default_label_text_size)
                 bar_label._get_wrap_line_width = lambda : rect.get_width()
                 if autofit_text:
                     auto_fit_fontsize(text=bar_label, rectangle=rect, fig=fig, ax=ax, text_min = min_text, drop_if_min=drop_if_min)
@@ -832,7 +835,8 @@ def plot_alluvial(df,
                   # stratum customization options
                   color_boxes = True, include_labels_in_boxes = True, box_line_width = 1,box_width = 0.4, 
                     # stratum text_customization options
-                  min_text = 4, default_text_size = 14, autofit_text = True, drop_if_min = False,
+                  min_text = 4, default_text_size = 14, default_axis_text_size = None, default_label_text_size = None,
+                  autofit_text = True, drop_if_min = False,
                   # axis options
                  y_axis_label = False, invert_xy = False,
                     # legend options
@@ -913,7 +917,8 @@ def plot_alluvial(df,
                                  drop_if_min = drop_if_min,
                                  y_axis_label = y_axis_label, invert_xy = invert_xy, include_stratum_legend = include_stratum_legend, 
                                  include_alluvium_legend = include_alluvium_legend, alluvial_edge_width = alluvial_edge_width,
-                                 min_text = min_text, default_text_size = default_text_size, autofit_text = autofit_text,
+                                 min_text = min_text, default_text_size = default_text_size, default_axis_text_size = default_axis_text_size, 
+                                 default_label_text_size = default_label_text_size, autofit_text = autofit_text,
         )
 
     if type(savefig) == str:
