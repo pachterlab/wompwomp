@@ -106,7 +106,7 @@ p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = 
 p
 ```
 
-```{r eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
+```{r, eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
 p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_bands = FALSE, coloring_algorithm = "left", min_text = 0.01, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_NN.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
 p
 
@@ -217,13 +217,13 @@ p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = 
 p
 ```
 
-```{r eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
+```{r, eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
 p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = FALSE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
 p2
 ```
 
 Optional (only if I'm doing a subset of objectives)
-```{r eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
+```{r, eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
 # log_msgs <- character()
 #
 # withCallingHandlers({
@@ -235,7 +235,7 @@ Optional (only if I'm doing a subset of objectives)
 # p2
 ```
 
-```{r eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
+```{r, eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
 # objectives <- stringr::str_match(log_msgs, "neighbornet_objective for iteration \\d+ = (\\d+)")[, 2]
 # objectives <- as.numeric(na.omit(objectives))
 #

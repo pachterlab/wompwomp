@@ -224,7 +224,7 @@ Let's compare neighbornet too
 clus_df_gather_sorted_neighbornet <- 0  # a default
 ```
 
-```{r eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
+```{r, eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
 clus_df_gather_sorted_neighbornet <- data_sort(df, column1 = "tissue", column2 = "cluster", sorting_algorithm = "neighbornet")
 crossing_edges_output <- determine_crossing_edges(clus_df_gather_sorted_neighbornet, column1 = "col1_int", column2 = "col2_int")
 crossing_edges <- crossing_edges_output$crossing_edges_df

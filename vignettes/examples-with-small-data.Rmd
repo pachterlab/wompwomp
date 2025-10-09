@@ -264,7 +264,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
 ```
 
-```{r}
+```{r, eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
 plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, coloring_algorithm = "advanced", color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
 ```
 
