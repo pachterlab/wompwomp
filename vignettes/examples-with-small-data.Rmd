@@ -78,7 +78,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none
 ```
 
 ```{r}
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order_per_cycle = FALSE, output_plot_path = file.path(output_dir, "2layer_NN.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, optimize_column_order_per_cycle = FALSE, output_plot_path = file.path(output_dir, "2layer_NN.pdf"))
 ```
 
 3+ columns
@@ -113,7 +113,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none
 
 ```{r}
 # clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
-# data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
+# data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
 # clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
 # graphing_columns_reordered <- data_sort_output$graphing_columns
 # out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = graphing_columns_reordered, column_weights = "value", return_weighted_layer_free_objective = FALSE)
@@ -121,12 +121,12 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none
 # # print(out$crossing_edges_df)
 
 # graph what I did above
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, output_plot_path = file.path(output_dir, "3layer_NN_fixed_columns.pdf"), verbose = TRUE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, output_plot_path = file.path(output_dir, "3layer_NN_fixed_columns.pdf"), verbose = TRUE)
 ```
 
 ```{r}
 # clus_df_gather_tmp <- data_preprocess(df = df, graphing_columns = graphing_columns, load_df = FALSE, do_gather_set_data = FALSE)
-# data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
+# data_sort_output <- data_sort(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, return_updated_graphing_columns = TRUE, verbose = TRUE)
 # clus_df_gather_tmp_sorted <- data_sort_output$clus_df_gather
 # graphing_columns_reordered <- data_sort_output$graphing_columns
 # out <- determine_crossing_edges(clus_df_gather_tmp_sorted, graphing_columns = graphing_columns_reordered, column_weights = "value", return_weighted_layer_free_objective = FALSE)
@@ -146,7 +146,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neig
 # #         "weight1", "weight2")])
 
 # graph what I did above
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, output_plot_path = file.path(output_dir, "3layer_NN_optimized_columns.pdf"), verbose = TRUE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, output_plot_path = file.path(output_dir, "3layer_NN_optimized_columns.pdf"), verbose = TRUE)
 ```
 
 Let's try on an extreme example
@@ -180,11 +180,11 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none
 ```
 
 ```{r}
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, verbose = TRUE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, verbose = TRUE)
 ```
 
 ```{r}
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, verbose = TRUE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1, resolution = 2, verbose = TRUE)
 ```
 
 Let's do an even more extreme example
@@ -199,7 +199,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none
 ```
 
 ```{r}
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, optimize_column_order = FALSE, optimize_column_order_per_cycle = TRUE)
 ```
 
 Constructing a toy example for the manuscript
@@ -234,7 +234,7 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none
 ```
 
 ```{r}
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "none", color_bands = TRUE, color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_NN.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", coloring_algorithm = "none", color_bands = TRUE, color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "tutorial_2_NN.pdf"))
 ```
 
 ```{r}
@@ -261,11 +261,11 @@ plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "none
 ```
 
 ```{r}
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
 ```
 
 ```{r}
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, coloring_algorithm = "advanced", color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, coloring_algorithm = "advanced", color_band_column = "tissue", color_band_list = c("BRAIN" = "#D55E00", "HEART" = "#56B4E9", "STOMACH" = "#009E73"), color_boxes = FALSE, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, output_plot_path = file.path(output_dir, "tutorial_3_NN.pdf"))
 ```
 
 ARI of 0
@@ -283,11 +283,11 @@ a <- rep(1:n_groups, each = block_size * n_groups) # each a group appears in n_g
 b <- rep(1:n_groups, times = n_groups * block_size) # each b group repeats across each a group
 
 df <- data.frame(a = a, b = b)
-clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp")
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_0.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_0.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 
@@ -319,11 +319,11 @@ for (i in 1:n_groups) {
 
 df <- data.frame(a = a, b = b)
 
-clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp")
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_02.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_02.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 ```{r}
@@ -354,11 +354,11 @@ for (i in 1:n_groups) {
 
 df <- data.frame(a = a, b = b)
 
-clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp")
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 
@@ -390,11 +390,11 @@ for (i in 1:n_groups) {
 
 df <- data.frame(a = a, b = b)
 
-clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp")
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_08.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_08.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 ```{r}
@@ -408,11 +408,11 @@ b <- rep(1:n_groups, each = rows_per_group)
 
 df <- data.frame(a = a, b = b)
 
-clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp")
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_1.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_1.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 ```{r}
@@ -428,11 +428,11 @@ b <- c(
 
 df <- data.frame(a = a, b = b)
 
-clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp")
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_left.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_left.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 ```{r}
@@ -448,11 +448,11 @@ a <- c(
 
 df <- data.frame(a = a, b = b)
 
-clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet")
+clus_df_gather <- data_sort(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp")
 determine_crossing_edges(clus_df_gather, graphing_columns = graphing_columns, normalize_objective = TRUE, return_weighted_layer_free_objective = TRUE)
 mclust::adjustedRandIndex(df$a, df$b)
 
-plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_right.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
+plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", color_bands = TRUE, color_boxes = TRUE, verbose = TRUE, output_plot_path = file.path(output_dir, "ari_05_split_right.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0, coloring_algorithm = "none", color_val = list("1" = "#D55E00", "2" = "#56B4E9", "3" = "#009E73", "4" = "#F0E442", "5" = "#0072B2"), color_band_column = "a", include_axis_titles = FALSE)
 ```
 
 

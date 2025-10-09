@@ -390,7 +390,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
     }
 
     if (verbose) message("Beginning loop through layers")
-    for (h in 1:(n_x - 1)) {
+    for (h in seq_len(n_x - 1)) {
         x1 <- h
         x2 <- h + 1
 
@@ -500,7 +500,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
             # # option 3 for objective (worst): double for loop (good if I need data frame)
             if (verbose) message("Looping through alluvia")
             if (is.null(stratum_column_and_value_to_keep)) {
-                for (i in 1:(lode_df_length - 1)) {
+                for (i in seq_len(lode_df_length - 1)) {
                     for (j in (i + 1):lode_df_length) {
                         # Check crossing condition once per unordered pair
                         if ((lode_df$y1[i] - lode_df$y1[j]) * (lode_df$y2[i] - lode_df$y2[j]) < 0) {
@@ -543,8 +543,8 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                 if (!include_output_objective_matrix_vector) {
                     stop("If stratum_column_and_value_to_keep is not NULL, then include_output_objective_matrix_vector must be provided")
                 }
-                for (i in 1:(lode_df_filtered_with_stratum_of_interest_length)) {
-                    for (j in 1:lode_df_filtered_without_stratum_of_interest_length) {
+                for (i in seq_len(lode_df_filtered_with_stratum_of_interest_length)) {
+                    for (j in seq_len(lode_df_filtered_without_stratum_of_interest_length)) {
                         alluvium1 <- lode_df_filtered_with_stratum_of_interest$alluvium[i]
                         alluvium2 <- lode_df_filtered_without_stratum_of_interest$alluvium[j]
                         w1 <- lode_df_filtered_with_stratum_of_interest$count[i]

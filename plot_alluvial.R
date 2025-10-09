@@ -64,7 +64,7 @@ compute_alluvial_statistics <- function(clus_df_gather, graphing_columns, column
 
     K_sum <- 0
     K_prod <- 1
-    for (i in seq_along(graphing_columns)) {
+    for (i in 1:length(graphing_columns)) {
         colname <- paste0("col", i, "_int")
         k_i <- length(unique(clus_df_gather[[colname]]))
         message(sprintf("k_%s = %s", i, k_i))
@@ -96,7 +96,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns,
 
     pairs <- combn(graphing_columns, 2)
     if (verbose) message("Computing objectives for each pair of columns in order to determine column order")
-    for (i in seq_len(ncol(pairs))) {
+    for (i in 1:ncol(pairs)) {
         if (verbose) message(sprintf("Computing objective for column pairs %s / %s", i, ncol(pairs)))
         column1 <- pairs[1, i]
         column2 <- pairs[2, i]
@@ -162,11 +162,11 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns,
     cycle_mapped <- labels[cycle]
 
     # determine the optimal starting point for cycle
-    adj_distances <- vapply(seq_len(length(cycle_mapped)), function(i) {
+    adj_distances <- sapply(seq_len(length(cycle_mapped)), function(i) {
         from <- cycle_mapped[i]
         to <- cycle_mapped[(i %% length(cycle_mapped)) + 1] # wraps around
         column_dist_matrix[from, to]
-    }, numeric(1L))
+    })
     max_index <- which.max(adj_distances)
 
     cycle_mapped_optimal_start <- rotate_left(cycle_mapped, max_index)
@@ -298,7 +298,7 @@ rotate_left <- function(vec, k = 1) {
     if (k == 0) {
         return(vec)
     }
-    c(vec[seq(from = k + 1, to = n)], vec[seq_len(k)])
+    c(vec[(k + 1):n], vec[1:k])
 }
 
 get_graph_groups <- function(cycle) {
@@ -1551,7 +1551,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @param column1 Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
-#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'none'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
+#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'none'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
 #' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.
 #' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.
 #' @param matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
@@ -1772,8 +1772,8 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
 #' @param column1 Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
-#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'.  performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
-#' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm ==  or 'tsp'} and \code{length(graphing_columns) > 2}.
+#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'}. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
+#' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.
 #' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.
 #' @param matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
 #' @param same_side_matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
