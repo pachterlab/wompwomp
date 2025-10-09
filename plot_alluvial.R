@@ -1182,9 +1182,7 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
     p <- p +
         theme_void() +
         theme(
-            text = element_text(family = "sans"),
-            axis.ticks.x = element_blank()
-        )
+            text = element_text(family = "sans"))
 
     if (add_legend) {
         p <- p + theme(legend.position = legend_loc) + labs(fill = "")
@@ -1192,10 +1190,6 @@ plot_alluvial_internal <- function(df, graphing_columns, column_weights,
         p <- p + theme(legend.position = "none")
     }
     
-    if (include_axis_titles) {
-        keep_x_labels <- TRUE
-        keep_y_labels <- TRUE
-    }
     if (keep_x_labels) {
         p <- p + theme(axis.text.x = element_text(size = axis_text_size, vjust = axis_text_vjust)) # vjust adjusts the vertical position of column titles)
     } 
@@ -1865,7 +1859,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           random_initializations = 1, color_boxes = TRUE, color_bands = FALSE,
                           color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_val = NULL,
                           color_band_boundary = FALSE, coloring_algorithm = "advanced", coloring_algorithm_advanced_option = "leiden", resolution = 1, cutoff = .5,
-                          alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = FALSE, include_group_sizes = FALSE,
+                          alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = FALSE,
                           output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE,
                           default_sorting = "alphabetical", box_width = 1 / 3, text_width = 1 / 4, min_text = 4, text_size = 14,
                           auto_adjust_text = TRUE, axis_text_size = 2, axis_text_vjust = 0, save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE,
