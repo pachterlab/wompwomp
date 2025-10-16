@@ -45,6 +45,16 @@ The first time any command is run on the command line, a prompt will appear aski
 
 While Python is not strictly required for use of the package, it is required for some options, including default package options (i.e., NeighborNet algorithm for sorting_algorithm == "neighbornet" or column_sorting_algorithm == "neighbornet", Leiden clustering for coloring_algorithm == "advanced", fenwick tree optimization for objective calculation).
 
+### Docker
+We provide an Docker image for running wompwomp built on [rocker/tidyverse](https://rocker-project.org)
+
+```
+docker run -it -p 8787:8787 -e PASSWORD josephrich98/wompwomp:latest
+```
+
+Then vist "http://localhost:8787" in a browser and use username: rstudio, password: PASSWORD (change password as desired after "-e").
+
+
 ## Usage
 
 The I/O for each of wompwomp's functions is as follows:

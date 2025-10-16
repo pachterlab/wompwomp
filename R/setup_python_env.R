@@ -14,12 +14,12 @@
 #' }
 #'
 #' @export
-setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "numpy==1.23.5", splitspy = "splitspy", pandas = "pandas", scipy = "scipy", leidenalg = "leidenalg", igraph = "python-igraph"), use_conda = TRUE) {
+setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "numpy==1.23.5", splitspy = "splitspy", pandas = "pandas", scipy = "scipy", leidenalg = "leidenalg", igraph = "python-igraph"), use_conda = TRUE, yes = FALSE) {
     if (use_conda) {
         conda_findable <- tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)
         if (!conda_findable) {
-            if (interactive()) {
-                answer <- readline("use_conda is TRUE but Miniconda not found. Would you like to install it now? [y/n]: ")
+            if (interactive() || yes) {
+                answer <- ifelse(yes, "yes", readline("use_conda is TRUE but Miniconda not found. Would you like to install it now? [y/n]: "))
                 if (tolower(answer) %in% c("y", "yes")) {
                     message("Installing Miniconda...")
                     reticulate::install_miniconda()
@@ -31,8 +31,8 @@ setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "num
 
         envs <- reticulate::conda_list()$name
         if (!(envname %in% envs)) {
-            if (interactive()) {
-                answer <- readline(paste0("Conda environment '", envname, "' not found. Create it now? [y/n]: "))
+            if (interactive() || yes) {
+                answer <- ifelse(yes, "yes", readline(paste0("Conda environment '", envname, "' not found. Create it now? [y/n]: "))
                 if (tolower(answer) %in% c("y", "yes")) {
                     message("Creating conda environment '", envname, "'...")
                     reticulate::conda_create(envname, python_version = "3.10")
@@ -51,8 +51,8 @@ setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "num
     } else {
         env_path <- file.path("~/.virtualenvs", envname)
         if (!dir.exists(path.expand(env_path))) {
-            if (interactive()) {
-                answer <- readline(paste0("Virtualenv '", envname, "' not found. Create it now? [y/n]: "))
+            if (interactive() || yes) {
+                answer <- ifelse(yes, "yes", readline(paste0("Virtualenv '", envname, "' not found. Create it now? [y/n]: "))
                 if (tolower(answer) %in% c("y", "yes")) {
                     message("Creating virtualenv '", envname, "'...")
                     reticulate::virtualenv_create(envname, python = "python3.10")
@@ -102,8 +102,8 @@ setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "num
         }
 
         if (need_install) {
-            if (interactive()) {
-                answer <- readline(paste0("Package '", pkg, "' is not installed in conda env '", envname, "'. Install it now with pip? [y/n]: "))
+            if (interactive() || yes) {
+                answer <- ifelse(yes, "yes", readline(paste0("Package '", pkg, "' is not installed in conda env '", envname, "'. Install it now with pip? [y/n]: "))
                 if (tolower(answer) %in% c("y", "yes")) {
                     reticulate::conda_install(envname, packages = pkg, pip = TRUE)
                 } else {
