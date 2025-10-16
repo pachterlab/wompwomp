@@ -49,10 +49,10 @@ While Python is not strictly required for use of the package, it is required for
 We provide an Docker image for running wompwomp built on [rocker/tidyverse](https://rocker-project.org)
 
 ```
-docker run -it -p 8787:8787 -e PASSWORD josephrich98/wompwomp:latest
+docker run -it -p 8787:8787 -e PASSWORD=<YOUR_PASS> josephrich98/wompwomp:latest
 ```
 
-Then vist "http://localhost:8787" in a browser and use username: rstudio, password: PASSWORD (change password as desired after "-e").
+Then vist "http://localhost:8787" in a browser and use username: rstudio, password: <YOUR_PASS> (change password as desired after "-e").
 
 
 ## Usage
