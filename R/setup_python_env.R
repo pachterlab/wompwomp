@@ -19,7 +19,7 @@ setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "num
         conda_findable <- tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)
         if (!conda_findable) {
             if (interactive() || yes) {
-                answer <- ifelse(yes, "yes", readline("use_conda is TRUE but Miniconda not found. Would you like to install it now? [y/n]: ")))
+                answer <- ifelse(yes, "yes", readline("use_conda is TRUE but Miniconda not found. Would you like to install it now? [y/n]: "))
                 if (tolower(answer) %in% c("y", "yes")) {
                     message("Installing Miniconda...")
                     reticulate::install_miniconda()
