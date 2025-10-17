@@ -4,6 +4,7 @@ output:
     BiocStyle::html_document:
         toc: true
         toc_depth: 2
+        self_contained: false
 vignette: >
   %\VignetteIndexEntry{Examples with Small Data}
   %\VignetteEngine{knitr::rmarkdown}

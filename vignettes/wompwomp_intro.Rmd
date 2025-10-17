@@ -4,6 +4,7 @@ output:
     BiocStyle::html_document:
         toc: true
         toc_depth: 2
+        self_contained: false
 vignette: >
   %\VignetteIndexEntry{Quick Start: An Introduction to wompwomp}
   %\VignetteEngine{knitr::rmarkdown}
@@ -11,9 +12,9 @@ vignette: >
 ---
 
 ```{r}
-devtools::load_all() # !!! erase
+# devtools::load_all() # !!! erase
 
-# library(wompwomp)  #!!! uncomment
+library(wompwomp)  #!!! uncomment
 library(dplyr)
 library(ggplot2)
 library(ggalluvial)
@@ -180,147 +181,3 @@ print(paste0("Objective (NeighborNet): ", objective_nn))
 ```{r}
 sessioninfo::session_info()
 ```
-
-```{r}
-# ---- Binary Indexed Tree (Fenwick Tree) ----
-BIT <- R6::R6Class("BIT",
-   public = list(
-       tree_count = NULL,
-       tree_weight = NULL,
-       
-       initialize = function(size) {
-           self$tree_count <- integer(size + 1)
-           self$tree_weight <- numeric(size + 1)
-       },
-       
-       update = function(index, weight) {
-           index <- index + 1L
-           n <- length(self$tree_count)
-           while (index < n) {
-               self$tree_count[index] <- self$tree_count[index] + 1L
-               self$tree_weight[index] <- self$tree_weight[index] + weight
-               index <- index + bitwAnd(index, -index)
-           }
-       },
-       
-       query = function(index) {
-           count <- 0L
-           weight_sum <- 0.0
-           index <- index + 1L
-           while (index > 0L) {
-               count <- count + self$tree_count[index]
-               weight_sum <- weight_sum + self$tree_weight[index]
-               index <- index - bitwAnd(index, -index)
-           }
-           list(count = count, weight_sum = weight_sum)
-       },
-       
-       query_range = function(low, high) {
-           q_high <- self$query(high)
-           q_low <- self$query(low - 1L)
-           list(
-               count = q_high$count - q_low$count,
-               weight_sum = q_high$weight_sum - q_low$weight_sum
-           )
-       }
-   )
-)
-
-calculate_objective_fenwick <- function(df) {
-    # Step 1: Sort by y1
-    df_sorted <- df[order(df$y1), ]
-    rownames(df_sorted) <- NULL
-    
-    # Step 2: Rank-compress y2 (higher y2 → higher rank)
-    df_sorted$y2_rank <- match(df_sorted$y2, sort(unique(df_sorted$y2)))
-    max_rank <- max(df_sorted$y2_rank)
-    
-    # Step 3: Initialize BIT
-    bit <- BIT$new(size = max_rank + 2L)
-    total_cross_weight <- 0.0
-    
-    for (i in seq_len(nrow(df_sorted))) {
-        y2_rank <- df_sorted$y2_rank[i]
-        weight <- df_sorted$count[i]
-        
-        # Count previous y2s > current (strictly greater)
-        q <- bit$query_range(y2_rank + 1L, max_rank)
-        total_cross_weight <- total_cross_weight + weight * q$weight_sum
-        
-        # Add current y2_rank to BIT
-        bit$update(y2_rank, weight)
-    }
-    
-    total_cross_weight
-}
-
-df <- data.frame(y1 = c(1, 3, 2, 4), y2 = c(4, 2, 3, 1), count = c(2, 1, 3, 4))
-calculate_objective_fenwick(df)
-
-df_hard <- data.frame(
-  y1 = round(runif(15, 0, 10), 2),       # random y1 between 0 and 10
-  y2 = round(rnorm(15, mean = 5, sd = 2), 2),  # random y2, some ties likely
-  count = sample(1:10, 15, replace = TRUE)     # integer weights 1–10
-)
-
-calculate_objective_fenwick(df_hard)
-```
-
-```{r}
-reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
-
-objective_fenwick_script_path <- file.path("/Users/joeyrich/Desktop/calculate_objective.py")
-reticulate::source_python(objective_fenwick_script_path)
-# calculate_objective_fenwick_python(df)
-# calculate_objective_fenwick_python(df_hard)
-```
-
-```{r}
-devtools::load_all()
-
-make_more_tsp_3_layer_df_with_2_identical_layers <- function() {
-    df <- data.frame(
-        tissue = c(
-            "BRAIN", "BRAIN", "BRAIN",
-            "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
-            "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
-            "T CELL", "T CELL",
-            "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
-        ),
-        sex = c(
-            "male", "female", "male",
-            "female", "male", "female", "female", "male", "female",
-            "male", "female", "male", "female", "male", "female", "male",
-            "female", "male",
-            "female", "male", "female", "male", "female", "male", "female", "female", "male"
-        ),
-        cluster = c(
-            "BRAIN", "BRAIN", "BRAIN",
-            "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
-            "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
-            "T CELL", "T CELL",
-            "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
-        )
-    )
-    graphing_columns <- c("tissue", "cluster", "sex")
-
-    list(
-        df = df,
-        graphing_columns = graphing_columns
-    )
-}
-
-# input <- make_more_tsp_3_layer_df_with_2_identical_layers()
-# df <- input$df
-# graphing_columns <- input$graphing_columns
-# 
-# clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
-# 
-# clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
-
-num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
-
-testthat::expect_equal(num, 48)
-```
-
-

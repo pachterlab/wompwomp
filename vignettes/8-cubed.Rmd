@@ -4,6 +4,7 @@ output:
     BiocStyle::html_document:
         toc: true
         toc_depth: 2
+        self_contained: false
 vignette: >
   %\VignetteIndexEntry{8 cubed}
   %\VignetteEngine{knitr::rmarkdown}
@@ -60,7 +61,7 @@ optimize_column_order <- FALSE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_fixed_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, coloring_algorithm = "left", resolution = 12, color_bands = TRUE, color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_fixed_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, coloring_algorithm = "left", resolution = 12, color_bands = TRUE, color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_fixed_columns
@@ -71,7 +72,7 @@ optimize_column_order <- TRUE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_optimized_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, coloring_algorithm = "left", resolution = 12, color_bands = TRUE, color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_optimized_columns <- plot_alluvial(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, coloring_algorithm = "left", resolution = 12, color_bands = TRUE, color_boxes = FALSE, verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_full_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_optimized_columns
@@ -100,7 +101,7 @@ optimize_column_order <- FALSE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_fixed_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("Akr1c21" = "#D55E00", "Slc7a12" = "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_fixed_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("Akr1c21" = "#D55E00", "Slc7a12" = "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_NN_fixed_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_fixed_columns_trimmed
@@ -111,7 +112,7 @@ optimize_column_order <- TRUE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_optimized_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("Akr1c21" = "#D55E00", "Slc7a12" = "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_optimized_columns_trimmed <- plot_alluvial(clus_df_gather_summed, graphing_columns = graphing_columns_summed, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("Akr1c21" = "#D55E00", "Slc7a12" = "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmed_NN_optimized_columns.pdf"), min_text = 0.01, save_height = 24, save_width = 24)
 
 print(Sys.time())
 
@@ -143,7 +144,7 @@ optimize_column_order <- FALSE
 optimize_column_order_per_cycle <- FALSE
 
 print(Sys.time())
-p_sorted_fixed_columns_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("Akr1c21" = "#D55E00", "Slc7a12" = "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_NN_fixed_columns.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_fixed_columns_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("Akr1c21" = "#D55E00", "Slc7a12" = "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_NN_fixed_columns.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_fixed_columns_trimmed2
@@ -154,7 +155,7 @@ optimize_column_order <- TRUE
 optimize_column_order_per_cycle <- TRUE
 
 print(Sys.time())
-p_sorted_optimized_columns_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "neighbornet", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("Akr1c21" = "#D55E00", "Slc7a12" = "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_NN_optimized_columns.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
+p_sorted_optimized_columns_trimmed2 <- plot_alluvial(clus_df_gather_summed2, graphing_columns = graphing_columns_summed2, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, color_bands = TRUE, color_band_column = "Gene", color_band_list = c("Akr1c21" = "#D55E00", "Slc7a12" = "#56B4E9"), color_boxes = FALSE, coloring_algorithm = "none", verbose = TRUE, output_plot_path = file.path(output_dir, "8_cubed_trimmedX2_NN_optimized_columns.pdf"), text_size = 35, axis_text_size = 35, axis_text_vjust = -5, min_text = 0.01, save_height = 24, save_width = 24)
 print(Sys.time())
 
 p_sorted_optimized_columns_trimmed2

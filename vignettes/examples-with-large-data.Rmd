@@ -4,6 +4,7 @@ output:
     BiocStyle::html_document:
         toc: true
         toc_depth: 2
+        self_contained: false
 vignette: >
   %\VignetteIndexEntry{Examples with Large Data}
   %\VignetteEngine{knitr::rmarkdown}
@@ -93,7 +94,7 @@ p
 ```
 
 ```{r}
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_bands = FALSE, coloring_algorithm = "left", min_text = 0.01, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_NN.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", optimize_column_order = FALSE, color_bands = FALSE, coloring_algorithm = "left", min_text = 0.01, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_NN.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
 p
 
 # df['Lannister_origin'] <- df["Origin"] == 'House Lannister'
@@ -103,7 +104,7 @@ df <- df %>%
         Origin == "Westeros" ~ 2,
         TRUE ~ 0
     ))
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = TRUE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_origin", output_plot_path = file.path(output_dir, "GoT_NN_lannister_origin.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = TRUE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_origin", output_plot_path = file.path(output_dir, "GoT_NN_lannister_origin.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
 p
 
 # df['Lannister_ending'] <- df["End.of.S7"] == 'Queen Cersei Lannister'
@@ -113,7 +114,7 @@ df <- df %>%
         End.of.S7 == "Other, Westeros" ~ 2,
         TRUE ~ 0
     ))
-p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = TRUE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_ending", output_plot_path = file.path(output_dir, "GoT_NN_lannister_ending.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
+p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", optimize_column_order = FALSE, color_boxes = FALSE, color_bands = TRUE, min_text = 0.01, verbose = TRUE, color_band_list = c("0" = "grey", "1" = "#D55E00", "2" = "#56B4E9"), color_band_column = "Lannister_ending", output_plot_path = file.path(output_dir, "GoT_NN_lannister_ending.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
 p
 ```
 
@@ -204,7 +205,7 @@ p
 ```
 
 ```{r}
-p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = FALSE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = FALSE, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
 p2
 ```
 
@@ -213,7 +214,7 @@ Optional (only if I'm doing a subset of objectives)
 # log_msgs <- character()
 #
 # withCallingHandlers({
-#   p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = 'trueclass')
+#   p2 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", verbose=TRUE, optimize_column_order = FALSE, output_plot_path=file.path(output_dir, sprintf("clustering_%s_NN.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = 'trueclass')
 # }, message = function(m) {
 #   log_msgs <<- c(log_msgs, conditionMessage(m))
 #   # no muffling → still prints to console
@@ -222,7 +223,7 @@ Optional (only if I'm doing a subset of objectives)
 ```
 
 ```{r}
-# objectives <- stringr::str_match(log_msgs, "neighbornet_objective for iteration \\d+ = (\\d+)")[, 2]
+# objectives <- stringr::str_match(log_msgs, "tsp_objective for iteration \\d+ = (\\d+)")[, 2]
 # objectives <- as.numeric(na.omit(objectives))
 #
 # df_obj <- data.frame(
@@ -236,7 +237,7 @@ Optional (only if I'm doing a subset of objectives)
 #     breaks = seq(0, length(objectives), by = 5),     # major ticks
 #     minor_breaks = seq(0, length(objectives), by = 1)  # minor ticks
 #   ) +
-#   labs(title = "NeighborNet Objective Over Iterations",
+#   labs(title = "tsp Objective Over Iterations",
 #        x = "Iteration", y = "Objective") +
 #   theme_minimal()
 ```
@@ -247,7 +248,7 @@ column_sorting_metric <- "edge_crossing" # edge_crossing or ARI
 optimize_column_order_per_cycle <- TRUE
 
 set.seed(42)
-p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN_optimized_columns.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric, text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
+p3 <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "tsp", coloring_algorithm = "left", resolution = 12, verbose = TRUE, optimize_column_order = TRUE, optimize_column_order_per_cycle = optimize_column_order_per_cycle, output_plot_path = file.path(output_dir, sprintf("clustering_%s_NN_optimized_columns.pdf", sample_size)), min_text = 0.01, save_height = 24, save_width = 24, rasterise_alluvia = FALSE, dpi = 50, color_boxes = FALSE, color_bands = TRUE, color_band_list = c("H7hESC" = "#D55E00", "H7_derived_APS" = "#56B4E9", "H7_derived_MPS" = "#009E73", "H7_derived_DLL1pPXM" = "#F0E442", "H7_derived_ESMT" = "#0072B2", "H7_derived_Sclrtm" = "#E69F00", "H7_derived_D5CntrlDrmmtm" = "#CC79A7", "H7_derived_D2LtM" = "#666666", "H7_dreived_D2.25_Smtmrs" = "#AD7700"), color_band_column = "trueclass", cycle_start_positions = cycle_start_positions, column_sorting_metric = column_sorting_metric, text_size = 35, axis_text_size = 20, axis_text_vjust = -5)
 p3
 ```
 

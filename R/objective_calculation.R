@@ -13,6 +13,7 @@
 #' @importFrom data.table :=
 #' @importFrom ggalluvial stat_alluvium
 #' @importFrom ggplot2 ggplot_build
+#' @importFrom R6 R6Class
 
 utils::globalVariables(c(
     ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"

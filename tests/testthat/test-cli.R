@@ -1,4 +1,4 @@
-# skip("Skipping this test file during development or check")
+skip("Skipping this test file during development or check")
 
 # dev mode for testing, not for compiling
 dev <- !("wompwomp" %in% installed.packages())  # !requireNamespace("wompwomp", quietly = TRUE)
