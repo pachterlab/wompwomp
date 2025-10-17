@@ -15,17 +15,17 @@ Optional:
   -c1, --column1            Can be used along with column2 in place of graphing_columns if working with two columns only. Mutually exclusive with graphing_columns.
   -c2, --column2            Can be used along with column1 in place of graphing_columns if working with two columns only. Mutually exclusive with graphing_columns.
   -w, --column_weights      Column name from df that contains the weights of each combination of groupings if df is in format (2) (see above).
-  -s, --sorting_algorithm       Algorithm with which to sort the values in the dataframe. Can choose from {'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when graphing_columns has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
-  --disable_optimize_column_order   If TRUE, will optimize the order of graphing_columns to minimize edge overlap. Only applies when sorting_algorithm == 'neighbornet' or 'tsp' and length(graphing_columns) > 2.
-  --optimize_column_order_per_cycle         If TRUE, will optimize the order of graphing_columns to minimize edge overlap upon each cycle. If FALSE, will optimize the order of graphing_columns to minimize edge overlap on the beginning cycle only. Only applies when sorting_algorithm == 'neighbornet' or 'tsp' and length(graphing_columns) > 2.
-  --matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when sorting_algorithm == 'neighbornet' or 'tsp'.
-  --same_side_matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when sorting_algorithm == 'neighbornet' or 'tsp'.
-  --weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when sorting_algorithm == 'neighbornet' or 'tsp'.
-  --matrix_initialization_value_column_order Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when sorting_algorithm == 'neighbornet' or 'tsp' and optimize_column_order is TRUE.
-  --weight_scalar_column_order Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when sorting_algorithm == 'neighbornet' or 'tsp' and optimize_column_order is TRUE.
-  --column_sorting_metric Character. Metric to use for determining column order. Options are 'edge_crossing' (default) or 'ARI'. Only applies when sorting_algorithm == 'neighbornet' or 'tsp' and optimize_column_order is TRUE.
-  --column_sorting_algorithm Character. Algorithm to use for determining column order. Options are 'tsp' (default) or 'neighbornet'. Only applies when sorting_algorithm == 'neighbornet' or 'tsp' and optimize_column_order is TRUE.
-  --cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when sorting_algorithm == 'neighbornet' or 'tsp'.
+  -s, --sorting_algorithm       Algorithm with which to sort the values in the dataframe. Can choose from {'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when graphing_columns has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
+  --disable_optimize_column_order   If TRUE, will optimize the order of graphing_columns to minimize edge overlap. Only applies when sorting_algorithm == 'tsp' and length(graphing_columns) > 2.
+  --optimize_column_order_per_cycle         If TRUE, will optimize the order of graphing_columns to minimize edge overlap upon each cycle. If FALSE, will optimize the order of graphing_columns to minimize edge overlap on the beginning cycle only. Only applies when sorting_algorithm == 'tsp' and length(graphing_columns) > 2.
+  --matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when sorting_algorithm == 'tsp'.
+  --same_side_matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when sorting_algorithm == 'tsp'.
+  --weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when sorting_algorithm == 'tsp'.
+  --matrix_initialization_value_column_order Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when sorting_algorithm == 'tsp' and optimize_column_order is TRUE.
+  --weight_scalar_column_order Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when sorting_algorithm == 'tsp' and optimize_column_order is TRUE.
+  --column_sorting_metric Character. Metric to use for determining column order. Options are 'edge_crossing' (default) or 'ARI'. Only applies when sorting_algorithm == 'tsp' and optimize_column_order is TRUE.
+  --column_sorting_algorithm Character. Algorithm to use for determining column order. Options are 'tsp' (default). Only applies when sorting_algorithm == 'tsp' and optimize_column_order is TRUE.
+  --cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when sorting_algorithm == 'tsp'.
   --fixed_column            Name or position of the column in graphing_columns to keep fixed during sorting. Only applies when sorting_algorithm == 'greedy_wolf'.
   --random_initializations  Number of random initializations for the positions of each grouping in graphing_columns. Only applies when sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'.
   --set_seed                Random seed for the random_initializations parameter (only applies when sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'), random initialization/shuffling of blocks (only applies when default_sorting == 'random' or sorting_algorithm == 'random'), TSP solver for block order or optimizing column order (only applies when sorting_algorithm == 'tsp' or column_sorting_algorithm == 'tsp'), and louvain/leiden clustering (only applies when coloring_algorithm == 'advanced').
@@ -47,7 +47,7 @@ Optional:
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   --output_df_path          Output path for the output data frame, in CSV format. If NULL, then will not be saved
   --disable_preprocess_data         If TRUE, will preprocess the data with the data_preprocess function.
-  --default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if sorting_algorithm == 'neighbornet' or 'tsp'. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
+  --default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if sorting_algorithm == 'tsp'. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
   --box_width Numeric between 0 and 1. Box width
   --text_width Numeric between 0 and 1. Text width
   --min_text Integer greater than 0. Min text
@@ -62,8 +62,6 @@ Optional:
   --keep_y_labels Keep y labels
   --keep_x_labels Keep x labels
   --box_line_width Box line width
-  --environment  Python environment (if applicable). Default: 'wompwomp_env'
-  --disable_use_conda  Whether or not to use conda for Python (if applicable)
   --add_legend  If TRUE, will generate a legend of the colors of boxes and alluvial
   --legend_loc  Location of legend. Only applies if add_legened == TRUE. Choices are 'right' (default), 'left', 'bottom', 'top'
   --flip_xy  Flip x and y (rotate plot 90 degrees).
@@ -128,8 +126,6 @@ Optional:
     dpi <- get_integer_arg(args, c("--dpi"))
     rasterise_alluvia <- store_true(args, c("--rasterise_alluvia"))
     box_line_width <- get_numeric_arg(args, c("--box_line_width"))
-    environment <- get_arg(args, c("--environment"), default = "wompwomp_env")
-    use_conda <- store_false(args, c("--disable_use_conda"))
     add_legend <- store_true(args, c("--add_legend"))
     legend_loc <- get_arg(args, c("--legend_loc"))
     flip_xy <- store_true(args, c("--flip_xy"))
@@ -198,8 +194,6 @@ Optional:
     if (!is.null(box_line_width)) args_list$box_line_width <- box_line_width
     if (!is.null(verbose)) args_list$verbose <- verbose
     if (!is.null(print_params)) args_list$print_params <- print_params
-    if (!is.null(environment)) args_list$environment <- environment
-    if (!is.null(use_conda)) args_list$use_conda <- use_conda
     if (!is.null(add_legend)) args_list$add_legend <- add_legend
     if (!is.null(legend_loc)) args_list$legend_loc <- legend_loc
     if (!is.null(flip_xy)) args_list$flip_xy <- flip_xy

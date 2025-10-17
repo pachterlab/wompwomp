@@ -1,5 +1,5 @@
 Package: wompwomp
-Version: 0.99.7
+Version: 0.99.8
 Date: 2025-06-07
 Title: Optimizing alluvial plots
 Authors@R: c(person("Joseph", "Rich", role = c("aut", "cre"), email = "jmrich@caltech.edu", comment = c(ORCID = "0000-0003-1400-8479")), person("Conrad", "Oakes", role = "aut", email = "coakes@caltech.edu"), person("Lior", "Pachter", role = "aut", comment = c(ORCID = "0000-0002-9164-6231")))
@@ -20,10 +20,10 @@ Imports:
     tidyr,
     magrittr,
     data.table,
-    reticulate,
     purrr,
     ggfittext,
     TSP,
+    R6,
     stats,
     utils
 Depends: R (>= 4.5.0)

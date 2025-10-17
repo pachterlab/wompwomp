@@ -41,8 +41,6 @@ plot_alluvial_internal(
   do_compute_alluvial_statistics = TRUE,
   coloring_algorithm_advanced_option = "leiden",
   resolution = 1,
-  environment = "wompwomp_env",
-  use_conda = TRUE,
   add_legend = FALSE,
   legend_loc = "right",
   flip_xy = FALSE
@@ -120,10 +118,6 @@ plot_alluvial_internal(
 \item{coloring_algorithm_advanced_option}{Character. If \code{coloring_algorithm == 'advanced'}, then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.}
 
 \item{resolution}{Numeric If \code{coloring_algorithm == 'advanced'}, then choose resolution for the graph clustering algorithm. Affects coloring of both bands and boxes.}
-
-\item{environment}{Character. Python environment (if applicable). Default: 'wompwomp_env'}
-
-\item{use_conda}{Logical. Whether or not to use conda for Python (if applicable)}
 
 \item{add_legend}{Logical. If TRUE, will generate a legend of the colors of boxes and alluvial}
 

@@ -23,9 +23,7 @@ determine_crossing_edges(
   input_objective = NULL,
   preprocess_data = TRUE,
   load_df = TRUE,
-  default_sorting = "alphabetical",
-  environment = "wompwomp_env",
-  use_conda = TRUE
+  default_sorting = "alphabetical"
 )
 }
 \arguments{
@@ -51,7 +49,7 @@ determine_crossing_edges(
 
 \item{return_weighted_layer_free_objective}{Logical. Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)}
 
-\item{use_fenwick_tree_for_objective_calculation}{Logical. Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn), but requires python environment.}
+\item{use_fenwick_tree_for_objective_calculation}{Logical. Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn).}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
@@ -68,10 +66,6 @@ determine_crossing_edges(
 \item{load_df}{Internal flag; not recommended to modify.}
 
 \item{default_sorting}{Internal flag; not recommended to modify.}
-
-\item{environment}{Character. Python environment (if applicable). Default: 'wompwomp_env'}
-
-\item{use_conda}{Logical. Whether or not to use conda for Python (if applicable)}
 }
 \value{
 If return_weighted_layer_free_objective is FALSE (default): A list of values, as follows:

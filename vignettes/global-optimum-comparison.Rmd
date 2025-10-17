@@ -11,7 +11,6 @@ vignette: >
 ---
 
 ```{r}
-# reticulate::use_condaenv("wompwomp_env", required = TRUE) # !!! erase
 # devtools::load_all() # !!! erase
 
 library(wompwomp)  #!!! uncomment
@@ -22,21 +21,8 @@ library(ggforce)
 library(igraph)
 library(tibble)
 library(tidyr)
-library(reticulate)
 
 set.seed(42)
-```
-
-Set up our python environment
-```{r setup-env, eval = FALSE}
-wompwomp::setup_python_env()
-```
-
-```{r check-python, include = FALSE}
-if (!reticulate::py_module_available("splitspy")) {
-    message("❌ 'splitspy' not found. Run wompwomp::setup_python_env() and restart R.")
-    knitr::knit_exit()
-}
 ```
 
 We create a toy data frame that maps tissues (BRAIN, STOMACH, HEART, T cell, B CELL) to clustering (1-5)
@@ -224,7 +210,7 @@ Let's compare neighbornet too
 clus_df_gather_sorted_neighbornet <- 0  # a default
 ```
 
-```{r, eval = reticulate::py_available(initialize = FALSE) && reticulate::py_module_available("splitspy")}
+```{r}
 clus_df_gather_sorted_neighbornet <- data_sort(df, column1 = "tissue", column2 = "cluster", sorting_algorithm = "neighbornet")
 crossing_edges_output <- determine_crossing_edges(clus_df_gather_sorted_neighbornet, column1 = "col1_int", column2 = "col2_int")
 crossing_edges <- crossing_edges_output$crossing_edges_df

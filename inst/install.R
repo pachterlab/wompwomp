@@ -10,7 +10,6 @@ required_packages <- c(
     "tidyr",
     "magrittr",
     "data.table",
-    "reticulate",
     "purrr",
     "ggfittext",
     "TSP",

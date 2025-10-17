@@ -1,4 +1,4 @@
-skip("Skipping this test file during development or check")  #!!! unless I make the setup_python_env conditional in exec/wompwomp, then it won't pass unit tests on build/check
+# skip("Skipping this test file during development or check")
 
 # dev mode for testing, not for compiling
 dev <- !("wompwomp" %in% installed.packages())  # !requireNamespace("wompwomp", quietly = TRUE)
@@ -178,20 +178,19 @@ test_that("CLI plot_alluvial, WBLF", {
     compare_images(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
-test_that("CLI plot_alluvial, neighbornet", {
+test_that("CLI plot_alluvial, TSP", {
     # Paths
-    python_test()
     command <- "plot_alluvial"
     df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".png")
-    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_neighbornet.png"))
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_tsp.png"))
 
     # Run CLI
     args <- c(
         command,
         "--df", df_path,
         "--output_plot_path", output_path,
-        "--sorting_algorithm", "neighbornet",
+        "--sorting_algorithm", "tsp",
         "--quiet", "TRUE"
     )
     if (dev) {
@@ -278,20 +277,19 @@ test_that("CLI data_sort, WBLF", {
     compare_csvs(output_path = output_path, truth_path = truth_path, check = TRUE)
 })
 
-test_that("CLI data_sort, neighbornet", {
+test_that("CLI data_sort, TSP", {
     # Paths
-    python_test()
     command <- "data_sort"
     df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".csv")
-    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_neighbornet_df.csv"))
+    truth_path <- normalizePath(testthat::test_path("ground_truth", "sorting_tsp_df.csv"))
 
     # Run CLI
     args <- c(
         command,
         "--df", df_path,
         "--output_df_path", output_path,
-        "--sorting_algorithm", "neighbornet",
+        "--sorting_algorithm", "tsp",
         "--quiet", "TRUE"
     )
     if (dev) {

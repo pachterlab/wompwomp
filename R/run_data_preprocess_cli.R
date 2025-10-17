@@ -12,7 +12,7 @@ Required:
 
 Optional:
   -w, --column_weights      Column name from df that contains the weights of each combination of groupings if df is in format (2) (see above).
-  --default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if sorting_algorithm == 'neighbornet'. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
+  --default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
   --set_seed Integer. Random seed for when default_sorting == 'random' parameter.
   -o, --output_df_path      Output path for the output data frame, in CSV format. If NULL, then will not be saved.
   -v, --verbose             If TRUE, will display messages during the function.

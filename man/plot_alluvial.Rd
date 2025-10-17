@@ -10,7 +10,7 @@ plot_alluvial(
   column1 = NULL,
   column2 = NULL,
   column_weights = NULL,
-  sorting_algorithm = "neighbornet",
+  sorting_algorithm = "tsp",
   optimize_column_order = TRUE,
   optimize_column_order_per_cycle = FALSE,
   matrix_initialization_value = 1e+06,
@@ -59,8 +59,6 @@ plot_alluvial(
   verbose = FALSE,
   print_params = FALSE,
   make_intermediate_neighbornet_plots = FALSE,
-  environment = "wompwomp_env",
-  use_conda = TRUE,
   add_legend = FALSE,
   legend_loc = "right",
   flip_xy = FALSE
@@ -79,27 +77,27 @@ plot_alluvial(
 
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
 
-\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.}
+\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.}
 
-\item{optimize_column_order}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.}
+\item{optimize_column_order}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'tsp'} and \code{length(graphing_columns) > 2}.}
 
-\item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.}
+\item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'tsp'} and \code{length(graphing_columns) > 2}.}
 
-\item{matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
+\item{matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'tsp'}.}
 
-\item{same_side_matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
+\item{same_side_matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{sorting_algorithm == 'tsp'}.}
 
-\item{weight_scalar}{Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
+\item{weight_scalar}{Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{sorting_algorithm == 'tsp'}.}
 
-\item{matrix_initialization_value_column_order}{Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.}
+\item{matrix_initialization_value_column_order}{Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'tsp'} and \code{optimize_column_order} is TRUE.}
 
-\item{weight_scalar_column_order}{Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.}
+\item{weight_scalar_column_order}{Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'tsp'} and \code{optimize_column_order} is TRUE.}
 
-\item{column_sorting_metric}{Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.}
+\item{column_sorting_metric}{Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{sorting_algorithm == 'tsp'} and \code{optimize_column_order} is TRUE.}
 
-\item{column_sorting_algorithm}{Character. Algorithm to use for determining column order. Options are "tsp" (default) or "neighbornet". Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.}
+\item{column_sorting_algorithm}{Character. Algorithm to use for determining column order. Options are "tsp" (default). Only applies when \code{sorting_algorithm == 'tsp'} and \code{optimize_column_order} is TRUE.}
 
-\item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
+\item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'tsp'}.}
 
 \item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_wolf'}.}
 
@@ -141,7 +139,7 @@ plot_alluvial(
 
 \item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.}
 
-\item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if \code{sorting_algorithm == 'neighbornet'}. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+\item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
 
 \item{box_width}{Numeric between 0 and 1. Box width}
 
@@ -176,10 +174,6 @@ plot_alluvial(
 \item{print_params}{Logical. If TRUE, will print function params.}
 
 \item{make_intermediate_neighbornet_plots}{Internal flag; not recommended to modify.}
-
-\item{environment}{Character. Python environment (if applicable). Default: 'wompwomp_env'}
-
-\item{use_conda}{Logical. Whether or not to use conda for Python (if applicable)}
 
 \item{add_legend}{Logical. If TRUE, will generate a legend of the colors of boxes and alluvial}
 

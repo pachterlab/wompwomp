@@ -15,24 +15,97 @@
 #' @importFrom ggplot2 ggplot_build
 
 utils::globalVariables(c(
-    ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement", "calculate_objective_fenwick"
+    ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"
 ))
 
-# devtools::document() needs package = "wompwomp"; but R CMD build wompwomp needs it not there stored globally - so I make this function
-get_objective_fenwick_script_path <- function() {
-    objective_fenwick_script_path <- system.file("scripts", "calculate_objective.py", package = "wompwomp")  # don't include package = "wompwomp"
-    if (objective_fenwick_script_path == "") {
-        # Fallback to development location
-        objective_fenwick_script_path <- file.path(here::here("inst", "scripts", "calculate_objective.py"))
-        if (!grepl("wompwomp", objective_fenwick_script_path)) {
-            # if here::here isn't putting it inside wompwomp
-            objective_fenwick_script_path <- file.path("inst", "scripts", "calculate_objective.py")
-        }
+# # devtools::document() needs package = "wompwomp"; but R CMD build wompwomp needs it not there stored globally - so I make this function
+# get_objective_fenwick_script_path <- function() {
+#     objective_fenwick_script_path <- system.file("scripts", "calculate_objective.py", package = "wompwomp")  # don't include package = "wompwomp"
+#     if (objective_fenwick_script_path == "") {
+#         # Fallback to development location
+#         objective_fenwick_script_path <- file.path(here::here("inst", "scripts", "calculate_objective.py"))
+#         if (!grepl("wompwomp", objective_fenwick_script_path)) {
+#             # if here::here isn't putting it inside wompwomp
+#             objective_fenwick_script_path <- file.path("inst", "scripts", "calculate_objective.py")
+#         }
+#     }
+#     objective_fenwick_script_path <- normalizePath(objective_fenwick_script_path, mustWork = TRUE)
+#     stopifnot(file.exists(objective_fenwick_script_path))
+#     return (objective_fenwick_script_path)
+# }
+
+# ---- Binary Indexed Tree (Fenwick Tree) ----
+BIT <- R6::R6Class("BIT",
+   public = list(
+       tree_count = NULL,
+       tree_weight = NULL,
+       
+       initialize = function(size) {
+           self$tree_count <- integer(size + 1)
+           self$tree_weight <- numeric(size + 1)
+       },
+       
+       update = function(index, weight) {
+           index <- index + 1L
+           n <- length(self$tree_count)
+           while (index < n) {
+               self$tree_count[index] <- self$tree_count[index] + 1L
+               self$tree_weight[index] <- self$tree_weight[index] + weight
+               index <- index + bitwAnd(index, -index)
+           }
+       },
+       
+       query = function(index) {
+           count <- 0L
+           weight_sum <- 0.0
+           index <- index + 1L
+           while (index > 0L) {
+               count <- count + self$tree_count[index]
+               weight_sum <- weight_sum + self$tree_weight[index]
+               index <- index - bitwAnd(index, -index)
+           }
+           list(count = count, weight_sum = weight_sum)
+       },
+       
+       query_range = function(low, high) {
+           q_high <- self$query(high)
+           q_low <- self$query(low - 1L)
+           list(
+               count = q_high$count - q_low$count,
+               weight_sum = q_high$weight_sum - q_low$weight_sum
+           )
+       }
+   )
+)
+
+calculate_objective_fenwick <- function(df) {
+    # Step 1: Sort by y1
+    df_sorted <- df[order(df$y1), ]
+    rownames(df_sorted) <- NULL
+    
+    # Step 2: Rank-compress y2 (higher y2 → higher rank)
+    df_sorted$y2_rank <- match(df_sorted$y2, sort(unique(df_sorted$y2)))
+    max_rank <- max(df_sorted$y2_rank)
+    
+    # Step 3: Initialize BIT
+    bit <- BIT$new(size = max_rank + 2L)
+    total_cross_weight <- 0.0
+    
+    for (i in seq_len(nrow(df_sorted))) {
+        y2_rank <- df_sorted$y2_rank[i]
+        weight <- df_sorted$count[i]
+        
+        # Count previous y2s > current (strictly greater)
+        q <- bit$query_range(y2_rank + 1L, max_rank)
+        total_cross_weight <- total_cross_weight + weight * q$weight_sum
+        
+        # Add current y2_rank to BIT
+        bit$update(y2_rank, weight)
     }
-    objective_fenwick_script_path <- normalizePath(objective_fenwick_script_path, mustWork = TRUE)
-    stopifnot(file.exists(objective_fenwick_script_path))
-    return (objective_fenwick_script_path)
+    
+    total_cross_weight
 }
+
 
 print_function_params <- function() {
     f <- sys.function(sys.parent())
@@ -89,45 +162,45 @@ lowercase_args <- function(arg_names) {
     }
 }
 
-check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "", environment = "wompwomp_env", use_conda = TRUE) {
-    ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
-    
-    # Skip check if script was run from command line (including checking from build/check) - this is ok because I set up my python environment in exec/wompwomp now
-    if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
-        return(invisible(NULL))
-    }
-    
-    # detect_and_setup_python_env(environment = environment, use_conda = use_conda)  #!!! uncomment later if I want python to be set up upon function call
-    
-    # can comment out relevant if I call wompwomp::setup_python_env() in here (above)
-    if (!reticulate::py_available(initialize = FALSE)) {
-        if (is.null(additional_message)) {
-            stop("Python environment is not set up. Please run wompwomp::setup_python_env().")
-        } else {
-            stop(sprintf(
-                "Python environment is not set up. Please run wompwomp::setup_python_env(), or %s.",
-                additional_message
-            ))
-        }
-    }
-    if (!is.null(necessary_packages_for_this_step)) {
-        for (package in necessary_packages_for_this_step) {
-            if (!reticulate::py_module_available(package)) {
-                if (is.null(additional_message)) {
-                    stop(sprintf(
-                        "Python module '%s' is not available. Please run wompwomp::setup_python_env().",
-                        package
-                    ))
-                } else {
-                    stop(sprintf(
-                        "Python module '%s' is not available. Please run wompwomp::setup_python_env(), or %s.",
-                        package, additional_message
-                    ))
-                }
-            }
-        }
-    }
-}
+# check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "", environment = "wompwomp_env", use_conda = TRUE) {
+#     ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
+#     
+#     # Skip check if script was run from command line (including checking from build/check) - this is ok because I set up my python environment in exec/wompwomp now
+#     if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
+#         return(invisible(NULL))
+#     }
+#     
+#     # detect_and_setup_python_env(environment = environment, use_conda = use_conda)  #!!! uncomment later if I want python to be set up upon function call
+#     
+#     # can comment out relevant if I call wompwomp::setup_python_env() in here (above)
+#     if (!reticulate::py_available(initialize = FALSE)) {
+#         if (is.null(additional_message)) {
+#             stop("Python environment is not set up. Please run wompwomp::setup_python_env().")
+#         } else {
+#             stop(sprintf(
+#                 "Python environment is not set up. Please run wompwomp::setup_python_env(), or %s.",
+#                 additional_message
+#             ))
+#         }
+#     }
+#     if (!is.null(necessary_packages_for_this_step)) {
+#         for (package in necessary_packages_for_this_step) {
+#             if (!reticulate::py_module_available(package)) {
+#                 if (is.null(additional_message)) {
+#                     stop(sprintf(
+#                         "Python module '%s' is not available. Please run wompwomp::setup_python_env().",
+#                         package
+#                     ))
+#                 } else {
+#                     stop(sprintf(
+#                         "Python module '%s' is not available. Please run wompwomp::setup_python_env(), or %s.",
+#                         package, additional_message
+#                     ))
+#                 }
+#             }
+#         }
+#     }
+# }
 
 
 # reticulate::source_python(objective_fenwick_script_path)  # Error: Unable to access object (object is from previous session and is now invalid)
@@ -214,9 +287,7 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' @param output_lode_df_path Optional character. Output path for the data frame containing lode information on each alluvium, in CSV format (see details below). If not provided, then nothing will be saved.
 #' @param include_output_objective_matrix_vector Logical. Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.
 #' @param return_weighted_layer_free_objective Logical. Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
-#' @param use_fenwick_tree_for_objective_calculation Logical. Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn), but requires python environment.
-#' @param environment Character. Python environment (if applicable). Default: 'wompwomp_env'
-#' @param use_conda Logical. Whether or not to use conda for Python (if applicable)
+#' @param use_fenwick_tree_for_objective_calculation Logical. Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn).
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param stratum_column_and_value_to_keep Internal flag; not recommended to modify.
@@ -253,7 +324,7 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' result <- determine_crossing_edges(df, column1 = "col1_int", column2 = "col2_int")
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, use_fenwick_tree_for_objective_calculation = TRUE, verbose = FALSE, print_params = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical", environment = "wompwomp_env", use_conda = TRUE) {
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, use_fenwick_tree_for_objective_calculation = TRUE, verbose = FALSE, print_params = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical") {
     if (print_params) print_function_params()
     lowercase_args(c("default_sorting"))
 
@@ -467,28 +538,28 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
 
         # Compare each pair of edges
         if (return_weighted_layer_free_objective) {
-            if (use_fenwick_tree_for_objective_calculation) {
-                python_set_up_for_fenwick <- tryCatch(
-                    {
-                        check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE", environment = environment, use_conda = use_conda)
-                        TRUE # if no error, return TRUE
-                    },
-                    error = function(e) {
-                        FALSE # if error occurs (i.e., it called stop), return FALSE
-                    }
-                )
-
-                if (!python_set_up_for_fenwick) {
-                    if (verbose) message("Python environment is not set up for use of fenwick tree optimization. Turning this optimization off. To turn on, set up the python environment, e.g., with wompwomp::setup_python_env().")
-                    use_fenwick_tree_for_objective_calculation <- FALSE
-                }
-            }
+            # if (use_fenwick_tree_for_objective_calculation) {
+            #     python_set_up_for_fenwick <- tryCatch(
+            #         {
+            #             check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE", environment = environment, use_conda = use_conda)
+            #             TRUE # if no error, return TRUE
+            #         },
+            #         error = function(e) {
+            #             FALSE # if error occurs (i.e., it called stop), return FALSE
+            #         }
+            #     )
+            # 
+            #     if (!python_set_up_for_fenwick) {
+            #         if (verbose) message("Python environment is not set up for use of fenwick tree optimization. Turning this optimization off. To turn on, set up the python environment, e.g., with wompwomp::setup_python_env().")
+            #         use_fenwick_tree_for_objective_calculation <- FALSE
+            #     }
+            # }
 
             if (use_fenwick_tree_for_objective_calculation) {
                 # # option 1 for objective (best): fenwick (only good if I only need objective, ie no matrix or data frame) - also requires python
                 # check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE")  # checked above
                 if (verbose) message("Calculating objective with fenwick tree")
-                reticulate::source_python(get_objective_fenwick_script_path())
+                # reticulate::source_python(get_objective_fenwick_script_path())
                 output_objective <- output_objective + calculate_objective_fenwick(lode_df)
             } else {
                 # # option 2 for objective: vectorized (only good if I only need objective, ie no matrix or data frame) - doesn't require python

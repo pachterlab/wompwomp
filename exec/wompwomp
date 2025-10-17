@@ -96,14 +96,15 @@ if (length(script_path) == 0) stop("Failed to detect script path.")
 package_root <- dirname(dirname(script_path))
 setwd(package_root)
 
+sub_args <- args[-1]
+
 # Set environment variable so downstream code can detect CLI mode
 Sys.setenv(R_SCRIPT_FROM_CLI = "true")
 
-# setup python environment
-sub_args <- args[-1]
-environment <- wompwomp:::get_arg(sub_args, c("--environment"), default = "wompwomp_env")
-use_conda <- wompwomp:::store_false(sub_args, c("--disable_use_conda"))
-wompwomp::setup_python_env(environment, use_conda = use_conda)
+# # setup python environment
+# environment <- wompwomp:::get_arg(sub_args, c("--environment"), default = "wompwomp_env")
+# use_conda <- wompwomp:::store_false(sub_args, c("--disable_use_conda"))
+# wompwomp::setup_python_env(environment, use_conda = use_conda)
 
 # set random seed
 set_seed <- wompwomp:::get_integer_arg(sub_args, "--set_seed")

@@ -26,7 +26,7 @@ data_preprocess(
 
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
 
-\item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Will not affect output if \code{sorting_algorithm == 'neighbornet'}. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+\item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
 
 \item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
 
