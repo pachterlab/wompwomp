@@ -50,5 +50,5 @@ ENV PATH="/home/miniconda/bin:${PATH}"
 
 # Install wompwomp and set up Python environment
  RUN R -e "if (!require('remotes', quietly = TRUE)) install.packages('remotes'); \
-            remotes::install_github('pachterlab/wompwomp'); \
+            remotes::install_github('pachterlab/wompwomp', ref = 'neighbornet'); \
             wompwomp::setup_python_env(yes=TRUE)"
