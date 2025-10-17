@@ -457,6 +457,8 @@ test_that("VDIFFR - plot_alluvial, more_tsp.Rmd, 3 layers with 2 identical layer
 
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers, unsorted", {
+    set.seed(42)
+    
     input <- make_more_tsp_3_layer_df()
     df <- input$df
     graphing_columns <- input$graphing_columns
@@ -471,6 +473,8 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, unsorted", {
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_order FALSE", {
+    set.seed(42)
+    
     input <- make_more_tsp_3_layer_df()
     df <- input$df
     graphing_columns <- input$graphing_columns
@@ -485,6 +489,8 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_order TRUE", {
+    set.seed(42)
+    
     input <- make_more_tsp_3_layer_df()
     df <- input$df
     graphing_columns <- input$graphing_columns
@@ -515,6 +521,8 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers, tsp, optimize_column_order FALSE", {
+    set.seed(42)
+    
     input <- make_more_tsp_3_layer_df_with_2_identical_layers()
     df <- input$df
     graphing_columns <- input$graphing_columns
@@ -529,6 +537,8 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers, tsp, optimize_column_order TRUE", {
+    set.seed(42)
+    
     input <- make_more_tsp_3_layer_df_with_2_identical_layers()
     df <- input$df
     graphing_columns <- input$graphing_columns

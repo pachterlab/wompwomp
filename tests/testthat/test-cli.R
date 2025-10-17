@@ -180,6 +180,7 @@ test_that("CLI plot_alluvial, WBLF", {
 
 test_that("CLI plot_alluvial, TSP", {
     # Paths
+    set.seed(42)
     command <- "plot_alluvial"
     df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".png")
@@ -191,6 +192,7 @@ test_that("CLI plot_alluvial, TSP", {
         "--df", df_path,
         "--output_plot_path", output_path,
         "--sorting_algorithm", "tsp",
+        "--weight_scalar", "10",
         "--quiet", "TRUE"
     )
     if (dev) {
@@ -279,6 +281,7 @@ test_that("CLI data_sort, WBLF", {
 
 test_that("CLI data_sort, TSP", {
     # Paths
+    set.seed(42)
     command <- "data_sort"
     df_path <- normalizePath(testthat::test_path("ground_truth", "df_tests_cli.csv"))
     output_path <- tempfile(fileext = ".csv")
@@ -290,6 +293,7 @@ test_that("CLI data_sort, TSP", {
         "--df", df_path,
         "--output_df_path", output_path,
         "--sorting_algorithm", "tsp",
+        "--weight_scalar", "10",
         "--quiet", "TRUE"
     )
     if (dev) {
