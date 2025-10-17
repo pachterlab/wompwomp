@@ -20,7 +20,6 @@ if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 BiocManager::install("wompwomp")
-wompwomp::setup_python_env()
 ```
 
 GitHub
@@ -28,7 +27,6 @@ GitHub
 if (!require("remotes", quietly = TRUE))
     install.packages("remotes")
 remotes::install_github("pachterlab/wompwomp")
-wompwomp::setup_python_env()
 ```
 
 ### Command line - Does not require system R to be installed if using conda.
@@ -42,8 +40,6 @@ remotes::install_local(".")  # or use --dev flag in commands
 ```
 
 The first time any command is run on the command line, a prompt will appear asking to install any missing R dependencies.
-
-While Python is not strictly required for use of the package, it is required for some options, including default package options (i.e., NeighborNet algorithm for sorting_algorithm == "neighbornet" or column_sorting_algorithm == "neighbornet", Leiden clustering for coloring_algorithm == "advanced", fenwick tree optimization for objective calculation).
 
 ### Docker
 We provide an Docker image for running wompwomp built on [rocker/tidyverse](https://rocker-project.org)
