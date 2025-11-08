@@ -191,7 +191,7 @@ check_python_setup_with_necessary_packages <- function(necessary_packages_for_th
             stop("Python environment is not set up.")  #  Please run wompwomp::setup_python_env().
         } else {
             stop(sprintf(
-                "Python environment is not set up. Please run %s.",  # Please run wompwomp::setup_python_env(), or %s.
+                "Python environment is not set up. %s.",  # Please run wompwomp::setup_python_env(), or %s.
                 additional_message
             ))
         }
@@ -206,7 +206,7 @@ check_python_setup_with_necessary_packages <- function(necessary_packages_for_th
                     ))
                 } else {
                     stop(sprintf(
-                        "Python module '%s' is not available. Please run %s.",  # Please run wompwomp::setup_python_env(), or %s.
+                        "Python module '%s' is not available. %s.",  # Please run wompwomp::setup_python_env(), or %s.
                         package, additional_message
                     ))
                 }
