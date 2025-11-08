@@ -79,9 +79,8 @@ BIT <- R6::R6Class("BIT",
    )
 )
 
-calculate_objective_fenwick <- function(df) {
+calculate_objective_fenwick <- function(df, weighted = TRUE) {
     # Step 1: Sort by y1
-    df_sorted <- df[order(df$y1), ]
     rownames(df_sorted) <- NULL
     
     # Step 2: Rank-compress y2 (higher y2 → higher rank)
@@ -94,18 +93,24 @@ calculate_objective_fenwick <- function(df) {
     
     for (i in seq_len(nrow(df_sorted))) {
         y2_rank <- df_sorted$y2_rank[i]
-        weight <- df_sorted$count[i]
+        weight <- if (weighted) df_sorted$count[i] else 1.0
         
         # Count previous y2s > current (strictly greater)
         q <- bit$query_range(y2_rank + 1L, max_rank)
-        total_cross_weight <- total_cross_weight + weight * q$weight_sum
+        
+        if (weighted) {
+            total_cross_weight <- total_cross_weight + weight * q$weight_sum
+        } else {
+            total_cross_weight <- total_cross_weight + q$count
+        }
         
         # Add current y2_rank to BIT
-        bit$update(y2_rank, weight)
+        bit$update(y2_rank, if (weighted) weight else 1.0)
     }
     
     total_cross_weight
 }
+
 
 
 print_function_params <- function() {
@@ -163,45 +168,45 @@ lowercase_args <- function(arg_names) {
     }
 }
 
-# check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "", environment = "wompwomp_env", use_conda = TRUE) {
-#     ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
-#     
-#     # Skip check if script was run from command line (including checking from build/check) - this is ok because I set up my python environment in exec/wompwomp now
-#     if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
-#         return(invisible(NULL))
-#     }
-#     
-#     # detect_and_setup_python_env(environment = environment, use_conda = use_conda)  #!!! uncomment later if I want python to be set up upon function call
-#     
-#     # can comment out relevant if I call wompwomp::setup_python_env() in here (above)
-#     if (!reticulate::py_available(initialize = FALSE)) {
-#         if (is.null(additional_message)) {
-#             stop("Python environment is not set up. Please run wompwomp::setup_python_env().")
-#         } else {
-#             stop(sprintf(
-#                 "Python environment is not set up. Please run wompwomp::setup_python_env(), or %s.",
-#                 additional_message
-#             ))
-#         }
-#     }
-#     if (!is.null(necessary_packages_for_this_step)) {
-#         for (package in necessary_packages_for_this_step) {
-#             if (!reticulate::py_module_available(package)) {
-#                 if (is.null(additional_message)) {
-#                     stop(sprintf(
-#                         "Python module '%s' is not available. Please run wompwomp::setup_python_env().",
-#                         package
-#                     ))
-#                 } else {
-#                     stop(sprintf(
-#                         "Python module '%s' is not available. Please run wompwomp::setup_python_env(), or %s.",
-#                         package, additional_message
-#                     ))
-#                 }
-#             }
-#         }
-#     }
-# }
+check_python_setup_with_necessary_packages <- function(necessary_packages_for_this_step = NULL, additional_message = "", environment = "wompwomp_env", use_conda = TRUE) {
+    ### make sure that necessary_packages_for_this_step uses the IMPORT package name, not the pypi package name
+    
+    # Skip check if script was run from command line (including checking from build/check) - this is ok because I set up my python environment in exec/wompwomp now
+    if (identical(Sys.getenv("R_SCRIPT_FROM_CLI"), "true")) {
+        return(invisible(NULL))
+    }
+    
+    # detect_and_setup_python_env(environment = environment, use_conda = use_conda)  #!!! uncomment later if I want python to be set up upon function call
+    
+    # can comment out relevant if I call wompwomp::setup_python_env() in here (above)
+    if (!reticulate::py_available(initialize = FALSE)) {
+        if (is.null(additional_message)) {
+            stop("Python environment is not set up.")  #  Please run wompwomp::setup_python_env().
+        } else {
+            stop(sprintf(
+                "Python environment is not set up. Please run %s.",  # Please run wompwomp::setup_python_env(), or %s.
+                additional_message
+            ))
+        }
+    }
+    if (!is.null(necessary_packages_for_this_step)) {
+        for (package in necessary_packages_for_this_step) {
+            if (!reticulate::py_module_available(package)) {
+                if (is.null(additional_message)) {
+                    stop(sprintf(
+                        "Python module '%s' is not available.",  # Please run wompwomp::setup_python_env().
+                        package
+                    ))
+                } else {
+                    stop(sprintf(
+                        "Python module '%s' is not available. Please run %s.",  # Please run wompwomp::setup_python_env(), or %s.
+                        package, additional_message
+                    ))
+                }
+            }
+        }
+    }
+}
 
 
 # reticulate::source_python(objective_fenwick_script_path)  # Error: Unable to access object (object is from previous session and is now invalid)
@@ -212,6 +217,7 @@ lowercase_args <- function(arg_names) {
 #' Determine the sum of products of overlapping edge weights.
 #'
 #' @param df A CSV path or data frame as outputted with \code{crossing_edges_df} (in R) or \code{output_df_path} (as a file) from \code{determine_crossing_edges}.
+#' @param weighted Logical. Weighted
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param print_params Logical. If TRUE, will print function params.
 #'
@@ -233,7 +239,7 @@ lowercase_args <- function(arg_names) {
 #' objective <- determine_weighted_layer_free_objective(crossing_edges_output$crossing_edges_df)
 #'
 #' @export
-determine_weighted_layer_free_objective <- function(df, verbose = FALSE, print_params = FALSE) {
+determine_weighted_layer_free_objective <- function(df, weighted = TRUE, verbose = FALSE, print_params = FALSE) {
     if (print_params) print_function_params()
     # Case 1: CSV
     if (is.character(df) && length(df) == 1 && file.exists(df)) {
@@ -245,9 +251,15 @@ determine_weighted_layer_free_objective <- function(df, verbose = FALSE, print_p
     } else {
         stop("Input must be either a file path or a list.")
     }
+    
+    # Case 2: Handle weighted or unweighted objective
+    if (weighted) {
+        total_crossings <- sum(df$weight1 * df$weight2) / 2  # Correct for double-counting
+    } else {
+        total_crossings <- nrow(df) / 2
+    }
 
-    total_weighted_crossings <- sum(df$weight1 * df$weight2) / 2 # Correct for double-counting
-    return(total_weighted_crossings)
+    return(total_crossings)
 }
 
 
@@ -283,12 +295,12 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' @param column1 Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
+#' @param weighted Logical. Weighted
 #' @param normalize_objective  Logical. Whether to normalize the objective by dividing by the sum of products of all edge weights.
 #' @param output_df_path Optional character. Output path for the data frame containing crossing edges, in CSV format (see details below). If not provided, then nothing will be saved.
 #' @param output_lode_df_path Optional character. Output path for the data frame containing lode information on each alluvium, in CSV format (see details below). If not provided, then nothing will be saved.
 #' @param include_output_objective_matrix_vector Logical. Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.
 #' @param return_weighted_layer_free_objective Logical. Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)
-#' @param use_fenwick_tree_for_objective_calculation Logical. Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn).
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param stratum_column_and_value_to_keep Internal flag; not recommended to modify.
@@ -325,7 +337,7 @@ make_crossing_matrix_vectorized <- function(y1, y2, count) {
 #' result <- determine_crossing_edges(df, column1 = "col1_int", column2 = "col2_int")
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, use_fenwick_tree_for_objective_calculation = TRUE, verbose = FALSE, print_params = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical") {
+determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", weighted = TRUE, normalize_objective = FALSE, output_df_path = NULL, output_lode_df_path = NULL, include_output_objective_matrix_vector = FALSE, return_weighted_layer_free_objective = FALSE, verbose = FALSE, print_params = FALSE, stratum_column_and_value_to_keep = NULL, input_objective_matrix_vector = NULL, input_objective = NULL, preprocess_data = TRUE, load_df = TRUE, default_sorting = "alphabetical") {
     if (print_params) print_function_params()
     lowercase_args(c("default_sorting"))
 
@@ -539,35 +551,8 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
 
         # Compare each pair of edges
         if (return_weighted_layer_free_objective) {
-            # if (use_fenwick_tree_for_objective_calculation) {
-            #     python_set_up_for_fenwick <- tryCatch(
-            #         {
-            #             check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE", environment = environment, use_conda = use_conda)
-            #             TRUE # if no error, return TRUE
-            #         },
-            #         error = function(e) {
-            #             FALSE # if error occurs (i.e., it called stop), return FALSE
-            #         }
-            #     )
-            # 
-            #     if (!python_set_up_for_fenwick) {
-            #         if (verbose) message("Python environment is not set up for use of fenwick tree optimization. Turning this optimization off. To turn on, set up the python environment, e.g., with wompwomp::setup_python_env().")
-            #         use_fenwick_tree_for_objective_calculation <- FALSE
-            #     }
-            # }
-
-            if (use_fenwick_tree_for_objective_calculation) {
-                # # option 1 for objective (best): fenwick (only good if I only need objective, ie no matrix or data frame) - also requires python
-                # check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("scipy", "pandas"), additional_message = "set use_fenwick_tree_for_objective_calculation = FALSE")  # checked above
-                if (verbose) message("Calculating objective with fenwick tree")
-                # reticulate::source_python(get_objective_fenwick_script_path())
-                output_objective <- output_objective + calculate_objective_fenwick(lode_df)
-            } else {
-                # # option 2 for objective: vectorized (only good if I only need objective, ie no matrix or data frame) - doesn't require python
-                if (verbose) message("Calculating objective with vectorized sum")
-                objective_matrix <- make_crossing_matrix_vectorized(lode_df$y1, lode_df$y2, lode_df$count)
-                output_objective <- output_objective + sum(objective_matrix)
-            }
+            if (verbose) message("Calculating objective")
+            output_objective <- output_objective + calculate_objective_fenwick(lode_df, weighted=weighted)
         } else {
             # # option 3 for objective (worst): double for loop (good if I need data frame)
             if (verbose) message("Looping through alluvia")
@@ -601,7 +586,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                             crossing_edges[[row_index]] <- new_row
                             row_index <- row_index + 1
 
-                            weight_product <- w1 * w2
+                            weight_product <- if (weighted) w1 * w2 else 1
                             output_objective <- output_objective + weight_product
 
                             if (include_output_objective_matrix_vector) {
@@ -625,7 +610,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                         if ((lode_df_filtered_with_stratum_of_interest$y1[i] - lode_df_filtered_without_stratum_of_interest$y1[j]) * (lode_df_filtered_with_stratum_of_interest$y2[i] - lode_df_filtered_without_stratum_of_interest$y2[j]) < 0) {
                             # crosses now, but didn't before (most cases)
                             if (objective_matrix[alluvium1, alluvium2] == 0) {
-                                weight_product <- w1 * w2
+                                weight_product <- if (weighted) w1 * w2 else 1
                                 objective_matrix[alluvium1, alluvium2] <- weight_product
                                 objective_matrix[alluvium2, alluvium1] <- weight_product
                                 output_objective <- output_objective + weight_product
@@ -633,7 +618,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column1 = NULL
                         } else {
                             # didn't cross before, but crosses now (most cases)
                             if (objective_matrix[alluvium1, alluvium2] > 0) {
-                                weight_product <- w1 * w2
+                                weight_product <- if (weighted) w1 * w2 else 1
                                 objective_matrix[alluvium1, alluvium2] <- 0
                                 objective_matrix[alluvium2, alluvium1] <- 0
                                 output_objective <- output_objective - weight_product

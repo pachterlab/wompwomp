@@ -11,9 +11,6 @@ VignetteBuilder: knitr
 RoxygenNote: 7.3.3
 Imports:
     dplyr,
-    ggplot2,
-    ggforce,
-    ggalluvial,
     igraph,
     tibble,
     rlang,
@@ -21,14 +18,13 @@ Imports:
     magrittr,
     data.table,
     purrr,
-    ggfittext,
     TSP,
     R6,
     stats,
     utils
-Depends: R (>= 4.5.0)
+Depends: R (>= 4.0.0)
 Suggests: 
-    testthat (>= 3.0.0),
+    testthat,
     vdiffr,
     magick,
     knitr,
@@ -36,12 +32,8 @@ Suggests:
     gtools,
     mclust,
     here,
-    ggrastr,
     stringr,
-    DuoClustering2018,
-    BiocStyle,
     sessioninfo
 Config/testthat/edition: 3
-biocViews: MathematicalBiology, Clustering, GraphAndNetwork, Visualization
 URL: https://github.com/pachterlab/wompwomp
 BugReports: https://github.com/pachterlab/wompwomp/issues

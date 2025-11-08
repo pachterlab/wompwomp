@@ -1,6 +1,6 @@
 # wompwomp
 
-Make alluvial plots with node order and colors optimized to minimize edge crossings with wompwomp!
+Sort k-partite graphs with node order, layer order, and node grouping optimized with a heuristic to (nearly) minimize edge crossings. Useful for improving visualizations with alluvial plots — see [biowomp](https://github.com/pachterlab/biowomp) for end-to-end alluvial plot generation with vignettes. Thank you to Cory Brunson for utilizing this algorithm in [ggalluvial](https://github.com/corybrunson/ggalluvial).
 
 wompwomp solves the **W**eighted (permutation) **O**ptimization of **M**ultiple **P**artitions-**W**eighted (label) **O**ptimization of **M**ultiple **P**artitions (W<sub>P</sub>OMP--W<sub>L</sub>OMP) problem.
 
@@ -36,7 +36,7 @@ git clone https://github.com/pachterlab/wompwomp
 cd wompwomp
 conda env create -f environment.yml  # or to avoid conda: Rscript inst/install.R
 conda activate wompwomp_env  # skip if used install.R above
-remotes::install_local(".")  # or use --dev flag in commands
+Rscript -e 'remotes::install_local(".")' # or use --dev flag in commands
 ```
 
 The first time any command is run on the command line, a prompt will appear asking to install any missing R dependencies.
@@ -134,3 +134,4 @@ ex. (note that the defaults for include_group_sizes=FALSE and include_axis_title
 ## See a full tutorial in our introductory vignette [wompwomp-intro.Rmd](vignettes/wompwomp-intro.Rmd)
 
 Read our preprint on arXiv [here](https://doi.org/10.48550/arXiv.2509.03761).
+See examples and vignettes [here](https://github.com/pachterlab/biowomp).
