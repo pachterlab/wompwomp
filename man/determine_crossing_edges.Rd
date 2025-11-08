@@ -10,12 +10,12 @@ determine_crossing_edges(
   column1 = NULL,
   column2 = NULL,
   column_weights = "value",
+  weighted = TRUE,
   normalize_objective = FALSE,
   output_df_path = NULL,
   output_lode_df_path = NULL,
   include_output_objective_matrix_vector = FALSE,
   return_weighted_layer_free_objective = FALSE,
-  use_fenwick_tree_for_objective_calculation = TRUE,
   verbose = FALSE,
   print_params = FALSE,
   stratum_column_and_value_to_keep = NULL,
@@ -39,6 +39,8 @@ determine_crossing_edges(
 
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
 
+\item{weighted}{Logical. Weighted}
+
 \item{normalize_objective}{Logical. Whether to normalize the objective by dividing by the sum of products of all edge weights.}
 
 \item{output_df_path}{Optional character. Output path for the data frame containing crossing edges, in CSV format (see details below). If not provided, then nothing will be saved.}
@@ -48,8 +50,6 @@ determine_crossing_edges(
 \item{include_output_objective_matrix_vector}{Logical. Whether to return a vector of matrices, where each matrix is square with dimension equal to the number of alluvia, and where entry (i,j) of a matrix represents the product of weights of alluvium i and alluvium j if they cross, and 0 otherwise. There are (n-1) matrices in the vector, where n is the length of graphing_columns.}
 
 \item{return_weighted_layer_free_objective}{Logical. Whether to return a list of overlapping edges (FALSE) or the sum of products of overlapping edges (TRUE)}
-
-\item{use_fenwick_tree_for_objective_calculation}{Logical. Whether to use fenwick trees for objective calculation. Speeds up from O(n^2) to O(nlogn).}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 

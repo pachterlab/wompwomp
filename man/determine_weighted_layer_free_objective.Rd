@@ -6,12 +6,15 @@
 \usage{
 determine_weighted_layer_free_objective(
   df,
+  weighted = TRUE,
   verbose = FALSE,
   print_params = FALSE
 )
 }
 \arguments{
 \item{df}{A CSV path or data frame as outputted with \code{crossing_edges_df} (in R) or \code{output_df_path} (as a file) from \code{determine_crossing_edges}.}
+
+\item{weighted}{Logical. Weighted}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 

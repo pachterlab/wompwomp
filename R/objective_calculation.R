@@ -81,6 +81,7 @@ BIT <- R6::R6Class("BIT",
 
 calculate_objective_fenwick <- function(df, weighted = TRUE) {
     # Step 1: Sort by y1
+    df_sorted <- df[order(df$y1), ]
     rownames(df_sorted) <- NULL
     
     # Step 2: Rank-compress y2 (higher y2 → higher rank)
@@ -113,7 +114,7 @@ calculate_objective_fenwick <- function(df, weighted = TRUE) {
 
 
 
-print_function_params <- function() {
+print_function_params <- function(display_df = FALSE) {
     f <- sys.function(sys.parent())
     call <- sys.call(sys.parent())
     defaults <- as.list(formals(f))
@@ -127,6 +128,10 @@ print_function_params <- function() {
             list(eval(arg, envir = parent.frame()))
         }
     })
+    
+    formal_names <- names(defaults)
+    unnamed <- which(!nzchar(names(call_args)))
+    names(call_args)[unnamed] <- formal_names[unnamed]
     
     # Flatten one level
     names(eval_args) <- names(call_args)
@@ -143,6 +148,8 @@ print_function_params <- function() {
         val <- all_args[[nm]]
         if (is.null(val)) {
             message(nm, " = NULL")
+        } else if (is.data.frame(val) && !display_df) {
+            message(nm, " = dataframe")
         } else if (length(val) == 1) {
             message(nm, " = ", val)
         } else {
