@@ -12,7 +12,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom data.table :=
 #' @importFrom ggalluvial stat_alluvium
-#' @importFrom ggplot2 ggplot_build
+#' @importFrom ggplot2 ggplot ggplot_build aes
 #' @importFrom R6 R6Class
 
 utils::globalVariables(c(

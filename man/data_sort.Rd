@@ -31,7 +31,6 @@ data_sort(
   verbose = FALSE,
   print_params = FALSE,
   load_df = TRUE,
-  make_intermediate_neighbornet_plots = FALSE,
   do_compute_alluvial_statistics = TRUE
 )
 }
@@ -89,8 +88,6 @@ data_sort(
 \item{print_params}{Logical. If TRUE, will print function params.}
 
 \item{load_df}{Internal flag; not recommended to modify.}
-
-\item{make_intermediate_neighbornet_plots}{Internal flag; not recommended to modify.}
 
 \item{do_compute_alluvial_statistics}{Internal flag; not recommended to modify.}
 }

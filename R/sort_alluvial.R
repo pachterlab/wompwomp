@@ -344,7 +344,7 @@ swap_graphing_column_order_based_on_graphing_column_int_order <- function(graphi
 
 
 
-determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE, weighted = TRUE) {
+determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, verbose = FALSE, weighted = TRUE) {
     # ensure someone doesn't specify both graphing_columns and column1/2
     if (!is.null(graphing_columns) && (!is.null(column1) || !is.null(column2))) {
         stop("Specify either graphing_columns or column1/column2, not both.")
@@ -475,16 +475,6 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
         #
         # objective_matrix_vector <- neighbornet_objective_output$objective_matrix_vector
         # neighbornet_objective <- neighbornet_objective_output$output_objective
-        
-        # to save each plot
-        if (make_intermediate_neighbornet_plots) {
-            output_plot_path <- sprintf("neighbornet_intermediate_%s.png", i + 1)
-            for (j in seq_along(graphing_columns_tmp)) {
-                int_col_name <- paste0("col", j, "_int")
-                clus_df_gather_neighbornet_tmp[[int_col_name]] <- factor(clus_df_gather_neighbornet_tmp[[int_col_name]])
-            }
-            plot_alluvial(clus_df_gather_neighbornet_tmp, graphing_columns = graphing_columns, column_weights = column_weights, sorting_algorithm = "none", preprocess_data = FALSE, color_boxes = FALSE, color_bands = TRUE, output_plot_path = output_plot_path)
-        }
         
         # print(neighbornet_objective)
         if (verbose) message(sprintf("objective for iteration %s = %s", i + 1, neighbornet_objective))
@@ -829,12 +819,12 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, default
 
 
 
-sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_weights = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", sorting_algorithm = "tsp", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, verbose = FALSE, make_intermediate_neighbornet_plots = FALSE, weighted = TRUE) {
+sort_neighbornet <- function(clus_df_gather, graphing_columns = NULL, column_weights = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", sorting_algorithm = "tsp", column_sorting_algorithm = "tsp", cycle_start_positions = NULL, verbose = FALSE, weighted = TRUE) {
     if (verbose) message(sprintf("Running %s", sorting_algorithm))
     cycle <- run_neighbornet(clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, sorting_algorithm = sorting_algorithm, verbose = verbose)
     if (verbose) message("Cycle: ", paste(cycle, collapse = ", "))
     if (verbose) message("Determining optimal cycle start")
-    res <- determine_optimal_cycle_start(clus_df_gather, cycle, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, matrix_initialization_value_column_order = matrix_initialization_value_column_order, weight_scalar_column_order = weight_scalar_column_order, column_sorting_metric = column_sorting_metric, column_sorting_algorithm = column_sorting_algorithm, cycle_start_positions = cycle_start_positions, verbose = verbose, make_intermediate_neighbornet_plots = make_intermediate_neighbornet_plots, weighted = weighted)
+    res <- determine_optimal_cycle_start(clus_df_gather, cycle, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, matrix_initialization_value_column_order = matrix_initialization_value_column_order, weight_scalar_column_order = weight_scalar_column_order, column_sorting_metric = column_sorting_metric, column_sorting_algorithm = column_sorting_algorithm, cycle_start_positions = cycle_start_positions, verbose = verbose, weighted = weighted)
     clus_df_gather_neighbornet <- res$clus_df_gather
     # graphing_columns_neighbornet <- res$graphing_columns
     if (verbose) message(sprintf("crossing edges objective = %s", res$neighbornet_objective))
@@ -965,7 +955,6 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param load_df Internal flag; not recommended to modify.
-#' @param make_intermediate_neighbornet_plots Internal flag; not recommended to modify.
 #' @param do_compute_alluvial_statistics Internal flag; not recommended to modify.
 #'
 #' @return
@@ -997,7 +986,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
 #' )
 #'
 #' @export
-data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "tsp", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", weighted = TRUE, cycle_start_positions = NULL, fixed_column = NULL, random_initializations = 1, output_df_path = NULL, preprocess_data = TRUE, default_sorting = "alphabetical", return_updated_graphing_columns = FALSE, verbose = FALSE, print_params = FALSE, load_df = TRUE, make_intermediate_neighbornet_plots = FALSE, do_compute_alluvial_statistics = TRUE) {
+data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL, column_weights = NULL, sorting_algorithm = "tsp", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing", column_sorting_algorithm = "tsp", weighted = TRUE, cycle_start_positions = NULL, fixed_column = NULL, random_initializations = 1, output_df_path = NULL, preprocess_data = TRUE, default_sorting = "alphabetical", return_updated_graphing_columns = FALSE, verbose = FALSE, print_params = FALSE, load_df = TRUE, do_compute_alluvial_statistics = TRUE) {
     if (print_params) print_function_params()
     lowercase_args(c("sorting_algorithm", "column_sorting_metric", "column_sorting_algorithm", "default_sorting"))
     
@@ -1093,7 +1082,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     
     if (sorting_algorithm == "neighbornet" || sorting_algorithm == "tsp") {
         # O(n^3) complexity, where n is the sum of blocks across all layers
-        clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, matrix_initialization_value_column_order = matrix_initialization_value_column_order, weight_scalar_column_order = weight_scalar_column_order, column_sorting_metric = column_sorting_metric, sorting_algorithm = sorting_algorithm, column_sorting_algorithm = column_sorting_algorithm, cycle_start_positions = cycle_start_positions, verbose = verbose, make_intermediate_neighbornet_plots = make_intermediate_neighbornet_plots, weighted = weighted)
+        clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column_weights = column_weights, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, matrix_initialization_value_column_order = matrix_initialization_value_column_order, weight_scalar_column_order = weight_scalar_column_order, column_sorting_metric = column_sorting_metric, sorting_algorithm = sorting_algorithm, column_sorting_algorithm = column_sorting_algorithm, cycle_start_positions = cycle_start_positions, verbose = verbose, weighted = weighted)
     } else if (sorting_algorithm == "greedy_wblf" || sorting_algorithm == "greedy_wolf") {
         # O(n_1 * n_2) complexity, where n1 is the number of blocks in layer 1, and n2 is the number of blocks in layer 2
         clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, graphing_columns = graphing_columns, column1 = column1, column2 = column2, column_weights = column_weights, fixed_column = fixed_column, random_initializations = random_initializations, sorting_algorithm = sorting_algorithm, verbose = verbose, weighted = weighted)

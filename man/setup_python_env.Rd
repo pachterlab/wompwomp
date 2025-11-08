@@ -18,6 +18,8 @@ setup_python_env(
 \item{packages}{Packages to install}
 
 \item{use_conda}{Use conda vs. virtualenv for python environment}
+
+\item{yes}{Logical. Install without prompt}
 }
 \value{
 Invisibly returns TRUE if the environment is set up successfully.

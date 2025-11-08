@@ -5,6 +5,7 @@
 #' @param envname Conda environment name
 #' @param packages Packages to install
 #' @param use_conda Use conda vs. virtualenv for python environment
+#' @param yes Logical. Install without prompt
 #'
 #' @return Invisibly returns TRUE if the environment is set up successfully.
 #'
