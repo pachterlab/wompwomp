@@ -4,9 +4,9 @@
 #' @docType package
 #' @name wompwomp
 #'
-#' @importFrom dplyr mutate select group_by summarise arrange desc ungroup slice n pull filter bind_rows across matches all_of add_count distinct
+#' @importFrom dplyr mutate select group_by summarise desc ungroup slice n pull bind_rows across all_of
 #' @importFrom purrr map
-#' @importFrom igraph max_bipartite_match V graph_from_data_frame cluster_louvain cluster_leiden E
+#' @importFrom igraph V cluster_louvain cluster_leiden E
 #' @importFrom tibble is_tibble
 #' @importFrom utils read.csv write.csv combn
 #' @importFrom stats setNames
@@ -107,12 +107,8 @@ determine_column_order <- function(clus_df_gather_neighbornet, graphing_columns,
                 clus_df_gather_neighbornet_tmp,
                 graphing_columns = graphing_columns_tmp,
                 column_weights = column_weights,
-                return_weighted_layer_free_objective = TRUE,
-                load_df = FALSE,
-                weighted = weighted,
-                # verbose = verbose,
-                preprocess_data = FALSE
-            )
+                weighted = weighted
+            )$output_objective
             neighbornet_objective <- weight_scalar_column_order * log1p(neighbornet_objective) # log1p to avoid issue of log(0)
         } else {
             stop(sprintf("column_sorting_metric '%s' is not a valid option.", column_sorting_metric))
@@ -428,53 +424,8 @@ determine_optimal_cycle_start <- function(df, cycle, graphing_columns = NULL, co
             clus_df_gather_neighbornet_tmp,
             graphing_columns = graphing_columns_tmp,
             column_weights = column_weights,
-            # verbose = verbose,
-            return_weighted_layer_free_objective = TRUE,
             weighted = weighted
-        )
-        
-        # # if ((optimize_column_order_per_cycle) || (i == 0)) {
-        # # # recalculate from scratch if i == 0 (first iteration, no matrices made yet) OR if graphing_columns_tmp != graphing_columns_tmp_previous_iteration (optimize_column_order_per_cycle is TRUE and we have a new column order, and therefore our matrices are no help)
-        # if ((!all(graphing_columns_tmp == graphing_columns_tmp_previous_iteration)) || (i == 0)) {
-        #     # include_output_objective_matrix_vector <- !optimize_column_order_per_cycle  # if optimize_column_order_per_cycle is TRUE, then no need to return this big matrix
-        #     neighbornet_objective_output <- determine_crossing_edges(
-        #         clus_df_gather_neighbornet_tmp,
-        #         graphing_columns = graphing_columns_tmp,
-        #         column_weights = column_weights,
-        #         verbose = verbose,
-        #         include_output_objective_matrix_vector = TRUE,
-        #         return_weighted_layer_free_objective = FALSE,
-        #     )
-        # } else {
-        #     swapped_node <- cycle_shifted[length(cycle_shifted)]
-        #     parts <- strsplit(swapped_node, "~~", fixed = TRUE)[[1]]
-        #     layer_name <- parts[1]
-        #     node_name <- parts[2]
-        #
-        #     # determine the int column that matches to this layer_name - because I haven't reordered any columns in clus_df_gather_neighbornet, I should use the order as determined here
-        #     int_column_int <- match(layer_name, graphing_columns_tmp)
-        #     int_column <- paste0("col", int_column_int, "_int")
-        #
-        #     # find the value in clus_df_gather_neighbornet[[int_column]] that maps to node_name of clus_df_gather_neighbornet[[layer_name]]
-        #     matched <- clus_df_gather_neighbornet_tmp[[int_column]][clus_df_gather_neighbornet_tmp[[layer_name]] == node_name]
-        #     stratum_int_name <- matched[1]
-        #     stratum_column_and_value_to_keep <- setNames(list(stratum_int_name), as.character(int_column_int))
-        #
-        #     neighbornet_objective_output <- determine_crossing_edges(
-        #         clus_df_gather_neighbornet_tmp,
-        #         graphing_columns = graphing_columns_tmp,
-        #         column_weights = column_weights,
-        #         stratum_column_and_value_to_keep = stratum_column_and_value_to_keep,
-        #         input_objective = neighbornet_objective,
-        #         input_objective_matrix_vector = objective_matrix_vector,
-        #         verbose = verbose,
-        #         include_output_objective_matrix_vector = TRUE,
-        #         return_weighted_layer_free_objective = FALSE,
-        #     )
-        # }
-        #
-        # objective_matrix_vector <- neighbornet_objective_output$objective_matrix_vector
-        # neighbornet_objective <- neighbornet_objective_output$output_objective
+        )$output_objective
         
         # print(neighbornet_objective)
         if (verbose) message(sprintf("objective for iteration %s = %s", i + 1, neighbornet_objective))
@@ -897,10 +848,7 @@ sort_greedy_wolf <- function(clus_df_gather, graphing_columns = NULL, column1 = 
             )
         }
         if (random_initializations > 1) {
-            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp,
-                                                                 column1 = column1, column2 = column2,
-                                                                 column_weights = column_weights, load_df = FALSE, preprocess_data = FALSE, # verbose = verbose,
-                                                                 weighted = weighted, output_df_path = NULL, return_weighted_layer_free_objective = TRUE)
+            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, graphing_columns = graphing_columns, column_weights = column_weights, weighted = weighted)$output_objective
             if (crossing_edges_objective < crossing_edges_objective_minimum) {
                 crossing_edges_objective_minimum <- crossing_edges_objective
                 clus_df_gather_best <- clus_df_gather_tmp
@@ -1121,7 +1069,7 @@ data_sort <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NUL
     # print objective - don't do for neighbornet because I did it right before
     if ((verbose) && (sorting_algorithm != "neighbornet")) {
         message("Determining crossing edges objective (to disable, use verbose==FALSE)")
-        objective <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, column_weights = column_weights, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE, default_sorting = default_sorting, weighted = weighted) # verbose = verbose
+        objective <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, column_weights = column_weights, weighted = weighted)$output_objective
         message(sprintf("crossing edges objective = %s", objective))
     }
     

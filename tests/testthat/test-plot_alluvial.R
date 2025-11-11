@@ -198,7 +198,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, unsorted", {
 
     clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "none", optimize_column_order = FALSE)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
     testthat::expect_equal(num, 225)
 })
@@ -214,7 +214,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = FALSE, weight_scalar = 1)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
     testthat::expect_equal(num, 44)
 })
@@ -230,7 +230,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
     testthat::expect_equal(num, 37)
 })
@@ -246,7 +246,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "none", optimize_column_order = FALSE, weight_scalar = 1)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
     testthat::expect_equal(num, 74)
 })
@@ -262,7 +262,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = FALSE, weight_scalar = 1)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
     testthat::expect_equal(num, 50)
 })
@@ -278,7 +278,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns, load_df = FALSE, preprocess_data = FALSE, return_weighted_layer_free_objective = TRUE)
+    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
     testthat::expect_equal(num, 50)
 })
