@@ -1,6 +1,6 @@
-#' wompwomp: Cluster-matching alluvial plots
+#' wompwomp: Sorting alluvia
 #'
-#' Main plotting function and helpers for bipartite-matching-based alluvial diagrams
+#' Sorting alluvia
 #' @docType package
 #' @name wompwomp
 #'
@@ -689,6 +689,7 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' @param load_df Internal flag; not recommended to modify.
 #' @param do_gather_set_data Internal flag; not recommended to modify.
 #' @param color_band_column Internal flag; not recommended to modify.
+#' @param do_add_int_columns Internal flag; not recommended to modify.
 #'
 #' @return A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc.
 #'
@@ -710,7 +711,7 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' )
 #'
 #' @export
-data_preprocess <- function(df, graphing_columns, column_weights = NULL, default_sorting = "alphabetical", output_df_path = NULL, verbose = FALSE, print_params = FALSE, load_df = TRUE, do_gather_set_data = FALSE, color_band_column = NULL) {
+data_preprocess <- function(df, graphing_columns, column_weights = NULL, default_sorting = "alphabetical", output_df_path = NULL, verbose = FALSE, print_params = FALSE, load_df = TRUE, do_gather_set_data = FALSE, color_band_column = NULL, do_add_int_columns = TRUE) {
     if (print_params) print_function_params()
     lowercase_args(c("default_sorting"))
     
@@ -729,15 +730,6 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, default
     df <- df[, cols_to_keep, drop = FALSE]
     
     # # # Fill in NA values with "Missing"
-    # # df[is.na(df)] <- "Missing"
-    # df <- df %>%
-    #     mutate(across(all_of(graphing_columns), ~ {
-    #         if (is.factor(.x) || is.character(.x)) {
-    #             replace(as.character(.x), is.na(.x), "Missing")
-    #         } else {
-    #             .x  # leave numeric and other types untouched
-    #         }
-    #     }))
     for (col in graphing_columns) {
         if (col %in% colnames(df)) {
             if (is.factor(df[[col]]) || is.character(df[[col]])) {
@@ -746,7 +738,9 @@ data_preprocess <- function(df, graphing_columns, column_weights = NULL, default
         }
     }
     
-    df <- add_int_columns(df, graphing_columns = graphing_columns, default_sorting = default_sorting)
+    if (do_add_int_columns) {
+        df <- add_int_columns(df, graphing_columns = graphing_columns, default_sorting = default_sorting)
+    }
     
     # sort columns according to graphing_columns
     # df <- df %>% dplyr::relocate(all_of(graphing_columns))  # put graphing_columns in front

@@ -14,7 +14,8 @@ data_preprocess(
   print_params = FALSE,
   load_df = TRUE,
   do_gather_set_data = FALSE,
-  color_band_column = NULL
+  color_band_column = NULL,
+  do_add_int_columns = TRUE
 )
 }
 \arguments{
@@ -39,6 +40,8 @@ data_preprocess(
 \item{do_gather_set_data}{Internal flag; not recommended to modify.}
 
 \item{color_band_column}{Internal flag; not recommended to modify.}
+
+\item{do_add_int_columns}{Internal flag; not recommended to modify.}
 }
 \value{
 A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc.
