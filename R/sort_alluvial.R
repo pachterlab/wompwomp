@@ -4,7 +4,7 @@
 #' @docType package
 #' @name wompwomp
 #'
-#' @importFrom dplyr mutate select group_by summarise desc ungroup slice n pull bind_rows across all_of
+#' @importFrom dplyr mutate select group_by summarise desc ungroup slice n pull bind_rows across all_of add_count
 #' @importFrom purrr map
 #' @importFrom igraph V cluster_louvain cluster_leiden E
 #' @importFrom tibble is_tibble
