@@ -650,9 +650,12 @@ reorder_and_rename_columns <- function(df, graphing_columns) {
     names(df)[names(df) %in% names(old_to_new_int_names)] <-
         old_to_new_int_names[names(df)[names(df) %in% names(old_to_new_int_names)]]
     
+    
+    graphing_and_int_columns <- union(graphing_columns, new_int_cols)
+    
     # Final column order
-    everything_else <- setdiff(names(df), c(graphing_columns, new_int_cols))
-    df <- df[, c(graphing_columns, new_int_cols, everything_else)]
+    everything_else <- setdiff(names(df), graphing_and_int_columns)
+    df <- df[, c(graphing_and_int_columns, everything_else)]
     
     return(df)
 }

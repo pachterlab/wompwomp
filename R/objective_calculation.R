@@ -16,49 +16,49 @@ utils::globalVariables(c(
 
 # ---- Binary Indexed Tree (Fenwick Tree) ----
 BIT <- R6::R6Class("BIT",
-   public = list(
-       tree_count = NULL,
-       tree_weight = NULL,
-       
-       initialize = function(size) {
-           self$tree_count <- integer(size + 1)
-           self$tree_weight <- numeric(size + 1)
-       },
-       
-       update = function(index, weight) {
-           index <- index + 1L
-           n <- length(self$tree_count)
-           while (index < n) {
-               self$tree_count[index] <- self$tree_count[index] + 1L
-               self$tree_weight[index] <- self$tree_weight[index] + weight
-               index <- index + bitwAnd(index, -index)
-           }
-       },
-       
-       query = function(index) {
-           count <- 0L
-           weight_sum <- 0.0
-           index <- index + 1L
-           while (index > 0L) {
-               count <- count + self$tree_count[index]
-               weight_sum <- weight_sum + self$tree_weight[index]
-               index <- index - bitwAnd(index, -index)
-           }
-           list(count = count, weight_sum = weight_sum)
-       },
-       
-       query_range = function(low, high) {
-           q_high <- self$query(high)
-           q_low <- self$query(low - 1L)
-           list(
-               count = q_high$count - q_low$count,
-               weight_sum = q_high$weight_sum - q_low$weight_sum
-           )
-       }
-   )
+                   public = list(
+                       tree_count = NULL,
+                       tree_weight = NULL,
+                       
+                       initialize = function(size) {
+                           self$tree_count <- integer(size + 1)
+                           self$tree_weight <- numeric(size + 1)
+                       },
+                       
+                       update = function(index, weight) {
+                           index <- index + 1L
+                           n <- length(self$tree_count)
+                           while (index < n) {
+                               self$tree_count[index] <- self$tree_count[index] + 1L
+                               self$tree_weight[index] <- self$tree_weight[index] + weight
+                               index <- index + bitwAnd(index, -index)
+                           }
+                       },
+                       
+                       query = function(index) {
+                           count <- 0L
+                           weight_sum <- 0.0
+                           index <- index + 1L
+                           while (index > 0L) {
+                               count <- count + self$tree_count[index]
+                               weight_sum <- weight_sum + self$tree_weight[index]
+                               index <- index - bitwAnd(index, -index)
+                           }
+                           list(count = count, weight_sum = weight_sum)
+                       },
+                       
+                       query_range = function(low, high) {
+                           q_high <- self$query(high)
+                           q_low <- self$query(low - 1L)
+                           list(
+                               count = q_high$count - q_low$count,
+                               weight_sum = q_high$weight_sum - q_low$weight_sum
+                           )
+                       }
+                   )
 )
 
-calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", weighted = TRUE) {
+calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", column_weights = 'count', weighted = TRUE) {
     # Step 1: Sort by y1
     df_sorted <- df[order(df[[y1]]), ]
     rownames(df_sorted) <- NULL
@@ -73,7 +73,7 @@ calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", weighted = TRU
     
     for (i in seq_len(nrow(df_sorted))) {
         y2_rank <- df_sorted$y2_rank[i]
-        weight <- if (weighted) df_sorted$count[i] else 1.0
+        weight <- if (weighted) df_sorted[[column_weights]][i] else 1.0
         
         # Count previous y2s > current (strictly greater)
         q <- bit$query_range(y2_rank + 1L, max_rank)
@@ -81,7 +81,7 @@ calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", weighted = TRU
         if (weighted) {
             total_cross_weight <- total_cross_weight + weight * q$weight_sum
         } else {
-            total_cross_weight <- total_cross_weight + q$count
+            total_cross_weight <- total_cross_weight + q[[column_weights]]
         }
         
         # Add current y2_rank to BIT
@@ -93,27 +93,23 @@ calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", weighted = TRU
 
 
 make_lode_df <- function(df, graphing_columns = NULL, column_weights = "value") {
-    # lode_df <- df
-    # x <- 1
-    # for (i in graphing_columns) {
-    #     ordered_df <- lode_df[order(lode_df[[i]]), ]
-    #     ordered_df[[paste0('y', x)]] <- 1/cumsum(ordered_df[[column_weights]])
-    #     lode_df <- dplyr::left_join(
-    #         lode_df,
-    #         ordered_df[, c(graphing_columns,paste0('y', x))],
-    #         by = graphing_columns
-    #     )
-    #     x <- x + 1
-    # }
-    # 
-    # # Rename column_weights -> "count"
-    # names(lode_df)[names(lode_df) == column_weights] <- "count"
-    # 
-    # # Add "alluvium" column: 1, 2, ..., nrow(df)
-    # lode_df$alluvium <- seq_len(nrow(lode_df))
-    # 
-    # return(lode_df)
-    
+    lode_df <- df
+    lode_df$alluvium <- seq_len(nrow(lode_df))
+    x <- 1
+    for (i in graphing_columns) {
+        ordered_df <- lode_df[order(lode_df[[i]]), ]
+        ordered_df[[paste0('y', x)]] <- cumsum(ordered_df[[column_weights]])
+        lode_df <- dplyr::left_join(
+            lode_df,
+            ordered_df[, c('alluvium',paste0('y', x))],
+            by = 'alluvium'
+        )
+        x <- x + 1
+    }
+    return(lode_df)
+}
+
+make_lode_df_old <- function(df, graphing_columns = NULL, column_weights = "value") {
     if (column_weights != "value") {
         df <- df %>% dplyr::rename(value = !!sym(column_weights))
         column_weights <- "value"
@@ -168,6 +164,8 @@ make_lode_df <- function(df, graphing_columns = NULL, column_weights = "value") 
         mapping <- mapping[!duplicated(names(mapping))]
         lode_df_full[[stratum_char_col]] <- mapping[as.character(lode_df_full[[stratum_col]])]
     }
+    
+    lode_df_full <- lode_df_full %>% dplyr::rename(value = "count")
     return(lode_df_full)
 }
 
@@ -203,12 +201,17 @@ make_lode_df <- function(df, graphing_columns = NULL, column_weights = "value") 
 #'
 #' @export
 determine_crossing_edges <- function(df, graphing_columns = NULL, column_weights = "value", weighted = TRUE, verbose = FALSE) {
-    lode_df <- make_lode_df(df, graphing_columns, column_weights)
+    col_ints <- c()
+    for (h in seq_len(length(graphing_columns))) {
+        col_ints <- c(col_ints, paste0('col', h, '_int'))
+    }
+    lode_df <- make_lode_df_old(df, col_ints, column_weights)
     objective_val <- 0
     for (h in seq_len(length(graphing_columns) - 1)) {
         y1 <- paste0('y', h)
         y2 <- paste0('y', h+1)
-        objective_val <- objective_val + calculate_objective_fenwick(lode_df, y1 = y1, y2 = y2, weighted = weighted)
+        
+        objective_val <- objective_val + calculate_objective_fenwick(lode_df, y1 = y1, y2 = y2, column_weights =  column_weights, weighted = weighted)
     }
     return(list(lode_df = lode_df, output_objective = objective_val))
 }

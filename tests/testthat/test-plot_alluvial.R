@@ -200,7 +200,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, unsorted", {
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
-    testthat::expect_equal(num, 225)
+    testthat::expect_equal(num, 316)
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_order FALSE", {
@@ -216,7 +216,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
-    testthat::expect_equal(num, 44)
+    testthat::expect_equal(num, 153)
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_order TRUE", {
@@ -232,7 +232,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
-    testthat::expect_equal(num, 37)
+    testthat::expect_equal(num, 153)
 })
 
 
@@ -264,7 +264,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
-    testthat::expect_equal(num, 50)
+    testthat::expect_equal(num, 95)
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers, tsp, optimize_column_order TRUE", {
@@ -280,5 +280,5 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
 
-    testthat::expect_equal(num, 50)
+    testthat::expect_equal(num, 95)
 })
