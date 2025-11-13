@@ -28,8 +28,8 @@ default_colors <- c(
 #' (2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).
 #' @param graphing_columns Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting).
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
-#' @param color_boxes Logical. Whether to color the strata/boxes (representing groups).
-#' @param color_list Optional named list or vector of colors to override default group colors.
+#' @param color_list Logical named list or vector of colors to override default group colors.
+#' @param match_colors Optional match colors
 #' @param color_val Optional named list where the entries are colors and the names correspond to values of the dataframe that should use those colors
 #' @param coloring_algorithm Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{graphing_columns}.
 #' @param coloring_algorithm_advanced_option Character. If \code{coloring_algorithm == 'advanced'}, then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.
@@ -39,6 +39,7 @@ default_colors <- c(
 #' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param print_params Logical. If TRUE, will print function params.
+#' @param load_df Internal flag; not recommended to modify.
 #'
 #' @return A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.
 #'
@@ -62,8 +63,7 @@ default_colors <- c(
 #' @export
 data_color <- function(df, graphing_columns, column_weights = NULL, color_list = NULL, match_colors = TRUE,
                        color_val = NULL, coloring_algorithm = "advanced", coloring_algorithm_advanced_option = "leiden", 
-                       resolution = 1, cutoff = .5, preprocess_data = TRUE, output_df_path = NULL, verbose = FALSE, print_params = FALSE, 
-                       load_df = TRUE, do_compute_alluvial_statistics = TRUE) {
+                       resolution = 1, cutoff = .5, preprocess_data = TRUE, output_df_path = NULL, verbose = FALSE, print_params = FALSE, load_df = TRUE) {
     if (print_params) print_function_params()
     lowercase_args(c("coloring_algorithm", "coloring_algorithm_advanced_option"))
     
