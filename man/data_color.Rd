@@ -9,6 +9,7 @@ data_color(
   graphing_columns,
   column_weights = NULL,
   color_list = NULL,
+  match_colors = TRUE,
   color_val = NULL,
   coloring_algorithm = "advanced",
   coloring_algorithm_advanced_option = "leiden",
@@ -18,8 +19,7 @@ data_color(
   output_df_path = NULL,
   verbose = FALSE,
   print_params = FALSE,
-  load_df = TRUE,
-  do_compute_alluvial_statistics = TRUE
+  load_df = TRUE
 )
 }
 \arguments{
@@ -31,7 +31,9 @@ data_color(
 
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
 
-\item{color_list}{Optional named list or vector of colors to override default group colors.}
+\item{color_list}{Logical named list or vector of colors to override default group colors.}
+
+\item{match_colors}{Optional match colors}
 
 \item{color_val}{Optional named list where the entries are colors and the names correspond to values of the dataframe that should use those colors}
 
@@ -51,7 +53,7 @@ data_color(
 
 \item{print_params}{Logical. If TRUE, will print function params.}
 
-\item{color_boxes}{Logical. Whether to color the strata/boxes (representing groups).}
+\item{load_df}{Internal flag; not recommended to modify.}
 }
 \value{
 A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.

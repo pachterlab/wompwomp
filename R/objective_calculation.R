@@ -16,48 +16,49 @@ utils::globalVariables(c(
 
 # ---- Binary Indexed Tree (Fenwick Tree) ----
 BIT <- R6::R6Class("BIT",
-                   public = list(
-                       tree_count = NULL,
-                       tree_weight = NULL,
-                       
-                       initialize = function(size) {
-                           self$tree_count <- integer(size + 1)
-                           self$tree_weight <- numeric(size + 1)
-                       },
-                       
-                       update = function(index, weight) {
-                           index <- index + 1L
-                           n <- length(self$tree_count)
-                           while (index < n) {
-                               self$tree_count[index] <- self$tree_count[index] + 1L
-                               self$tree_weight[index] <- self$tree_weight[index] + weight
-                               index <- index + bitwAnd(index, -index)
-                           }
-                       },
-                       
-                       query = function(index) {
-                           count <- 0L
-                           weight_sum <- 0.0
-                           index <- index + 1L
-                           while (index > 0L) {
-                               count <- count + self$tree_count[index]
-                               weight_sum <- weight_sum + self$tree_weight[index]
-                               index <- index - bitwAnd(index, -index)
-                           }
-                           list(count = count, weight_sum = weight_sum)
-                       },
-                       
-                       query_range = function(low, high) {
-                           q_high <- self$query(high)
-                           q_low <- self$query(low - 1L)
-                           list(
-                               count = q_high$count - q_low$count,
-                               weight_sum = q_high$weight_sum - q_low$weight_sum
-                           )
-                       }
-                   )
+                                   public = list(
+                                       tree_count = NULL,
+                                       tree_weight = NULL,
+                                       
+                                       initialize = function(size) {
+                                           self$tree_count <- integer(size + 1)
+                                           self$tree_weight <- numeric(size + 1)
+                                       },
+                                       
+                                       update = function(index, weight) {
+                                           index <- index + 1L
+                                           n <- length(self$tree_count)
+                                           while (index < n) {
+                                               self$tree_count[index] <- self$tree_count[index] + 1L
+                                               self$tree_weight[index] <- self$tree_weight[index] + weight
+                                               index <- index + bitwAnd(index, -index)
+                                           }
+                                       },
+                                       
+                                       query = function(index) {
+                                           count <- 0L
+                                           weight_sum <- 0.0
+                                           index <- index + 1L
+                                           while (index > 0L) {
+                                               count <- count + self$tree_count[index]
+                                               weight_sum <- weight_sum + self$tree_weight[index]
+                                               index <- index - bitwAnd(index, -index)
+                                           }
+                                           list(count = count, weight_sum = weight_sum)
+                                       },
+                                       
+                                       query_range = function(low, high) {
+                                           q_high <- self$query(high)
+                                           q_low <- self$query(low - 1L)
+                                           list(
+                                               count = q_high$count - q_low$count,
+                                               weight_sum = q_high$weight_sum - q_low$weight_sum
+                                           )
+                                       }
+                                   )
 )
 
+calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", column_weights = 'count', weighted = TRUE) {
 calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", column_weights = 'count', weighted = TRUE) {
     # Step 1: Sort by y1
     df_sorted <- df[order(df[[y1]]), ]
@@ -148,10 +149,17 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column_weights
         col_ints <- c(col_ints, paste0('col', h, '_int'))
     }
     lode_df <- make_lode_df(df, col_ints, column_weights)
+    col_ints <- c()
+    for (h in seq_len(length(graphing_columns))) {
+        col_ints <- c(col_ints, paste0('col', h, '_int'))
+    }
+    lode_df <- make_lode_df(df, col_ints, column_weights)
     objective_val <- 0
     for (h in seq_len(length(graphing_columns) - 1)) {
         y1 <- paste0('y', h)
         y2 <- paste0('y', h+1)
+        
+        objective_val <- objective_val + calculate_objective_fenwick(lode_df, y1 = y1, y2 = y2, column_weights =  column_weights, weighted = weighted)
         
         objective_val <- objective_val + calculate_objective_fenwick(lode_df, y1 = y1, y2 = y2, column_weights =  column_weights, weighted = weighted)
     }
