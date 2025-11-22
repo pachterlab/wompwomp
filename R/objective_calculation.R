@@ -205,7 +205,7 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column_weights
     for (h in seq_len(length(graphing_columns))) {
         col_ints <- c(col_ints, paste0('col', h, '_int'))
     }
-    lode_df <- make_lode_df_old(df, col_ints, column_weights)
+    lode_df <- make_lode_df(df, col_ints, column_weights)
     objective_val <- 0
     for (h in seq_len(length(graphing_columns) - 1)) {
         y1 <- paste0('y', h)
