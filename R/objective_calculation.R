@@ -149,17 +149,10 @@ determine_crossing_edges <- function(df, graphing_columns = NULL, column_weights
         col_ints <- c(col_ints, paste0('col', h, '_int'))
     }
     lode_df <- make_lode_df(df, col_ints, column_weights)
-    col_ints <- c()
-    for (h in seq_len(length(graphing_columns))) {
-        col_ints <- c(col_ints, paste0('col', h, '_int'))
-    }
-    lode_df <- make_lode_df(df, col_ints, column_weights)
     objective_val <- 0
     for (h in seq_len(length(graphing_columns) - 1)) {
         y1 <- paste0('y', h)
         y2 <- paste0('y', h+1)
-        
-        objective_val <- objective_val + calculate_objective_fenwick(lode_df, y1 = y1, y2 = y2, column_weights =  column_weights, weighted = weighted)
         
         objective_val <- objective_val + calculate_objective_fenwick(lode_df, y1 = y1, y2 = y2, column_weights =  column_weights, weighted = weighted)
     }
