@@ -58,7 +58,7 @@ BIT <- R6::R6Class("BIT",
                                    )
 )
 
-calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", column_weights = 'count', weighted = TRUE) {
+
 calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", column_weights = 'count', weighted = TRUE) {
     # Step 1: Sort by y1
     df_sorted <- df[order(df[[y1]]), ]
