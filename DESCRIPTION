@@ -26,7 +26,7 @@ Imports:
     R6,
     stats,
     utils
-Depends: R (>= 4.5.0)
+Depends: R (>= 4.0.0)
 Suggests: 
     testthat (>= 3.0.0),
     vdiffr,
