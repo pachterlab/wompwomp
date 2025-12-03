@@ -411,3 +411,55 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
     
     return(final_list)
 }
+
+#' Make stratum color list
+#'
+#' Convert color mapping made by data_color into list for scale_fill_manual
+#'
+#' @param data A data frame with columns corresponding to axes, with factors indicating sorting. (eg run through data_sort)
+#' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
+#' @param mapping List. Output from data_color.
+#'
+#' @return A vector of colors.
+#'
+#' @examples
+#' # Example 1
+#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' cols = c("method1", "method2")
+#' clus_df_gather <- data_sort(data, cols = cols, method = "tsp")
+#' color_mapping <- data_color(data = clus_df_gather, cols = cols)
+#' color_list <- make_stratum_color_list(data = clus_df_gather, cols = cols, mapping = color_mapping)
+#'
+#' @export
+make_stratum_color_list <- function(data, cols, mapping) {
+    
+    # 1. Collect all factor levels across all columns
+    vals <- unique(unlist(lapply(cols, function(col) levels(data[[col]]))))
+    
+    # 2. Initialize named color vector
+    flat_colors <- setNames(rep(NA_character_, length(vals)), vals)
+    
+    # 3. Fill colors from each sub-mapping
+    for (col in cols) {
+        if (!col %in% names(mapping)) {
+            stop(sprintf("Column '%s' not found in mapping", col))
+        }
+        for (k in names(mapping[[col]])) {
+            if (k %in% names(flat_colors)) {
+                flat_colors[k] <- mapping[[col]][[k]]
+            }
+        }
+    }
+    
+    # 4. Check for missing colors
+    if (any(is.na(flat_colors))) {
+        missing_levels <- names(flat_colors)[is.na(flat_colors)]
+        stop(
+            "Missing colors for: ",
+            paste(missing_levels, collapse = ", "),
+            "\nAdd them to stratum_to_color_mapping."
+        )
+    }
+    
+    return(flat_colors)
+}
