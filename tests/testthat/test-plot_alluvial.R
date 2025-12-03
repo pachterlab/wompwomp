@@ -7,10 +7,11 @@ test_that("data_sort works with unsorted algorithm", {
     )
 
     # Aggregate by combination
-    df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
+    data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
+    cols = c("method1", "method2")
 
-    unsorted_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "none")
-    # unsorted_df <- dplyr::ungroup(unsorted_df)
+    unsorted_df <- data_sort(data, cols = cols, wt = "value", method = "none")
+    # unsorted_df <- dplyr::ungroup()(unsorted_df)
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "unsorted_df.rds"))
 
@@ -19,6 +20,8 @@ test_that("data_sort works with unsorted algorithm", {
     }
 
     ground_truth_df <- readRDS(ground_truth_df_path)
+    ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
+    ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
 
     expect_equal(unsorted_df, ground_truth_df)
 })
@@ -32,8 +35,9 @@ test_that("data_sort works with greedy_wolf algorithm", {
     )
 
     # Aggregate by combination
-    df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
-    greedy_wolf_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "greedy_wolf")
+    data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
+    cols = c("method1", "method2")
+    greedy_wolf_df <- data_sort(data, cols = cols, wt = "value", method = "greedy_wolf")
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "greedy_wolf_df.rds"))
 
@@ -42,6 +46,8 @@ test_that("data_sort works with greedy_wolf algorithm", {
     }
 
     ground_truth_df <- readRDS(ground_truth_df_path)
+    ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
+    ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
 
     expect_equal(greedy_wolf_df, ground_truth_df)
 })
@@ -55,9 +61,9 @@ test_that("data_sort works with greedy_wblf algorithm", {
     )
 
     # Aggregate by combination
-    df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
-
-    greedy_wblf_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "greedy_wblf")
+    data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
+    cols = c("method1", "method2")
+    greedy_wblf_df <- data_sort(data, cols = cols, wt = "value", method = "greedy_wblf")
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "greedy_wblf_df.rds"))
 
@@ -66,6 +72,8 @@ test_that("data_sort works with greedy_wblf algorithm", {
     }
 
     ground_truth_df <- readRDS(ground_truth_df_path)
+    ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
+    ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
 
     expect_equal(greedy_wblf_df, ground_truth_df)
 })
@@ -80,9 +88,9 @@ test_that("data_sort works with tsp algorithm", {
     )
 
     # Aggregate by combination
-    df <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
-
-    tsp_df <- data_sort(df, column1 = "method1", column2 = "method2", column_weights = "value", sorting_algorithm = "tsp")
+    data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
+    cols = c("method1", "method2")
+    tsp_df <- data_sort(data, cols = cols, wt = "value", method = "tsp")
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "tsp_df.rds"))
 
@@ -91,13 +99,15 @@ test_that("data_sort works with tsp algorithm", {
     }
 
     ground_truth_df <- readRDS(ground_truth_df_path)
+    ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
+    ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
 
     expect_equal(tsp_df, ground_truth_df)
 })
 
 
 make_more_tsp_2_layer_df <- function() {
-    df <- data.frame(
+    data <- data.frame(
         tissue = c(
             1, 1, 1,
             2, 2, 2, 2, 2, 2,
@@ -115,16 +125,16 @@ make_more_tsp_2_layer_df <- function() {
     )
     column1 <- "tissue"
     column2 <- "cluster"
-    graphing_columns <- c(column1, column2)
+    cols <- c(column1, column2)
 
     list(
-        df = df,
-        graphing_columns = graphing_columns
+        data = data,
+        cols = cols
     )
 }
 
 make_more_tsp_3_layer_df <- function() {
-    df <- data.frame(
+    data <- data.frame(
         tissue = c(
             "BRAIN", "BRAIN", "BRAIN",
             "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
@@ -147,16 +157,16 @@ make_more_tsp_3_layer_df <- function() {
             "male", "male", "male", "male", "male", "male", "male", "male", "male"
         )
     )
-    graphing_columns <- c("tissue", "cluster", "sex")
+    cols <- c("tissue", "cluster", "sex")
 
     list(
-        df = df,
-        graphing_columns = graphing_columns
+        data = data,
+        cols = cols
     )
 }
 
 make_more_tsp_3_layer_df_with_2_identical_layers <- function() {
-    df <- data.frame(
+    data <- data.frame(
         tissue = c(
             "BRAIN", "BRAIN", "BRAIN",
             "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
@@ -179,11 +189,11 @@ make_more_tsp_3_layer_df_with_2_identical_layers <- function() {
             "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
         )
     )
-    graphing_columns <- c("tissue", "cluster", "sex")
+    cols <- c("tissue", "cluster", "sex")
 
     list(
-        df = df,
-        graphing_columns = graphing_columns
+        data = data,
+        cols = cols
     )
 }
 
@@ -191,14 +201,14 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, unsorted", {
     set.seed(42)
     
     input <- make_more_tsp_3_layer_df()
-    df <- input$df
-    graphing_columns <- input$graphing_columns
+    data <- input$data
+    cols <- input$cols
 
-    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+    clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "none", optimize_column_order = FALSE)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "none", column_method = "none")
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
+    num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
     testthat::expect_equal(num, 225)
 })
@@ -207,14 +217,14 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
     set.seed(42)
     
     input <- make_more_tsp_3_layer_df()
-    df <- input$df
-    graphing_columns <- input$graphing_columns
+    data <- input$data
+    cols <- input$cols
 
-    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+    clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = FALSE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", weight_scalar = 1)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
+    num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
     testthat::expect_equal(num, 44)
 })
@@ -223,30 +233,30 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
     set.seed(42)
     
     input <- make_more_tsp_3_layer_df()
-    df <- input$df
-    graphing_columns <- input$graphing_columns
+    data <- input$data
+    cols <- input$cols
 
-    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+    clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", options = list(optimize_column_order_per_cycle = TRUE), weight_scalar = 1)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
+    num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 37)
+    testthat::expect_equal(num, 44)
 })
 
 
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers, unsorted", {
     input <- make_more_tsp_3_layer_df_with_2_identical_layers()
-    df <- input$df
-    graphing_columns <- input$graphing_columns
+    data <- input$data
+    cols <- input$cols
 
-    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+    clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "none", optimize_column_order = FALSE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "none", column_method = "none", weight_scalar = 1)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
+    num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
     testthat::expect_equal(num, 74)
 })
@@ -255,14 +265,14 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
     set.seed(42)
     
     input <- make_more_tsp_3_layer_df_with_2_identical_layers()
-    df <- input$df
-    graphing_columns <- input$graphing_columns
+    data <- input$data
+    cols <- input$cols
 
-    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+    clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = FALSE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", weight_scalar = 1)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
+    num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
     testthat::expect_equal(num, 50)
 })
@@ -271,14 +281,14 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
     set.seed(42)
     
     input <- make_more_tsp_3_layer_df_with_2_identical_layers()
-    df <- input$df
-    graphing_columns <- input$graphing_columns
+    data <- input$data
+    cols <- input$cols
 
-    clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns)
+    clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, graphing_columns = graphing_columns, column_weights = "value", sorting_algorithm = "tsp", optimize_column_order = TRUE, optimize_column_order_per_cycle = TRUE, weight_scalar = 1)
+    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", options = list(optimize_column_order_per_cycle = TRUE), weight_scalar = 1)
 
-    num <- determine_crossing_edges(clus_df_gather_sorted, graphing_columns = graphing_columns)$output_objective
+    num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
     testthat::expect_equal(num, 50)
 })

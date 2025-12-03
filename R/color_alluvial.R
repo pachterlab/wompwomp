@@ -42,9 +42,10 @@ default_colors <- c(
 #' @return A named list of control parameters for use in `data_color()`.
 #'
 #' @examples
-#' opts <- data_color_options(method = "advanced",
-#'                            method_advanced_option = "leiden")
-#' df_colored <- data_color(data, cols, options = opts)
+#' 
+#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' opts <- data_color_options(cutoff = 0.3, method_advanced_option = "louvain")
+#' mapping <- data_color(data = data, cols = c('method1', 'method2'), options = opts)
 #'
 #' @export
 data_color_options <- function(
@@ -104,8 +105,33 @@ data_color_options <- function(
 #' )
 #'
 #' @export
-data_color <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = data_color_options()) {
-    list2env(options, envir = environment())  # adds my options to be variables here
+data_color <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
+    default_opt <- data_color_options()
+    if (!is.null(options)) {
+        if (!is.list(options)) stop("`options` must be a list.")
+        for (nm in names(default_opt)) {
+            if (!nm %in% names(options)) {
+                val <- ifelse(!is.null(default_opt[[nm]]), default_opt[[nm]], "NULLTMP")
+                options[[nm]] <- val
+            }
+        }
+    } else {
+        options <- default_opt
+        for (nm in names(options)) {
+            if (is.null(options[[nm]])) {
+                options[[nm]] <- "NULLTMP"
+            }
+        }
+    }
+    for (nm in names(options)) {
+        if (is.null(options[[nm]]) || options[[nm]] == "NULLTMP") {
+            val <- NULL
+        } else {
+            val <- options[[nm]]
+        }
+        assign(nm, val, envir = environment())
+    }
+    
     if (print_params) print_function_params()
     # lowercase_args(c("method", "method_advanced_option"))
     

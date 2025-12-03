@@ -44,8 +44,9 @@ Creates a list of control parameters that modify the behavior of
 algorithm without cluttering the main function interface.
 }
 \examples{
-opts <- data_color_options(method = "advanced",
-                           method_advanced_option = "leiden")
-df_colored <- data_color(data, cols, options = opts)
+
+data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+opts <- data_color_options(cutoff = 0.3, method_advanced_option = "louvain")
+mapping <- data_color(data = data, cols = c('method1', 'method2'), options = opts)
 
 }

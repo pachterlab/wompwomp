@@ -11,7 +11,7 @@ data_color(
   method = "advanced",
   resolution = 1,
   verbose = FALSE,
-  options = data_color_options()
+  options = NULL
 )
 }
 \arguments{

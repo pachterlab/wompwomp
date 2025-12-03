@@ -14,7 +14,7 @@ data_sort(
   fixed_column = NULL,
   output_df_path = NULL,
   verbose = FALSE,
-  options = data_sort_options()
+  options = NULL
 )
 }
 \arguments{

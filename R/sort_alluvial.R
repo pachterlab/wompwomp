@@ -743,6 +743,8 @@ data_preprocess <- function(data, cols, wt = NULL, default_sorting = "alphabetic
         clus_df_gather <- data
     }
     
+    clus_df_gather <- clus_df_gather %>% dplyr::ungroup()
+    
     if ((is.character(output_df_path) && grepl("\\.rds$", output_df_path, ignore.case = TRUE))) {
         if (verbose) message(sprintf("Saving dataframe to=%s", output_df_path))
         saveRDS(clus_df_gather, output_df_path)
@@ -880,9 +882,9 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
 #'   via the `options` argument.
 #'
 #' @examples
+#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' opts <- data_sort_options(default_sorting = "alphabetical", matrix_initialization_value = 100)
-#'
-#' data_sort(data, cols, options = opts)
+#' data_sort(data = data, cols = c('method1', 'method2'), options = opts)
 #'
 #' @export
 data_sort_options <- function(
@@ -969,8 +971,33 @@ data_sort_options <- function(
 #' )
 #'
 #' @export
-data_sort <- function(data, cols = NULL, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = data_sort_options()) {
-    list2env(options, envir = environment())  # adds my options to be variables here
+data_sort <- function(data, cols = NULL, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
+    default_opt <- data_sort_options()
+    if (!is.null(options)) {
+        if (!is.list(options)) stop("`options` must be a list.")
+        for (nm in names(default_opt)) {
+            if (!nm %in% names(options)) {
+                val <- ifelse(!is.null(default_opt[[nm]]), default_opt[[nm]], "NULLTMP")
+                options[[nm]] <- val
+            }
+        }
+    } else {
+        options <- default_opt
+        for (nm in names(options)) {
+            if (is.null(options[[nm]])) {
+                options[[nm]] <- "NULLTMP"
+            }
+        }
+    }
+    for (nm in names(options)) {
+        if (is.null(options[[nm]]) || options[[nm]] == "NULLTMP") {
+            val <- NULL
+        } else {
+            val <- options[[nm]]
+        }
+        assign(nm, val, envir = environment())
+    }
+    
     if (print_params) print_function_params()
     # lowercase_args(c("method", "column_metric", "column_method", "default_sorting"))
     
@@ -1073,6 +1100,7 @@ data_sort <- function(data, cols = NULL, wt = NULL, method = c("tsp", "neighborn
     # reorder cols to match any changed order in clus_df_gather_sorted
     graphing_columns_sorted <- cols[order(match(cols, names(clus_df_gather_sorted)))]
     clus_df_gather <- generalized_reorder(clus_df_gather=clus_df_gather, clus_df_gather_sorted=clus_df_gather_sorted, cols=graphing_columns_sorted)
+    clus_df_gather <- clus_df_gather %>% dplyr::ungroup()
     
     # Save if desired
     if ((is.character(output_df_path) && grepl("\\.rds$", output_df_path, ignore.case = TRUE))) {

@@ -198,8 +198,8 @@ make_lode_df_old <- function(data, cols = NULL, wt = "value") {
 #'
 #' @examples
 #' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' data <- data_sort(data, sorting_algorithm = "tsp")
-#' result <- determine_crossing_edges(data, cols = c("col1_int", "col2_int"))
+#' data <- data_sort(data, cols = c("method1", "method2"), method = "tsp")
+#' result <- determine_crossing_edges(data, cols = c("method1", "method2"))
 #'
 #' @export
 determine_crossing_edges <- function(data, cols = NULL, wt = "value", weighted_metric = TRUE, verbose = FALSE) {
