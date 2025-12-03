@@ -56,14 +56,14 @@ print(clus_df_gather_tsp)
 ```
 
 ```{r}
-# clus_df_gather_tsp_leiden <- clus_df_gather_tsp
-clus_df_gather_tsp_leiden <- data_color(clus_df_gather_tsp, cols = graphing_columns, wt = "value", method = "advanced")
-print(clus_df_gather_tsp_leiden[, c("tissue", "cluster", "col1_int", "col2_int", "col1_int_colors", "col2_int_colors", "value")])
+# clus_df_gather_tsp <- clus_df_gather_tsp
+devtools::load_all("~/Desktop/local/wompwomp")
+stratum_to_color_mapping <- data_color(clus_df_gather_tsp, cols = graphing_columns, wt = "value", method = "advanced")
+print(stratum_to_color_mapping)
 ```
 
 ```{r}
-devtools::load_all("~/Desktop/local/wompwomp")
-crossing_edges_out <- determine_crossing_edges(clus_df_gather_tsp_leiden, cols = graphing_columns, wt = "value")
+crossing_edges_out <- determine_crossing_edges(clus_df_gather_tsp, cols = graphing_columns, wt = "value")
 print(crossing_edges_out$output_objective)
 ```
 
@@ -102,5 +102,5 @@ plot_alluvial_wompwomp(clus_df_gather, graphing_columns)
 ```
 
 ```{r}
-plot_alluvial_wompwomp(clus_df_gather_tsp_leiden, graphing_columns)
+plot_alluvial_wompwomp(clus_df_gather_tsp, graphing_columns)
 ```

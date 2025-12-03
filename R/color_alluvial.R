@@ -5,7 +5,7 @@
 #' @name wompwomp
 #'
 #' @importFrom igraph V cluster_louvain cluster_leiden E
-#' @importFrom dplyr add_count
+#' @importFrom dplyr add_count mutate select group_by
 #' @importFrom magrittr %>%
 #' @importFrom utils read.csv write.csv
 
@@ -27,8 +27,6 @@ default_colors <- c(
 #'
 #' @param color_list Optional named list or vector mapping values in the
 #'   graphing columns to colors. Overrides default palette.
-#' @param match_colors Logical. If TRUE (default), attempts to match colors
-#'   based on shared group memberships across columns.
 #' @param color_val Optional named list: names correspond to data values, and
 #'   each element is a color to assign directly.
 #' @param coloring_algorithm_advanced_option Character. When
@@ -51,7 +49,6 @@ default_colors <- c(
 #' @export
 data_color_options <- function(
         color_list = NULL,
-        match_colors = TRUE,
         color_val = NULL,
         coloring_algorithm_advanced_option = c("leiden", "louvain"),
         cutoff = 0.5,
@@ -64,7 +61,6 @@ data_color_options <- function(
     
     list(
         color_list = color_list,
-        match_colors = match_colors,
         color_val = color_val,
         coloring_algorithm_advanced_option = coloring_algorithm_advanced_option,
         cutoff = cutoff,
@@ -144,254 +140,110 @@ data_color <- function(data, cols, wt = NULL, method = "advanced", resolution = 
         clus_df_gather <- data_preprocess(data = data, cols = cols, 
                                           wt = wt, load_df = load_df, 
                                           do_gather_set_data = FALSE, do_add_int_columns = FALSE)
+        for (col in cols) {
+            clus_df_gather[[col]] <- factor(clus_df_gather[[col]])
+        }
         if (is.null(wt)) {
             wt <- "value" # is set during data_preprocess
         }
     } else {
         clus_df_gather <- data
     }
-    clus_df_gather <- data_sort(clus_df_gather, cols = cols, 
-                                sorting_algorithm="none", wt = wt,
-                                optimize_column_order = FALSE)
-    #!!!! do coloring here
-    if (match_colors) {
-        unused_colors <- default_colors
-        first <- TRUE
-        if (method == "left") {
-            n <- 1
-            for (col_group in cols) {
-                num_levels <- length(levels(clus_df_gather[[col_group]]))
-                if (first) {
-                    temp_df <- data.frame(name = factor(1:num_levels))
-                    temp_df[[paste0("col", n, "_int_colors")]] <- unused_colors[1:num_levels]
-                    names(temp_df) <- c(paste0("col", n, "_int"), paste0("col", n, "_int_colors"))
-                    clus_df_gather_color <- dplyr::left_join(
-                        clus_df_gather,
-                        temp_df,
-                        by = paste0("col", n, "_int")
-                    )
-                    unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0("col", n, "_int_colors")]])]
-                    first <- FALSE
-                } else {
-                    clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
-                                                      group1_name = paste0("col", n - 1, "_int"), group2_name = paste0("col", n, "_int"),
-                                                      cutoff = cutoff
-                    )
-                    unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0("col", n, "_int_colors")]])]
-                }
-                n <- n + 1
-            }
-        } else if (method == "right") {
-            n <- length(cols)
-            for (col_group in rev(cols)) {
-                num_levels <- length(levels(clus_df_gather[[col_group]]))
-                if (first) {
-                    temp_df <- data.frame(name = factor(1:num_levels))
-                    temp_df[[paste0("col", n, "_int_colors")]] <- unused_colors[1:num_levels]
-                    names(temp_df) <- c(paste0("col", n, "_int"), paste0("col", n, "_int_colors"))
-                    
-                    clus_df_gather_color <- dplyr::left_join(
-                        clus_df_gather,
-                        temp_df,
-                        by = paste0("col", n, "_int")
-                    )
-                    unused_colors <- unused_colors[!(unused_colors %in% data[[paste0("col", n, "_int_colors")]])]
-                    first <- FALSE
-                } else {
-                    clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
-                                             group1_name = paste0("col", n + 1, "_int"), group2_name = paste0("col", n, "_int"),
-                                             cutoff = cutoff
-                    )
-                    unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0("col", n, "_int_colors")]])]
-                }
-                n <- n - 1
-            }
-        } else if (method == "advanced") {
-            # check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("igraph", "leidenalg"), additional_message = "do not set method to 'advanced'")
-            clus_df_gather_color <- find_colors_advanced(clus_df_gather, unused_colors, 
-                                                         cols, coloring_algorithm_advanced_option = coloring_algorithm_advanced_option, 
-                                                         resolution = resolution)
-        } else {
-            col_group <- method
-            num_levels <- length(levels(factor(data[[col_group]])))
-            
-            ref_group_n <- which(method == cols)[[1]]
-            temp_df <- data.frame(name = factor(1:num_levels))
-            temp_df[[paste0("col", ref_group_n, "_int_colors")]] <- unused_colors[1:num_levels]
-            names(temp_df) <- c(paste0("col", ref_group_n, "_int"), paste0("col", ref_group_n, "_int_colors"))
-            clus_df_gather_color <- dplyr::left_join(
-                clus_df_gather,
-                temp_df,
-                by = paste0("col", ref_group_n, "_int")
-            )
-            unused_colors <- unused_colors[!(unused_colors %in% data[[paste0("col", ref_group_n, "_int_colors")]])]
-            
-            for (col_group in cols) {
-                if (!(col_group == method)) {
-                    col_group_n <- which(col_group == cols)[[1]]
-                    clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
-                                                               group1_name = paste0("col", ref_group_n, "_int"), group2_name = paste0("col", col_group_n, "_int"),
-                                                               cutoff = cutoff
-                    )
-                    unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0("col", col_group_n, "_int_colors")]])]
-                }
-            }
-        }
-    } else {
-        clus_df_gather_color <- clus_df_gather
-        }
-    
-    # Save if desired
-    if ((is.character(output_df_path) && grepl("\\.csv$", output_df_path, ignore.case = TRUE))) {
-        if (verbose) message(sprintf("Saving sorted dataframe to=%s", output_df_path))
-        write.csv(clus_df_gather_color, file = output_df_path, row.names = FALSE)
-    }
-    
-    return (clus_df_gather_color)
-}
-
-
-find_group2_colors <- function(clus_df_gather, unused_colors,
-                               group1_name = "col1_int", group2_name = "col2_int",
-                               cutoff = .5) {
-    num_levels <- length(levels(clus_df_gather[[group2_name]]))
-    
-    clus_df_ungrouped <- clus_df_gather[, c(group1_name, group2_name, "value",
-                                            paste0(group1_name, '_colors'))]
-    clus_df_filtered <- clus_df_ungrouped %>%
-        dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) %>%
-        select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n, !!rlang::sym(paste0(group1_name, '_colors')))
-    clus_df_filtered <- dplyr::distinct(clus_df_filtered)
-    colnames(clus_df_filtered) <- c(group1_name, group2_name, "value", paste0(group1_name, '_colors'))
-    
-    
-    clus_df_filtered <- clus_df_filtered %>%
-        group_by(!!rlang::sym(group1_name)) %>%
-        mutate(group1_size = sum(value))
-    clus_df_filtered <- clus_df_filtered %>%
-        group_by(!!rlang::sym(group2_name)) %>%
-        mutate(group2_size = sum(value))
-    clus_df_filtered <- clus_df_filtered %>%
-        group_by(!!rlang::sym(group1_name)) %>%
-        mutate(weight = value / group2_size)
-    
-    parent_df <- clus_df_filtered %>%
-        group_by(!!rlang::sym(group2_name)) %>%
-        dplyr::filter(weight == max(weight)) # %>% select(!!rlang::sym(group1_name))
-    parent_df <- parent_df[parent_df$weight > cutoff,]
-
-    parent_df <- parent_df[,c(group1_name, group2_name, paste0(group1_name, '_colors'))]
-    colnames(parent_df) <- c(group1_name, group2_name, paste0(group2_name, '_colors'))
-    
-    final_df <- dplyr::left_join(
-        clus_df_gather,
-        parent_df,
-        by = c(group1_name, group2_name)
-        )
-    
-    need_colors <- is.na(final_df[[paste0(group2_name, '_colors')]])
-    final_df[[paste0(group2_name, '_colors')]][need_colors] <- unused_colors[1:sum(need_colors)]
-    
-    return(final_df)
-}
-
-find_colors_advanced <- function(clus_df_gather, ditto_colors, cols, coloring_algorithm_advanced_option = "leiden", resolution = 1) {
-    column_int_names <- c()
-    for (col_int in seq_along(cols)) {
-        int_name <- paste0("col", col_int, "_int")
-        column_int_names <- c(column_int_names, int_name)
-    }
-    clus_df_ungrouped <- clus_df_gather[, c(column_int_names, "value")]
-    
+    unused_colors <- default_colors
     first <- TRUE
-    compared <- c()
-    for (group1_name in column_int_names) {
-        for (group2_name in column_int_names) {
-            if (!(group1_name == group2_name)) {
-                comp1 <- paste0(group1_name, group2_name)
-                comp2 <- paste0(group2_name, group1_name)
-                if (!(comp1 %in% compared | comp2 %in% compared)) {
-                    if (first) {
-                        clus_df_filtered <- clus_df_ungrouped[, c(group1_name, group2_name, "value")]
-                        clus_df_filtered <- clus_df_filtered %>%
-                            dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) %>%
-                            select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
-                        clus_df_filtered <- dplyr::distinct(clus_df_filtered)
-                        colnames(clus_df_filtered) <- c("group1", "group2", "value")
-                        
-                        clus_df_filtered <- clus_df_filtered %>%
-                            group_by(group1) %>%
-                            mutate(group1_size = sum(value))
-                        clus_df_filtered <- clus_df_filtered %>%
-                            group_by(group1) %>%
-                            mutate(group2_size = sum(value))
-                        
-                        clus_df_filtered <- clus_df_filtered %>%
-                            group_by(group1) %>%
-                            mutate(weight = value) # /group2_size)
-                        
-                        clus_df_filtered$group1 <- sub("^", paste0(group1_name, "_"), clus_df_filtered[["group1"]])
-                        clus_df_filtered$group2 <- sub("^", paste0(group2_name, "_"), clus_df_filtered[["group2"]])
-                        
-                        first <- FALSE
-                    } else {
-                        temp_clus_df_filtered <- clus_df_ungrouped[, c(group1_name, group2_name, "value")]
-                        temp_clus_df_filtered <- temp_clus_df_filtered %>%
-                            dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) %>%
-                            select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
-                        temp_clus_df_filtered <- dplyr::distinct(temp_clus_df_filtered)
-                        colnames(temp_clus_df_filtered) <- c("group1", "group2", "value")
-                        
-                        temp_clus_df_filtered <- temp_clus_df_filtered %>%
-                            group_by(group1) %>%
-                            mutate(group1_size = sum(value))
-                        temp_clus_df_filtered <- temp_clus_df_filtered %>%
-                            group_by(group2) %>%
-                            mutate(group2_size = sum(value))
-                        
-                        temp_clus_df_filtered <- temp_clus_df_filtered %>%
-                            group_by(group1) %>%
-                            mutate(weight = value) # /group2_size)
-                        
-                        temp_clus_df_filtered$group1 <- sub("^", paste0(group1_name, "_"), temp_clus_df_filtered[["group1"]])
-                        temp_clus_df_filtered$group2 <- sub("^", paste0(group2_name, "_"), temp_clus_df_filtered[["group2"]])
-                        
-                        clus_df_filtered <- rbind(clus_df_filtered, temp_clus_df_filtered)
-                    }
-                }
-                # compared <- c(compared, comp1, comp2)
+    if (method == "left") {
+        for (col_group in cols) {
+            num_levels <- length(levels(clus_df_gather[[col_group]]))
+            if (first) {
+                temp_df <- data.frame(name = levels(clus_df_gather[[col_group]]))
+                temp_df[[paste0(col_group, "_colors")]] <- unused_colors[1:num_levels]
+                names(temp_df) <- c(col_group, paste0(col_group, "_colors"))
+                clus_df_gather_color <- dplyr::left_join(
+                    clus_df_gather,
+                    temp_df,
+                    by = col_group
+                )
+                unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0(col_group, "_colors")]])]
+                old_col_group <- col_group
+                first <- FALSE
+            } else {
+                clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
+                                                           group1_name = old_col_group, group2_name = col_group,
+                                                           cutoff = cutoff
+                )
+                old_col_group <- col_group
+                unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[col_group]])]
+            }
+        }
+    } else if (method == "right") {
+        for (col_group in cols) {
+            num_levels <- length(levels(clus_df_gather[[col_group]]))
+            if (first) {
+                temp_df <- data.frame(name = levels(clus_df_gather[[col_group]]))
+                temp_df[[paste0(col_group, "_colors")]] <- unused_colors[1:num_levels]
+                names(temp_df) <- c(col_group, paste0(col_group, "_colors"))
+                clus_df_gather_color <- dplyr::left_join(
+                    clus_df_gather,
+                    temp_df,
+                    by = col_group
+                )
+                unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0(col_group, "_colors")]])]
+                old_col_group <- col_group
+                first <- FALSE
+            } else {
+                clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
+                                                           group1_name = old_col_group, group2_name = col_group,
+                                                           cutoff = cutoff
+                )
+                old_col_group <- col_group
+                unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[col_group]])]
+            }
+        }
+    } else if (method == "advanced") {
+        # check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("igraph", "leidenalg"), additional_message = "do not set method to 'advanced'")
+        clus_df_gather_color <- find_colors_advanced(clus_df_gather, cols, unused_colors, 
+                                                     coloring_algorithm_advanced_option = coloring_algorithm_advanced_option, 
+                                                     resolution = resolution)
+        return (clus_df_gather_color)
+    } else {
+        ref_group <- method
+        num_levels <- length(levels(factor(data[[col_group]])))
+        
+        temp_df <- data.frame(name = levels(clus_df_gather[[col_group]]))
+        temp_df[[paste0(ref_group, "_colors")]] <- unused_colors[1:num_levels]
+        names(temp_df) <- c(ref_group, paste0(ref_group, "_colors"))
+        clus_df_gather_color <- dplyr::left_join(
+            clus_df_gather,
+            temp_df,
+            by = ref_group
+        )
+        unused_colors <- unused_colors[!(unused_colors %in% data[[paste0(ref_group, "_colors")]])]
+        
+        for (col_group in cols) {
+            if (!(col_group == method)) {
+                clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
+                                                           group1_name = ref_group, group2_name = col_group,
+                                                           cutoff = cutoff
+                )
+                unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0(col_group, "_colors")]])]
             }
         }
     }
+    clus_df_gather_color <- clus_df_gather_color %>% dplyr::select(-!!rlang::sym(wt)) 
     
-    clus_df_extra_filtered <- clus_df_filtered[, c("group1", "group2", "value")]
-    g <- igraph::graph_from_data_frame(d = clus_df_extra_filtered, directed = FALSE)
-    if (coloring_algorithm_advanced_option == "louvain") {
-        partition <- igraph::cluster_louvain(g, weights = igraph::E(g)$value, resolution = resolution)
-    } else if (coloring_algorithm_advanced_option == "leiden") {
-        partition <- igraph::cluster_leiden(g, weights = igraph::E(g)$value, resolution = resolution)
-    } else {
-        stop(sprintf("coloring_algorithm_advanced_option '%s' is not recognized. Please choose from 'leiden' (default) or 'louvain'.", coloring_algorithm_advanced_option))
+    final_df <- data.frame(axis=c(),
+                           value=c(),
+                           color=c())
+    for (col in cols) {
+        temp_df <- clus_df_gather_color[, c(col, paste0(col, '_colors'))]
+        names(temp_df) <- c('value', 'color')
+        temp_df[['axis']] <- col
+        final_df <- rbind(final_df, temp_df)
     }
     
-    clus_df_leiden <- data.frame(group_name = partition$names, leiden = partition$membership)
-    clus_df_leiden <- clus_df_leiden %>% tidyr::separate_wider_delim(group_name, names = c("col", "trash", "group"), delim = "_")
-    clus_df_leiden <- clus_df_leiden %>% tidyr::separate_wider_delim(col, names = c("trash2", "col"), delim = "col")
-    clus_df_leiden <- clus_df_leiden[, c("col", "group", "leiden")]
-    clus_df_leiden[["colors"]] <- unlist(Map(function(x) ditto_colors[x], clus_df_leiden$leiden))
-    
-    final_df <- clus_df_gather
-    final_colors <- c()
-    for (col_int in unique(clus_df_leiden$col)) {
-        intcol <- paste0('col', col_int, '_int')
-        temp_df <- clus_df_leiden[clus_df_leiden$col == col_int, ]
-        colnames(temp_df) <- c('col', intcol, 'leiden', paste0(intcol, '_colors'))
-        final_df <- dplyr::left_join(
-            final_df,
-            temp_df[, c(intcol,  paste0(intcol, '_colors'))],
-            by = intcol
-        )
-    }
-    
-    return(final_df)
+    final_df <- split(unique(final_df), unique(final_df)[['axis']])
+    final_list <- lapply(final_df, function(subdf) {
+        setNames(as.list(subdf[['color']]), subdf[['value']])
+    })
+    return (final_list)
 }
