@@ -91,14 +91,15 @@ plot_alluvial_wompwomp <- function(clus_df_gather, cols, wt = "value", stratum_c
             axis2 = .data[[col2]]
         )
     ) +
-        geom_alluvium(aes(fill = .data[[col1]]), width = 1/12) +
-        geom_stratum(width = 1/12, fill = "black", color = "grey") +
+        geom_alluvium(aes(fill = .data[[col1]]), width = 1/12) +  # alluvia color is column1
+        geom_stratum(aes(fill = after_stat(stratum)), width = 1/12, color = "grey") +
         geom_label(stat = "stratum", aes(label = after_stat(stratum))) +
         scale_x_discrete(
             limits = c(col1, col2),
             expand = c(.05, .05)
         ) +
-        theme_minimal()
+        theme_minimal() +
+        theme(legend.position = "none")
     
     if (!is.null(stratum_colors)) {
         p <- p + scale_fill_manual(values = stratum_colors)
