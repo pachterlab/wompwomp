@@ -107,14 +107,7 @@ plot_alluvial_wompwomp(clus_df_gather, graphing_columns)
 ```
 
 ```{r}
-plot_alluvial_wompwomp(clus_df_gather_tsp, graphing_columns)
+set.seed(43)
+clus_df_gather_tsp_from_scratch <- data_sort(df, cols = graphing_columns, method = "tsp")
+plot_alluvial_wompwomp(clus_df_gather_tsp_from_scratch, graphing_columns)
 ```
-
-
-```{r}
-data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-opts <- data_color_options(cutoff = 0.3, method_advanced_option = "louvain")
-devtools::load_all("~/Desktop/local/wompwomp")
-mapping <- data_color(data = data, cols = c('method1', 'method2'), options = opts)
-```
-
