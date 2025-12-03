@@ -912,7 +912,6 @@ data_sort_options <- function(
         matrix_initialization_value_column_order = matrix_initialization_value_column_order,
         weight_scalar_column_order = weight_scalar_column_order,
         column_metric = column_metric,
-        column_method = column_method,
         weighted_metric = weighted_metric,
         cycle_start_positions = cycle_start_positions,
         random_initializations = random_initializations,

@@ -6,9 +6,8 @@
 \usage{
 data_color_options(
   color_list = NULL,
-  match_colors = TRUE,
   color_val = NULL,
-  coloring_algorithm_advanced_option = c("leiden", "louvain"),
+  method_advanced_option = c("leiden", "louvain"),
   cutoff = 0.5,
   preprocess_data = TRUE,
   print_params = FALSE,
@@ -19,13 +18,10 @@ data_color_options(
 \item{color_list}{Optional named list or vector mapping values in the
 graphing columns to colors. Overrides default palette.}
 
-\item{match_colors}{Logical. If TRUE (default), attempts to match colors
-based on shared group memberships across columns.}
-
 \item{color_val}{Optional named list: names correspond to data values, and
 each element is a color to assign directly.}
 
-\item{coloring_algorithm_advanced_option}{Character. When
+\item{method_advanced_option}{Character. When
 \code{method == "advanced"}, selects the clustering algorithm.
 Options: \code{"leiden"} (default) or \code{"louvain"}.}
 
@@ -49,7 +45,7 @@ algorithm without cluttering the main function interface.
 }
 \examples{
 opts <- data_color_options(method = "advanced",
-                           coloring_algorithm_advanced_option = "leiden")
+                           method_advanced_option = "leiden")
 df_colored <- data_color(data, cols, options = opts)
 
 }
