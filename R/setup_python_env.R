@@ -15,7 +15,7 @@
 #' }
 #'
 #' @export
-setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "numpy==1.23.5", splitspy = "splitspy", pandas = "pandas", scipy = "scipy", leidenalg = "leidenalg", igraph = "python-igraph"), use_conda = TRUE, yes = FALSE) {
+setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "numpy", splitspy = "splitspy", pandas = "pandas", scipy = "scipy", leidenalg = "leidenalg", igraph = "python-igraph"), use_conda = TRUE, yes = FALSE) {
     if (use_conda) {
         conda_findable <- tryCatch(file.exists(reticulate::conda_binary()), error = function(e) FALSE)
         if (!conda_findable) {
@@ -74,10 +74,21 @@ setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "num
     # Only install missing Python modules
     for (import_name in names(packages)) {
         pkg <- packages[[import_name]]
-        # Split "pkg==version" if present
-        split <- strsplit(pkg, "==", fixed = TRUE)[[1]]
-        pypi_name <- split[1]
-        required_version <- if (length(split) > 1) split[2] else NULL
+        # Parse package specification with version constraint
+        # Matches patterns like: package==1.0, package>=1.0, package<2.0, etc.
+        pattern <- "^([a-zA-Z0-9_-]+)\\s*([<>=!]+)\\s*([0-9.]+)$"
+        match <- regexec(pattern, pkg)
+        matched <- regmatches(pkg, match)[[1]]
+        
+        if (length(matched) > 1) {
+            pypi_name <- matched[2]
+            operator <- matched[3]
+            required_version <- matched[4]
+        } else {
+            pypi_name <- pkg
+            operator <- NULL
+            required_version <- NULL
+        }
 
         need_install <- FALSE
 
@@ -92,13 +103,29 @@ setup_python_env <- function(envname = "wompwomp_env", packages = c(numpy = "num
                 },
                 error = function(e) NA
             )
-
-            if (is.na(actual_version) || actual_version != required_version) {
-                need_install <- TRUE
-                message(
-                    "Module '", pypi_name, "' has version ", actual_version,
-                    " but requires ", required_version, ". Will reinstall."
+            
+            if (!is.na(actual_version)) {
+                # Compare versions based on operator
+                versions_match <- switch(operator,
+                                         "==" = actual_version == required_version,
+                                         "!=" = actual_version != required_version,
+                                         ">=" = utils::compareVersion(actual_version, required_version) >= 0,
+                                         "<=" = utils::compareVersion(actual_version, required_version) <= 0,
+                                         ">" = utils::compareVersion(actual_version, required_version) > 0,
+                                         "<" = utils::compareVersion(actual_version, required_version) < 0,
+                                         TRUE  # Default if operator not recognized
                 )
+                
+                if (!versions_match) {
+                    need_install <- TRUE
+                    message(
+                        "Module '", pypi_name, "' has version ", actual_version,
+                        " but requires ", operator, required_version, ". Will reinstall."
+                    )
+                }
+            } else {
+                need_install <- TRUE
+                message("Could not determine version of '", pypi_name, "'. Will reinstall.")
             }
         }
 

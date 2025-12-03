@@ -5,77 +5,53 @@
 \title{Color alluvia}
 \usage{
 data_color(
-  df,
-  graphing_columns,
-  column_weights = NULL,
-  color_list = NULL,
-  match_colors = TRUE,
-  color_val = NULL,
-  coloring_algorithm = "advanced",
-  coloring_algorithm_advanced_option = "leiden",
+  data,
+  cols,
+  wt = NULL,
+  method = "advanced",
   resolution = 1,
-  cutoff = 0.5,
-  preprocess_data = TRUE,
-  output_df_path = NULL,
   verbose = FALSE,
-  print_params = FALSE,
-  load_df = TRUE
+  options = data_color_options()
 )
 }
 \arguments{
-\item{df}{A data frame, tibble, or CSV file path. Must be in one of two formats:
-(1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
-(2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).}
+\item{data}{A data frame, tibble, or CSV file path. Must be in one of two formats:
+(1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
+(2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).}
 
-\item{graphing_columns}{Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting).}
+\item{cols}{Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).}
 
-\item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
+\item{wt}{Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).}
 
-\item{color_list}{Logical named list or vector of colors to override default group colors.}
+\item{method}{Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{cols}.}
 
-\item{match_colors}{Optional match colors}
-
-\item{color_val}{Optional named list where the entries are colors and the names correspond to values of the dataframe that should use those colors}
-
-\item{coloring_algorithm}{Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{graphing_columns}.}
-
-\item{coloring_algorithm_advanced_option}{Character. If \code{coloring_algorithm == 'advanced'}, then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.}
-
-\item{resolution}{Numeric If \code{coloring_algorithm == 'advanced'}, then choose resolution for the graph clustering algorithm.}
-
-\item{cutoff}{Numeric If \code{coloring_algorithm != 'none' and coloring_algorithm != 'advanced'}, sets the cutoff for color matching, below which a new color will be assigned.}
-
-\item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.}
-
-\item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
+\item{resolution}{Numeric If \code{method == 'advanced'}, then choose resolution for the graph clustering algorithm.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
-\item{print_params}{Logical. If TRUE, will print function params.}
-
-\item{load_df}{Internal flag; not recommended to modify.}
+\item{options}{Additional arguments. See data_color_options}
 }
 \value{
-A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.
+A data frame where each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} ('value' if \code{wt} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.
 }
 \description{
-Colors a dataframe with the algorithm specified by \code{coloring_algorithm}.
+Colors a dataframe with the algorithm specified by \code{method}.
 }
 \examples{
-# Example 1: df format 1
-df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- data_preprocess(df, graphing_columns = c("method1", "method2"))
+# Example 1: data format 1
+data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+clus_df_gather <- data_preprocess(data, cols = c("method1", "method2"))
 
-# Example 2: df format 2
-df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- df |>
+# Example 2: data format 2
+data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+clus_df_gather <- data |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
 clus_df_gather <- data_preprocess(
     clus_df_gather,
-    graphing_columns = c("method1", "method2"),
-    column_weights = "value"
+    cols = c("method1", "method2"),
+    wt = "value"
 )
 
 }

@@ -58,9 +58,9 @@ BIT <- R6::R6Class("BIT",
                    )
 )
 
-calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", column_weights = 'count', weighted = TRUE) {
+calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'count', weighted_metric = TRUE) {
     # Step 1: Sort by y1
-    df_sorted <- df[order(df[[y1]]), ]
+    df_sorted <- data[order(data[[y1]]), ]
     rownames(df_sorted) <- NULL
     
     # Step 2: Rank-compress y2 (higher y2 → higher rank)
@@ -73,32 +73,32 @@ calculate_objective_fenwick <- function(df, y1 = "y1", y2 = "y2", column_weights
     
     for (i in seq_len(nrow(df_sorted))) {
         y2_rank <- df_sorted$y2_rank[i]
-        weight <- if (weighted) df_sorted[[column_weights]][i] else 1.0
+        weight <- if (weighted_metric) df_sorted[[wt]][i] else 1.0
         
         # Count previous y2s > current (strictly greater)
         q <- bit$query_range(y2_rank + 1L, max_rank)
         
-        if (weighted) {
+        if (weighted_metric) {
             total_cross_weight <- total_cross_weight + weight * q$weight_sum
         } else {
-            total_cross_weight <- total_cross_weight + q[[column_weights]]
+            total_cross_weight <- total_cross_weight + q[[wt]]
         }
         
         # Add current y2_rank to BIT
-        bit$update(y2_rank, if (weighted) weight else 1.0)
+        bit$update(y2_rank, if (weighted_metric) weight else 1.0)
     }
     
     total_cross_weight
 }
 
 
-make_lode_df <- function(df, graphing_columns = NULL, column_weights = "value") {
-    lode_df <- df
+make_lode_df <- function(data, cols = NULL, wt = "value") {
+    lode_df <- data
     lode_df$alluvium <- seq_len(nrow(lode_df))
     x <- 1
-    for (i in graphing_columns) {
+    for (i in cols) {
         ordered_df <- lode_df[order(lode_df[[i]]), ]
-        ordered_df[[paste0('y', x)]] <- cumsum(ordered_df[[column_weights]])
+        ordered_df[[paste0('y', x)]] <- cumsum(ordered_df[[wt]])
         lode_df <- dplyr::left_join(
             lode_df,
             ordered_df[, c('alluvium',paste0('y', x))],
@@ -109,16 +109,16 @@ make_lode_df <- function(df, graphing_columns = NULL, column_weights = "value") 
     return(lode_df)
 }
 
-make_lode_df_old <- function(df, graphing_columns = NULL, column_weights = "value") {
-    if (column_weights != "value") {
-        df <- df %>% dplyr::rename(value = !!sym(column_weights))
-        column_weights <- "value"
+make_lode_df_old <- function(data, cols = NULL, wt = "value") {
+    if (wt != "value") {
+        data <- data %>% dplyr::rename(value = !!sym(wt))
+        wt <- "value"
     }
     
-    p <- ggplot2::ggplot(data = df, ggplot2::aes(y = value), )
-    for (x in seq_along(graphing_columns)) {
+    p <- ggplot2::ggplot(data = data, ggplot2::aes(y = value), )
+    for (x in seq_along(cols)) {
         int_col <- paste0("col", x, "_int")
-        if (!(int_col %in% colnames(df))) {
+        if (!(int_col %in% colnames(data))) {
             stop(sprintf("%s not in columns. Please run data_preprocess first.", int_col))
         }
         p$mapping[[paste0("axis", x)]] <- sym(int_col)
@@ -154,13 +154,13 @@ make_lode_df_old <- function(df, graphing_columns = NULL, column_weights = "valu
         )
     
     # add the actual character values
-    for (i in seq_along(graphing_columns)) {
+    for (i in seq_along(cols)) {
         int_col <- paste0("col", i, "_int") # e.g. col1_int
-        label_col <- graphing_columns[i]
+        label_col <- cols[i]
         stratum_col <- paste0("stratum", i) # e.g. stratum1
         stratum_char_col <- paste0(stratum_col, "_char") # e.g. stratum1_char
         
-        mapping <- setNames(df[[label_col]], df[[int_col]])
+        mapping <- setNames(data[[label_col]], data[[int_col]])
         mapping <- mapping[!duplicated(names(mapping))]
         lode_df_full[[stratum_char_col]] <- mapping[as.character(lode_df_full[[stratum_col]])]
     }
@@ -174,12 +174,12 @@ make_lode_df_old <- function(df, graphing_columns = NULL, column_weights = "valu
 #'
 #' Determine overlapping edges of k-partite graph.
 #'
-#' @param df A data frame, tibble, or CSV file path. Must be in one of two formats:
-#' (1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
-#' (2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).
-#' @param graphing_columns Optional character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.
-#' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
-#' @param weighted Logical. Weighted
+#' @param data A data frame, tibble, or CSV file path. Must be in one of two formats:
+#' (1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
+#' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
+#' @param cols Optional character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.
+#' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
+#' @param weighted_metric Logical. weighted_metric
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #'
 #' @return
@@ -195,23 +195,33 @@ make_lode_df_old <- function(df, graphing_columns = NULL, column_weights = "valu
 #' 'output_objective': An integer representing the sum of products of overlapping edge weights.
 #'
 #' @examples
-#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' df <- data_sort(df, sorting_algorithm = "tsp")
-#' result <- determine_crossing_edges(df, graphing_columns = c("col1_int", "col2_int"))
+#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' data <- data_sort(data, sorting_algorithm = "tsp")
+#' result <- determine_crossing_edges(data, cols = c("col1_int", "col2_int"))
 #'
 #' @export
-determine_crossing_edges <- function(df, graphing_columns = NULL, column_weights = "value", weighted = TRUE, verbose = FALSE) {
+determine_crossing_edges <- function(data, cols = NULL, wt = "value", weighted_metric = TRUE, verbose = FALSE) {
     col_ints <- c()
-    for (h in seq_len(length(graphing_columns))) {
+    for (h in seq_len(length(cols))) {
         col_ints <- c(col_ints, paste0('col', h, '_int'))
     }
-    lode_df <- make_lode_df(df, col_ints, column_weights)
+    
+    # add int columns if needed
+    n_present <- sum(col_ints %in% names(data))
+    if (n_present == 0) {
+        data <- generalized_make_int_columns(data, cols)
+    } else if (n_present == length(col_ints)) {
+    } else {
+        stop("Some int columns are present, but not all.")
+    }
+    
+    lode_df <- make_lode_df(data, col_ints, wt)
     objective_val <- 0
-    for (h in seq_len(length(graphing_columns) - 1)) {
+    for (h in seq_len(length(cols) - 1)) {
         y1 <- paste0('y', h)
         y2 <- paste0('y', h+1)
         
-        objective_val <- objective_val + calculate_objective_fenwick(lode_df, y1 = y1, y2 = y2, column_weights =  column_weights, weighted = weighted)
+        objective_val <- objective_val + calculate_objective_fenwick(lode_df, y1 = y1, y2 = y2, wt =  wt, weighted_metric = weighted_metric)
     }
     return(list(lode_df = lode_df, output_objective = objective_val))
 }

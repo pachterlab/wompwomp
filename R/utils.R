@@ -112,3 +112,71 @@ check_python_setup_with_necessary_packages <- function(necessary_packages_for_th
         }
     }
 }
+
+
+generalized_reorder <- function(clus_df_gather, clus_df_gather_sorted, cols) {
+    # 1. Reorder factors of each column in cols according to ascending order of integers in coli_int, where i represents the index of the column in cols
+    ordering_columns <- paste0("col", seq_along(cols), "_int")
+    missing_cols <- setdiff(ordering_columns, colnames(clus_df_gather_sorted))
+    if (length(missing_cols) > 0) {
+        stop(sprintf("The following ordering_columns are missing from clus_df_gather_sorted: %s", paste(missing_cols, collapse = ", ")))
+    }
+    
+    for (i in seq_along(cols)) {
+        grp_col <- cols[i]
+        ord_col <- ordering_columns[i]
+        
+        order_vec <- clus_df_gather_sorted %>%
+            arrange(.data[[ord_col]]) %>%
+            pull(.data[[grp_col]]) %>%
+            unique()
+        
+        clus_df_gather[[grp_col]] <- factor(clus_df_gather[[grp_col]], levels = order_vec)
+    }
+    
+    # 2. Reorder columns so cols come first, in that order
+    other_cols <- setdiff(colnames(clus_df_gather), cols)
+    clus_df_gather <- clus_df_gather[, c(cols, other_cols)]
+    clus_df_gather <- clus_df_gather[, !(names(clus_df_gather) %in% ordering_columns), drop = FALSE]
+    
+    clus_df_gather
+}
+
+generalized_make_int_columns <- function(clus_df_gather, cols) {
+    # Check that all columns exist
+    missing_cols <- setdiff(cols, colnames(clus_df_gather))
+    if (length(missing_cols) > 0) {
+        stop(sprintf(
+            "The following cols do not exist in clus_df_gather: %s",
+            paste(missing_cols, collapse = ", ")
+        ))
+    }
+    
+    # Check that each is a factor
+    not_factors <- cols[!sapply(clus_df_gather[cols], is.factor)]
+    if (length(not_factors) > 0) {
+        stop(sprintf(
+            "The following columns are not factors (factor ordering required): %s",
+            paste(not_factors, collapse = ", ")
+        ))
+    }
+    
+    # Construct integer column names
+    ordering_columns <- paste0("col", seq_along(cols), "_int")
+    
+    # Construct integer columns
+    for (i in seq_along(cols)) {
+        grp_col <- cols[i]
+        ord_col <- ordering_columns[i]
+        
+        # Mapping: factor level order → integer (1, 2, ..., n)
+        lvl <- levels(clus_df_gather[[grp_col]])
+        map <- setNames(seq_along(lvl), lvl)  # named vector; e.g. "B"→1, "A"→2, etc
+        
+        # Assign integer values based on factor order
+        clus_df_gather[[ord_col]] <- unname(map[clus_df_gather[[grp_col]]])
+    }
+    
+    # Return with new integer columns added
+    clus_df_gather
+}

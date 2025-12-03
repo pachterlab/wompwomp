@@ -5,23 +5,23 @@
 \title{Determine overlapping edges}
 \usage{
 determine_crossing_edges(
-  df,
-  graphing_columns = NULL,
-  column_weights = "value",
-  weighted = TRUE,
+  data,
+  cols = NULL,
+  wt = "value",
+  weighted_metric = TRUE,
   verbose = FALSE
 )
 }
 \arguments{
-\item{df}{A data frame, tibble, or CSV file path. Must be in one of two formats:
-(1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
-(2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).}
+\item{data}{A data frame, tibble, or CSV file path. Must be in one of two formats:
+(1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
+(2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).}
 
-\item{graphing_columns}{Optional character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.}
+\item{cols}{Optional character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.}
 
-\item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
+\item{wt}{Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).}
 
-\item{weighted}{Logical. Weighted}
+\item{weighted_metric}{Logical. weighted_metric}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 }
@@ -43,8 +43,8 @@ If return_weighted_layer_free_objective is FALSE (default): A list of values, as
 Determine overlapping edges of k-partite graph.
 }
 \examples{
-df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-df <- data_sort(df, sorting_algorithm = "tsp")
-result <- determine_crossing_edges(df, graphing_columns = c("col1_int", "col2_int"))
+data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+data <- data_sort(data, sorting_algorithm = "tsp")
+result <- determine_crossing_edges(data, cols = c("col1_int", "col2_int"))
 
 }

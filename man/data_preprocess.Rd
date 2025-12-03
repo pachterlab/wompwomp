@@ -5,9 +5,9 @@
 \title{Preprocess data}
 \usage{
 data_preprocess(
-  df,
-  graphing_columns,
-  column_weights = NULL,
+  data,
+  cols,
+  wt = NULL,
   default_sorting = "alphabetical",
   output_df_path = NULL,
   verbose = FALSE,
@@ -15,21 +15,21 @@ data_preprocess(
   load_df = TRUE,
   do_gather_set_data = FALSE,
   color_band_column = NULL,
-  do_add_int_columns = TRUE
+  do_add_int_columns = FALSE
 )
 }
 \arguments{
-\item{df}{A data frame, tibble, or CSV file path. Must be in one of two formats:
-(1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
-(2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).}
+\item{data}{A data frame, tibble, or CSV file path. Must be in one of two formats:
+(1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
+(2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).}
 
-\item{graphing_columns}{Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting).}
+\item{cols}{Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).}
 
-\item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
+\item{wt}{Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).}
 
 \item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
 
-\item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
+\item{output_df_path}{Optional character. Output path for the output data frame, in rds format. If \code{NULL}, then will not be saved.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
@@ -44,26 +44,26 @@ data_preprocess(
 \item{do_add_int_columns}{Internal flag; not recommended to modify.}
 }
 \value{
-A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc.
+A data frame where each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} ('value' if \code{wt} == NULL) represents the number of entities in that combination of groupings. For each column in \code{cols}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{cols} - for example, \code{col1_int} corresponds to \code{cols[1]}, \code{col2_int} corresponds to \code{cols[2]}, etc.
 }
 \description{
-Preprocess data (load in, add integer columns, reorder columns to match graphing_columns, and group as needed)
+Preprocess data (load in, add integer columns, reorder columns to match cols, and group as needed)
 }
 \examples{
-# Example 1: df format 1
-df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- data_preprocess(df, graphing_columns = c("method1", "method2"))
+# Example 1: data format 1
+data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+clus_df_gather <- data_preprocess(data, cols = c("method1", "method2"))
 
-# Example 2: df format 2
-df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- df |>
+# Example 2: data format 2
+data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+clus_df_gather <- data |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
 clus_df_gather <- data_preprocess(
     clus_df_gather,
-    graphing_columns = c("method1", "method2"),
-    column_weights = "value"
+    cols = c("method1", "method2"),
+    wt = "value"
 )
 
 }

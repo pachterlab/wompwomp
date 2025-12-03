@@ -19,74 +19,120 @@ default_colors <- c(
     "#3D3D3D"
 )
 
-#' Color alluvia
+#' Control Options for `data_color()`
 #'
-#' Colors a dataframe with the algorithm specified by \code{coloring_algorithm}.
+#' Creates a list of control parameters that modify the behavior of
+#' `data_color()`. These options allow fine-grained control over the coloring
+#' algorithm without cluttering the main function interface.
 #'
-#' @param df A data frame, tibble, or CSV file path. Must be in one of two formats:
-#' (1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
-#' (2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).
-#' @param graphing_columns Character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting).
-#' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
-#' @param color_list Logical named list or vector of colors to override default group colors.
-#' @param match_colors Optional match colors
-#' @param color_val Optional named list where the entries are colors and the names correspond to values of the dataframe that should use those colors
-#' @param coloring_algorithm Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{graphing_columns}.
-#' @param coloring_algorithm_advanced_option Character. If \code{coloring_algorithm == 'advanced'}, then choose graph clustering algorithm. Choices are 'leiden' (default) or 'louvain'.
-#' @param resolution Numeric If \code{coloring_algorithm == 'advanced'}, then choose resolution for the graph clustering algorithm.
-#' @param cutoff Numeric If \code{coloring_algorithm != 'none' and coloring_algorithm != 'advanced'}, sets the cutoff for color matching, below which a new color will be assigned.
-#' @param preprocess_data Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.
-#' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
-#' @param verbose Logical. If TRUE, will display messages during the function.
-#' @param print_params Logical. If TRUE, will print function params.
+#' @param color_list Optional named list or vector mapping values in the
+#'   graphing columns to colors. Overrides default palette.
+#' @param match_colors Logical. If TRUE (default), attempts to match colors
+#'   based on shared group memberships across columns.
+#' @param color_val Optional named list: names correspond to data values, and
+#'   each element is a color to assign directly.
+#' @param coloring_algorithm_advanced_option Character. When
+#'   `method == "advanced"`, selects the clustering algorithm.
+#'   Options: `"leiden"` (default) or `"louvain"`.
+#' @param cutoff Numeric. If using a non-advanced algorithm, similarity score
+#'   threshold for deciding whether to reuse a color or assign a new one.
+#' @param preprocess_data Logical. If TRUE (default), preprocess data with
+#'   `data_preprocess()`.
+#' @param print_params Logical. If TRUE, prints parameters during execution.
 #' @param load_df Internal flag; not recommended to modify.
 #'
-#' @return A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.
+#' @return A named list of control parameters for use in `data_color()`.
 #'
 #' @examples
-#' # Example 1: df format 1
-#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data_preprocess(df, graphing_columns = c("method1", "method2"))
+#' opts <- data_color_options(method = "advanced",
+#'                            coloring_algorithm_advanced_option = "leiden")
+#' df_colored <- data_color(data, cols, options = opts)
 #'
-#' # Example 2: df format 2
-#' df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- df |>
+#' @export
+data_color_options <- function(
+        color_list = NULL,
+        match_colors = TRUE,
+        color_val = NULL,
+        coloring_algorithm_advanced_option = c("leiden", "louvain"),
+        cutoff = 0.5,
+        preprocess_data = TRUE,
+        print_params = FALSE,
+        load_df = TRUE
+) {
+    
+    coloring_algorithm_advanced_option <- match.arg(coloring_algorithm_advanced_option)
+    
+    list(
+        color_list = color_list,
+        match_colors = match_colors,
+        color_val = color_val,
+        coloring_algorithm_advanced_option = coloring_algorithm_advanced_option,
+        cutoff = cutoff,
+        preprocess_data = preprocess_data,
+        print_params = print_params,
+        load_df = load_df
+    )
+}
+
+#' Color alluvia
+#'
+#' Colors a dataframe with the algorithm specified by \code{method}.
+#'
+#' @param data A data frame, tibble, or CSV file path. Must be in one of two formats:
+#' (1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
+#' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
+#' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
+#' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
+#' @param method Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{cols}.
+#' @param resolution Numeric If \code{method == 'advanced'}, then choose resolution for the graph clustering algorithm.
+#' @param verbose Logical. If TRUE, will display messages during the function.
+#' @param options Additional arguments. See data_color_options
+#'
+#' @return A data frame where each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} ('value' if \code{wt} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.
+#'
+#' @examples
+#' # Example 1: data format 1
+#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' clus_df_gather <- data_preprocess(data, cols = c("method1", "method2"))
+#'
+#' # Example 2: data format 2
+#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' clus_df_gather <- data |>
 #'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
 #'     dplyr::group_by_all() |>
 #'     dplyr::count(name = "value")
 #' clus_df_gather <- data_preprocess(
 #'     clus_df_gather,
-#'     graphing_columns = c("method1", "method2"),
-#'     column_weights = "value"
+#'     cols = c("method1", "method2"),
+#'     wt = "value"
 #' )
 #'
 #' @export
-data_color <- function(df, graphing_columns, column_weights = NULL, color_list = NULL, match_colors = TRUE,
-                       color_val = NULL, coloring_algorithm = "advanced", coloring_algorithm_advanced_option = "leiden", 
-                       resolution = 1, cutoff = .5, preprocess_data = TRUE, output_df_path = NULL, verbose = FALSE, print_params = FALSE, load_df = TRUE) {
+data_color <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = data_color_options()) {
+    list2env(options, envir = environment())  # adds my options to be variables here
     if (print_params) print_function_params()
-    lowercase_args(c("coloring_algorithm", "coloring_algorithm_advanced_option"))
+    # lowercase_args(c("method", "coloring_algorithm_advanced_option"))
     
     #* Type Checking Start
-    valid_algorithms <- c("advanced", "left", "right", "none", "random", graphing_columns)
-    if (!(coloring_algorithm %in% valid_algorithms)) {
+    valid_algorithms <- c("advanced", "left", "right", "none", "random", cols)
+    if (!(method %in% valid_algorithms)) {
         stop(sprintf(
             "Invalid sorting_algorithm: '%s'. Must be one of: %s",
-            coloring_algorithm, paste(valid_algorithms, collapse = ", ")
+            method, paste(valid_algorithms, collapse = ", ")
         ))
     }
     
-    if (is.vector(graphing_columns) && length(graphing_columns) < 2) {
-        stop("graphing_columns must have at least 2 entries.")
+    if (is.vector(cols) && length(cols) < 2) {
+        stop("cols must have at least 2 entries.")
     }
     
-    if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
-        stop("Some graphing_columns are not present in the dataframe.")
+    if (!is.null(cols) && any(!cols %in% colnames(data))) {
+        stop("Some cols are not present in the dataframe.")
     }
     
-    if ((is.character(df)) && (load_df)) {
+    if ((is.character(data)) && (load_df)) {
         if (verbose) message("Loading in data")
-        df <- load_in_df(df = df, graphing_columns = graphing_columns, column_weights = column_weights)
+        data <- load_in_df(data = data, cols = cols, wt = wt)
         load_df <- FALSE
     }
     #* Type Checking End
@@ -95,25 +141,25 @@ data_color <- function(df, graphing_columns, column_weights = NULL, color_list =
     # Preprocess (i.e., add int columns and do the grouping)
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
-        clus_df_gather <- data_preprocess(df = df, graphing_columns = graphing_columns, 
-                                          column_weights = column_weights, load_df = load_df, 
+        clus_df_gather <- data_preprocess(data = data, cols = cols, 
+                                          wt = wt, load_df = load_df, 
                                           do_gather_set_data = FALSE, do_add_int_columns = FALSE)
-        if (is.null(column_weights)) {
-            column_weights <- "value" # is set during data_preprocess
+        if (is.null(wt)) {
+            wt <- "value" # is set during data_preprocess
         }
     } else {
-        clus_df_gather <- df
+        clus_df_gather <- data
     }
-    clus_df_gather <- data_sort(clus_df_gather, graphing_columns = graphing_columns, 
-                                sorting_algorithm="none", column_weights = column_weights,
+    clus_df_gather <- data_sort(clus_df_gather, cols = cols, 
+                                sorting_algorithm="none", wt = wt,
                                 optimize_column_order = FALSE)
     #!!!! do coloring here
     if (match_colors) {
         unused_colors <- default_colors
         first <- TRUE
-        if (coloring_algorithm == "left") {
+        if (method == "left") {
             n <- 1
-            for (col_group in graphing_columns) {
+            for (col_group in cols) {
                 num_levels <- length(levels(clus_df_gather[[col_group]]))
                 if (first) {
                     temp_df <- data.frame(name = factor(1:num_levels))
@@ -135,9 +181,9 @@ data_color <- function(df, graphing_columns, column_weights = NULL, color_list =
                 }
                 n <- n + 1
             }
-        } else if (coloring_algorithm == "right") {
-            n <- length(graphing_columns)
-            for (col_group in rev(graphing_columns)) {
+        } else if (method == "right") {
+            n <- length(cols)
+            for (col_group in rev(cols)) {
                 num_levels <- length(levels(clus_df_gather[[col_group]]))
                 if (first) {
                     temp_df <- data.frame(name = factor(1:num_levels))
@@ -149,7 +195,7 @@ data_color <- function(df, graphing_columns, column_weights = NULL, color_list =
                         temp_df,
                         by = paste0("col", n, "_int")
                     )
-                    unused_colors <- unused_colors[!(unused_colors %in% df[[paste0("col", n, "_int_colors")]])]
+                    unused_colors <- unused_colors[!(unused_colors %in% data[[paste0("col", n, "_int_colors")]])]
                     first <- FALSE
                 } else {
                     clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
@@ -160,16 +206,16 @@ data_color <- function(df, graphing_columns, column_weights = NULL, color_list =
                 }
                 n <- n - 1
             }
-        } else if (coloring_algorithm == "advanced") {
-            # check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("igraph", "leidenalg"), additional_message = "do not set coloring_algorithm to 'advanced'")
+        } else if (method == "advanced") {
+            # check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("igraph", "leidenalg"), additional_message = "do not set method to 'advanced'")
             clus_df_gather_color <- find_colors_advanced(clus_df_gather, unused_colors, 
-                                                         graphing_columns, coloring_algorithm_advanced_option = coloring_algorithm_advanced_option, 
+                                                         cols, coloring_algorithm_advanced_option = coloring_algorithm_advanced_option, 
                                                          resolution = resolution)
         } else {
-            col_group <- coloring_algorithm
-            num_levels <- length(levels(factor(df[[col_group]])))
+            col_group <- method
+            num_levels <- length(levels(factor(data[[col_group]])))
             
-            ref_group_n <- which(coloring_algorithm == graphing_columns)[[1]]
+            ref_group_n <- which(method == cols)[[1]]
             temp_df <- data.frame(name = factor(1:num_levels))
             temp_df[[paste0("col", ref_group_n, "_int_colors")]] <- unused_colors[1:num_levels]
             names(temp_df) <- c(paste0("col", ref_group_n, "_int"), paste0("col", ref_group_n, "_int_colors"))
@@ -178,11 +224,11 @@ data_color <- function(df, graphing_columns, column_weights = NULL, color_list =
                 temp_df,
                 by = paste0("col", ref_group_n, "_int")
             )
-            unused_colors <- unused_colors[!(unused_colors %in% df[[paste0("col", ref_group_n, "_int_colors")]])]
+            unused_colors <- unused_colors[!(unused_colors %in% data[[paste0("col", ref_group_n, "_int_colors")]])]
             
-            for (col_group in graphing_columns) {
-                if (!(col_group == coloring_algorithm)) {
-                    col_group_n <- which(col_group == graphing_columns)[[1]]
+            for (col_group in cols) {
+                if (!(col_group == method)) {
+                    col_group_n <- which(col_group == cols)[[1]]
                     clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
                                                                group1_name = paste0("col", ref_group_n, "_int"), group2_name = paste0("col", col_group_n, "_int"),
                                                                cutoff = cutoff
@@ -249,9 +295,9 @@ find_group2_colors <- function(clus_df_gather, unused_colors,
     return(final_df)
 }
 
-find_colors_advanced <- function(clus_df_gather, ditto_colors, graphing_columns, coloring_algorithm_advanced_option = "leiden", resolution = 1) {
+find_colors_advanced <- function(clus_df_gather, ditto_colors, cols, coloring_algorithm_advanced_option = "leiden", resolution = 1) {
     column_int_names <- c()
-    for (col_int in seq_along(graphing_columns)) {
+    for (col_int in seq_along(cols)) {
         int_name <- paste0("col", col_int, "_int")
         column_int_names <- c(column_int_names, int_name)
     }

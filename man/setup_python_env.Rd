@@ -6,7 +6,7 @@
 \usage{
 setup_python_env(
   envname = "wompwomp_env",
-  packages = c(numpy = "numpy==1.23.5", splitspy = "splitspy", pandas = "pandas", scipy =
+  packages = c(numpy = "numpy", splitspy = "splitspy", pandas = "pandas", scipy =
     "scipy", leidenalg = "leidenalg", igraph = "python-igraph"),
   use_conda = TRUE,
   yes = FALSE

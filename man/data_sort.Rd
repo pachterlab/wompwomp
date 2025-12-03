@@ -5,121 +5,69 @@
 \title{Sorts a dataframe.}
 \usage{
 data_sort(
-  df,
-  graphing_columns = NULL,
-  column1 = NULL,
-  column2 = NULL,
-  column_weights = NULL,
-  sorting_algorithm = "tsp",
-  optimize_column_order = TRUE,
-  optimize_column_order_per_cycle = FALSE,
-  matrix_initialization_value = 1e+06,
-  same_side_matrix_initialization_value = 1e+06,
+  data,
+  cols = NULL,
+  wt = NULL,
+  method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"),
+  column_method = c("tsp", "neighbornet", "none", "random"),
   weight_scalar = 5e+05,
-  matrix_initialization_value_column_order = 1e+06,
-  weight_scalar_column_order = 1,
-  column_sorting_metric = "edge_crossing",
-  column_sorting_algorithm = "tsp",
-  weighted = TRUE,
-  cycle_start_positions = NULL,
   fixed_column = NULL,
-  random_initializations = 1,
   output_df_path = NULL,
-  preprocess_data = TRUE,
-  default_sorting = "alphabetical",
-  return_updated_graphing_columns = FALSE,
   verbose = FALSE,
-  print_params = FALSE,
-  load_df = TRUE,
-  do_compute_alluvial_statistics = TRUE
+  options = data_sort_options()
 )
 }
 \arguments{
-\item{df}{A data frame, tibble, or CSV file path. Must be in one of two formats:
-(1) column_weights == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two graphing_columns).
-(2) column_weights != NULL: Each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{graphing_columns}, one \code{column_weights}).}
+\item{data}{A data frame/tibble. Must be in one of two formats:
+(1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
+(2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).}
 
-\item{graphing_columns}{Optional character vector. Vector of column names from \code{df} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.}
+\item{cols}{Optional character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.}
 
-\item{column1}{Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.}
+\item{wt}{Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).}
 
-\item{column2}{Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.}
+\item{method}{Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.}
 
-\item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
+\item{column_method}{Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'random', and 'none'.}
 
-\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.}
+\item{weight_scalar}{Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method == 'tsp'}.}
 
-\item{optimize_column_order}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'tsp'} and \code{length(graphing_columns) > 2}.}
+\item{fixed_column}{Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method == 'greedy_wolf'}.}
 
-\item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'tsp'} and \code{length(graphing_columns) > 2}.}
-
-\item{matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'tsp'}.}
-
-\item{same_side_matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{sorting_algorithm == 'tsp'}.}
-
-\item{weight_scalar}{Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{sorting_algorithm == 'tsp'}.}
-
-\item{matrix_initialization_value_column_order}{Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'tsp'} and \code{optimize_column_order} is TRUE.}
-
-\item{weight_scalar_column_order}{Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'tsp'} and \code{optimize_column_order} is TRUE.}
-
-\item{column_sorting_metric}{Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{sorting_algorithm == 'tsp'} and \code{optimize_column_order} is TRUE.}
-
-\item{column_sorting_algorithm}{Character. Algorithm to use for determining column order. Options are "tsp" (default). Only applies when \code{sorting_algorithm == 'tsp'} and \code{optimize_column_order} is TRUE.}
-
-\item{weighted}{Logical. Weighted objective}
-
-\item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'tsp'}.}
-
-\item{fixed_column}{Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_wolf'}.}
-
-\item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}.}
-
-\item{output_df_path}{Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.}
-
-\item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.}
-
-\item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
-
-\item{return_updated_graphing_columns}{Logical. If FALSE, will only return the updated data frame. If TRUE, will return both the updated data frame and the updated graphing_columns parameter in the order in which the columns should be graphed.}
+\item{output_df_path}{Optional character. Output path for the output data frame, in rds format. If \code{NULL}, then will not be saved.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
-\item{print_params}{Logical. If TRUE, will print function params.}
-
-\item{load_df}{Internal flag; not recommended to modify.}
-
-\item{do_compute_alluvial_statistics}{Internal flag; not recommended to modify.}
+\item{options}{Additional arguments. See data_sort_options}
 }
 \value{
-If return_updated_graphing_columns == FALSE (default): A data frame where each row represents a combination of groupings, each column from \code{graphing_columns} represents a grouping, and the column \code{column_weights} ('value' if \code{column_weights} == NULL) represents the number of entities in that combination of groupings. For each column in \code{graphing_columns}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{graphing_columns} - for example, \code{col1_int} corresponds to \code{graphing_columns[1]}, \code{col2_int} corresponds to \code{graphing_columns[2]}, etc. The position mappings in these columns, as well as the order of the columns (if \code{optimize_column_order} is TRUE), will be sorted according to \code{sorting_algorithm}.
-If return_updated_graphing_columns == TRUE: A list of the data frame described above and the sorted \code{graphing_columns}, in the keys 'clus_df_gather' and 'graphing_columns', respectively.
+A data frame where each row represents an alluvium and each column represents an axis. Each column of \code{cols} represents an axis, stored as a factor ordered in ascending order of strata. There is an additional column \code{wt} ('value' if NULL) that represents the size of the alluvium in that row. The order of columns represents the recommended order of axes.
 }
 \description{
-Sorts a dataframe with the algorithm specified by \code{sorting_algorithm}.
+Sorts a dataframe with the algorithm specified by \code{method}.
 }
 \examples{
-# Example 1: df format 1
-df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+# Example 1: data format 1
+data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 clus_df_gather <- data_sort(
-    df,
-    graphing_columns = c("method1", "method2"),
-    sorting_algorithm = "tsp",
-    column_sorting_algorithm = "tsp"
+    data,
+    cols = c("method1", "method2"),
+    method = "tsp",
+    column_method = "tsp"
 )
 
-# Example 2: df format 2
-df <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- df |>
+# Example 2: data format 2
+data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+clus_df_gather <- data |>
     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
 clus_df_gather <- data_sort(
     clus_df_gather,
-    graphing_columns = c("method1", "method2"),
-    column_weights = "value",
-    sorting_algorithm = "tsp",
-    column_sorting_algorithm = "tsp"
+    cols = c("method1", "method2"),
+    wt = "value",
+    method = "tsp",
+    column_method = "tsp"
 )
 
 }
