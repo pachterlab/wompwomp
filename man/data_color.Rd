@@ -7,7 +7,7 @@
 data_color(
   data,
   cols,
-  wt = NULL,
+  wt,
   method = "advanced",
   resolution = 1,
   verbose = FALSE,

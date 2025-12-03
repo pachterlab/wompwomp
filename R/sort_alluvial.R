@@ -925,53 +925,7 @@ data_sort_options <- function(
     )
 }
 
-
-#' Sorts a dataframe.
-#'
-#' Sorts a dataframe with the algorithm specified by \code{method}.
-#'
-#' @param data A data frame/tibble. Must be in one of two formats:
-#' (1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
-#' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
-#' @param cols Optional character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.
-#' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
-#' @param method Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
-#' @param column_method Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'random', and 'none'.
-#' @param weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method == 'tsp'}.
-#' @param fixed_column Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method == 'greedy_wolf'}.
-#' @param output_df_path Optional character. Output path for the output data frame, in rds format. If \code{NULL}, then will not be saved.
-#' @param verbose Logical. If TRUE, will display messages during the function.
-#' @param options Additional arguments. See data_sort_options
-#'
-#' @return
-#' A data frame where each row represents an alluvium and each column represents an axis. Each column of \code{cols} represents an axis, stored as a factor ordered in ascending order of strata. There is an additional column \code{wt} ('value' if NULL) that represents the size of the alluvium in that row. The order of columns represents the recommended order of axes.
-#'
-#' @examples
-#' # Example 1: data format 1
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data_sort(
-#'     data,
-#'     cols = c("method1", "method2"),
-#'     method = "tsp",
-#'     column_method = "tsp"
-#' )
-#'
-#' # Example 2: data format 2
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data |>
-#'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
-#'     dplyr::group_by_all() |>
-#'     dplyr::count(name = "value")
-#' clus_df_gather <- data_sort(
-#'     clus_df_gather,
-#'     cols = c("method1", "method2"),
-#'     wt = "value",
-#'     method = "tsp",
-#'     column_method = "tsp"
-#' )
-#'
-#' @export
-data_sort <- function(data, cols = NULL, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
+data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
     default_opt <- data_sort_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
@@ -1000,7 +954,7 @@ data_sort <- function(data, cols = NULL, wt = NULL, method = c("tsp", "neighborn
     
     if (print_params) print_function_params()
     # lowercase_args(c("method", "column_metric", "column_method", "default_sorting"))
-    
+
     #* Type Checking Start
     method <- match.arg(method)
     column_method <- match.arg(column_method)
@@ -1109,4 +1063,93 @@ data_sort <- function(data, cols = NULL, wt = NULL, method = c("tsp", "neighborn
     }
     
     return(clus_df_gather)
+}
+
+
+#' Sorts a dataframe.
+#'
+#' Sorts a dataframe with the algorithm specified by \code{method}.
+#'
+#' @param data A data frame/tibble. Must be in one of two formats:
+#' (1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
+#' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
+#' @param cols Optional character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.
+#' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
+#' @param method Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
+#' @param column_method Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'random', and 'none'.
+#' @param weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method == 'tsp'}.
+#' @param fixed_column Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method == 'greedy_wolf'}.
+#' @param output_df_path Optional character. Output path for the output data frame, in rds format. If \code{NULL}, then will not be saved.
+#' @param verbose Logical. If TRUE, will display messages during the function.
+#' @param options Additional arguments. See data_sort_options
+#'
+#' @return
+#' A data frame where each row represents an alluvium and each column represents an axis. Each column of \code{cols} represents an axis, stored as a factor ordered in ascending order of strata. There is an additional column \code{wt} ('value' if NULL) that represents the size of the alluvium in that row. The order of columns represents the recommended order of axes.
+#'
+#' @examples
+#' # Example 1: data format 1
+#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' clus_df_gather <- data_sort(
+#'     data,
+#'     cols = c("method1", "method2"),
+#'     method = "tsp",
+#'     column_method = "tsp"
+#' )
+#'
+#' # Example 2: data format 2
+#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' clus_df_gather <- data |>
+#'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+#'     dplyr::group_by_all() |>
+#'     dplyr::count(name = "value")
+#' clus_df_gather <- data_sort(
+#'     clus_df_gather,
+#'     cols = c("method1", "method2"),
+#'     wt = "value",
+#'     method = "tsp",
+#'     column_method = "tsp"
+#' )
+#'
+#' @export
+data_sort <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
+    default_opt <- data_sort_options()
+    if (!is.null(options)) {
+        if (!is.list(options)) stop("`options` must be a list.")
+        for (nm in names(default_opt)) {
+            if (!nm %in% names(options)) {
+                val <- ifelse(!is.null(default_opt[[nm]]), default_opt[[nm]], "NULLTMP")
+                options[[nm]] <- val
+            }
+        }
+    } else {
+        options <- default_opt
+        for (nm in names(options)) {
+            if (is.null(options[[nm]])) {
+                options[[nm]] <- "NULLTMP"
+            }
+        }
+    }
+    for (nm in names(options)) {
+        if (is.null(options[[nm]]) || options[[nm]] == "NULLTMP") {
+            val <- NULL
+        } else {
+            val <- options[[nm]]
+        }
+        assign(nm, val, envir = environment())
+    }
+
+    if (missing(wt)) {
+        data <- data_preprocess(data = data, cols = cols, default_sorting = default_sorting, load_df = load_df, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
+        wt <- "value" # is set during data_preprocess
+    }
+    
+    cols_expr <- rlang::enquo(cols)
+    wt_expr <- rlang::ensym(wt)  # rlang::enquo(wt)
+    cols_pos <- tidyselect::eval_select(cols_expr, data = data)
+    wt_pos <- tidyselect::eval_select(wt_expr, data = data)
+    res <- rlang::set_names(
+        data[c(cols_pos, wt_pos)],
+        c(names(cols_pos), names(wt_pos))
+    )
+    data_sort_internal(data = res, cols = names(cols_pos), wt = names(wt_pos), method = method, column_method = column_method, weight_scalar = weight_scalar, fixed_column = fixed_column, output_df_path = output_df_path, verbose = verbose, options = options)
 }

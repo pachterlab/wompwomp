@@ -115,8 +115,85 @@ plot_alluvial_wompwomp(clus_df_gather, graphing_columns)
 
 ```{r}
 set.seed(43)
+devtools::load_all()
 clus_df_gather_tsp_from_scratch <- data_sort(df, cols = graphing_columns, method = "tsp")  # sorting
 stratum_to_color_mapping <- data_color(clus_df_gather_tsp_from_scratch, cols = graphing_columns, wt = "value", method = "advanced")  # coloring
 stratum_colors <- make_stratum_color_list(data = clus_df_gather_tsp_from_scratch, cols = graphing_columns, mapping = stratum_to_color_mapping)  # coloring in sorted order
 plot_alluvial_wompwomp(clus_df_gather_tsp_from_scratch, graphing_columns, stratum_colors = stratum_colors)
+```
+
+```{r}
+library(ggalluvial)
+devtools::load_all()
+set.seed(43)
+
+df <- data.frame(
+  tissue = c(
+    "BRAIN", "BRAIN", "BRAIN",
+    "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+    "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+    "T CELL", "T CELL",
+    "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+  ),
+  cluster = c(
+    1, 1, 2,
+    1, 2, 2, 2, 2, 2,
+    1, 3, 3, 3, 3, 3, 3,
+    4, 4,
+    4, 4, 4, 4, 4, 4, 4, 4, 4
+  )
+)
+
+# preprocess (manual) and plot — unsorted + uncolored
+df |> 
+  dplyr::group_by(tissue, cluster) |> 
+  dplyr::summarize(value = dplyr::n()) |> 
+  dplyr::ungroup() |> 
+  dplyr::mutate(dplyr::across(c(tissue, cluster), as.character)) |> 
+  print() -> clus_df_gather
+
+# unsorted plot
+clus_df_gather |> 
+  ggplot(aes(y = value, axis1 = tissue, axis2 = cluster)) +
+  # alluvia color is column1
+  geom_alluvium(aes(fill = tissue), width = 1/12) +
+  geom_stratum(aes(fill = after_stat(stratum)), width = 1/12, color = "grey") +
+  geom_label(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(
+    limits = c("tissue", "cluster"),
+    expand = c(.05, .05)
+  )
+
+# sort (tidy) and plot - sorted + uncolored
+clus_df_gather |> 
+  data_sort(cols = c(tissue, cluster), wt = value) |> 
+  print() -> clus_df_gather_sort
+
+clus_df_gather_sort |> 
+  ggplot(aes(y = value, axis1 = tissue, axis2 = cluster)) +
+  # alluvia color is column1
+  geom_alluvium(aes(fill = tissue), width = 1/12) +
+  geom_stratum(aes(fill = after_stat(stratum)), width = 1/12, color = "grey") +
+  geom_label(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(
+    limits = c("tissue", "cluster"),
+    expand = c(.05, .05)
+  )
+
+# color (tidy) and plot - sorted + colored
+clus_df_gather_sort |> 
+  data_color(cols = c(tissue, cluster), wt = value) |> 
+  print() -> color_mapping
+
+clus_df_gather_sort |> 
+  ggplot(aes(y = value, axis1 = tissue, axis2 = cluster)) +
+  # alluvia color is column1
+  geom_alluvium(aes(fill = tissue), width = 1/12) +
+  geom_stratum(aes(fill = after_stat(stratum)), width = 1/12, color = "grey") +
+  geom_label(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(
+    limits = c("tissue", "cluster"),
+    expand = c(.05, .05)
+  ) +
+  scale_fill_manual(values = make_stratum_color_list(data = clus_df_gather_sort, cols = c("tissue", "cluster"), mapping = color_mapping))  # scale_fill_manual(values = make_stratum_color_list(data = clus_df_gather_sort, cols = c(tissue, cluster), mapping = color_mapping))
 ```

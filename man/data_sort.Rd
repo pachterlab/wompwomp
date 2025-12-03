@@ -6,7 +6,7 @@
 \usage{
 data_sort(
   data,
-  cols = NULL,
+  cols,
   wt = NULL,
   method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"),
   column_method = c("tsp", "neighbornet", "none", "random"),

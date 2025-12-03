@@ -71,41 +71,7 @@ data_color_options <- function(
     )
 }
 
-#' Color alluvia
-#'
-#' Colors a dataframe with the algorithm specified by \code{method}.
-#'
-#' @param data A data frame, tibble, or CSV file path. Must be in one of two formats:
-#' (1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
-#' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
-#' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
-#' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
-#' @param method Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{cols}.
-#' @param resolution Numeric If \code{method == 'advanced'}, then choose resolution for the graph clustering algorithm.
-#' @param verbose Logical. If TRUE, will display messages during the function.
-#' @param options Additional arguments. See data_color_options
-#'
-#' @return A data frame where each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} ('value' if \code{wt} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.
-#'
-#' @examples
-#' # Example 1: data format 1
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data_preprocess(data, cols = c("method1", "method2"))
-#'
-#' # Example 2: data format 2
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data |>
-#'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
-#'     dplyr::group_by_all() |>
-#'     dplyr::count(name = "value")
-#' clus_df_gather <- data_preprocess(
-#'     clus_df_gather,
-#'     cols = c("method1", "method2"),
-#'     wt = "value"
-#' )
-#'
-#' @export
-data_color <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
+data_color_internal <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
     default_opt <- data_color_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
@@ -134,7 +100,7 @@ data_color <- function(data, cols, wt = NULL, method = "advanced", resolution = 
     
     if (print_params) print_function_params()
     # lowercase_args(c("method", "method_advanced_option"))
-    
+
     #* Type Checking Start
     valid_algorithms <- c("advanced", "left", "right", "none", "random", cols)
     if (!(method %in% valid_algorithms)) {
@@ -462,4 +428,52 @@ make_stratum_color_list <- function(data, cols, mapping) {
     }
     
     return(flat_colors)
+}
+
+
+#' Color alluvia
+#'
+#' Colors a dataframe with the algorithm specified by \code{method}.
+#'
+#' @param data A data frame, tibble, or CSV file path. Must be in one of two formats:
+#' (1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
+#' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
+#' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
+#' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
+#' @param method Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{cols}.
+#' @param resolution Numeric If \code{method == 'advanced'}, then choose resolution for the graph clustering algorithm.
+#' @param verbose Logical. If TRUE, will display messages during the function.
+#' @param options Additional arguments. See data_color_options
+#'
+#' @return A data frame where each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} ('value' if \code{wt} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.
+#'
+#' @examples
+#' # Example 1: data format 1
+#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' clus_df_gather <- data_preprocess(data, cols = c("method1", "method2"))
+#'
+#' # Example 2: data format 2
+#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
+#' clus_df_gather <- data |>
+#'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+#'     dplyr::group_by_all() |>
+#'     dplyr::count(name = "value")
+#' clus_df_gather <- data_preprocess(
+#'     clus_df_gather,
+#'     cols = c("method1", "method2"),
+#'     wt = "value"
+#' )
+#'
+#' @export
+data_color <- function(data, cols, wt, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
+    cols_expr <- rlang::enquo(cols)
+    wt_expr <- rlang::enquo(wt)
+    cols_pos <- tidyselect::eval_select(cols_expr, data = data)
+    wt_pos <- tidyselect::eval_select(wt_expr, data = data)
+    res <- rlang::set_names(
+        data[c(cols_pos, wt_pos)],
+        c(names(cols_pos), names(wt_pos))
+    )
+    map <- data_color_internal(res, cols = names(cols_pos), wt = names(wt_pos), method = method, resolution = resolution, verbose = verbose, options = options)
+    # make_stratum_color_list(data = data, cols = names(cols_pos), mapping = map)
 }
