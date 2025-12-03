@@ -118,28 +118,12 @@ data_color_internal <- function(data, cols, wt = NULL, method = "advanced", reso
         stop("Some cols are not present in the dataframe.")
     }
     
-    if ((is.character(data)) && (load_df)) {
-        if (verbose) message("Loading in data")
-        data <- load_in_df(data = data, cols = cols, wt = wt)
-        load_df <- FALSE
-    }
-    #* Type Checking End
     
-    
-    # Preprocess (i.e., add int columns and do the grouping)
-    if (preprocess_data) {
-        if (verbose) message("Preprocessing data before sorting")
-        clus_df_gather <- data_preprocess(data = data, cols = cols, 
-                                          wt = wt, load_df = load_df, 
-                                          do_gather_set_data = FALSE, do_add_int_columns = FALSE)
-        for (col in cols) {
+    clus_df_gather <- data
+    for (col in cols) {
+        if (!is.factor(clus_df_gather[[col]])) {
             clus_df_gather[[col]] <- factor(clus_df_gather[[col]])
         }
-        if (is.null(wt)) {
-            wt <- "value" # is set during data_preprocess
-        }
-    } else {
-        clus_df_gather <- data
     }
     unused_colors <- default_colors
     first <- TRUE
@@ -148,23 +132,25 @@ data_color_internal <- function(data, cols, wt = NULL, method = "advanced", reso
             num_levels <- length(levels(clus_df_gather[[col_group]]))
             if (first) {
                 temp_df <- data.frame(name = levels(clus_df_gather[[col_group]]))
-                temp_df[[paste0(col_group, "_colors")]] <- unused_colors[1:num_levels]
+                temp_df[[paste0(col_group, "_colors")]] <- 1:num_levels
                 names(temp_df) <- c(col_group, paste0(col_group, "_colors"))
                 clus_df_gather_color <- dplyr::left_join(
                     clus_df_gather,
                     temp_df,
                     by = col_group
                 )
-                unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0(col_group, "_colors")]])]
+                #unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0(col_group, "_colors")]])]
+                max_level <- num_levels
                 old_col_group <- col_group
                 first <- FALSE
             } else {
-                clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
+                clus_df_gather_color <- find_group2_colors(clus_df_gather_color, max_level, 
                                                            group1_name = old_col_group, group2_name = col_group,
                                                            cutoff = cutoff
                 )
                 old_col_group <- col_group
-                unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[col_group]])]
+                max_level <- max(max_level, max(clus_df_gather_color[[paste0(col_group, "_colors")]]))
+                #unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[col_group]])]
             }
         }
     } else if (method == "right") {
@@ -172,23 +158,25 @@ data_color_internal <- function(data, cols, wt = NULL, method = "advanced", reso
             num_levels <- length(levels(clus_df_gather[[col_group]]))
             if (first) {
                 temp_df <- data.frame(name = levels(clus_df_gather[[col_group]]))
-                temp_df[[paste0(col_group, "_colors")]] <- unused_colors[1:num_levels]
+                temp_df[[paste0(col_group, "_colors")]] <- 1:num_levels
                 names(temp_df) <- c(col_group, paste0(col_group, "_colors"))
                 clus_df_gather_color <- dplyr::left_join(
                     clus_df_gather,
                     temp_df,
                     by = col_group
                 )
-                unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0(col_group, "_colors")]])]
+                #unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0(col_group, "_colors")]])]
+                max_level <- num_levels
                 old_col_group <- col_group
                 first <- FALSE
             } else {
-                clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
+                clus_df_gather_color <- find_group2_colors(clus_df_gather_color, max_level, 
                                                            group1_name = old_col_group, group2_name = col_group,
                                                            cutoff = cutoff
                 )
                 old_col_group <- col_group
-                unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[col_group]])]
+                max_level <- max(max_level, max(clus_df_gather_color[[paste0(col_group, "_colors")]]))
+                #unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[col_group]])]
             }
         }
     } else if (method == "advanced") {
@@ -202,22 +190,23 @@ data_color_internal <- function(data, cols, wt = NULL, method = "advanced", reso
         num_levels <- length(levels(factor(data[[col_group]])))
         
         temp_df <- data.frame(name = levels(clus_df_gather[[col_group]]))
-        temp_df[[paste0(ref_group, "_colors")]] <- unused_colors[1:num_levels]
+        temp_df[[paste0(ref_group, "_colors")]] <- 1:num_levels
         names(temp_df) <- c(ref_group, paste0(ref_group, "_colors"))
         clus_df_gather_color <- dplyr::left_join(
             clus_df_gather,
             temp_df,
             by = ref_group
         )
-        unused_colors <- unused_colors[!(unused_colors %in% data[[paste0(ref_group, "_colors")]])]
+        max_level <- num_levels
         
         for (col_group in cols) {
             if (!(col_group == method)) {
-                clus_df_gather_color <- find_group2_colors(clus_df_gather_color, unused_colors, 
+                clus_df_gather_color <- find_group2_colors(clus_df_gather_color, max_level, 
                                                            group1_name = ref_group, group2_name = col_group,
                                                            cutoff = cutoff
                 )
-                unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0(col_group, "_colors")]])]
+                max_level <- max(max_level, max(clus_df_gather_color[[paste0(col_group, "_colors")]]))
+                #unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0(col_group, "_colors")]])]
             }
         }
     }
@@ -240,8 +229,8 @@ data_color_internal <- function(data, cols, wt = NULL, method = "advanced", reso
     return (final_list)
 }
 
-find_group2_colors <- function(clus_df_gather, unused_colors,
-                               group1_name = "col1_int", group2_name = "col2_int",
+find_group2_colors <- function(clus_df_gather, max_level,
+                               group1_name, group2_name,
                                cutoff = .5) {
     num_levels <- length(levels(clus_df_gather[[group2_name]]))
     
@@ -276,9 +265,9 @@ find_group2_colors <- function(clus_df_gather, unused_colors,
         parent_df[, c(group2_name, paste0(group2_name, '_colors'))],
         by = c(group2_name)
     )
-    
     need_colors <- is.na(final_df[[paste0(group2_name, '_colors')]])
-    final_df[[paste0(group2_name, '_colors')]][need_colors] <- unused_colors[1:sum(need_colors)]
+    
+    final_df[[paste0(group2_name, '_colors')]][need_colors] <- (max_level+1):(max_level+sum(need_colors))#unused_colors[1:sum(need_colors)]
     
     final_df <- dplyr::left_join(
         clus_df_gather,
@@ -368,7 +357,7 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
     clus_df_leiden <- data.frame(group_name = partition$names, leiden = partition$membership)
     clus_df_leiden <- clus_df_leiden %>% tidyr::separate_wider_delim(group_name, names = c("axis", 'value'), delim = "_")
     
-    clus_df_leiden[["leiden"]] <- unlist(Map(function(x) ditto_colors[x], clus_df_leiden$leiden))
+    #clus_df_leiden[["leiden"]] <- unlist(Map(function(x) ditto_colors[x], clus_df_leiden$leiden))
     
     final_df <- split(clus_df_leiden, clus_df_leiden[['axis']])
     final_list <- lapply(final_df, function(subdf) {
@@ -398,7 +387,12 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
 #'
 #' @export
 make_stratum_color_list <- function(data, cols, mapping) {
-    
+    cols <- substitute(cols)
+    if (is.call(cols) && cols[[1]] == 'c') {
+        items <- as.list(cols)[-1]
+        cols <- as.list(sapply(items, function(x) rlang::as_string(x)))
+        
+    }    
     # 1. Collect all factor levels across all columns
     vals <- unique(unlist(lapply(cols, function(col) levels(data[[col]]))))
     
@@ -475,5 +469,5 @@ data_color <- function(data, cols, wt, method = "advanced", resolution = 1, verb
         c(names(cols_pos), names(wt_pos))
     )
     map <- data_color_internal(res, cols = names(cols_pos), wt = names(wt_pos), method = method, resolution = resolution, verbose = verbose, options = options)
-    # make_stratum_color_list(data = data, cols = names(cols_pos), mapping = map)
+    #make_stratum_color_list(data = data, cols = names(cols_pos), mapping = map)
 }
