@@ -973,7 +973,6 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
     }
     
     if (verbose && do_compute_alluvial_statistics) compute_alluvial_statistics(clus_df_gather = clus_df_gather, cols = cols, wt = wt)
-    
     if (method == "neighbornet" || method == "tsp") {
         # O(n^3) complexity, where n is the sum of blocks across all layers
         clus_df_gather_sorted <- sort_neighbornet(clus_df_gather = clus_df_gather, cols = cols, wt = wt, optimize_column_order = optimize_column_order, optimize_column_order_per_cycle = optimize_column_order_per_cycle, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, matrix_initialization_value_column_order = matrix_initialization_value_column_order, weight_scalar_column_order = weight_scalar_column_order, column_metric = column_metric, method = method, column_method = column_method, cycle_start_positions = cycle_start_positions, verbose = verbose, weighted_metric = weighted_metric)
