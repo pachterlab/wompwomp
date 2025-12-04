@@ -588,37 +588,6 @@ get_alluvial_df <- function(data, wt = "value", do_gather_set_data = FALSE) {
     return(data)
 }
 
-load_in_df <- function(data, cols = NULL, wt = NULL) {
-    if (is.character(data) && grepl("\\.csv$", data)) {
-        data <- read.csv(data) # load in CSV as dataframe
-    } else if (tibble::is_tibble(data)) {
-        data <- as.data.frame(data) # convert tibble to dataframe
-    } else if (!is.data.frame(data)) {
-        stop("Input must be a data frame, tibble, or CSV file path.")
-    }
-    
-    if (!is.null(wt)) {
-        if (!(wt %in% colnames(data))) {
-            stop(sprintf("wt '%s' is not a column in the dataframe.", wt))
-        }
-        data <- tidyr::uncount(data, weights = !!rlang::sym(wt))
-    }
-    
-    if (!(is.null(cols))) {
-        for (col in cols) {
-            if (!(col %in% colnames(data))) {
-                stop(sprintf("column '%s' is not a column in the dataframe.", col))
-            }
-            # convert to factor
-            if (!is.factor(data[[col]])) {
-                data[[col]] <- as.factor(data[[col]])
-            }
-        }
-    }
-    
-    return(data)
-}
-
 # reorders int columns to match cols - eg if data has tissue, cluster, col1_int (for tissue), col2_int (for cluster) and cols = (cluster, tissue), then the output data will have cluster, tissue, col1_int (for cluster), col2_int (for tissue)
 reorder_and_rename_columns <- function(data, cols) {
     # Find the order in data of the columns listed in cols
@@ -672,10 +641,8 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
 #' @param default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
-#' @param output_df_path Optional character. Output path for the output data frame, in rds format. If \code{NULL}, then will not be saved.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param print_params Logical. If TRUE, will print function params.
-#' @param load_df Internal flag; not recommended to modify.
 #' @param do_gather_set_data Internal flag; not recommended to modify.
 #' @param color_band_column Internal flag; not recommended to modify.
 #' @param do_add_int_columns Internal flag; not recommended to modify.
@@ -700,13 +667,9 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' )
 #'
 #' @export
-data_preprocess <- function(data, cols, wt = NULL, default_sorting = "alphabetical", output_df_path = NULL, verbose = FALSE, print_params = FALSE, load_df = TRUE, do_gather_set_data = FALSE, color_band_column = NULL, do_add_int_columns = FALSE) {
+data_preprocess <- function(data, cols, wt = NULL, default_sorting = "alphabetical", verbose = FALSE, print_params = FALSE, do_gather_set_data = FALSE, color_band_column = NULL, do_add_int_columns = FALSE) {
     if (print_params) print_function_params()
     lowercase_args(c("default_sorting"))
-    
-    if (load_df) {
-        data <- load_in_df(data = data, cols = cols, wt = wt)
-    }
     
     # remove all columns outside of cols, wt, and int columns
     cols_to_keep <- c(
@@ -718,13 +681,18 @@ data_preprocess <- function(data, cols, wt = NULL, default_sorting = "alphabetic
     cols_to_keep <- intersect(cols_to_keep, names(data))
     data <- data[, cols_to_keep, drop = FALSE]
     
-    # # # Fill in NA values with "Missing"
     for (col in cols) {
-        if (col %in% colnames(data)) {
-            if (is.factor(data[[col]]) || is.character(data[[col]])) {
-                data[[col]] <- replace(as.character(data[[col]]), is.na(data[[col]]), "Missing")
-            }
+        if (!(col %in% colnames(data))) {
+            stop(sprintf("column '%s' is not a column in the dataframe.", col))
         }
+        
+        # convert to factor
+        if (!is.factor(data[[col]])) {
+            data[[col]] <- as.factor(data[[col]])
+        }
+        
+        # fill in na with "Missing"
+        data[[col]] <- replace(as.character(data[[col]]), is.na(data[[col]]), "Missing")
     }
     
     if (do_add_int_columns) {
@@ -737,18 +705,23 @@ data_preprocess <- function(data, cols, wt = NULL, default_sorting = "alphabetic
         data <- reorder_and_rename_columns(data, cols)
     }
     
-    if (is.null(wt) || !(wt %in% colnames(data))) {
-        clus_df_gather <- get_alluvial_df(data, wt = wt, do_gather_set_data = do_gather_set_data)
+    wt_col <- get_col_name(data, wt)
+    wt_col_in_data <- check_col(data, wt)
+    if (!wt_col_in_data) {
+        if (is.null(wt_col)) {
+            wt_col <- "value"
+        }
+        clus_df_gather <- get_alluvial_df(data, wt = wt_col, do_gather_set_data = do_gather_set_data)
     } else {
         clus_df_gather <- data
     }
     
     clus_df_gather <- clus_df_gather %>% dplyr::ungroup()
     
-    if ((is.character(output_df_path) && grepl("\\.rds$", output_df_path, ignore.case = TRUE))) {
-        if (verbose) message(sprintf("Saving dataframe to=%s", output_df_path))
-        saveRDS(clus_df_gather, output_df_path)
-    }
+    # if ((is.character(output_df_path) && grepl("\\.rds$", output_df_path, ignore.case = TRUE))) {
+    #     if (verbose) message(sprintf("Saving dataframe to=%s", output_df_path))
+    #     saveRDS(clus_df_gather, output_df_path)
+    # }
     
     return(clus_df_gather)
 }
@@ -875,7 +848,6 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
 #' @param preprocess_data Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.
 #' @param default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
 #' @param print_params Logical. If TRUE, will print function params.
-#' @param load_df Internal flag; not recommended to modify.
 #' @param do_compute_alluvial_statistics Internal flag; not recommended to modify.
 #' 
 #' @return A named list of control parameters, to be passed into `data_sort()`
@@ -900,7 +872,6 @@ data_sort_options <- function(
         preprocess_data = TRUE,
         default_sorting = c("alphabetical", "reverse_alphabetical", "increasing", "decreasing", "random", "fixed"),
         print_params = FALSE,
-        load_df = TRUE,
         do_compute_alluvial_statistics = FALSE
 ) {
     # enforce match.arg for any fixed-choice settings
@@ -920,7 +891,6 @@ data_sort_options <- function(
         preprocess_data = preprocess_data,
         default_sorting = default_sorting,
         print_params = print_params,
-        load_df = load_df,
         do_compute_alluvial_statistics = do_compute_alluvial_statistics
     )
 }
@@ -994,7 +964,7 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
     # Preprocess (i.e., add int columns and do the grouping)
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
-        clus_df_gather <- data_preprocess(data = data, cols = cols, wt = wt, default_sorting = default_sorting, load_df = load_df, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
+        clus_df_gather <- data_preprocess(data = data, cols = cols, wt = wt, default_sorting = default_sorting, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
         if (is.null(wt)) {
             wt <- "value" # is set during data_preprocess
         }
@@ -1111,7 +1081,7 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
 #' )
 #'
 #' @export
-data_sort <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
+data_sort <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, verbose = FALSE, options = NULL) {
     default_opt <- data_sort_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
@@ -1139,7 +1109,7 @@ data_sort <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "g
     }
 
     if (missing(wt)) {
-        data <- data_preprocess(data = data, cols = cols, default_sorting = default_sorting, load_df = load_df, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
+        data <- data_preprocess(data = data, cols = cols, default_sorting = default_sorting, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
         wt <- "value" # is set during data_preprocess
     }
     
@@ -1151,5 +1121,5 @@ data_sort <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "g
         data[c(cols_pos, wt_pos)],
         c(names(cols_pos), names(wt_pos))
     )
-    data_sort_internal(data = res, cols = names(cols_pos), wt = names(wt_pos), method = method, column_method = column_method, weight_scalar = weight_scalar, fixed_column = fixed_column, output_df_path = output_df_path, verbose = verbose, options = options)
+    data_sort_internal(data = res, cols = names(cols_pos), wt = names(wt_pos), method = method, column_method = column_method, weight_scalar = weight_scalar, fixed_column = fixed_column, verbose = verbose, options = options)
 }

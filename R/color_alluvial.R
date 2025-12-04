@@ -25,10 +25,6 @@ default_colors <- c(
 #' `data_color()`. These options allow fine-grained control over the coloring
 #' algorithm without cluttering the main function interface.
 #'
-#' @param color_list Optional named list or vector mapping values in the
-#'   graphing columns to colors. Overrides default palette.
-#' @param color_val Optional named list: names correspond to data values, and
-#'   each element is a color to assign directly.
 #' @param method_advanced_option Character. When
 #'   `method == "advanced"`, selects the clustering algorithm.
 #'   Options: `"leiden"` (default) or `"louvain"`.
@@ -49,25 +45,19 @@ default_colors <- c(
 #'
 #' @export
 data_color_options <- function(
-        color_list = NULL,
-        color_val = NULL,
         method_advanced_option = c("leiden", "louvain"),
         cutoff = 0.5,
         preprocess_data = TRUE,
-        print_params = FALSE,
-        load_df = TRUE
+        print_params = FALSE
 ) {
     
     method_advanced_option <- match.arg(method_advanced_option)
     
     list(
-        color_list = color_list,
-        color_val = color_val,
         method_advanced_option = method_advanced_option,
         cutoff = cutoff,
         preprocess_data = preprocess_data,
-        print_params = print_params,
-        load_df = load_df
+        print_params = print_params
     )
 }
 
@@ -117,14 +107,26 @@ data_color_internal <- function(data, cols, wt = NULL, method = "advanced", reso
     if (!is.null(cols) && any(!cols %in% colnames(data))) {
         stop("Some cols are not present in the dataframe.")
     }
+    #* Type Checking End
     
+    # Preprocess (i.e., add int columns and do the grouping)
+    if (preprocess_data) {
+        if (verbose) message("Preprocessing data before sorting")
+        clus_df_gather <- data_preprocess(data = data, cols = cols, wt = wt, 
+                                          do_gather_set_data = FALSE, do_add_int_columns = FALSE)
+        if (is.null(wt)) {
+            wt <- "value" # is set during data_preprocess
+        }
+    } else {
+        clus_df_gather <- data
+    }
     
-    clus_df_gather <- data
     for (col in cols) {
         if (!is.factor(clus_df_gather[[col]])) {
-            clus_df_gather[[col]] <- factor(clus_df_gather[[col]])
+            clus_df_gather[[col]] <- as.factor(clus_df_gather[[col]])
         }
     }
+    
     unused_colors <- default_colors
     first <- TRUE
     if (method == "left") {
@@ -282,6 +284,7 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
     if (is.null(ditto_colors)) {
         ditto_colors <- default_colors
     }
+    # browser()
     clus_df_ungrouped <- clus_df_gather[, c(graphing_columns, "value")]
     
     first <- TRUE
@@ -367,6 +370,15 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
     return(final_list)
 }
 
+
+convert_mapping_to_colors <- function(mapping, default_colors) {
+    idx <- as.integer(mapping)
+    idx_mod <- ((idx - 1) %% length(default_colors)) + 1
+    out <- default_colors[idx_mod]
+    names(out) <- names(mapping)
+    out
+}
+
 #' Make stratum color list
 #'
 #' Convert color mapping made by data_color into list for scale_fill_manual
@@ -374,6 +386,7 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
 #' @param data A data frame with columns corresponding to axes, with factors indicating sorting. (eg run through data_sort)
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param mapping List. Output from data_color.
+#' @param color_palette Optional named list or vector mapping values in the graphing columns to colors. Overrides default palette.
 #'
 #' @return A vector of colors.
 #'
@@ -386,13 +399,13 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
 #' color_list <- make_stratum_color_list(data = clus_df_gather, cols = cols, mapping = color_mapping)
 #'
 #' @export
-make_stratum_color_list <- function(data, cols, mapping) {
-    cols <- substitute(cols)
-    if (is.call(cols) && cols[[1]] == 'c') {
-        items <- as.list(cols)[-1]
+make_stratum_color_list <- function(data, cols, mapping, color_palette = NULL) {
+    cols_tmp <- substitute(cols)
+    if (is.call(cols_tmp) && cols_tmp[[1]] == 'c') {
+        items <- as.list(cols_tmp)[-1]
         cols <- as.list(sapply(items, function(x) rlang::as_string(x)))
-        
-    }    
+    }
+
     # 1. Collect all factor levels across all columns
     vals <- unique(unlist(lapply(cols, function(col) levels(data[[col]]))))
     
@@ -420,6 +433,11 @@ make_stratum_color_list <- function(data, cols, mapping) {
             "\nAdd them to stratum_to_color_mapping."
         )
     }
+    
+    if (is.null(color_palette)) {
+        color_palette <- default_colors
+    }
+    flat_colors <- convert_mapping_to_colors(flat_colors, color_palette)
     
     return(flat_colors)
 }
@@ -469,5 +487,5 @@ data_color <- function(data, cols, wt, method = "advanced", resolution = 1, verb
         c(names(cols_pos), names(wt_pos))
     )
     map <- data_color_internal(res, cols = names(cols_pos), wt = names(wt_pos), method = method, resolution = resolution, verbose = verbose, options = options)
-    #make_stratum_color_list(data = data, cols = names(cols_pos), mapping = map)
+    # make_stratum_color_list(data = data, cols = names(cols_pos), mapping = map)
 }

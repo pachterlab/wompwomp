@@ -180,3 +180,71 @@ generalized_make_int_columns <- function(clus_df_gather, cols) {
     # Return with new integer columns added
     clus_df_gather
 }
+
+# check_col <- function(data, col) {
+#     col_quo <- rlang::enquo(col)
+#     
+#     # Try resolving selection
+#     col_sel <- tidyselect::eval_select(col_quo, data)
+#     
+#     # No column returned → fail
+#     if (length(col_sel) == 0) {
+#         stop("Column does not exist.")
+#     }
+#     
+#     # Only allow one column
+#     if (length(col_sel) > 1) {
+#         stop("Column must refer to exactly one column.")
+#     }
+#     
+#     # Extract name
+#     col_name <- names(col_sel)
+#     
+#     message("Column exists: ", col_name)
+# }
+
+get_col_name <- function(data, col) {
+    col_quo <- rlang::enquo(col)
+    
+    # Try resolving selection.
+    # If eval_select() fails (unknown column), return NULL.
+    sel <- tryCatch(
+        tidyselect::eval_select(col_quo, data),
+        error = function(e) return(NULL)
+    )
+    
+    # 0 columns selected → treat as NULL
+    if (is.null(sel) || length(sel) == 0) {
+        return(NULL)
+    }
+    
+    # >1 column selected → invalid
+    if (length(sel) > 1) {
+        stop("`col` must refer to exactly one column.")
+    }
+    
+    names(sel)
+}
+
+check_col <- function(data, col) {
+    col_quo <- rlang::enquo(col)
+    
+    # Try resolving tidyselect. If it fails, return FALSE.
+    sel <- tryCatch(
+        tidyselect::eval_select(col_quo, data),
+        error = function(e) return(FALSE)
+    )
+    
+    # 0 columns selected → FALSE
+    if (length(sel) == 0) {
+        return(FALSE)
+    }
+    
+    # >1 column selected → ambiguous → FALSE
+    if (length(sel) > 1) {
+        return(FALSE)
+    }
+    
+    # Valid: exactly one column selected
+    TRUE
+}

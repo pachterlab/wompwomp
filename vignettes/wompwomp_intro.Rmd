@@ -71,57 +71,6 @@ print(crossing_edges_out$output_objective)
 sessionInfo()
 ```
 
-
-```{r}
-library(ggplot2)
-library(ggalluvial)
-
-plot_alluvial_wompwomp <- function(clus_df_gather, cols, wt = "value", stratum_colors = NULL) {
-    if (length(cols) != 2) {
-        stop("plot_alluvial_wompwomp() requires exactly 2 columns in `cols`.")
-    }
-    
-    col1 <- cols[1]
-    col2 <- cols[2]
-    
-    p <- ggplot(clus_df_gather,
-        aes(
-            y     = .data[[wt]],
-            axis1 = .data[[col1]],
-            axis2 = .data[[col2]]
-        )
-    ) +
-        geom_alluvium(aes(fill = .data[[col1]]), width = 1/12) +  # alluvia color is column1
-        geom_stratum(aes(fill = after_stat(stratum)), width = 1/12, color = "grey") +
-        geom_label(stat = "stratum", aes(label = after_stat(stratum))) +
-        scale_x_discrete(
-            limits = c(col1, col2),
-            expand = c(.05, .05)
-        ) +
-        theme_minimal() +
-        theme(legend.position = "none")
-    
-    if (!is.null(stratum_colors)) {
-        p <- p + scale_fill_manual(values = stratum_colors)
-    }
-    
-    return (p)
-}
-```
-
-```{r}
-plot_alluvial_wompwomp(clus_df_gather, graphing_columns)
-```
-
-```{r}
-set.seed(43)
-devtools::load_all()
-clus_df_gather_tsp_from_scratch <- data_sort(df, cols = graphing_columns, method = "tsp")  # sorting
-stratum_to_color_mapping <- data_color(clus_df_gather_tsp_from_scratch, cols = graphing_columns, wt = "value", method = "advanced")  # coloring
-stratum_colors <- make_stratum_color_list(data = clus_df_gather_tsp_from_scratch, cols = graphing_columns, mapping = stratum_to_color_mapping)  # coloring in sorted order
-plot_alluvial_wompwomp(clus_df_gather_tsp_from_scratch, graphing_columns, stratum_colors = stratum_colors)
-```
-
 ```{r}
 library(ggalluvial)
 devtools::load_all()
@@ -183,7 +132,7 @@ clus_df_gather_sort |>
 # color (tidy) and plot - sorted + colored
 clus_df_gather_sort |> 
   data_color(cols = c(tissue, cluster), wt = value) |> 
-  print() -> color_mapping
+  print() -> cluster_mapping
 
 clus_df_gather_sort |> 
   ggplot(aes(y = value, axis1 = tissue, axis2 = cluster)) +
@@ -195,5 +144,5 @@ clus_df_gather_sort |>
     limits = c("tissue", "cluster"),
     expand = c(.05, .05)
   ) +
-  scale_fill_manual(values = make_stratum_color_list(data = clus_df_gather_sort, cols = c("tissue", "cluster"), mapping = color_mapping))  # scale_fill_manual(values = make_stratum_color_list(data = clus_df_gather_sort, cols = c(tissue, cluster), mapping = color_mapping))
+  scale_fill_manual(values = make_stratum_color_list(data = clus_df_gather_sort, cols = c(tissue, cluster), mapping = cluster_mapping))
 ```
