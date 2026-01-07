@@ -58,8 +58,14 @@ Creates a list of control parameters that modify the behavior of
 cluttering the main function arguments.
 }
 \examples{
-data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-opts <- data_sort_options(default_sorting = "alphabetical", matrix_initialization_value = 100)
+data <- data.frame(
+  method1 = LETTERS[sample(1:3, 100, TRUE)],
+  method2 = LETTERS[27 - sample(1:3, 100, TRUE)]
+)
+opts <- data_sort_options(
+  default_sorting = "reverse_alphabetical",
+  matrix_initialization_value = 100
+)
 data_sort(data = data, cols = c('method1', 'method2'), options = opts)
 
 }

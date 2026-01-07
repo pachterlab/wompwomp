@@ -23,7 +23,7 @@ Imports:
     stats,
     ggforce,
     ggplot2,
-    ggalluvial
+    ggalluvial,
     utils
 Depends: R (>= 4.0.0)
 Suggests: 
