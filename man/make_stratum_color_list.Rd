@@ -4,7 +4,7 @@
 \alias{make_stratum_color_list}
 \title{Make stratum color list}
 \usage{
-make_stratum_color_list(data, cols, mapping)
+make_stratum_color_list(data, cols, mapping, color_palette = NULL)
 }
 \arguments{
 \item{data}{A data frame with columns corresponding to axes, with factors indicating sorting. (eg run through data_sort)}
@@ -12,6 +12,8 @@ make_stratum_color_list(data, cols, mapping)
 \item{cols}{Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).}
 
 \item{mapping}{List. Output from data_color.}
+
+\item{color_palette}{Optional named list or vector mapping values in the graphing columns to colors. Overrides default palette.}
 }
 \value{
 A vector of colors.
