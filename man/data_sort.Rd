@@ -12,7 +12,6 @@ data_sort(
   column_method = c("tsp", "neighbornet", "none", "random"),
   weight_scalar = 5e+05,
   fixed_column = NULL,
-  output_df_path = NULL,
   verbose = FALSE,
   options = NULL
 )
@@ -34,11 +33,11 @@ data_sort(
 
 \item{fixed_column}{Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method == 'greedy_wolf'}.}
 
-\item{output_df_path}{Optional character. Output path for the output data frame, in rds format. If \code{NULL}, then will not be saved.}
-
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
 \item{options}{Additional arguments. See data_sort_options}
+
+\item{output_df_path}{Optional character. Output path for the output data frame, in rds format. If \code{NULL}, then will not be saved.}
 }
 \value{
 A data frame where each row represents an alluvium and each column represents an axis. Each column of \code{cols} represents an axis, stored as a factor ordered in ascending order of strata. There is an additional column \code{wt} ('value' if NULL) that represents the size of the alluvium in that row. The order of columns represents the recommended order of axes.

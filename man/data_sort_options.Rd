@@ -18,7 +18,6 @@ data_sort_options(
   default_sorting = c("alphabetical", "reverse_alphabetical", "increasing", "decreasing",
     "random", "fixed"),
   print_params = FALSE,
-  load_df = TRUE,
   do_compute_alluvial_statistics = FALSE
 )
 }
@@ -46,8 +45,6 @@ data_sort_options(
 \item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
 
 \item{print_params}{Logical. If TRUE, will print function params.}
-
-\item{load_df}{Internal flag; not recommended to modify.}
 
 \item{do_compute_alluvial_statistics}{Internal flag; not recommended to modify.}
 }
