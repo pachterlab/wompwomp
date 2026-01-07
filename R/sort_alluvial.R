@@ -854,8 +854,14 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
 #'   via the `options` argument.
 #'
 #' @examples
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' opts <- data_sort_options(default_sorting = "alphabetical", matrix_initialization_value = 100)
+#' data <- data.frame(
+#'   method1 = LETTERS[sample(1:3, 100, TRUE)],
+#'   method2 = LETTERS[27 - sample(1:3, 100, TRUE)]
+#' )
+#' opts <- data_sort_options(
+#'   default_sorting = "reverse_alphabetical",
+#'   matrix_initialization_value = 100
+#' )
 #' data_sort(data = data, cols = c('method1', 'method2'), options = opts)
 #'
 #' @export
@@ -1035,7 +1041,7 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
 }
 
 
-#' Sorts a dataframe.
+#' Sorts a dataframe to minimize crossings in a parallel sets / alluvial plot.
 #'
 #' Sorts a dataframe with the algorithm specified by \code{method}.
 #'
@@ -1056,28 +1062,47 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
 #' A data frame where each row represents an alluvium and each column represents an axis. Each column of \code{cols} represents an axis, stored as a factor ordered in ascending order of strata. There is an additional column \code{wt} ('value' if NULL) that represents the size of the alluvium in that row. The order of columns represents the recommended order of axes.
 #'
 #' @examples
-#' # Example 1: data format 1
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data_sort(
-#'     data,
-#'     cols = c("method1", "method2"),
-#'     method = "tsp",
-#'     column_method = "tsp"
+#' # Example 1: data format 1 (uncounted)
+#' set.seed(429144)
+#' data <- data.frame(
+#'   method1 = factor(LETTERS[sample(1:3, 100, TRUE)]),
+#'   method2 = factor(LETTERS[27 - sample(1:3, 100, TRUE)])
 #' )
+#' head(data)
+#' lapply(data, levels)
+#' clus_df_gather <- data_sort(
+#'   data,
+#'   cols = c("method1", "method2"),
+#'   method = "tsp",
+#'   column_method = "tsp"
+#' )
+#' print(clus_df_gather)
+#' lapply(clus_df_gather[, 1:2], levels)
 #'
-#' # Example 2: data format 2
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data |>
-#'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
-#'     dplyr::group_by_all() |>
-#'     dplyr::count(name = "value")
-#' clus_df_gather <- data_sort(
-#'     clus_df_gather,
-#'     cols = c("method1", "method2"),
-#'     wt = "value",
-#'     method = "tsp",
-#'     column_method = "tsp"
+#' # Example 2: data format 2 (counted)
+#' set.seed(806949)
+#' data <- data.frame(
+#'   method1 = factor(LETTERS[sample(1:3, 100, TRUE)]),
+#'   method2 = factor(LETTERS[27 - sample(1:3, 100, TRUE)])
 #' )
+#' clus_df_gather <- data |>
+#'   dplyr::mutate_if(
+#'     is.numeric,
+#'     function(x) factor(x, levels = as.character(sort(unique(x))))
+#'   ) |>
+#'   dplyr::group_by_all() |>
+#'   dplyr::count(name = "value")
+#' print(clus_df_gather)
+#' lapply(clus_df_gather[, 1:2], levels)
+#' clus_df_gather <- data_sort(
+#'   clus_df_gather,
+#'   cols = c("method1", "method2"),
+#'   wt = "value",
+#'   method = "tsp",
+#'   column_method = "tsp"
+#' )
+#' print(clus_df_gather)
+#' lapply(clus_df_gather[, 1:2], levels)
 #'
 #' @export
 data_sort <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, verbose = FALSE, options = NULL) {
