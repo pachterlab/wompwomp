@@ -1,9 +1,7 @@
 #' wompwomp: Cluster-matching alluvial plots
 #'
-#' Utils
-#' @docType package
-#' @name wompwomp
-#'
+#' @name wompwomp-imports
+#' @rdname wompwomp
 #' @importFrom rlang sym .data
 #' @importFrom magrittr %>%
 

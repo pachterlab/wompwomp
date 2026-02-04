@@ -1,9 +1,7 @@
 #' wompwomp: Cluster-matching alluvial plots
 #'
-#' Objective calculation
-#' @docType package
-#' @name wompwomp
-#'
+#' @name wompwomp-imports
+#' @rdname wompwomp
 #' @importFrom dplyr mutate group_by ungroup n row_number left_join
 #' @importFrom rlang sym .data
 #' @importFrom magrittr %>%
@@ -111,65 +109,66 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
     return(lode_df)
 }
 
-make_lode_df_old <- function(data, cols = NULL, wt = "value") {
-    if (wt != "value") {
-        data <- data %>% dplyr::rename(value = !!sym(wt))
-        wt <- "value"
-    }
-    
-    p <- ggplot2::ggplot(data = data, ggplot2::aes(y = value), )
-    for (x in seq_along(cols)) {
-        int_col <- paste0("col", x, "_int")
-        if (!(int_col %in% colnames(data))) {
-            stop(sprintf("%s not in columns. Please run data_preprocess first.", int_col))
-        }
-        p$mapping[[paste0("axis", x)]] <- sym(int_col)
-    }
-    p <- p + ggalluvial::stat_alluvium(geom = "blank")
-    columns_to_keep <- c("alluvium", "x", "y", "stratum", "count")
-    lode_df_long_full <- ggplot2::ggplot_build(p)$data[[1]][columns_to_keep]
-    
-    # Initialize result list and seen pair tracker
-    crossing_edges <- list()
-    row_index <- 1
-    
-    output_objective <- 0
-    
-    # Get unique x values, sorted
-    x_vals <- sort(unique(lode_df_long_full$x))
-    n_x <- length(x_vals)
-    
-    # make the full lode_df
-    lode_df_long_indexed_full <- lode_df_long_full %>%
-        group_by(alluvium) %>%
-        mutate(pos = row_number()) %>%
-        ungroup()
-    
-    # Pivot each of x, y, stratum into wide format
-    lode_df_full <- lode_df_long_indexed_full %>%
-        select(alluvium, pos, x, y, stratum, count) %>%
-        tidyr::pivot_wider(
-            id_cols = c(alluvium, count),
-            names_from = pos,
-            values_from = c(x, y, stratum),
-            names_glue = "{.value}{pos}"
-        )
-    
-    # add the actual character values
-    for (i in seq_along(cols)) {
-        int_col <- paste0("col", i, "_int") # e.g. col1_int
-        label_col <- cols[i]
-        stratum_col <- paste0("stratum", i) # e.g. stratum1
-        stratum_char_col <- paste0(stratum_col, "_char") # e.g. stratum1_char
-        
-        mapping <- setNames(data[[label_col]], data[[int_col]])
-        mapping <- mapping[!duplicated(names(mapping))]
-        lode_df_full[[stratum_char_col]] <- mapping[as.character(lode_df_full[[stratum_col]])]
-    }
-    
-    lode_df_full <- lode_df_full %>% dplyr::rename(value = "count")
-    return(lode_df_full)
-}
+# # if uncommenting, then move ggplot2 and ggalluvial from Suggests to Imports in DESCRIPTION
+# make_lode_df_old <- function(data, cols = NULL, wt = "value") {
+#     if (wt != "value") {
+#         data <- data %>% dplyr::rename(value = !!sym(wt))
+#         wt <- "value"
+#     }
+#     
+#     p <- ggplot2::ggplot(data = data, ggplot2::aes(y = value), )
+#     for (x in seq_along(cols)) {
+#         int_col <- paste0("col", x, "_int")
+#         if (!(int_col %in% colnames(data))) {
+#             stop(sprintf("%s not in columns. Please run data_preprocess first.", int_col))
+#         }
+#         p$mapping[[paste0("axis", x)]] <- sym(int_col)
+#     }
+#     p <- p + ggalluvial::stat_alluvium(geom = "blank")
+#     columns_to_keep <- c("alluvium", "x", "y", "stratum", "count")
+#     lode_df_long_full <- ggplot2::ggplot_build(p)$data[[1]][columns_to_keep]
+#     
+#     # Initialize result list and seen pair tracker
+#     crossing_edges <- list()
+#     row_index <- 1
+#     
+#     output_objective <- 0
+#     
+#     # Get unique x values, sorted
+#     x_vals <- sort(unique(lode_df_long_full$x))
+#     n_x <- length(x_vals)
+#     
+#     # make the full lode_df
+#     lode_df_long_indexed_full <- lode_df_long_full %>%
+#         group_by(alluvium) %>%
+#         mutate(pos = row_number()) %>%
+#         ungroup()
+#     
+#     # Pivot each of x, y, stratum into wide format
+#     lode_df_full <- lode_df_long_indexed_full %>%
+#         select(alluvium, pos, x, y, stratum, count) %>%
+#         tidyr::pivot_wider(
+#             id_cols = c(alluvium, count),
+#             names_from = pos,
+#             values_from = c(x, y, stratum),
+#             names_glue = "{.value}{pos}"
+#         )
+#     
+#     # add the actual character values
+#     for (i in seq_along(cols)) {
+#         int_col <- paste0("col", i, "_int") # e.g. col1_int
+#         label_col <- cols[i]
+#         stratum_col <- paste0("stratum", i) # e.g. stratum1
+#         stratum_char_col <- paste0(stratum_col, "_char") # e.g. stratum1_char
+#         
+#         mapping <- setNames(data[[label_col]], data[[int_col]])
+#         mapping <- mapping[!duplicated(names(mapping))]
+#         lode_df_full[[stratum_char_col]] <- mapping[as.character(lode_df_full[[stratum_col]])]
+#     }
+#     
+#     lode_df_full <- lode_df_full %>% dplyr::rename(value = "count")
+#     return(lode_df_full)
+# }
 
 
 #' Determine overlapping edges

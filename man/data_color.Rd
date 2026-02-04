@@ -7,7 +7,7 @@
 data_color(
   data,
   cols,
-  wt,
+  wt = NULL,
   method = "advanced",
   resolution = 1,
   verbose = FALSE,
@@ -38,20 +38,13 @@ A data frame where each row represents a combination of groupings, each column f
 Colors a dataframe with the algorithm specified by \code{method}.
 }
 \examples{
-# Example 1: data format 1
-data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- data_preprocess(data, cols = c("method1", "method2"))
-
-# Example 2: data format 2
-data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- data |>
-    dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
-    dplyr::group_by_all() |>
-    dplyr::count(name = "value")
-clus_df_gather <- data_preprocess(
-    clus_df_gather,
-    cols = c("method1", "method2"),
-    wt = "value"
+set.seed(429144)
+data <- data.frame(
+  method1 = factor(LETTERS[sample(1:3, 100, TRUE)]),
+  method2 = factor(LETTERS[27 - sample(1:3, 100, TRUE)])
 )
+lapply(data, levels)
+cluster_mapping <- data |> 
+  data_color(cols = c(method1, method2), wt = value)
 
 }

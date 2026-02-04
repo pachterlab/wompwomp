@@ -21,9 +21,6 @@ Imports:
     TSP,
     R6,
     stats,
-    ggforce,
-    ggplot2,
-    ggalluvial,
     utils
 Depends: R (>= 4.0.0)
 Suggests: 
@@ -37,6 +34,8 @@ Suggests:
     here,
     stringr,
     reticulate,
+    ggplot2,
+    ggalluvial,
     sessioninfo
 Config/testthat/edition: 3
 URL: https://github.com/pachterlab/wompwomp

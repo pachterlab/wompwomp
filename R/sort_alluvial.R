@@ -1,9 +1,7 @@
-#' wompwomp: Sorting alluvia
+#' wompwomp: Cluster-matching alluvial plots
 #'
-#' Sorting alluvia
-#' @docType package
-#' @name wompwomp
-#'
+#' @name wompwomp-imports
+#' @rdname wompwomp
 #' @importFrom dplyr mutate select group_by summarise desc ungroup slice n pull bind_rows across all_of arrange
 #' @importFrom purrr map
 #' @importFrom igraph V cluster_louvain cluster_leiden E
@@ -160,7 +158,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value
 
 run_neighbornet <- function(data, cols, wt = "value", matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, method = "tsp", verbose = FALSE) {
     # map from string to int if needed
-    if (is.null(wt) || !(wt %in% colnames(data))) {
+    if (is.null(wt) || length(wt) == 0 || !(wt %in% colnames(data))) {
         clus_df_gather <- get_alluvial_df(data, wt = wt)
     } else {
         clus_df_gather <- data
@@ -377,7 +375,7 @@ determine_optimal_cycle_start <- function(data, cycle, cols = NULL, wt = "value"
             sub("^.*?~~", "", x)
         })
         
-        if (is.null(wt) || !(wt %in% colnames(data))) {
+        if (is.null(wt) || length(wt) == 0 || !(wt %in% colnames(data))) {
             clus_df_gather_neighbornet <- get_alluvial_df(data, wt = wt)
         } else {
             clus_df_gather_neighbornet <- data
@@ -573,8 +571,20 @@ add_int_columns <- function(data, cols, default_sorting = "alphabetical") {
     return(data)
 }
 
+# from ggforce
+gather_set_data <- function (data, x, id_name = "id") 
+{
+    columns <- tidyselect::eval_select(enquo(x), data)
+    data[[id_name]] <- seq_len(nrow(data))
+    vctrs::vec_rbind(!!!lapply(names(columns), function(n) {
+        data$x <- n
+        data$y <- data[[n]]
+        data
+    }))
+}
+
 get_alluvial_df <- function(data, wt = "value", do_gather_set_data = FALSE) {
-    if (is.null(wt)) {
+    if (is.null(wt) || length(wt) == 0) {
         wt <- "value"
     }
     # Convert numeric clustering columns to ordered factors
@@ -583,7 +593,7 @@ get_alluvial_df <- function(data, wt = "value", do_gather_set_data = FALSE) {
         dplyr::group_by_all() |>
         dplyr::count(name = wt)
     if (do_gather_set_data) {
-        data <- ggforce::gather_set_data(data, 1:2)
+        data <- gather_set_data(data, 1:2)
     }
     return(data)
 }
@@ -773,7 +783,7 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
     
     length_clus_df_gather_original <- nrow(clus_df_gather)
     if (length(setdiff(c("id", "x", "y"), colnames(clus_df_gather))) > 0) {
-        clus_df_gather <- ggforce::gather_set_data(clus_df_gather, 1:2)
+        clus_df_gather <- gather_set_data(clus_df_gather, 1:2)
     }
     
     for (i in seq_len(random_initializations)) {
@@ -971,7 +981,7 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
         clus_df_gather <- data_preprocess(data = data, cols = cols, wt = wt, default_sorting = default_sorting, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
-        if (is.null(wt)) {
+        if (is.null(wt) || length(wt) == 0) {
             wt <- "value" # is set during data_preprocess
         }
     } else {
@@ -1048,7 +1058,7 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
 #' @param data A data frame/tibble. Must be in one of two formats:
 #' (1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
 #' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
-#' @param cols Optional character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.
+#' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
 #' @param method Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
 #' @param column_method Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'random', and 'none'.

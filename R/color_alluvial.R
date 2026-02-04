@@ -1,9 +1,7 @@
-#' wompwomp: Coloring alluvia
+#' wompwomp: Cluster-matching alluvial plots
 #'
-#' Coloring alluvia
-#' @docType package
-#' @name wompwomp
-#'
+#' @name wompwomp-imports
+#' @rdname wompwomp
 #' @importFrom igraph V cluster_louvain cluster_leiden E
 #' @importFrom dplyr add_count mutate select group_by
 #' @importFrom magrittr %>%
@@ -114,7 +112,7 @@ data_color_internal <- function(data, cols, wt = NULL, method = "advanced", reso
         if (verbose) message("Preprocessing data before sorting")
         clus_df_gather <- data_preprocess(data = data, cols = cols, wt = wt, 
                                           do_gather_set_data = FALSE, do_add_int_columns = FALSE)
-        if (is.null(wt)) {
+        if (is.null(wt) || length(wt) == 0) {
             wt <- "value" # is set during data_preprocess
         }
     } else {
@@ -212,6 +210,7 @@ data_color_internal <- function(data, cols, wt = NULL, method = "advanced", reso
             }
         }
     }
+    
     clus_df_gather_color <- clus_df_gather_color %>% dplyr::select(-!!rlang::sym(wt)) 
     
     final_df <- data.frame(axis=c(),
@@ -284,7 +283,6 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
     if (is.null(ditto_colors)) {
         ditto_colors <- default_colors
     }
-    # browser()
     clus_df_ungrouped <- clus_df_gather[, c(graphing_columns, "value")]
     
     first <- TRUE
@@ -365,6 +363,11 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
     final_df <- split(clus_df_leiden, clus_df_leiden[['axis']])
     final_list <- lapply(final_df, function(subdf) {
         setNames(as.list(subdf[['leiden']]), subdf[['value']])
+    })
+    
+    # numeric --> integer
+    final_list <- lapply(final_list, function(inner) {
+        lapply(inner, as.integer)
     })
     
     return(final_list)
@@ -460,25 +463,27 @@ make_stratum_color_list <- function(data, cols, mapping, color_palette = NULL) {
 #' @return A data frame where each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} ('value' if \code{wt} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.
 #'
 #' @examples
-#' # Example 1: data format 1
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data_preprocess(data, cols = c("method1", "method2"))
-#'
-#' # Example 2: data format 2
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data |>
-#'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
-#'     dplyr::group_by_all() |>
-#'     dplyr::count(name = "value")
-#' clus_df_gather <- data_preprocess(
-#'     clus_df_gather,
-#'     cols = c("method1", "method2"),
-#'     wt = "value"
+#' set.seed(429144)
+#' data <- data.frame(
+#'   method1 = factor(LETTERS[sample(1:3, 100, TRUE)]),
+#'   method2 = factor(LETTERS[27 - sample(1:3, 100, TRUE)])
 #' )
+#' lapply(data, levels)
+#' cluster_mapping <- data |> 
+#'   data_color(cols = c(method1, method2), wt = value)
 #'
 #' @export
-data_color <- function(data, cols, wt, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
+data_color <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
     cols_expr <- rlang::enquo(cols)
+    
+    # if (missing(wt)) {
+    #     col_names <- names(
+    #         tidyselect::eval_select(cols_expr, data)
+    #     )
+    #     data <- data_preprocess(data = data, cols = col_names, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
+    #     wt <- "value" # is set during data_preprocess
+    # }
+    
     wt_expr <- rlang::enquo(wt)
     cols_pos <- tidyselect::eval_select(cols_expr, data = data)
     wt_pos <- tidyselect::eval_select(wt_expr, data = data)
@@ -486,6 +491,7 @@ data_color <- function(data, cols, wt, method = "advanced", resolution = 1, verb
         data[c(cols_pos, wt_pos)],
         c(names(cols_pos), names(wt_pos))
     )
+    
     map <- data_color_internal(res, cols = names(cols_pos), wt = names(wt_pos), method = method, resolution = resolution, verbose = verbose, options = options)
     # make_stratum_color_list(data = data, cols = names(cols_pos), mapping = map)
 }

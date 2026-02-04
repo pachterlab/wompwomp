@@ -23,7 +23,7 @@ test_that("data_sort works with unsorted algorithm", {
     ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
     ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
 
-    expect_equal(unsorted_df, ground_truth_df)
+    expect_equal(as.data.frame(unsorted_df), as.data.frame(ground_truth_df))
 })
 
 test_that("data_sort works with greedy_wolf algorithm", {
@@ -49,7 +49,7 @@ test_that("data_sort works with greedy_wolf algorithm", {
     ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
     ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
 
-    expect_equal(greedy_wolf_df, ground_truth_df)
+    expect_equal(as.data.frame(greedy_wolf_df), as.data.frame(ground_truth_df))
 })
 
 test_that("data_sort works with greedy_wblf algorithm", {
@@ -75,7 +75,7 @@ test_that("data_sort works with greedy_wblf algorithm", {
     ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
     ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
 
-    expect_equal(greedy_wblf_df, ground_truth_df)
+    expect_equal(as.data.frame(greedy_wblf_df), as.data.frame(ground_truth_df))
 })
 
 
@@ -102,7 +102,7 @@ test_that("data_sort works with tsp algorithm", {
     ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
     ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
 
-    expect_equal(tsp_df, ground_truth_df)
+    expect_equal(as.data.frame(tsp_df), as.data.frame(ground_truth_df))
 })
 
 
@@ -291,4 +291,148 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
     num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
     testthat::expect_equal(num, 95)
+})
+
+test_that("data_color correctly handles multiple factor columns", {
+    set.seed(429144)
+    
+    data <- data.frame(
+        method1 = factor(LETTERS[sample(1:3, 100, TRUE)]),
+        method2 = factor(LETTERS[27 - sample(1:3, 100, TRUE)])
+    )
+    
+    # sanity check input
+    expect_equal(lapply(data, levels), list(
+        method1 = c("A", "B", "C"),
+        method2 = c("X", "Y", "Z")
+    ))
+    
+    cluster_mapping <- data |>
+        data_color(cols = c(method1, method2), method = "left")
+    
+    # ---- expectations (adjust to actual return type) ----
+    
+    expect_true(!is.null(cluster_mapping))
+    expect_true(length(cluster_mapping) > 0)
+    
+    # If it's a data.frame
+    if (is.data.frame(cluster_mapping)) {
+        expect_true(all(c("method1", "method2") %in% names(cluster_mapping)))
+    }
+    
+    # If it's a named list
+    if (is.list(cluster_mapping)) {
+        expect_true(all(c("method1", "method2") %in% names(cluster_mapping)))
+    }
+    
+    expected <- list(
+        method1 = list(
+            A = 1L,
+            B = 2L,
+            C = 3L
+        ),
+        method2 = list(
+            X = 4L,
+            Y = 5L,
+            Z = 6L
+        )
+    )
+    
+    expect_identical(cluster_mapping, expected)
+})
+
+test_that("data_color correctly handles multiple factor columns with string column names", {
+    set.seed(429144)
+    
+    data <- data.frame(
+        method1 = factor(LETTERS[sample(1:3, 100, TRUE)]),
+        method2 = factor(LETTERS[27 - sample(1:3, 100, TRUE)])
+    )
+    
+    # sanity check input
+    expect_equal(lapply(data, levels), list(
+        method1 = c("A", "B", "C"),
+        method2 = c("X", "Y", "Z")
+    ))
+    
+    cluster_mapping <- data |>
+        data_color(cols = c("method1", "method2"), method = "left")
+    
+    # ---- expectations (adjust to actual return type) ----
+    
+    expect_true(!is.null(cluster_mapping))
+    expect_true(length(cluster_mapping) > 0)
+    
+    # If it's a data.frame
+    if (is.data.frame(cluster_mapping)) {
+        expect_true(all(c("method1", "method2") %in% names(cluster_mapping)))
+    }
+    
+    # If it's a named list
+    if (is.list(cluster_mapping)) {
+        expect_true(all(c("method1", "method2") %in% names(cluster_mapping)))
+    }
+    
+    expected <- list(
+        method1 = list(
+            A = 1L,
+            B = 2L,
+            C = 3L
+        ),
+        method2 = list(
+            X = 4L,
+            Y = 5L,
+            Z = 6L
+        )
+    )
+    
+    expect_identical(cluster_mapping, expected)
+})
+
+test_that("data_color correctly handles multiple factor columns with method advanced", {
+    set.seed(429144)
+    
+    data <- data.frame(
+        method1 = factor(LETTERS[sample(1:3, 100, TRUE)]),
+        method2 = factor(LETTERS[27 - sample(1:3, 100, TRUE)])
+    )
+    
+    # sanity check input
+    expect_equal(lapply(data, levels), list(
+        method1 = c("A", "B", "C"),
+        method2 = c("X", "Y", "Z")
+    ))
+    
+    cluster_mapping <- data |>
+        data_color(cols = c("method1", "method2"), method = "advanced", resolution=10)
+    
+    # ---- expectations (adjust to actual return type) ----
+    
+    expect_true(!is.null(cluster_mapping))
+    expect_true(length(cluster_mapping) > 0)
+    
+    # If it's a data.frame
+    if (is.data.frame(cluster_mapping)) {
+        expect_true(all(c("method1", "method2") %in% names(cluster_mapping)))
+    }
+    
+    # If it's a named list
+    if (is.list(cluster_mapping)) {
+        expect_true(all(c("method1", "method2") %in% names(cluster_mapping)))
+    }
+    
+    expected <- list(
+        method1 = list(
+            A = 1L,
+            B = 1L,
+            C = 2L
+        ),
+        method2 = list(
+            X = 2L,
+            Y = 1L,
+            Z = 1L
+        )
+    )
+    
+    expect_identical(cluster_mapping, expected)
 })
