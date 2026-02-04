@@ -21,6 +21,8 @@ Imports:
     TSP,
     R6,
     stats,
+    tidyselect,
+    vctrs,
     utils
 Depends: R (>= 4.0.0)
 Suggests: 

@@ -45,6 +45,6 @@ data <- data.frame(
 )
 lapply(data, levels)
 cluster_mapping <- data |> 
-  data_color(cols = c(method1, method2), wt = value)
+  data_color(cols = c(method1, method2))
 
 }

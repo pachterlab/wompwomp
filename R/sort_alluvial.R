@@ -11,6 +11,7 @@
 #' @importFrom rlang sym .data
 #' @importFrom magrittr %>%
 #' @importFrom data.table :=
+#' @importFrom tidyselect eval_select
 
 utils::globalVariables(c(
     ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name"
@@ -574,7 +575,7 @@ add_int_columns <- function(data, cols, default_sorting = "alphabetical") {
 # from ggforce
 gather_set_data <- function (data, x, id_name = "id") 
 {
-    columns <- tidyselect::eval_select(enquo(x), data)
+    columns <- tidyselect::eval_select(rlang::enquo(x), data)
     data[[id_name]] <- seq_len(nrow(data))
     vctrs::vec_rbind(!!!lapply(names(columns), function(n) {
         data$x <- n
@@ -1064,7 +1065,6 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
 #' @param column_method Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'random', and 'none'.
 #' @param weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method == 'tsp'}.
 #' @param fixed_column Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method == 'greedy_wolf'}.
-#' @param output_df_path Optional character. Output path for the output data frame, in rds format. If \code{NULL}, then will not be saved.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param options Additional arguments. See data_sort_options
 #'

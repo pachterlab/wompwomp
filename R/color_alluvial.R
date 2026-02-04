@@ -6,6 +6,7 @@
 #' @importFrom dplyr add_count mutate select group_by
 #' @importFrom magrittr %>%
 #' @importFrom utils read.csv write.csv
+#' @importFrom tidyselect eval_select
 
 utils::globalVariables(c(
     ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name"
@@ -31,7 +32,6 @@ default_colors <- c(
 #' @param preprocess_data Logical. If TRUE (default), preprocess data with
 #'   `data_preprocess()`.
 #' @param print_params Logical. If TRUE, prints parameters during execution.
-#' @param load_df Internal flag; not recommended to modify.
 #'
 #' @return A named list of control parameters for use in `data_color()`.
 #'
@@ -470,7 +470,7 @@ make_stratum_color_list <- function(data, cols, mapping, color_palette = NULL) {
 #' )
 #' lapply(data, levels)
 #' cluster_mapping <- data |> 
-#'   data_color(cols = c(method1, method2), wt = value)
+#'   data_color(cols = c(method1, method2))
 #'
 #' @export
 data_color <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {

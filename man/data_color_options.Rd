@@ -23,8 +23,6 @@ threshold for deciding whether to reuse a color or assign a new one.}
 \code{data_preprocess()}.}
 
 \item{print_params}{Logical. If TRUE, prints parameters during execution.}
-
-\item{load_df}{Internal flag; not recommended to modify.}
 }
 \value{
 A named list of control parameters for use in \code{data_color()}.

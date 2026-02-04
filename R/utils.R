@@ -4,6 +4,8 @@
 #' @rdname wompwomp
 #' @importFrom rlang sym .data
 #' @importFrom magrittr %>%
+#' @importFrom tidyselect eval_select
+#' @importFrom vctrs vec_cast
 
 utils::globalVariables(c(
     ".data", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"
