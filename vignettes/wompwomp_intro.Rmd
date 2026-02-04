@@ -12,7 +12,7 @@ vignette: >
 ---
 
 ```{r}
-devtools::load_all("~/Desktop/local/wompwomp")
+devtools::load_all()
 # library(wompwomp)
 
 set.seed(43)
@@ -57,7 +57,6 @@ print(clus_df_gather_tsp)
 
 ```{r}
 # clus_df_gather_tsp <- clus_df_gather_tsp
-devtools::load_all("~/Desktop/local/wompwomp")
 stratum_to_color_mapping <- data_color(clus_df_gather_tsp, cols = graphing_columns, wt = "value", method = "advanced")
 print(stratum_to_color_mapping)
 ```

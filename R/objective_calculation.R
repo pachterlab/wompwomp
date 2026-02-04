@@ -5,7 +5,6 @@
 #' @importFrom dplyr mutate group_by ungroup n row_number left_join
 #' @importFrom rlang sym .data
 #' @importFrom magrittr %>%
-#' @importFrom data.table :=
 #' @importFrom R6 R6Class
 #' 
 utils::globalVariables(c(

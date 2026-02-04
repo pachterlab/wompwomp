@@ -10,7 +10,6 @@
 #' @importFrom stats setNames
 #' @importFrom rlang sym .data
 #' @importFrom magrittr %>%
-#' @importFrom data.table :=
 #' @importFrom tidyselect eval_select
 
 utils::globalVariables(c(

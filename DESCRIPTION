@@ -16,7 +16,6 @@ Imports:
     rlang,
     tidyr,
     magrittr,
-    data.table,
     purrr,
     TSP,
     R6,
