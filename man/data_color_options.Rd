@@ -5,22 +5,13 @@
 \title{Control Options for \code{data_color()}}
 \usage{
 data_color_options(
-  color_list = NULL,
-  color_val = NULL,
   method_advanced_option = c("leiden", "louvain"),
   cutoff = 0.5,
   preprocess_data = TRUE,
-  print_params = FALSE,
-  load_df = TRUE
+  print_params = FALSE
 )
 }
 \arguments{
-\item{color_list}{Optional named list or vector mapping values in the
-graphing columns to colors. Overrides default palette.}
-
-\item{color_val}{Optional named list: names correspond to data values, and
-each element is a color to assign directly.}
-
 \item{method_advanced_option}{Character. When
 \code{method == "advanced"}, selects the clustering algorithm.
 Options: \code{"leiden"} (default) or \code{"louvain"}.}

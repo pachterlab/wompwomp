@@ -21,10 +21,10 @@ Imports:
     TSP,
     R6,
     stats,
-    utils,
     ggforce,
     ggplot2,
-    ggalluvial
+    ggalluvial,
+    utils
 Depends: R (>= 4.0.0)
 Suggests: 
     testthat,

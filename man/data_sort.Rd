@@ -2,7 +2,7 @@
 % Please edit documentation in R/sort_alluvial.R
 \name{data_sort}
 \alias{data_sort}
-\title{Sorts a dataframe.}
+\title{Sorts a dataframe to minimize crossings in a parallel sets / alluvial plot.}
 \usage{
 data_sort(
   data,
@@ -12,7 +12,6 @@ data_sort(
   column_method = c("tsp", "neighbornet", "none", "random"),
   weight_scalar = 5e+05,
   fixed_column = NULL,
-  output_df_path = NULL,
   verbose = FALSE,
   options = NULL
 )
@@ -34,11 +33,11 @@ data_sort(
 
 \item{fixed_column}{Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method == 'greedy_wolf'}.}
 
-\item{output_df_path}{Optional character. Output path for the output data frame, in rds format. If \code{NULL}, then will not be saved.}
-
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
 \item{options}{Additional arguments. See data_sort_options}
+
+\item{output_df_path}{Optional character. Output path for the output data frame, in rds format. If \code{NULL}, then will not be saved.}
 }
 \value{
 A data frame where each row represents an alluvium and each column represents an axis. Each column of \code{cols} represents an axis, stored as a factor ordered in ascending order of strata. There is an additional column \code{wt} ('value' if NULL) that represents the size of the alluvium in that row. The order of columns represents the recommended order of axes.
@@ -47,27 +46,46 @@ A data frame where each row represents an alluvium and each column represents an
 Sorts a dataframe with the algorithm specified by \code{method}.
 }
 \examples{
-# Example 1: data format 1
-data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- data_sort(
-    data,
-    cols = c("method1", "method2"),
-    method = "tsp",
-    column_method = "tsp"
+# Example 1: data format 1 (uncounted)
+set.seed(429144)
+data <- data.frame(
+  method1 = factor(LETTERS[sample(1:3, 100, TRUE)]),
+  method2 = factor(LETTERS[27 - sample(1:3, 100, TRUE)])
 )
+head(data)
+lapply(data, levels)
+clus_df_gather <- data_sort(
+  data,
+  cols = c("method1", "method2"),
+  method = "tsp",
+  column_method = "tsp"
+)
+print(clus_df_gather)
+lapply(clus_df_gather[, 1:2], levels)
 
-# Example 2: data format 2
-data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- data |>
-    dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
-    dplyr::group_by_all() |>
-    dplyr::count(name = "value")
-clus_df_gather <- data_sort(
-    clus_df_gather,
-    cols = c("method1", "method2"),
-    wt = "value",
-    method = "tsp",
-    column_method = "tsp"
+# Example 2: data format 2 (counted)
+set.seed(806949)
+data <- data.frame(
+  method1 = factor(LETTERS[sample(1:3, 100, TRUE)]),
+  method2 = factor(LETTERS[27 - sample(1:3, 100, TRUE)])
 )
+clus_df_gather <- data |>
+  dplyr::mutate_if(
+    is.numeric,
+    function(x) factor(x, levels = as.character(sort(unique(x))))
+  ) |>
+  dplyr::group_by_all() |>
+  dplyr::count(name = "value")
+print(clus_df_gather)
+lapply(clus_df_gather[, 1:2], levels)
+clus_df_gather <- data_sort(
+  clus_df_gather,
+  cols = c("method1", "method2"),
+  wt = "value",
+  method = "tsp",
+  column_method = "tsp"
+)
+print(clus_df_gather)
+lapply(clus_df_gather[, 1:2], levels)
 
 }
