@@ -9,11 +9,10 @@
 #' @importFrom utils read.csv write.csv combn
 #' @importFrom stats setNames
 #' @importFrom rlang sym .data
-#' @importFrom magrittr %>%
 #' @importFrom tidyselect eval_select
 
 utils::globalVariables(c(
-    ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name"
+    ".data", ":=", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name"
 ))
 
 # devtools::document() needs package = "wompwomp"; but R CMD build wompwomp needs it not there stored globally - so I make this function
@@ -202,16 +201,16 @@ run_neighbornet <- function(data, cols, wt = "value", matrix_initialization_valu
     
     # For each combination, group and summarize
     summarized_results <- purrr::map(pairwise_groupings, function(columns) {
-        clus_df_gather %>%
-            group_by(across(all_of(columns))) %>%
-            summarise(total_value = sum(!!sym(wt)), .groups = "drop") %>%
+        clus_df_gather |>
+            group_by(across(all_of(columns))) |>
+            summarise(total_value = sum(!!sym(wt)), .groups = "drop") |>
             mutate(grouping = paste(columns, collapse = "+"))
     })
     
     # summarized_results <- purrr::map(pairwise_groupings, function(columns) {
-    #     clus_df_gather %>%
-    #         group_by(across(all_of(columns))) %>%
-    #         summarise(total_value = sum(value), .groups = "drop") %>%
+    #     clus_df_gather |>
+    #         group_by(across(all_of(columns))) |>
+    #         summarise(total_value = sum(value), .groups = "drop") |>
     #         mutate(grouping = paste(columns, collapse = "+"))
     # })
     
@@ -437,14 +436,14 @@ determine_optimal_cycle_start <- function(data, cycle, cols = NULL, wt = "value"
 }
 
 increment_if_zeros <- function(clus_df_gather, column) {
-    clus_df_gather <- clus_df_gather %>% mutate(group_numeric = as.numeric(as.character(.data[[column]])))
+    clus_df_gather <- clus_df_gather |> mutate(group_numeric = as.numeric(as.character(.data[[column]])))
     
     if (any(clus_df_gather$group_numeric == 0, na.rm = TRUE)) {
         clus_df_gather$group_numeric <- clus_df_gather$group_numeric + 1
-        clus_df_gather <- clus_df_gather %>% mutate(!!column := factor(group_numeric))
+        clus_df_gather <- clus_df_gather |> mutate(!!column := factor(group_numeric))
     }
     
-    clus_df_gather <- clus_df_gather %>% select(-group_numeric)
+    clus_df_gather <- clus_df_gather |> select(-group_numeric)
     
     return(clus_df_gather)
 }
@@ -461,11 +460,11 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
         # Initialize variables
         half_rows <- nrow(clus_df_gather) / 2
         
-        subset_data <- clus_df_gather %>%
-            ungroup() %>%
+        subset_data <- clus_df_gather |>
+            ungroup() |>
             dplyr::slice((half_rows + 1):nrow(clus_df_gather))
         
-        subset_data <- subset_data %>% mutate(
+        subset_data <- subset_data |> mutate(
             !!reordered_column_original_clusters_name := as.numeric(as.character(.data[[reordered_column]])),
             !!reordered_column := -as.numeric(as.character(.data[[reordered_column]])),
             y := -as.numeric(as.character(y)),
@@ -515,7 +514,7 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
             sort(unique(subset_data[[reordered_column]]))
         )
         
-        subset_data <- subset_data %>% mutate(!!reordered_column := mapping[as.character(.data[[reordered_column]])])
+        subset_data <- subset_data |> mutate(!!reordered_column := mapping[as.character(.data[[reordered_column]])])
         
         clus_df_gather[[reordered_column]][(1:half_rows)] <- subset_data[[reordered_column]]
         clus_df_gather[[reordered_column]][((half_rows + 1):nrow(clus_df_gather))] <- subset_data[[reordered_column]]
@@ -710,7 +709,7 @@ data_preprocess <- function(data, cols, wt = NULL, default_sorting = "alphabetic
     }
     
     # sort columns according to cols
-    # data <- data %>% dplyr::relocate(all_of(cols))  # put cols in front
+    # data <- data |> dplyr::relocate(all_of(cols))  # put cols in front
     if (!all(intersect(colnames(data), cols) == cols)) {
         data <- reorder_and_rename_columns(data, cols)
     }
@@ -726,7 +725,7 @@ data_preprocess <- function(data, cols, wt = NULL, default_sorting = "alphabetic
         clus_df_gather <- data
     }
     
-    clus_df_gather <- clus_df_gather %>% dplyr::ungroup()
+    clus_df_gather <- clus_df_gather |> dplyr::ungroup()
     
     # if ((is.character(output_df_path) && grepl("\\.rds$", output_df_path, ignore.case = TRUE))) {
     #     if (verbose) message(sprintf("Saving dataframe to=%s", output_df_path))
@@ -831,9 +830,9 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
     
     # checks if id, x, y in clus_df_gather_best, as well as if clus_df_gather_best has more rows than original
     if ((length(setdiff(c("id", "x", "y"), colnames(clus_df_gather_best))) == 0) && nrow(clus_df_gather_best) > length_clus_df_gather_original) {
-        clus_df_gather_best <- clus_df_gather_best %>%
-            ungroup() %>%
-            slice(1:(n() %/% 2)) %>% # keep first half of rows
+        clus_df_gather_best <- clus_df_gather_best |>
+            ungroup() |>
+            slice(1:(n() %/% 2)) |> # keep first half of rows
             select(-id, -x, -y) # drop columns
     }
     
@@ -1039,7 +1038,7 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
     # reorder cols to match any changed order in clus_df_gather_sorted
     graphing_columns_sorted <- cols[order(match(cols, names(clus_df_gather_sorted)))]
     clus_df_gather <- generalized_reorder(clus_df_gather=clus_df_gather, clus_df_gather_sorted=clus_df_gather_sorted, cols=graphing_columns_sorted)
-    clus_df_gather <- clus_df_gather %>% dplyr::ungroup()
+    clus_df_gather <- clus_df_gather |> dplyr::ungroup()
     
     # Save if desired
     if ((is.character(output_df_path) && grepl("\\.rds$", output_df_path, ignore.case = TRUE))) {

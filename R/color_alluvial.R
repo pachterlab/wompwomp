@@ -4,12 +4,11 @@
 #' @rdname wompwomp
 #' @importFrom igraph V cluster_louvain cluster_leiden E
 #' @importFrom dplyr add_count mutate select group_by
-#' @importFrom magrittr %>%
 #' @importFrom utils read.csv write.csv
 #' @importFrom tidyselect eval_select
 
 utils::globalVariables(c(
-    ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name"
+    ".data", ":=", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name"
 ))
 default_colors <- c(
     "#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700", "#1C91D4", "#007756", "#D5C711", "#005685",
@@ -211,7 +210,7 @@ data_color_internal <- function(data, cols, wt = NULL, method = "advanced", reso
         }
     }
     
-    clus_df_gather_color <- clus_df_gather_color %>% dplyr::select(-!!rlang::sym(wt)) 
+    clus_df_gather_color <- clus_df_gather_color |> dplyr::select(-!!rlang::sym(wt)) 
     
     final_df <- data.frame(axis=c(),
                            value=c(),
@@ -237,26 +236,26 @@ find_group2_colors <- function(clus_df_gather, max_level,
     
     clus_df_ungrouped <- clus_df_gather[, c(group1_name, group2_name, "value",
                                             paste0(group1_name, '_colors'))]
-    clus_df_filtered <- clus_df_ungrouped %>%
-        dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) %>%
+    clus_df_filtered <- clus_df_ungrouped |>
+        dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) |>
         dplyr::select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n, !!rlang::sym(paste0(group1_name, '_colors')))
     clus_df_filtered <- dplyr::distinct(clus_df_filtered)
     colnames(clus_df_filtered) <- c(group1_name, group2_name, "value", paste0(group1_name, '_colors'))
     
     
-    clus_df_filtered <- clus_df_filtered %>%
-        dplyr::group_by(!!rlang::sym(group1_name)) %>%
+    clus_df_filtered <- clus_df_filtered |>
+        dplyr::group_by(!!rlang::sym(group1_name)) |>
         dplyr::mutate(group1_size = sum(value))
-    clus_df_filtered <- clus_df_filtered %>%
-        dplyr::group_by(!!rlang::sym(group2_name)) %>%
+    clus_df_filtered <- clus_df_filtered |>
+        dplyr::group_by(!!rlang::sym(group2_name)) |>
         dplyr::mutate(group2_size = sum(value))
-    clus_df_filtered <- clus_df_filtered %>%
-        dplyr::group_by(!!rlang::sym(group1_name)) %>%
+    clus_df_filtered <- clus_df_filtered |>
+        dplyr::group_by(!!rlang::sym(group1_name)) |>
         dplyr::mutate(weight = value / group2_size)
     
-    parent_df <- clus_df_filtered %>%
-        dplyr::group_by(!!rlang::sym(group2_name)) %>%
-        dplyr::filter(weight == max(weight)) # %>% select(!!rlang::sym(group1_name))
+    parent_df <- clus_df_filtered |>
+        dplyr::group_by(!!rlang::sym(group2_name)) |>
+        dplyr::filter(weight == max(weight)) # |> select(!!rlang::sym(group1_name))
     parent_df <- parent_df[parent_df$weight > cutoff,]
     
     parent_df <- parent_df[,c(group1_name, group2_name, paste0(group1_name, '_colors'))]
@@ -295,21 +294,21 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
                 if (!(comp1 %in% compared | comp2 %in% compared)) {
                     if (first) {
                         clus_df_filtered <- clus_df_ungrouped[, c(group1_name, group2_name, "value")]
-                        clus_df_filtered <- clus_df_filtered %>%
-                            dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) %>%
+                        clus_df_filtered <- clus_df_filtered |>
+                            dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) |>
                             dplyr::select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
                         clus_df_filtered <- dplyr::distinct(clus_df_filtered)
                         colnames(clus_df_filtered) <- c("group1", "group2", "value")
                         
-                        clus_df_filtered <- clus_df_filtered %>%
-                            dplyr::group_by(group1) %>%
+                        clus_df_filtered <- clus_df_filtered |>
+                            dplyr::group_by(group1) |>
                             dplyr::mutate(group1_size = sum(value))
-                        clus_df_filtered <- clus_df_filtered %>%
-                            dplyr::group_by(group1) %>%
+                        clus_df_filtered <- clus_df_filtered |>
+                            dplyr::group_by(group1) |>
                             dplyr::mutate(group2_size = sum(value))
                         
-                        clus_df_filtered <- clus_df_filtered %>%
-                            dplyr::group_by(group1) %>%
+                        clus_df_filtered <- clus_df_filtered |>
+                            dplyr::group_by(group1) |>
                             dplyr::mutate(weight = value)
                         
                         clus_df_filtered$group1 <- sub("^", paste0(group1_name, "_"), clus_df_filtered[["group1"]])
@@ -318,21 +317,21 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
                         first <- FALSE
                     } else {
                         temp_clus_df_filtered <- clus_df_ungrouped[, c(group1_name, group2_name, "value")]
-                        temp_clus_df_filtered <- temp_clus_df_filtered %>%
-                            dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) %>%
+                        temp_clus_df_filtered <- temp_clus_df_filtered |>
+                            dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) |>
                             dplyr::select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
                         temp_clus_df_filtered <- dplyr::distinct(temp_clus_df_filtered)
                         colnames(temp_clus_df_filtered) <- c("group1", "group2", "value")
                         
-                        temp_clus_df_filtered <- temp_clus_df_filtered %>%
-                            dplyr::group_by(group1) %>%
+                        temp_clus_df_filtered <- temp_clus_df_filtered |>
+                            dplyr::group_by(group1) |>
                             dplyr::mutate(group1_size = sum(value))
-                        temp_clus_df_filtered <- temp_clus_df_filtered %>%
-                            dplyr::group_by(group2) %>%
+                        temp_clus_df_filtered <- temp_clus_df_filtered |>
+                            dplyr::group_by(group2) |>
                             dplyr::mutate(group2_size = sum(value))
                         
-                        temp_clus_df_filtered <- temp_clus_df_filtered %>%
-                            dplyr::group_by(group1) %>%
+                        temp_clus_df_filtered <- temp_clus_df_filtered |>
+                            dplyr::group_by(group1) |>
                             dplyr::mutate(weight = value) 
                         
                         temp_clus_df_filtered$group1 <- sub("^", paste0(group1_name, "_"), temp_clus_df_filtered[["group1"]])
@@ -356,7 +355,7 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
     }
     
     clus_df_leiden <- data.frame(group_name = partition$names, leiden = partition$membership)
-    clus_df_leiden <- clus_df_leiden %>% tidyr::separate_wider_delim(group_name, names = c("axis", 'value'), delim = "_")
+    clus_df_leiden <- clus_df_leiden |> tidyr::separate_wider_delim(group_name, names = c("axis", 'value'), delim = "_")
     
     #clus_df_leiden[["leiden"]] <- unlist(Map(function(x) ditto_colors[x], clus_df_leiden$leiden))
     

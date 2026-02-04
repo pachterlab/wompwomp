@@ -3,12 +3,11 @@
 #' @name wompwomp-imports
 #' @rdname wompwomp
 #' @importFrom rlang sym .data
-#' @importFrom magrittr %>%
 #' @importFrom tidyselect eval_select
 #' @importFrom vctrs vec_cast
 
 utils::globalVariables(c(
-    ".data", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"
+    ".data", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"
 ))
 
 print_function_params <- function(display_df = FALSE) {
@@ -126,9 +125,9 @@ generalized_reorder <- function(clus_df_gather, clus_df_gather_sorted, cols) {
         grp_col <- cols[i]
         ord_col <- ordering_columns[i]
         
-        order_vec <- clus_df_gather_sorted %>%
-            arrange(.data[[ord_col]]) %>%
-            pull(.data[[grp_col]]) %>%
+        order_vec <- clus_df_gather_sorted |>
+            arrange(.data[[ord_col]]) |>
+            pull(.data[[grp_col]]) |>
             unique()
         
         clus_df_gather[[grp_col]] <- factor(clus_df_gather[[grp_col]], levels = order_vec)

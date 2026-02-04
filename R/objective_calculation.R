@@ -4,11 +4,10 @@
 #' @rdname wompwomp
 #' @importFrom dplyr mutate group_by ungroup n row_number left_join
 #' @importFrom rlang sym .data
-#' @importFrom magrittr %>%
 #' @importFrom R6 R6Class
 #' 
 utils::globalVariables(c(
-    ".data", ":=", "%>%", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"
+    ".data", ":=", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"
 ))
 
 # ---- Binary Indexed Tree (Fenwick Tree) ----
@@ -111,7 +110,7 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
 # # if uncommenting, then move ggplot2 and ggalluvial from Suggests to Imports in DESCRIPTION
 # make_lode_df_old <- function(data, cols = NULL, wt = "value") {
 #     if (wt != "value") {
-#         data <- data %>% dplyr::rename(value = !!sym(wt))
+#         data <- data |> dplyr::rename(value = !!sym(wt))
 #         wt <- "value"
 #     }
 #     
@@ -138,14 +137,14 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
 #     n_x <- length(x_vals)
 #     
 #     # make the full lode_df
-#     lode_df_long_indexed_full <- lode_df_long_full %>%
-#         group_by(alluvium) %>%
-#         mutate(pos = row_number()) %>%
+#     lode_df_long_indexed_full <- lode_df_long_full |>
+#         group_by(alluvium) |>
+#         mutate(pos = row_number()) |>
 #         ungroup()
 #     
 #     # Pivot each of x, y, stratum into wide format
-#     lode_df_full <- lode_df_long_indexed_full %>%
-#         select(alluvium, pos, x, y, stratum, count) %>%
+#     lode_df_full <- lode_df_long_indexed_full |>
+#         select(alluvium, pos, x, y, stratum, count) |>
 #         tidyr::pivot_wider(
 #             id_cols = c(alluvium, count),
 #             names_from = pos,
@@ -165,7 +164,7 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
 #         lode_df_full[[stratum_char_col]] <- mapping[as.character(lode_df_full[[stratum_col]])]
 #     }
 #     
-#     lode_df_full <- lode_df_full %>% dplyr::rename(value = "count")
+#     lode_df_full <- lode_df_full |> dplyr::rename(value = "count")
 #     return(lode_df_full)
 # }
 

@@ -21,7 +21,7 @@ test_that("data_sort works with unsorted algorithm", {
 
     ground_truth_df <- readRDS(ground_truth_df_path)
     ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
-    ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
+    ground_truth_df <- ground_truth_df |> dplyr::ungroup()
 
     expect_equal(as.data.frame(unsorted_df), as.data.frame(ground_truth_df))
 })
@@ -47,7 +47,7 @@ test_that("data_sort works with greedy_wolf algorithm", {
 
     ground_truth_df <- readRDS(ground_truth_df_path)
     ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
-    ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
+    ground_truth_df <- ground_truth_df |> dplyr::ungroup()
 
     expect_equal(as.data.frame(greedy_wolf_df), as.data.frame(ground_truth_df))
 })
@@ -73,7 +73,7 @@ test_that("data_sort works with greedy_wblf algorithm", {
 
     ground_truth_df <- readRDS(ground_truth_df_path)
     ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
-    ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
+    ground_truth_df <- ground_truth_df |> dplyr::ungroup()
 
     expect_equal(as.data.frame(greedy_wblf_df), as.data.frame(ground_truth_df))
 })
@@ -100,7 +100,7 @@ test_that("data_sort works with tsp algorithm", {
 
     ground_truth_df <- readRDS(ground_truth_df_path)
     ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
-    ground_truth_df <- ground_truth_df %>% dplyr::ungroup()
+    ground_truth_df <- ground_truth_df |> dplyr::ungroup()
 
     expect_equal(as.data.frame(tsp_df), as.data.frame(ground_truth_df))
 })
