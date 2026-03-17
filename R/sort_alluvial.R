@@ -649,7 +649,7 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
-#' @param default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
+#' @param default_sorting Character. Default column sorting in [data_preprocess()] if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param do_gather_set_data Internal flag; not recommended to modify.
@@ -860,7 +860,7 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
 #' Control Options for `data_sort()`
 #'
 #' Creates a list of control parameters that modify the behavior of
-#' `data_sort()`. These options allow tuning algorithmic behavior without
+#' [data_sort()]. These options allow tuning algorithmic behavior without
 #' cluttering the main function arguments.
 #'
 #' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{cols} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{cols} to minimize edge overlap on the beginning cycle only. Only applies when \code{method == 'tsp'} and \code{length(cols) > 2}.
@@ -872,12 +872,12 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
 #' @param weighted_metric Logical. weighted_metric objective
 #' @param cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{method == 'tsp'}.
 #' @param random_initializations Integer. Number of random initializations for the positions of each grouping in \code{cols}. Only applies when \code{method == 'greedy_wolf' or method == 'greedy_wblf'}.
-#' @param preprocess_data Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.
-#' @param default_sorting Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
+#' @param preprocess_data Logical. If TRUE, will preprocess the data with the [data_preprocess()] function.
+#' @param default_sorting Character. Default column sorting in [data_preprocess()] if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param do_compute_alluvial_statistics Internal flag; not recommended to modify.
 #' 
-#' @return A named list of control parameters, to be passed into `data_sort()`
+#' @return A named list of control parameters, to be passed into [data_sort()]
 #'   via the `options` argument.
 #'
 #' @examples
@@ -1082,7 +1082,7 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
 #' @param weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method == 'tsp'}.
 #' @param fixed_column Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method == 'greedy_wolf'}.
 #' @param verbose Logical. If TRUE, will display messages during the function.
-#' @param options Additional arguments. See data_sort_options
+#' @param options Additional arguments. See [data_sort_options()].
 #'
 #' @return
 #' A data frame where each row represents an alluvium and each column represents an axis. Each column of \code{cols} represents an axis, stored as a factor ordered in ascending order of strata. There is an additional column \code{wt} ('value' if NULL) that represents the size of the alluvium in that row. The order of columns represents the recommended order of axes.

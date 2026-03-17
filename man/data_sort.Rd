@@ -35,7 +35,7 @@ data_sort(
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
-\item{options}{Additional arguments. See data_sort_options}
+\item{options}{Additional arguments. See \code{\link[=data_sort_options]{data_sort_options()}}.}
 }
 \value{
 A data frame where each row represents an alluvium and each column represents an axis. Each column of \code{cols} represents an axis, stored as a factor ordered in ascending order of strata. There is an additional column \code{wt} ('value' if NULL) that represents the size of the alluvium in that row. The order of columns represents the recommended order of axes.

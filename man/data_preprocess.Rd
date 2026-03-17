@@ -25,7 +25,7 @@ data_preprocess(
 
 \item{wt}{Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).}
 
-\item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+\item{default_sorting}{Character. Default column sorting in \code{\link[=data_preprocess]{data_preprocess()}} if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
