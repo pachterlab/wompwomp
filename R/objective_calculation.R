@@ -12,46 +12,46 @@ utils::globalVariables(c(
 
 # ---- Binary Indexed Tree (Fenwick Tree) ----
 BIT <- R6::R6Class("BIT",
-                                   public = list(
-                                       tree_count = NULL,
-                                       tree_weight = NULL,
-                                       
-                                       initialize = function(size) {
-                                           self$tree_count <- integer(size + 1)
-                                           self$tree_weight <- numeric(size + 1)
-                                       },
-                                       
-                                       update = function(index, weight) {
-                                           index <- index + 1L
-                                           n <- length(self$tree_count)
-                                           while (index < n) {
-                                               self$tree_count[index] <- self$tree_count[index] + 1L
-                                               self$tree_weight[index] <- self$tree_weight[index] + weight
-                                               index <- index + bitwAnd(index, -index)
-                                           }
-                                       },
-                                       
-                                       query = function(index) {
-                                           count <- 0L
-                                           weight_sum <- 0.0
-                                           index <- index + 1L
-                                           while (index > 0L) {
-                                               count <- count + self$tree_count[index]
-                                               weight_sum <- weight_sum + self$tree_weight[index]
-                                               index <- index - bitwAnd(index, -index)
-                                           }
-                                           list(count = count, weight_sum = weight_sum)
-                                       },
-                                       
-                                       query_range = function(low, high) {
-                                           q_high <- self$query(high)
-                                           q_low <- self$query(low - 1L)
-                                           list(
-                                               count = q_high$count - q_low$count,
-                                               weight_sum = q_high$weight_sum - q_low$weight_sum
-                                           )
-                                       }
-                                   )
+                   public = list(
+                       tree_count = NULL,
+                       tree_weight = NULL,
+                       
+                       initialize = function(size) {
+                           self$tree_count <- integer(size + 1)
+                           self$tree_weight <- numeric(size + 1)
+                       },
+                       
+                       update = function(index, weight) {
+                           index <- index + 1L
+                           n <- length(self$tree_count)
+                           while (index < n) {
+                               self$tree_count[index] <- self$tree_count[index] + 1L
+                               self$tree_weight[index] <- self$tree_weight[index] + weight
+                               index <- index + bitwAnd(index, -index)
+                           }
+                       },
+                       
+                       query = function(index) {
+                           count <- 0L
+                           weight_sum <- 0.0
+                           index <- index + 1L
+                           while (index > 0L) {
+                               count <- count + self$tree_count[index]
+                               weight_sum <- weight_sum + self$tree_weight[index]
+                               index <- index - bitwAnd(index, -index)
+                           }
+                           list(count = count, weight_sum = weight_sum)
+                       },
+                       
+                       query_range = function(low, high) {
+                           q_high <- self$query(high)
+                           q_low <- self$query(low - 1L)
+                           list(
+                               count = q_high$count - q_low$count,
+                               weight_sum = q_high$weight_sum - q_low$weight_sum
+                           )
+                       }
+                   )
 )
 
 calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'value', weighted_metric = TRUE) {
@@ -77,7 +77,7 @@ calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'value'
         if (weighted_metric) {
             total_cross_weight <- total_cross_weight + (weight * q$weight_sum)
         } else {
-            total_cross_weight <- total_cross_weight + q[[wt]]
+            total_cross_weight <- total_cross_weight + q$count
         }
         
         # Add current y2_rank to BIT
@@ -91,6 +91,13 @@ calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'value'
 make_lode_df <- function(data, cols = NULL, wt = "value") {
     lode_df <- data
     lode_df$alluvium <- seq_len(nrow(lode_df))
+    
+    # create a temp column
+    if (is.null(wt)) {
+        lode_df$.wt_internal <- 1
+        wt <- ".wt_internal"
+    }
+
     x <- 1
     for (i in cols) {
         ordered_df <- lode_df[order(lode_df[[i]]), ]
@@ -102,8 +109,12 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
         )
         x <- x + 1
     }
-
-
+    
+    # remove temp column if created
+    if (is.null(wt)) {
+        lode_df$.wt_internal <- NULL
+    }
+    
     return(lode_df)
 }
 
@@ -177,7 +188,8 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
 #' (1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
 #' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
 #' @param cols Optional character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.
-#' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above). For unweighted metric, set to null.
+#' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above). If null, then sets \code{weighted_metric} to FALSE.
+#' @param weighted_metric Logical. Determines if the objective is total number of edge crossings (weighted_metric=FALSE) or sum of product of overlapping edge weights (weighted_metric=TRUE).
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #'
 #' @return
@@ -198,14 +210,14 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
 #' result <- determine_crossing_edges(data, cols = c("method1", "method2"))
 #'
 #' @export
-determine_crossing_edges <- function(data, cols = NULL, wt = "value", verbose = FALSE) {
-    # weighted_metric = TRUE if wt is not null
-    weighted_metric <- FALSE
+determine_crossing_edges <- function(data, cols = NULL, wt = "value", weighted_metric = TRUE, verbose = FALSE) {
     if (!is.null(wt)) {
         if (!(wt %in% names(data))) {
             stop(sprintf("Column '%s' (wt) not found in data.", wt))
         }
-        weighted_metric <- TRUE
+    } else {
+        # if wt is null, then weighted_metric is FALSE
+        weighted_metric <- FALSE
     }
     
     col_ints <- c()

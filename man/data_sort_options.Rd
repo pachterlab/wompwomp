@@ -34,7 +34,7 @@ data_sort_options(
 
 \item{column_metric}{Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{column_method != 'none'}.}
 
-\item{weighted_metric}{Logical. weighted_metric objective}
+\item{weighted_metric}{Logical. Determines if the objective is total number of edge crossings (weighted_metric=FALSE) or sum of product of overlapping edge weights (weighted_metric=TRUE).}
 
 \item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{method == 'tsp'}.}
 

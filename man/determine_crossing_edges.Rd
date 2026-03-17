@@ -19,9 +19,9 @@ determine_crossing_edges(
 
 \item{cols}{Optional character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.}
 
-\item{wt}{Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).}
+\item{wt}{Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above). If null, then sets \code{weighted_metric} to FALSE.}
 
-\item{weighted_metric}{Logical. weighted_metric}
+\item{weighted_metric}{Logical. Determines if the objective is total number of edge crossings (weighted_metric=FALSE) or sum of product of overlapping edge weights (weighted_metric=TRUE).}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 }

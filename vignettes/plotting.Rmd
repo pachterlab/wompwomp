@@ -61,7 +61,7 @@ clus_df_gather |>
 ```{r}
 # sort (tidy) and plot - sorted + uncolored
 clus_df_gather |> 
-  data_sort(cols = c(tissue, cluster), wt = value) |> 
+  data_sort(cols = c(tissue, cluster), wt = value, options = list(weighted_metric = TRUE)) |> 
   print() -> clus_df_gather_sort
 
 clus_df_gather_sort |> 
