@@ -40,21 +40,21 @@ data_sort_options(
 
 \item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{cols}. Only applies when \code{method == 'greedy_wolf' or method == 'greedy_wblf'}.}
 
-\item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{data_preprocess} function.}
+\item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{\link[=data_preprocess]{data_preprocess()}} function.}
 
-\item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+\item{default_sorting}{Character. Default column sorting in \code{\link[=data_preprocess]{data_preprocess()}} if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
 
 \item{print_params}{Logical. If TRUE, will print function params.}
 
 \item{do_compute_alluvial_statistics}{Internal flag; not recommended to modify.}
 }
 \value{
-A named list of control parameters, to be passed into \code{data_sort()}
+A named list of control parameters, to be passed into \code{\link[=data_sort]{data_sort()}}
 via the \code{options} argument.
 }
 \description{
 Creates a list of control parameters that modify the behavior of
-\code{data_sort()}. These options allow tuning algorithmic behavior without
+\code{\link[=data_sort]{data_sort()}}. These options allow tuning algorithmic behavior without
 cluttering the main function arguments.
 }
 \examples{

@@ -25,7 +25,7 @@ data_preprocess(
 
 \item{wt}{Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).}
 
-\item{default_sorting}{Character. Default column sorting in data_preprocess if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+\item{default_sorting}{Character. Default column sorting in \code{\link[=data_preprocess]{data_preprocess()}} if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
@@ -44,20 +44,38 @@ A data frame where each row represents a combination of groupings, each column f
 Preprocess data (load in, add integer columns, reorder columns to match cols, and group as needed)
 }
 \examples{
+set.seed(235488)
+data <- data.frame(
+  method1 = sample(1:3, 100, TRUE),
+  method2 = sample(4:6, 100, TRUE)
+)
+head(data)
+lapply(data, unique)
+
 # Example 1: data format 1
-data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-clus_df_gather <- data_preprocess(data, cols = c("method1", "method2"))
+clus_df_gather <- data_preprocess(
+  data,
+  cols = c("method1", "method2")
+)
+print(clus_df_gather)
+lapply(clus_df_gather[, 1:2], levels)
 
 # Example 2: data format 2
-data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 clus_df_gather <- data |>
-    dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+    dplyr::mutate_if(
+      is.numeric,
+      function(x) factor(x, levels = as.character(sort(unique(x))))
+    ) |>
     dplyr::group_by_all() |>
     dplyr::count(name = "value")
+print(clus_df_gather)
+lapply(clus_df_gather[, 1:2], unique)
 clus_df_gather <- data_preprocess(
-    clus_df_gather,
-    cols = c("method1", "method2"),
-    wt = "value"
+  clus_df_gather,
+  cols = c("method1", "method2"),
+  wt = "value"
 )
+print(clus_df_gather)
+lapply(clus_df_gather[, 1:2], unique)
 
 }
