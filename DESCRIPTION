@@ -15,7 +15,6 @@ Imports:
     tibble,
     rlang,
     tidyr,
-    magrittr,
     purrr,
     TSP,
     R6,

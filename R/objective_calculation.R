@@ -54,7 +54,7 @@ BIT <- R6::R6Class("BIT",
                                    )
 )
 
-calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'count', weighted_metric = TRUE) {
+calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'value', weighted_metric = TRUE) {
     # Step 1: Sort by y1
     df_sorted <- data[order(data[[y1]]), ]
     rownames(df_sorted) <- NULL
@@ -75,7 +75,7 @@ calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'count'
         q <- bit$query_range(y2_rank + 1L, max_rank)
         
         if (weighted_metric) {
-            total_cross_weight <- total_cross_weight + weight * q$weight_sum
+            total_cross_weight <- total_cross_weight + (weight * q$weight_sum)
         } else {
             total_cross_weight <- total_cross_weight + q[[wt]]
         }
@@ -177,8 +177,7 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
 #' (1) wt == NULL: Each row represents an entity, each column represents a grouping, and each entry represents the membership of the entity in that row to the grouping in that column. Must contain at least two columns (two cols).
 #' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
 #' @param cols Optional character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting). Mutually exclusive with \code{column1} and \code{column2}.
-#' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
-#' @param weighted_metric Logical. weighted_metric
+#' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above). For unweighted metric, set to null.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #'
 #' @return
@@ -199,7 +198,16 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
 #' result <- determine_crossing_edges(data, cols = c("method1", "method2"))
 #'
 #' @export
-determine_crossing_edges <- function(data, cols = NULL, wt = "value", weighted_metric = TRUE, verbose = FALSE) {
+determine_crossing_edges <- function(data, cols = NULL, wt = "value", verbose = FALSE) {
+    # weighted_metric = TRUE if wt is not null
+    weighted_metric <- FALSE
+    if (!is.null(wt)) {
+        if (!(wt %in% names(data))) {
+            stop(sprintf("Column '%s' (wt) not found in data.", wt))
+        }
+        weighted_metric <- TRUE
+    }
+    
     col_ints <- c()
     for (h in seq_len(length(cols))) {
         col_ints <- c(col_ints, paste0('col', h, '_int'))
@@ -220,7 +228,7 @@ determine_crossing_edges <- function(data, cols = NULL, wt = "value", weighted_m
         y1 <- paste0('y', h)
         y2 <- paste0('y', h+1)
         
-        objective_val <- objective_val + calculate_objective_fenwick(lode_df, y1 = y1, y2 = y2, wt =  wt, weighted_metric = weighted_metric)
+        objective_val <- objective_val + calculate_objective_fenwick(lode_df, y1 = y1, y2 = y2, wt = wt, weighted_metric = weighted_metric)
     }
     return(list(lode_df = lode_df, output_objective = objective_val))
 }
