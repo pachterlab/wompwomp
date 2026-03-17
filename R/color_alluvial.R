@@ -455,11 +455,11 @@ make_stratum_color_list <- function(data, cols, mapping, color_palette = NULL) {
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
 #' @param method Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{cols}.
-#' @param resolution Numeric If \code{method == 'advanced'}, then choose resolution for the graph clustering algorithm.
+#' @param resolution Numeric If \code{method == 'advanced'}, then choose resolution for the graph clustering algorithm. Higher resolutions correspond to more distinct colors.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param options Additional arguments. See data_color_options
 #'
-#' @return A data frame where each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} ('value' if \code{wt} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.
+#' @return A nested list mapping each stratum to a color. The outer list is indexed by axis names, and the inner lists are indexed by stratum names. Each color is represented by an integer that is mapped to a color by the \code{mapping} parameter in \code{scale_fill_manual()}.
 #'
 #' @examples
 #' set.seed(429144)

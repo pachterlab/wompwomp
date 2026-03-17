@@ -25,14 +25,14 @@ data_color(
 
 \item{method}{Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{cols}.}
 
-\item{resolution}{Numeric If \code{method == 'advanced'}, then choose resolution for the graph clustering algorithm.}
+\item{resolution}{Numeric If \code{method == 'advanced'}, then choose resolution for the graph clustering algorithm. Higher resolutions correspond to more distinct colors.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 
 \item{options}{Additional arguments. See data_color_options}
 }
 \value{
-A data frame where each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} ('value' if \code{wt} == NULL) represents the number of entities in that combination of groupings. There will be an additional column 'node_color'.
+A nested list mapping each stratum to a color. The outer list is indexed by axis names, and the inner lists are indexed by stratum names. Each color is represented by an integer that is mapped to a color by the \code{mapping} parameter in \code{scale_fill_manual()}.
 }
 \description{
 Colors a dataframe with the algorithm specified by \code{method}.
