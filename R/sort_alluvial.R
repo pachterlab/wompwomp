@@ -659,21 +659,39 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' @return A data frame where each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} ('value' if \code{wt} == NULL) represents the number of entities in that combination of groupings. For each column in \code{cols}, there will be an additional column \code{col1_int}, \code{col2_int}, etc. where each column corresponds to a position mapping of groupings in the respective entry of \code{cols} - for example, \code{col1_int} corresponds to \code{cols[1]}, \code{col2_int} corresponds to \code{cols[2]}, etc.
 #'
 #' @examples
+#' set.seed(235488)
+#' data <- data.frame(
+#'   method1 = sample(1:3, 100, TRUE),
+#'   method2 = sample(4:6, 100, TRUE)
+#' )
+#' head(data)
+#' lapply(data, unique)
+#' 
 #' # Example 1: data format 1
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' clus_df_gather <- data_preprocess(data, cols = c("method1", "method2"))
+#' clus_df_gather <- data_preprocess(
+#'   data,
+#'   cols = c("method1", "method2")
+#' )
+#' print(clus_df_gather)
+#' lapply(clus_df_gather[, 1:2], levels)
 #'
 #' # Example 2: data format 2
-#' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' clus_df_gather <- data |>
-#'     dplyr::mutate_if(is.numeric, function(x) factor(x, levels = as.character(sort(unique(x))))) |>
+#'     dplyr::mutate_if(
+#'       is.numeric,
+#'       function(x) factor(x, levels = as.character(sort(unique(x))))
+#'     ) |>
 #'     dplyr::group_by_all() |>
 #'     dplyr::count(name = "value")
+#' print(clus_df_gather)
+#' lapply(clus_df_gather[, 1:2], unique)
 #' clus_df_gather <- data_preprocess(
-#'     clus_df_gather,
-#'     cols = c("method1", "method2"),
-#'     wt = "value"
+#'   clus_df_gather,
+#'   cols = c("method1", "method2"),
+#'   wt = "value"
 #' )
+#' print(clus_df_gather)
+#' lapply(clus_df_gather[, 1:2], unique)
 #'
 #' @export
 data_preprocess <- function(data, cols, wt = NULL, default_sorting = "alphabetical", verbose = FALSE, print_params = FALSE, do_gather_set_data = FALSE, color_band_column = NULL, do_add_int_columns = FALSE) {
