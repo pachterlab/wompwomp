@@ -1,5 +1,8 @@
 # wompwomp
 
+## Note: This is the version of wompwomp that is reflected in version 1 of our preprint on arXiv [here](https://doi.org/10.48550/arXiv.2509.03761).
+Since the release of this preprint, wompwomp on the main branch has undergone some changes in function naming and functionality - namely, we have focused wompwomp on the sorting/grouping functions, and have removed the end-to-end plot_alluvial function in favor of working more seamlessly with ggalluvial and the tidyverse directly. In order to work with the latest vesion of wompwomp, see the main branch. In order to reproduce figures and track naming conventions of version 1 of our preprint, stay on this branch (arxiv_v1).
+
 Make alluvial plots with node order and colors optimized to minimize edge crossings with wompwomp!
 
 wompwomp solves the **W**eighted (permutation) **O**ptimization of **M**ultiple **P**artitions-**W**eighted (label) **O**ptimization of **M**ultiple **P**artitions (W<sub>P</sub>OMP--W<sub>L</sub>OMP) problem.
