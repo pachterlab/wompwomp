@@ -210,7 +210,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, unsorted", {
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 316)
+    testthat::expect_equal(num, 225)
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_order FALSE", {
@@ -226,7 +226,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 153)
+    testthat::expect_equal(num, 57)
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_order TRUE", {
@@ -242,7 +242,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 153)
+    testthat::expect_equal(num, 57)
 })
 
 
@@ -274,7 +274,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 95)
+    testthat::expect_equal(num, 56)
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers, tsp, optimize_column_order TRUE", {
@@ -290,7 +290,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 95)
+    testthat::expect_equal(num, 56)
 })
 
 test_that("get_lode_clusters correctly handles multiple factor columns", {

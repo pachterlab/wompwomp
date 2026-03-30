@@ -11,8 +11,7 @@ vignette: >
 ---
 
 ```{r}
-devtools::load_all()
-# library(wompwomp)
+library(wompwomp)
 
 set.seed(43)
 ```

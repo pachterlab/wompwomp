@@ -40,5 +40,5 @@ The input table can have one of two formats:
 1. Ungrouped: columns specified by graphing_columns, where each row corresponds to a separate entity
 2. Grouped: columns specified by graphing_columns and column_weights, where each row corresponds to a combination of graphing_columns, and column_weights specified the number of items in this combination
 
-Read our preprint on arXiv [here](https://doi.org/10.48550/arXiv.2509.03761).
-See examples and vignettes [here](https://github.com/pachterlab/biowomp).
+Read our preprint on arXiv [here](https://doi.org/10.48550/arXiv.2509.03761). Note that some functionalities and names have been changed since the preprint. To download the version of wompwomp reflected in the preprint, please see the "arxiv_v1" branch of this repository.
+Reproduce figures from our preprint at https://github.com/pachterlab/ROP_2025.

@@ -12,8 +12,7 @@ vignette: >
 
 ```{r}
 library(ggalluvial)
-# library(wompwomp)
-devtools::load_all()
+library(wompwomp)
 set.seed(43)
 ```
 
@@ -94,6 +93,12 @@ clus_df_gather_sort |>
   ) +
   scale_fill_manual(values = lode_cluster_pal(data = clus_df_gather_sort, cols = c(tissue, cluster), mapping = cluster_mapping))
 ```
+
+```{r}
+crossing_edges_out <- compute_crossing_objective(clus_df_gather_sort, cols = c("tissue", "cluster"), wt = "value")
+print(crossing_edges_out$output_objective)
+```
+
 
 ```{r}
 sessionInfo()
