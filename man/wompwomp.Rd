@@ -8,7 +8,7 @@
 \alias{wompwomp}
 \title{wompwomp: Cluster-matching alluvial plots}
 \description{
-Alluvial plots are great for visualizing the concordance between two different clustering methods applied to a dataset. However, these plots only allow for cluster agreement when each side of the bipartite graph is lined up in such a way that there is minimal cross-over between clusters, thus allowing one to visualize something analogous to an Adjusted Rand Index. wompwomp utilizes ggalluvial and igraph::max_bipartite_match in order to achieve this goal.
+Sort k-partite graphs with node order, layer order, and node grouping optimized with a heuristic to (nearly) minimize edge crossings. Useful for improving visualizations with alluvial plots by "untangling" the graphs.
 }
 \seealso{
 Useful links:
