@@ -35,7 +35,7 @@ df <- data.frame(
         4, 4, 4, 4, 4, 4, 4, 4, 4
     )
 )
-graphing_columns = c("tissue", "cluster")
+graphing_columns <- c("tissue", "cluster")
 
 # write.csv(df, file = "vignette_intro_df_ungrouped.csv", row.names = FALSE, quote = FALSE)
 print(df)
