@@ -12,12 +12,12 @@ wompwomp solves the **W**eighted (permutation) **O**ptimization of **M**ultiple 
 
 ## Installation:
 
-### R - Requires system [R](https://www.r-project.org/) to be installed
+### CRAN - Requires system [R](https://www.r-project.org/) to be installed
 ```         
 install.packages("wompwomp")
 ```
 
-GitHub
+### GitHub
 ```
 if (!require("remotes", quietly = TRUE))
     install.packages("remotes")
