@@ -34,7 +34,7 @@ The first time any command is run on the command line, a prompt will appear aski
 The I/O for each of wompwomp's functions is as follows:
 
 1.  data_preprocess: dataframe, csv, or tibble (grouped or ungrouped) --\> dataframe (grouped)
-2.  data_sort: dataframe, csv, or tibble (grouped or ungrouped) --\> dataframe (grouped)
+2.  sort_to_uncross: dataframe, csv, or tibble (grouped or ungrouped) --\> dataframe (grouped)
 3.  determine_crossing_edges: dataframe, csv, or tibble (grouped or ungrouped) --\> list
 
 The input table can have one of two formats:

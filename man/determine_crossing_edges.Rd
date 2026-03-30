@@ -44,7 +44,7 @@ Determine overlapping edges of k-partite graph.
 }
 \examples{
 data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-data <- data_sort(data, cols = c("method1", "method2"), method = "tsp")
+data <- sort_to_uncross(data, cols = c("method1", "method2"), method = "tsp")
 result <- determine_crossing_edges(data, cols = c("method1", "method2"))
 
 }

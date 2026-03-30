@@ -17,10 +17,10 @@ default_colors <- c(
     "#3D3D3D"
 )
 
-#' Control Options for `data_color()`
+#' Control Options for `get_lode_clusters()`
 #'
 #' Creates a list of control parameters that modify the behavior of
-#' `data_color()`. These options allow fine-grained control over the coloring
+#' `get_lode_clusters()`. These options allow fine-grained control over the coloring
 #' algorithm without cluttering the main function interface.
 #'
 #' @param method_advanced_option Character. When
@@ -32,16 +32,16 @@ default_colors <- c(
 #'   `data_preprocess()`.
 #' @param print_params Logical. If TRUE, prints parameters during execution.
 #'
-#' @return A named list of control parameters for use in `data_color()`.
+#' @return A named list of control parameters for use in `get_lode_clusters()`.
 #'
 #' @examples
 #' 
 #' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
-#' opts <- data_color_options(cutoff = 0.3, method_advanced_option = "louvain")
-#' mapping <- data_color(data = data, cols = c('method1', 'method2'), options = opts)
+#' opts <- get_lode_clusters_options(cutoff = 0.3, method_advanced_option = "louvain")
+#' mapping <- get_lode_clusters(data = data, cols = c('method1', 'method2'), options = opts)
 #'
 #' @export
-data_color_options <- function(
+get_lode_clusters_options <- function(
         method_advanced_option = c("leiden", "louvain"),
         cutoff = 0.5,
         preprocess_data = TRUE,
@@ -58,8 +58,8 @@ data_color_options <- function(
     )
 }
 
-data_color_internal <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
-    default_opt <- data_color_options()
+get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
+    default_opt <- get_lode_clusters_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
         for (nm in names(default_opt)) {
@@ -383,11 +383,11 @@ convert_mapping_to_colors <- function(mapping, default_colors) {
 
 #' Make stratum color list
 #'
-#' Convert color mapping made by data_color into list for scale_fill_manual
+#' Convert color mapping made by get_lode_clusters into list for scale_fill_manual
 #'
-#' @param data A data frame with columns corresponding to axes, with factors indicating sorting. (eg run through data_sort)
+#' @param data A data frame with columns corresponding to axes, with factors indicating sorting. (eg run through sort_to_uncross)
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
-#' @param mapping List. Output from data_color.
+#' @param mapping List. Output from get_lode_clusters.
 #' @param color_palette Optional named list or vector mapping values in the graphing columns to colors. Overrides default palette.
 #'
 #' @return A vector of colors.
@@ -396,12 +396,12 @@ convert_mapping_to_colors <- function(mapping, default_colors) {
 #' # Example 1
 #' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' cols = c("method1", "method2")
-#' clus_df_gather <- data_sort(data, cols = cols, method = "tsp")
-#' color_mapping <- data_color(data = clus_df_gather, cols = cols)
-#' color_list <- make_stratum_color_list(data = clus_df_gather, cols = cols, mapping = color_mapping)
+#' clus_df_gather <- sort_to_uncross(data, cols = cols, method = "tsp")
+#' color_mapping <- get_lode_clusters(data = clus_df_gather, cols = cols)
+#' color_list <- lode_cluster_pal(data = clus_df_gather, cols = cols, mapping = color_mapping)
 #'
 #' @export
-make_stratum_color_list <- function(data, cols, mapping, color_palette = NULL) {
+lode_cluster_pal <- function(data, cols, mapping, color_palette = NULL) {
     cols_tmp <- substitute(cols)
     if (is.call(cols_tmp) && cols_tmp[[1]] == 'c') {
         items <- as.list(cols_tmp)[-1]
@@ -457,7 +457,7 @@ make_stratum_color_list <- function(data, cols, mapping, color_palette = NULL) {
 #' @param method Character. Matching colors methods. Choices are 'advanced' (default), 'none', 'left', 'right', or any value in \code{cols}.
 #' @param resolution Numeric If \code{method == 'advanced'}, then choose resolution for the graph clustering algorithm. Higher resolutions correspond to more distinct colors.
 #' @param verbose Logical. If TRUE, will display messages during the function.
-#' @param options Additional arguments. See data_color_options
+#' @param options Additional arguments. See get_lode_clusters_options
 #'
 #' @return A nested list mapping each stratum to a color. The outer list is indexed by axis names, and the inner lists are indexed by stratum names. Each color is represented by an integer that is mapped to a color by the \code{mapping} parameter in \code{scale_fill_manual()}.
 #'
@@ -469,10 +469,10 @@ make_stratum_color_list <- function(data, cols, mapping, color_palette = NULL) {
 #' )
 #' lapply(data, levels)
 #' cluster_mapping <- data |> 
-#'   data_color(cols = c(method1, method2))
+#'   get_lode_clusters(cols = c(method1, method2))
 #'
 #' @export
-data_color <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
+get_lode_clusters <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
     cols_expr <- rlang::enquo(cols)
     
     # if (missing(wt)) {
@@ -491,6 +491,6 @@ data_color <- function(data, cols, wt = NULL, method = "advanced", resolution = 
         c(names(cols_pos), names(wt_pos))
     )
     
-    map <- data_color_internal(res, cols = names(cols_pos), wt = names(wt_pos), method = method, resolution = resolution, verbose = verbose, options = options)
-    # make_stratum_color_list(data = data, cols = names(cols_pos), mapping = map)
+    map <- get_lode_clusters_internal(res, cols = names(cols_pos), wt = names(wt_pos), method = method, resolution = resolution, verbose = verbose, options = options)
+    # lode_cluster_pal(data = data, cols = names(cols_pos), mapping = map)
 }

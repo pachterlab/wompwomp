@@ -50,13 +50,13 @@ print(clus_df_gather)
 ```
 
 ```{r}
-clus_df_gather_tsp <- data_sort(clus_df_gather, cols = graphing_columns, wt = "value", method = "tsp")
+clus_df_gather_tsp <- sort_to_uncross(clus_df_gather, cols = graphing_columns, wt = "value", method = "tsp")
 print(clus_df_gather_tsp)
 ```
 
 ```{r}
 # clus_df_gather_tsp <- clus_df_gather_tsp
-stratum_to_color_mapping <- data_color(clus_df_gather_tsp, cols = graphing_columns, wt = "value", method = "advanced")
+stratum_to_color_mapping <- get_lode_clusters(clus_df_gather_tsp, cols = graphing_columns, wt = "value", method = "advanced")
 print(stratum_to_color_mapping)
 ```
 

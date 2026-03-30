@@ -1,4 +1,4 @@
-test_that("data_sort works with unsorted algorithm", {
+test_that("sort_to_uncross works with unsorted algorithm", {
     set.seed(42)
     # Generate raw data
     raw_df <- data.frame(
@@ -10,7 +10,7 @@ test_that("data_sort works with unsorted algorithm", {
     data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
     cols = c("method1", "method2")
 
-    unsorted_df <- data_sort(data, cols = cols, wt = "value", method = "none")
+    unsorted_df <- sort_to_uncross(data, cols = cols, wt = "value", method = "none")
     # unsorted_df <- dplyr::ungroup()(unsorted_df)
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "unsorted_df.rds"))
@@ -26,7 +26,7 @@ test_that("data_sort works with unsorted algorithm", {
     expect_equal(as.data.frame(unsorted_df), as.data.frame(ground_truth_df))
 })
 
-test_that("data_sort works with greedy_wolf algorithm", {
+test_that("sort_to_uncross works with greedy_wolf algorithm", {
     set.seed(42)
     # Generate raw data
     raw_df <- data.frame(
@@ -37,7 +37,7 @@ test_that("data_sort works with greedy_wolf algorithm", {
     # Aggregate by combination
     data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
     cols = c("method1", "method2")
-    greedy_wolf_df <- data_sort(data, cols = cols, wt = "value", method = "greedy_wolf")
+    greedy_wolf_df <- sort_to_uncross(data, cols = cols, wt = "value", method = "greedy_wolf")
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "greedy_wolf_df.rds"))
 
@@ -52,7 +52,7 @@ test_that("data_sort works with greedy_wolf algorithm", {
     expect_equal(as.data.frame(greedy_wolf_df), as.data.frame(ground_truth_df))
 })
 
-test_that("data_sort works with greedy_wblf algorithm", {
+test_that("sort_to_uncross works with greedy_wblf algorithm", {
     set.seed(42)
     # Generate raw data
     raw_df <- data.frame(
@@ -63,7 +63,7 @@ test_that("data_sort works with greedy_wblf algorithm", {
     # Aggregate by combination
     data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
     cols = c("method1", "method2")
-    greedy_wblf_df <- data_sort(data, cols = cols, wt = "value", method = "greedy_wblf")
+    greedy_wblf_df <- sort_to_uncross(data, cols = cols, wt = "value", method = "greedy_wblf")
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "greedy_wblf_df.rds"))
 
@@ -79,7 +79,7 @@ test_that("data_sort works with greedy_wblf algorithm", {
 })
 
 
-test_that("data_sort works with tsp algorithm", {
+test_that("sort_to_uncross works with tsp algorithm", {
     set.seed(42)
     # Generate raw data
     raw_df <- data.frame(
@@ -90,7 +90,7 @@ test_that("data_sort works with tsp algorithm", {
     # Aggregate by combination
     data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
     cols = c("method1", "method2")
-    tsp_df <- data_sort(data, cols = cols, wt = "value", method = "tsp")
+    tsp_df <- sort_to_uncross(data, cols = cols, wt = "value", method = "tsp")
 
     ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "tsp_df.rds"))
 
@@ -206,7 +206,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, unsorted", {
 
     clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "none", column_method = "none")
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "none", column_method = "none")
 
     num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
@@ -222,7 +222,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
@@ -238,7 +238,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", options = list(optimize_column_order_per_cycle = TRUE), weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", options = list(optimize_column_order_per_cycle = TRUE), weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
@@ -254,7 +254,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "none", column_method = "none", weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "none", column_method = "none", weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
@@ -270,7 +270,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
@@ -286,14 +286,14 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather <- data_preprocess(data = data, cols = cols)
 
-    clus_df_gather_sorted <- data_sort(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", options = list(optimize_column_order_per_cycle = TRUE), weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", options = list(optimize_column_order_per_cycle = TRUE), weight_scalar = 1)
 
     num <- determine_crossing_edges(clus_df_gather_sorted, cols = cols)$output_objective
 
     testthat::expect_equal(num, 95)
 })
 
-test_that("data_color correctly handles multiple factor columns", {
+test_that("get_lode_clusters correctly handles multiple factor columns", {
     set.seed(429144)
     
     data <- data.frame(
@@ -308,7 +308,7 @@ test_that("data_color correctly handles multiple factor columns", {
     ))
     
     cluster_mapping <- data |>
-        data_color(cols = c(method1, method2), method = "left")
+        get_lode_clusters(cols = c(method1, method2), method = "left")
     
     # ---- expectations (adjust to actual return type) ----
     
@@ -341,7 +341,7 @@ test_that("data_color correctly handles multiple factor columns", {
     expect_identical(cluster_mapping, expected)
 })
 
-test_that("data_color correctly handles multiple factor columns with string column names", {
+test_that("get_lode_clusters correctly handles multiple factor columns with string column names", {
     set.seed(429144)
     
     data <- data.frame(
@@ -356,7 +356,7 @@ test_that("data_color correctly handles multiple factor columns with string colu
     ))
     
     cluster_mapping <- data |>
-        data_color(cols = c("method1", "method2"), method = "left")
+        get_lode_clusters(cols = c("method1", "method2"), method = "left")
     
     # ---- expectations (adjust to actual return type) ----
     
@@ -389,7 +389,7 @@ test_that("data_color correctly handles multiple factor columns with string colu
     expect_identical(cluster_mapping, expected)
 })
 
-test_that("data_color correctly handles multiple factor columns with method advanced", {
+test_that("get_lode_clusters correctly handles multiple factor columns with method advanced", {
     set.seed(429144)
     
     data <- data.frame(
@@ -404,7 +404,7 @@ test_that("data_color correctly handles multiple factor columns with method adva
     ))
     
     cluster_mapping <- data |>
-        data_color(cols = c("method1", "method2"), method = "advanced", resolution=10)
+        get_lode_clusters(cols = c("method1", "method2"), method = "advanced", resolution=10)
     
     # ---- expectations (adjust to actual return type) ----
     

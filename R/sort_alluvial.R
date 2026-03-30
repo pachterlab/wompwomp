@@ -857,10 +857,10 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
     return(clus_df_gather_best)
 }
 
-#' Control Options for `data_sort()`
+#' Control Options for `sort_to_uncross()`
 #'
 #' Creates a list of control parameters that modify the behavior of
-#' [data_sort()]. These options allow tuning algorithmic behavior without
+#' [sort_to_uncross()]. These options allow tuning algorithmic behavior without
 #' cluttering the main function arguments.
 #'
 #' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{cols} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{cols} to minimize edge overlap on the beginning cycle only. Only applies when \code{method == 'tsp'} and \code{length(cols) > 2}.
@@ -877,7 +877,7 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param do_compute_alluvial_statistics Internal flag; not recommended to modify.
 #' 
-#' @return A named list of control parameters, to be passed into [data_sort()]
+#' @return A named list of control parameters, to be passed into [sort_to_uncross()]
 #'   via the `options` argument.
 #'
 #' @examples
@@ -885,14 +885,14 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
 #'   method1 = LETTERS[sample(1:3, 100, TRUE)],
 #'   method2 = LETTERS[27 - sample(1:3, 100, TRUE)]
 #' )
-#' opts <- data_sort_options(
+#' opts <- sort_to_uncross_options(
 #'   default_sorting = "reverse_alphabetical",
 #'   matrix_initialization_value = 100
 #' )
-#' data_sort(data = data, cols = c('method1', 'method2'), options = opts)
+#' sort_to_uncross(data = data, cols = c('method1', 'method2'), options = opts)
 #'
 #' @export
-data_sort_options <- function(
+sort_to_uncross_options <- function(
         optimize_column_order_per_cycle = FALSE,
         matrix_initialization_value = 1e6,
         same_side_matrix_initialization_value = 1e6,
@@ -928,8 +928,8 @@ data_sort_options <- function(
     )
 }
 
-data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
-    default_opt <- data_sort_options()
+sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
+    default_opt <- sort_to_uncross_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
         for (nm in names(default_opt)) {
@@ -1082,7 +1082,7 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
 #' @param weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method == 'tsp'}.
 #' @param fixed_column Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method == 'greedy_wolf'}.
 #' @param verbose Logical. If TRUE, will display messages during the function.
-#' @param options Additional arguments. See [data_sort_options()].
+#' @param options Additional arguments. See [sort_to_uncross_options()].
 #'
 #' @return
 #' A data frame where each row represents an alluvium and each column represents an axis. Each column of \code{cols} represents an axis, stored as a factor ordered in ascending order of strata. There is an additional column \code{wt} ('value' if NULL) that represents the size of the alluvium in that row. The order of columns represents the recommended order of axes.
@@ -1096,7 +1096,7 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
 #' )
 #' head(data)
 #' lapply(data, levels)
-#' clus_df_gather <- data_sort(
+#' clus_df_gather <- sort_to_uncross(
 #'   data,
 #'   cols = c("method1", "method2"),
 #'   method = "tsp",
@@ -1120,7 +1120,7 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
 #'   dplyr::count(name = "value")
 #' print(clus_df_gather)
 #' lapply(clus_df_gather[, 1:2], levels)
-#' clus_df_gather <- data_sort(
+#' clus_df_gather <- sort_to_uncross(
 #'   clus_df_gather,
 #'   cols = c("method1", "method2"),
 #'   wt = "value",
@@ -1131,8 +1131,8 @@ data_sort_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbo
 #' lapply(clus_df_gather[, 1:2], levels)
 #'
 #' @export
-data_sort <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, verbose = FALSE, options = NULL) {
-    default_opt <- data_sort_options()
+sort_to_uncross <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, verbose = FALSE, options = NULL) {
+    default_opt <- sort_to_uncross_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
         for (nm in names(default_opt)) {
@@ -1171,5 +1171,5 @@ data_sort <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "g
         data[c(cols_pos, wt_pos)],
         c(names(cols_pos), names(wt_pos))
     )
-    data_sort_internal(data = res, cols = names(cols_pos), wt = names(wt_pos), method = method, column_method = column_method, weight_scalar = weight_scalar, fixed_column = fixed_column, verbose = verbose, options = options)
+    sort_to_uncross_internal(data = res, cols = names(cols_pos), wt = names(wt_pos), method = method, column_method = column_method, weight_scalar = weight_scalar, fixed_column = fixed_column, verbose = verbose, options = options)
 }

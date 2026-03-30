@@ -61,7 +61,7 @@ clus_df_gather |>
 ```{r}
 # sort (tidy) and plot - sorted + uncolored
 clus_df_gather |> 
-  data_sort(cols = c(tissue, cluster), wt = value, options = list(weighted_metric = TRUE)) |> 
+  sort_to_uncross(cols = c(tissue, cluster), wt = value, options = list(weighted_metric = TRUE)) |> 
   print() -> clus_df_gather_sort
 
 clus_df_gather_sort |> 
@@ -79,7 +79,7 @@ clus_df_gather_sort |>
 ```{r}
 # color (tidy) and plot - sorted + colored
 clus_df_gather_sort |> 
-  data_color(cols = c(tissue, cluster), wt = value) |> 
+  get_lode_clusters(cols = c(tissue, cluster), wt = value) |> 
   print() -> cluster_mapping
 
 clus_df_gather_sort |> 
@@ -92,7 +92,7 @@ clus_df_gather_sort |>
     limits = c("tissue", "cluster"),
     expand = c(.05, .05)
   ) +
-  scale_fill_manual(values = make_stratum_color_list(data = clus_df_gather_sort, cols = c(tissue, cluster), mapping = cluster_mapping))
+  scale_fill_manual(values = lode_cluster_pal(data = clus_df_gather_sort, cols = c(tissue, cluster), mapping = cluster_mapping))
 ```
 
 ```{r}
