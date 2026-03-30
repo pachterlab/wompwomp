@@ -1,6 +1,6 @@
 # wompwomp
 
-Sort k-partite graphs with node order, layer order, and node grouping optimized with a heuristic to (nearly) minimize edge crossings. Useful for improving visualizations with alluvial plots — see [biowomp](https://github.com/pachterlab/biowomp) for end-to-end alluvial plot generation with vignettes. Thank you to Cory Brunson for utilizing this algorithm in [ggalluvial](https://github.com/corybrunson/ggalluvial).
+Sort k-partite graphs with node order, layer order, and node grouping optimized with a heuristic to (nearly) minimize edge crossings. Useful for improving visualizations with alluvial plots by "untangling" the graphs.
 
 wompwomp solves the **W**eighted (permutation) **O**ptimization of **M**ultiple **P**artitions-**W**eighted (label) **O**ptimization of **M**ultiple **P**artitions (W<sub>P</sub>OMP--W<sub>L</sub>OMP) problem.
 
@@ -24,8 +24,10 @@ if (!require("remotes", quietly = TRUE))
 remotes::install_github("pachterlab/wompwomp")
 ```
 
-The first time any command is run on the command line, a prompt will appear asking to install any missing R dependencies.
-
+## Getting Started
+See the vignettes for wompwomp in the "vignettes" folder. 
+- wompwomp_intro.Rmd introduces the package and its functions, and provides a walkthrough of how to use wompwomp on simulated data.
+- plotting.Rmd visualizes the results of wompwomp with ggplot2 and ggalluvial.
 
 ## Usage
 

@@ -11,6 +11,8 @@ vignette: >
 ---
 
 ```{r}
+library(dplyr)
+library(ggplot2)
 library(ggalluvial)
 library(wompwomp)
 set.seed(43)
