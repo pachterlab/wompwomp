@@ -91,30 +91,39 @@ calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'value'
 make_lode_df <- function(data, cols = NULL, wt = "value") {
     lode_df <- data
     lode_df$alluvium <- seq_len(nrow(lode_df))
-    
+
     # create a temp column
-    if (is.null(wt)) {
+    wt_was_null <- is.null(wt)
+    if (wt_was_null) {
         lode_df$.wt_internal <- 1
         wt <- ".wt_internal"
     }
 
-    x <- 1
-    for (i in cols) {
-        ordered_df <- lode_df[order(lode_df[[i]]), ]
+    n_cols <- length(cols)
+    for (x in seq_len(n_cols)) {
+        i <- cols[x]
+        # Within each stratum, order edges by the adjacent axis so that edges
+        # sharing a stratum are not counted as crossings by the Fenwick tree.
+        # Use the next column as tiebreaker (or the previous for the last axis).
+        if (x < n_cols) {
+            tiebreaker <- cols[x + 1]
+        } else {
+            tiebreaker <- cols[x - 1]
+        }
+        ordered_df <- lode_df[order(lode_df[[i]], lode_df[[tiebreaker]]), ]
         ordered_df[[paste0('y', x)]] <- cumsum(ordered_df[[wt]])
         lode_df <- dplyr::left_join(
             lode_df,
-            ordered_df[, c('alluvium',paste0('y', x))],
+            ordered_df[, c('alluvium', paste0('y', x))],
             by = 'alluvium'
         )
-        x <- x + 1
     }
-    
+
     # remove temp column if created
-    if (is.null(wt)) {
+    if (wt_was_null) {
         lode_df$.wt_internal <- NULL
     }
-    
+
     return(lode_df)
 }
 
