@@ -24,3 +24,4 @@
 ^vignettes/output$
 ^.*\.Rproj$
 ^doc/.*\.html$
+^LICENSE\.md$
