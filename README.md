@@ -4,8 +4,7 @@ Sort k-partite graphs with node order, layer order, and node grouping optimized 
 
 wompwomp solves the **W**eighted (permutation) **O**ptimization of **M**ultiple **P**artitions-**W**eighted (label) **O**ptimization of **M**ultiple **P**artitions (W<sub>P</sub>OMP--W<sub>L</sub>OMP) problem.
 
-<!-- ![alt text](https://github.com/pachterlab/wompwomp/blob/main/figures/wompwomp_before_after.png) -->
-<img src="https://github.com/pachterlab/wompwomp/blob/main/figures/wompwomp_before_after.png" width="600">
+![alt text](https://github.com/pachterlab/wompwomp/blob/main/figures/wompwomp_before_after.png)
 
 ## wompwomp functions/commands
 
