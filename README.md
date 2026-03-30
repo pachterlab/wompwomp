@@ -1,7 +1,16 @@
 # wompwomp
 
 ## Note: This is the version of wompwomp that is reflected in version 1 of our preprint on arXiv [here](https://doi.org/10.48550/arXiv.2509.03761).
-Since the release of this preprint, wompwomp on the main branch has undergone some changes in function naming and functionality - namely, we have focused wompwomp on the sorting/grouping functions, and have removed the end-to-end plot_alluvial function in favor of working more seamlessly with ggalluvial and the tidyverse directly. In order to work with the latest vesion of wompwomp, see the main branch. In order to reproduce figures, see https://github.com/pachterlab/ROP_2025. 
+Since the release of this preprint, wompwomp on the main branch has undergone some changes in function naming and functionality - namely, we have focused wompwomp on the sorting/grouping functions, and have removed the end-to-end plot_alluvial function in favor of working more seamlessly with ggalluvial and the tidyverse directly. The following functions have changed names from this branch to the main branch:
+
+- data_sort → sort_to_uncross
+- data_color → get_lode_clusters
+- make_stratum_color_list → lode_cluster_pal
+- data_preprocess → prep_for_lodes
+- determine_crossing_edges → compute_crossing_objective
+- plot_alluvial → *deleted* (see https://github.com/pachterlab/biowomp).
+
+In order to work with the latest vesion of wompwomp, see the main branch. In order to reproduce figures, see https://github.com/pachterlab/ROP_2025. 
 
 Make alluvial plots with node order and colors optimized to minimize edge crossings with wompwomp!
 
