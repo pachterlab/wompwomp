@@ -2,10 +2,10 @@
 
 export(get_lode_clusters)
 export(get_lode_clusters_options)
-export(data_preprocess)
+export(prep_for_lodes)
 export(sort_to_uncross)
 export(sort_to_uncross_options)
-export(determine_crossing_edges)
+export(compute_crossing_objective)
 export(lode_cluster_pal)
 export(setup_python_env)
 importFrom(R6,R6Class)

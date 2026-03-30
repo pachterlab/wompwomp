@@ -106,7 +106,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value
             neighbornet_objective <- -neighbornet_objective + 1 # convert from [-1,1] to [0,2], and flip the sign (so that 1 becomes smallest ie perfect cluster agreement --> smallest distance)
             neighbornet_objective <- weight_scalar_column_order * 50 * neighbornet_objective # built-in scalar
         } else if (column_metric == "edge_crossing") {
-            neighbornet_objective <- determine_crossing_edges(
+            neighbornet_objective <- compute_crossing_objective(
                 clus_df_gather_neighbornet_tmp,
                 cols = graphing_columns_tmp,
                 wt = wt,
@@ -405,7 +405,7 @@ determine_optimal_cycle_start <- function(data, cycle, cols = NULL, wt = "value"
         
         clus_df_gather_neighbornet_tmp <- reorder_and_rename_columns(clus_df_gather_neighbornet, graphing_columns_tmp)
         
-        neighbornet_objective <- determine_crossing_edges(
+        neighbornet_objective <- compute_crossing_objective(
             clus_df_gather_neighbornet_tmp,
             cols = graphing_columns_tmp,
             wt = wt,
@@ -649,7 +649,7 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
-#' @param default_sorting Character. Default column sorting in [data_preprocess()] if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
+#' @param default_sorting Character. Default column sorting in [prep_for_lodes()] if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param do_gather_set_data Internal flag; not recommended to modify.
@@ -668,7 +668,7 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' lapply(data, unique)
 #' 
 #' # Example 1: data format 1
-#' clus_df_gather <- data_preprocess(
+#' clus_df_gather <- prep_for_lodes(
 #'   data,
 #'   cols = c("method1", "method2")
 #' )
@@ -685,7 +685,7 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #'     dplyr::count(name = "value")
 #' print(clus_df_gather)
 #' lapply(clus_df_gather[, 1:2], unique)
-#' clus_df_gather <- data_preprocess(
+#' clus_df_gather <- prep_for_lodes(
 #'   clus_df_gather,
 #'   cols = c("method1", "method2"),
 #'   wt = "value"
@@ -694,7 +694,7 @@ randomly_map_int_columns <- function(clus_df_gather) {
 #' lapply(clus_df_gather[, 1:2], unique)
 #'
 #' @export
-data_preprocess <- function(data, cols, wt = NULL, default_sorting = "alphabetical", verbose = FALSE, print_params = FALSE, do_gather_set_data = FALSE, color_band_column = NULL, do_add_int_columns = FALSE) {
+prep_for_lodes <- function(data, cols, wt = NULL, default_sorting = "alphabetical", verbose = FALSE, print_params = FALSE, do_gather_set_data = FALSE, color_band_column = NULL, do_add_int_columns = FALSE) {
     if (print_params) print_function_params()
     lowercase_args(c("default_sorting"))
     
@@ -835,7 +835,7 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
             )
         }
         if (random_initializations > 1) {
-            crossing_edges_objective <- determine_crossing_edges(clus_df_gather_tmp, cols = cols, wt = wt, weighted_metric = weighted_metric)$output_objective
+            crossing_edges_objective <- compute_crossing_objective(clus_df_gather_tmp, cols = cols, wt = wt, weighted_metric = weighted_metric)$output_objective
             if (crossing_edges_objective < crossing_edges_objective_minimum) {
                 crossing_edges_objective_minimum <- crossing_edges_objective
                 clus_df_gather_best <- clus_df_gather_tmp
@@ -872,8 +872,8 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
 #' @param weighted_metric Logical. Determines if the objective is total number of edge crossings (weighted_metric=FALSE) or sum of product of overlapping edge weights (weighted_metric=TRUE).
 #' @param cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{method == 'tsp'}.
 #' @param random_initializations Integer. Number of random initializations for the positions of each grouping in \code{cols}. Only applies when \code{method == 'greedy_wolf' or method == 'greedy_wblf'}.
-#' @param preprocess_data Logical. If TRUE, will preprocess the data with the [data_preprocess()] function.
-#' @param default_sorting Character. Default column sorting in [data_preprocess()] if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
+#' @param preprocess_data Logical. If TRUE, will preprocess the data with the [prep_for_lodes()] function.
+#' @param default_sorting Character. Default column sorting in [prep_for_lodes()] if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param do_compute_alluvial_statistics Internal flag; not recommended to modify.
 #' 
@@ -997,9 +997,9 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "n
     # Preprocess (i.e., add int columns and do the grouping)
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
-        clus_df_gather <- data_preprocess(data = data, cols = cols, wt = wt, default_sorting = default_sorting, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
+        clus_df_gather <- prep_for_lodes(data = data, cols = cols, wt = wt, default_sorting = default_sorting, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
         if (is.null(wt) || length(wt) == 0) {
-            wt <- "value" # is set during data_preprocess
+            wt <- "value" # is set during prep_for_lodes
         }
     } else {
         clus_df_gather <- data
@@ -1047,7 +1047,7 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "n
     # print objective - don't do for neighbornet because I did it right before
     if ((verbose) && (method != "neighbornet")) {
         message("Determining crossing edges objective (to disable, use verbose==FALSE)")
-        objective <- determine_crossing_edges(clus_df_gather_sorted, cols = cols, wt = wt, weighted_metric = weighted_metric)$output_objective
+        objective <- compute_crossing_objective(clus_df_gather_sorted, cols = cols, wt = wt, weighted_metric = weighted_metric)$output_objective
         message(sprintf("crossing edges objective = %s", objective))
     }
     
@@ -1159,8 +1159,8 @@ sort_to_uncross <- function(data, cols, wt = NULL, method = c("tsp", "neighborne
     }
 
     if (missing(wt)) {
-        data <- data_preprocess(data = data, cols = cols, default_sorting = default_sorting, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
-        wt <- "value" # is set during data_preprocess
+        data <- prep_for_lodes(data = data, cols = cols, default_sorting = default_sorting, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
+        wt <- "value" # is set during prep_for_lodes
     }
     
     cols_expr <- rlang::enquo(cols)

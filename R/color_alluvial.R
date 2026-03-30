@@ -29,7 +29,7 @@ default_colors <- c(
 #' @param cutoff Numeric. If using a non-advanced algorithm, similarity score
 #'   threshold for deciding whether to reuse a color or assign a new one.
 #' @param preprocess_data Logical. If TRUE (default), preprocess data with
-#'   `data_preprocess()`.
+#'   `prep_for_lodes()`.
 #' @param print_params Logical. If TRUE, prints parameters during execution.
 #'
 #' @return A named list of control parameters for use in `get_lode_clusters()`.
@@ -109,10 +109,10 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
     # Preprocess (i.e., add int columns and do the grouping)
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
-        clus_df_gather <- data_preprocess(data = data, cols = cols, wt = wt, 
+        clus_df_gather <- prep_for_lodes(data = data, cols = cols, wt = wt, 
                                           do_gather_set_data = FALSE, do_add_int_columns = FALSE)
         if (is.null(wt) || length(wt) == 0) {
-            wt <- "value" # is set during data_preprocess
+            wt <- "value" # is set during prep_for_lodes
         }
     } else {
         clus_df_gather <- data
@@ -479,8 +479,8 @@ get_lode_clusters <- function(data, cols, wt = NULL, method = "advanced", resolu
     #     col_names <- names(
     #         tidyselect::eval_select(cols_expr, data)
     #     )
-    #     data <- data_preprocess(data = data, cols = col_names, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
-    #     wt <- "value" # is set during data_preprocess
+    #     data <- prep_for_lodes(data = data, cols = col_names, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
+    #     wt <- "value" # is set during prep_for_lodes
     # }
     
     wt_expr <- rlang::enquo(wt)

@@ -129,7 +129,7 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
 #     for (x in seq_along(cols)) {
 #         int_col <- paste0("col", x, "_int")
 #         if (!(int_col %in% colnames(data))) {
-#             stop(sprintf("%s not in columns. Please run data_preprocess first.", int_col))
+#             stop(sprintf("%s not in columns. Please run prep_for_lodes first.", int_col))
 #         }
 #         p$mapping[[paste0("axis", x)]] <- sym(int_col)
 #     }
@@ -207,10 +207,10 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
 #' @examples
 #' data <- data.frame(method1 = sample(1:3, 100, TRUE), method2 = sample(1:3, 100, TRUE))
 #' data <- sort_to_uncross(data, cols = c("method1", "method2"), method = "tsp")
-#' result <- determine_crossing_edges(data, cols = c("method1", "method2"))
+#' result <- compute_crossing_objective(data, cols = c("method1", "method2"))
 #'
 #' @export
-determine_crossing_edges <- function(data, cols = NULL, wt = "value", weighted_metric = TRUE, verbose = FALSE) {
+compute_crossing_objective <- function(data, cols = NULL, wt = "value", weighted_metric = TRUE, verbose = FALSE) {
     if (!is.null(wt)) {
         if (!(wt %in% names(data))) {
             stop(sprintf("Column '%s' (wt) not found in data.", wt))

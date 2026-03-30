@@ -20,7 +20,7 @@ Options: \code{"leiden"} (default) or \code{"louvain"}.}
 threshold for deciding whether to reuse a color or assign a new one.}
 
 \item{preprocess_data}{Logical. If TRUE (default), preprocess data with
-\code{data_preprocess()}.}
+\code{prep_for_lodes()}.}
 
 \item{print_params}{Logical. If TRUE, prints parameters during execution.}
 }

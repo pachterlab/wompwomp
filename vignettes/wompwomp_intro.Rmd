@@ -43,7 +43,7 @@ print(df)
 
 Group by tissue and cluster, counting the values in a new column value
 ```{r}
-clus_df_gather <- data_preprocess(df, cols = graphing_columns)
+clus_df_gather <- prep_for_lodes(df, cols = graphing_columns)
 
 # write.csv(clus_df_gather, file = "vignette_intro_df_grouped.csv", row.names = FALSE, quote = FALSE)
 print(clus_df_gather)
@@ -61,7 +61,7 @@ print(stratum_to_color_mapping)
 ```
 
 ```{r}
-crossing_edges_out <- determine_crossing_edges(clus_df_gather_tsp, cols = graphing_columns, wt = "value")
+crossing_edges_out <- compute_crossing_objective(clus_df_gather_tsp, cols = graphing_columns, wt = "value")
 print(crossing_edges_out$output_objective)
 ```
 

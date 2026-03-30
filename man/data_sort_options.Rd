@@ -40,9 +40,9 @@ sort_to_uncross_options(
 
 \item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{cols}. Only applies when \code{method == 'greedy_wolf' or method == 'greedy_wblf'}.}
 
-\item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{\link[=data_preprocess]{data_preprocess()}} function.}
+\item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{\link[=prep_for_lodes]{prep_for_lodes()}} function.}
 
-\item{default_sorting}{Character. Default column sorting in \code{\link[=data_preprocess]{data_preprocess()}} if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+\item{default_sorting}{Character. Default column sorting in \code{\link[=prep_for_lodes]{prep_for_lodes()}} if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
 
 \item{print_params}{Logical. If TRUE, will print function params.}
 
