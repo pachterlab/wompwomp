@@ -57,6 +57,7 @@ print(clus_df_gather_tsp)
 # clus_df_gather_tsp <- clus_df_gather_tsp
 stratum_to_color_mapping <- get_lode_clusters(clus_df_gather_tsp, cols = graphing_columns, wt = "value", method = "advanced")
 print(stratum_to_color_mapping)
+# jsonlite::toJSON(stratum_to_color_mapping, pretty = TRUE, auto_unbox = TRUE)
 ```
 
 ```{r}

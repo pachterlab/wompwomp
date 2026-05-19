@@ -12,7 +12,11 @@
 #' @importFrom tidyselect eval_select
 
 utils::globalVariables(c(
-    ".data", ":=", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name"
+    ".data", ":=", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name",
+    "default_sorting", "print_params", "preprocess_data", "do_compute_alluvial_statistics",
+    "optimize_column_order_per_cycle", "matrix_initialization_value", "same_side_matrix_initialization_value",
+    "matrix_initialization_value_column_order", "weight_scalar_column_order", "column_metric",
+    "cycle_start_positions", "weighted_metric", "valid_algorithms"
 ))
 
 # devtools::document() needs package = "wompwomp"; but R CMD build wompwomp needs it not there stored globally - so I make this function
