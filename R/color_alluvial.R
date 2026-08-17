@@ -180,16 +180,15 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
             }
         }
     } else if (method == "advanced") {
-        # check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("igraph", "leidenalg"), additional_message = "do not set method to 'advanced'")
-        clus_df_gather_color <- find_colors_advanced(clus_df_gather, cols, unused_colors, 
+        clus_df_gather_color <- find_colors_advanced(clus_df_gather, cols, unused_colors,
                                                      method_advanced_option = method_advanced_option, 
                                                      resolution = resolution)
         return (clus_df_gather_color)
     } else {
         ref_group <- method
-        num_levels <- length(levels(factor(data[[col_group]])))
-        
-        temp_df <- data.frame(name = levels(clus_df_gather[[col_group]]))
+        num_levels <- length(levels(clus_df_gather[[ref_group]]))
+
+        temp_df <- data.frame(name = levels(clus_df_gather[[ref_group]]))
         temp_df[[paste0(ref_group, "_colors")]] <- 1:num_levels
         names(temp_df) <- c(ref_group, paste0(ref_group, "_colors"))
         clus_df_gather_color <- dplyr::left_join(
@@ -211,22 +210,20 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
         }
     }
     
-    clus_df_gather_color <- clus_df_gather_color |> dplyr::select(-!!rlang::sym(wt)) 
-    
-    final_df <- data.frame(axis=c(),
-                           value=c(),
-                           color=c())
-    for (col in cols) {
-        temp_df <- clus_df_gather_color[, c(col, paste0(col, '_colors'))]
-        names(temp_df) <- c('value', 'color')
-        temp_df[['axis']] <- col
-        final_df <- rbind(final_df, temp_df)
-    }
-    
-    final_df <- split(unique(final_df), unique(final_df)[['axis']])
-    final_list <- lapply(final_df, function(subdf) {
-        setNames(as.list(subdf[['color']]), subdf[['value']])
+    clus_df_gather_color <- clus_df_gather_color |> dplyr::select(-!!rlang::sym(wt))
+
+    # Deduplicate each column's (value, color) pairs directly (bounded by that
+    # column's number of distinct levels) instead of row-binding every
+    # column into one long table and deduplicating that as a whole; results
+    # are identical since axis strictly separates rows by source column, but
+    # this avoids ever materializing/deduplicating the full-size combined
+    # table. Sorted by column name to match split()'s alphabetical grouping.
+    final_list <- lapply(cols, function(col) {
+        temp_df <- unique(clus_df_gather_color[, c(col, paste0(col, '_colors'))])
+        setNames(as.list(temp_df[[paste0(col, '_colors')]]), temp_df[[col]])
     })
+    names(final_list) <- cols
+    final_list <- final_list[sort(names(final_list))]
     return (final_list)
 }
 
@@ -244,9 +241,6 @@ find_group2_colors <- function(clus_df_gather, max_level,
     colnames(clus_df_filtered) <- c(group1_name, group2_name, "value", paste0(group1_name, '_colors'))
     
     
-    clus_df_filtered <- clus_df_filtered |>
-        dplyr::group_by(!!rlang::sym(group1_name)) |>
-        dplyr::mutate(group1_size = sum(value))
     clus_df_filtered <- clus_df_filtered |>
         dplyr::group_by(!!rlang::sym(group2_name)) |>
         dplyr::mutate(group2_size = sum(value))
@@ -300,18 +294,7 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
                             dplyr::select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
                         clus_df_filtered <- dplyr::distinct(clus_df_filtered)
                         colnames(clus_df_filtered) <- c("group1", "group2", "value")
-                        
-                        clus_df_filtered <- clus_df_filtered |>
-                            dplyr::group_by(group1) |>
-                            dplyr::mutate(group1_size = sum(value))
-                        clus_df_filtered <- clus_df_filtered |>
-                            dplyr::group_by(group1) |>
-                            dplyr::mutate(group2_size = sum(value))
-                        
-                        clus_df_filtered <- clus_df_filtered |>
-                            dplyr::group_by(group1) |>
-                            dplyr::mutate(weight = value)
-                        
+
                         clus_df_filtered$group1 <- sub("^", paste0(group1_name, "_"), clus_df_filtered[["group1"]])
                         clus_df_filtered$group2 <- sub("^", paste0(group2_name, "_"), clus_df_filtered[["group2"]])
                         
@@ -323,18 +306,7 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
                             dplyr::select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
                         temp_clus_df_filtered <- dplyr::distinct(temp_clus_df_filtered)
                         colnames(temp_clus_df_filtered) <- c("group1", "group2", "value")
-                        
-                        temp_clus_df_filtered <- temp_clus_df_filtered |>
-                            dplyr::group_by(group1) |>
-                            dplyr::mutate(group1_size = sum(value))
-                        temp_clus_df_filtered <- temp_clus_df_filtered |>
-                            dplyr::group_by(group2) |>
-                            dplyr::mutate(group2_size = sum(value))
-                        
-                        temp_clus_df_filtered <- temp_clus_df_filtered |>
-                            dplyr::group_by(group1) |>
-                            dplyr::mutate(weight = value) 
-                        
+
                         temp_clus_df_filtered$group1 <- sub("^", paste0(group1_name, "_"), temp_clus_df_filtered[["group1"]])
                         temp_clus_df_filtered$group2 <- sub("^", paste0(group2_name, "_"), temp_clus_df_filtered[["group2"]])
                         

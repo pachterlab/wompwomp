@@ -2,8 +2,7 @@
 #'
 #' @name wompwomp-imports
 #' @rdname wompwomp
-#' @importFrom dplyr mutate select group_by summarise desc ungroup slice n pull bind_rows across all_of arrange
-#' @importFrom purrr map
+#' @importFrom dplyr mutate select group_by summarise desc ungroup slice n pull across all_of arrange
 #' @importFrom igraph V cluster_louvain cluster_leiden E
 #' @importFrom tibble is_tibble
 #' @importFrom utils read.csv write.csv combn
@@ -18,24 +17,6 @@ utils::globalVariables(c(
     "matrix_initialization_value_column_order", "weight_scalar_column_order", "column_metric",
     "cycle_start_positions", "weighted_metric", "valid_algorithms"
 ))
-
-# devtools::document() needs package = "wompwomp"; but R CMD build wompwomp needs it not there stored globally - so I make this function
-get_neighbornet_script_path <- function() {
-    neighbornet_script_path <- system.file("scripts", "run_neighbornet.py", package = "wompwomp")
-    if (neighbornet_script_path == "") {
-        # Fallback to development location
-        neighbornet_script_path <- file.path(here::here("inst", "scripts", "run_neighbornet.py"))
-        if (!grepl("wompwomp", neighbornet_script_path)) {
-            # if here::here isn't putting it inside wompwomp
-            neighbornet_script_path <- file.path("inst", "scripts", "run_neighbornet.py")
-        }
-    }
-    neighbornet_script_path <- normalizePath(neighbornet_script_path, mustWork = TRUE)
-    stopifnot(file.exists(neighbornet_script_path))
-    return (neighbornet_script_path)
-}
-
-#reticulate::source_python(neighbornet_script_path)  # Error: Unable to access object (object is from previous session and is now invalid)
 
 compute_alluvial_statistics <- function(clus_df_gather, cols, wt = "value") {
     message(sprintf("Alluvial statistics: n = number of elements; m = number of graphing columns; a = number of alluvia/edges; k_i = number of blocks in layer i (where i goes from 1:m); K_sum = number of blocks across all layers; K_prod = product of blocks across all layers"))
@@ -124,11 +105,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value
         column_dist_matrix[column1, column2] <- neighbornet_objective
         column_dist_matrix[column2, column1] <- neighbornet_objective
     }
-    # Prepare data in R
     labels <- cols # assuming this is a character vector
-    # # Call Python function
-    # mat_list <- split(column_dist_matrix, row(column_dist_matrix))  # convert R matrix to list of row-vectors
-    # result <- nn_mod$neighbor_net(labels, mat_list)
     if (verbose) message(sprintf("Running '%s' for column order", column_method))
     
     if (column_method == "tsp") {
@@ -136,10 +113,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value
         tour <- TSP::solve_TSP(tsp_instance)
         cycle <- as.integer(tour)
     } else if (column_method == "neighbornet") {
-        check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("splitspy", "numpy"), additional_message = "do not set column_method to 'neighbornet'")
-        reticulate::source_python(get_neighbornet_script_path())
-        result <- neighbor_net(labels, column_dist_matrix) # from python
-        cycle <- result[[1]]
+        cycle <- neighbor_net_cycle(labels, column_dist_matrix)
     } else {
         stop(sprintf("column_method '%s' is not a valid option.", column_method))
     }
@@ -202,54 +176,37 @@ run_neighbornet <- function(data, cols, wt = "value", matrix_initialization_valu
     
     # Get all 2-column combinations
     pairwise_groupings <- combn(cols, 2, simplify = FALSE)
-    
-    # For each combination, group and summarize
-    summarized_results <- purrr::map(pairwise_groupings, function(columns) {
-        clus_df_gather |>
+
+    # For each combination, group and summarize, then fill the (symmetric)
+    # distance matrix for that pair in one vectorized assignment instead of a
+    # per-row strsplit()+scalar lookup loop.
+    for (columns in pairwise_groupings) {
+        summarized <- clus_df_gather |>
             group_by(across(all_of(columns))) |>
-            summarise(total_value = sum(!!sym(wt)), .groups = "drop") |>
-            mutate(grouping = paste(columns, collapse = "+"))
-    })
-    
-    # summarized_results <- purrr::map(pairwise_groupings, function(columns) {
-    #     clus_df_gather |>
-    #         group_by(across(all_of(columns))) |>
-    #         summarise(total_value = sum(value), .groups = "drop") |>
-    #         mutate(grouping = paste(columns, collapse = "+"))
-    # })
-    
-    # Combine into a single data frame
-    final_result <- bind_rows(summarized_results)
-    
-    for (i in seq_len(nrow(final_result))) {
-        grouping_str <- final_result$grouping[i]
-        parts <- strsplit(grouping_str, "\\+")[[1]]
-        column1_tmp <- parts[1]
-        column2_tmp <- parts[2]
-        
-        n1 <- as.character(final_result[[column1_tmp]][i])
-        n2 <- as.character(final_result[[column2_tmp]][i])
-        w <- final_result$total_value[i]
-        
-        if (w > 0) {
-            full_dist_matrix[n1, n2] <- weight_scalar * -log(w)
-            full_dist_matrix[n2, n1] <- weight_scalar * -log(w) # symmetric since graph is undirected
-        }
+            summarise(total_value = sum(!!sym(wt)), .groups = "drop")
+
+        n1 <- as.character(summarized[[columns[1]]])
+        n2 <- as.character(summarized[[columns[2]]])
+        w <- summarized$total_value
+
+        valid <- w > 0
+        n1 <- n1[valid]
+        n2 <- n2[valid]
+        vals <- weight_scalar * -log(w[valid])
+
+        full_dist_matrix[cbind(n1, n2)] <- vals
+        full_dist_matrix[cbind(n2, n1)] <- vals # symmetric since graph is undirected
     }
     
     # make sure all numbers are positive for neighbornet
     min_val_abs <- abs(min(full_dist_matrix))
     full_dist_matrix <- full_dist_matrix + (min_val_abs + 1)
     
-    # Prepare data in R
     labels <- all_nodes # assuming this is a character vector
     mat <- full_dist_matrix
     mat[is.infinite(mat)] <- 1e6
     mat[is.na(mat)] <- 1e6
-    
-    # # Call Python function
-    # mat_list <- split(mat, row(mat))  # convert R matrix to list of row-vectors
-    # result <- nn_mod$neighbor_net(labels, mat_list)
+
     if (verbose) message(sprintf("Running '%s' for stratum order", method))
     
     if (method == "tsp") {
@@ -257,11 +214,7 @@ run_neighbornet <- function(data, cols, wt = "value", matrix_initialization_valu
         tour <- TSP::solve_TSP(tsp_instance)
         cycle <- as.integer(tour)
     } else if (method == "neighbornet") {
-        check_python_setup_with_necessary_packages(necessary_packages_for_this_step = c("splitspy", "numpy"), additional_message = "do not set method to 'neighbornet'")
-        reticulate::source_python(get_neighbornet_script_path())
-        result <- neighbor_net(labels, mat) # from python
-        cycle <- result[[1]]
-        # splits <- result[[2]]
+        cycle <- neighbor_net_cycle(labels, mat)
     }
     
     cycle_mapped <- labels[cycle]
@@ -355,9 +308,19 @@ determine_optimal_cycle_start <- function(data, cycle, cols = NULL, wt = "value"
     clus_df_gather_best <- NULL
     graphing_columns_best <- NULL
     objective_matrix_vector <- c()
-    
+
     n <- length(cycle)
-    
+
+    # `data`/`wt` do not change across cycle-start iterations, so the base
+    # alluvial dataframe is loop-invariant; compute it once instead of
+    # recomputing (potentially an expensive group_by_all()+count()) on every
+    # one of the n iterations below.
+    if (is.null(wt) || length(wt) == 0 || !(wt %in% colnames(data))) {
+        clus_df_gather_base <- get_alluvial_df(data, wt = wt)
+    } else {
+        clus_df_gather_base <- data
+    }
+
     graphing_columns_tmp <- cols
     for (i in 0:(n - 1)) {
         if ((!is.null(cycle_start_positions)) && !((i + 1) %in% cycle_start_positions)) {
@@ -369,21 +332,17 @@ determine_optimal_cycle_start <- function(data, cycle, cols = NULL, wt = "value"
         # } else if (i == 1) {
         #     if (verbose) message(sprintf("Starting subsequent iterations (should go much faster than iteration 1 if optimize_column_order is FALSE and/or optimize_column_order_per_cycle is FALSE)"))
         # }
-        
+
         cycle_shifted <- rotate_left(cycle, i)
         graphs_list <- get_graph_groups(cycle_shifted)
-        
+
         # remove prefix (column1_, etc)
         graphs_list_stripped <- lapply(graphs_list, function(x) {
             sub("^.*?~~", "", x)
         })
-        
-        if (is.null(wt) || length(wt) == 0 || !(wt %in% colnames(data))) {
-            clus_df_gather_neighbornet <- get_alluvial_df(data, wt = wt)
-        } else {
-            clus_df_gather_neighbornet <- data
-        }
-        
+
+        clus_df_gather_neighbornet <- clus_df_gather_base
+
         graphing_columns_int <- c()
         for (j in seq_along(cols)) {
             col_name <- cols[j]
