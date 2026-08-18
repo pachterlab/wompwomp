@@ -13,3 +13,8 @@ trash
 .Rhistory
 .Rproj.user/
 inst/doc
+benchmarks/results/
+src/*.o
+src/*.so
+src/*.dll
+src/symbols.rds

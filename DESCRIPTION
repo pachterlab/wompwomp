@@ -8,7 +8,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
-RoxygenNote: 7.3.3
 Imports:
     dplyr,
     igraph,
@@ -19,7 +18,10 @@ Imports:
     stats,
     tidyselect,
     vctrs,
-    utils
+    utils,
+    Rcpp
+LinkingTo:
+    Rcpp
 Depends: R (>= 4.0.0)
 Suggests: 
     testthat,
@@ -36,3 +38,4 @@ Suggests:
 Config/testthat/edition: 3
 URL: https://github.com/pachterlab/wompwomp
 BugReports: https://github.com/pachterlab/wompwomp/issues
+Config/roxygen2/version: 8.1.0

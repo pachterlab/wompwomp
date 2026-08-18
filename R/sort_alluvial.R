@@ -399,41 +399,47 @@ determine_optimal_cycle_start <- function(data, cycle, cols = NULL, wt = "value"
 }
 
 increment_if_zeros <- function(clus_df_gather, column) {
-    clus_df_gather <- clus_df_gather |> mutate(group_numeric = as.numeric(as.character(.data[[column]])))
-    
-    if (any(clus_df_gather$group_numeric == 0, na.rm = TRUE)) {
-        clus_df_gather$group_numeric <- clus_df_gather$group_numeric + 1
-        clus_df_gather <- clus_df_gather |> mutate(!!column := factor(group_numeric))
+    group_numeric <- as.numeric(as.character(clus_df_gather[[column]]))
+
+    if (any(group_numeric == 0, na.rm = TRUE)) {
+        group_numeric <- group_numeric + 1
+        clus_df_gather[[column]] <- factor(group_numeric)
     }
-    
-    clus_df_gather <- clus_df_gather |> select(-group_numeric)
-    
-    return(clus_df_gather)
+
+    clus_df_gather
 }
 
 sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reordered_column = "B") {
     for (n in 1:2) {
         clus_df_gather$y <- -2 # tmp
         reordered_column_original_clusters_name <- paste0(reordered_column, "_original_clusters")
-        
+
         clus_df_gather <- increment_if_zeros(clus_df_gather, stable_column)
         clus_df_gather <- increment_if_zeros(clus_df_gather, reordered_column)
         clus_df_gather <- increment_if_zeros(clus_df_gather, "col2_int")
-        
+
         # Initialize variables
         half_rows <- nrow(clus_df_gather) / 2
-        
-        subset_data <- clus_df_gather |>
-            ungroup() |>
-            dplyr::slice((half_rows + 1):nrow(clus_df_gather))
-        
-        subset_data <- subset_data |> mutate(
-            !!reordered_column_original_clusters_name := as.numeric(as.character(.data[[reordered_column]])),
-            !!reordered_column := -as.numeric(as.character(.data[[reordered_column]])),
-            y := -as.numeric(as.character(y)),
-            best_cluster_agreement := .data[[reordered_column]]
-        )
-        
+
+        # Base-R subsetting/assignment throughout this function instead of
+        # dplyr pipes (mutate/slice/ungroup/select): this only ever runs over
+        # a table capped at n_categories^2 rows, so the dplyr per-call
+        # dispatch/NSE overhead (profiled dominating wall time here) is pure
+        # fixed cost with no payoff at this scale. ungroup() is kept since a
+        # caller could in principle pass a grouped tibble; nothing below
+        # relies on grouping metadata.
+        clus_df_gather <- dplyr::ungroup(clus_df_gather)
+        subset_data <- clus_df_gather[(half_rows + 1):nrow(clus_df_gather), ]
+
+        # Order matters: reordered_column_original_clusters_name captures the
+        # pre-negation value, and best_cluster_agreement must read
+        # reordered_column *after* it's negated on the next line (mirrors
+        # dplyr::mutate()'s left-to-right sequential evaluation).
+        subset_data[[reordered_column_original_clusters_name]] <- as.numeric(as.character(subset_data[[reordered_column]]))
+        subset_data[[reordered_column]] <- -as.numeric(as.character(subset_data[[reordered_column]]))
+        subset_data$y <- -as.numeric(as.character(subset_data$y))
+        subset_data$best_cluster_agreement <- subset_data[[reordered_column]]
+
         # Loop over each unique cluster number in Group 2
         for (cluster_number in sort(unique(subset_data[[reordered_column_original_clusters_name]]))) {
             # Subset the data for the current cluster number
@@ -477,7 +483,7 @@ sort_clusters_by_agreement <- function(clus_df_gather, stable_column = "A", reor
             sort(unique(subset_data[[reordered_column]]))
         )
         
-        subset_data <- subset_data |> mutate(!!reordered_column := mapping[as.character(.data[[reordered_column]])])
+        subset_data[[reordered_column]] <- mapping[as.character(subset_data[[reordered_column]])]
         
         clus_df_gather[[reordered_column]][(1:half_rows)] <- subset_data[[reordered_column]]
         clus_df_gather[[reordered_column]][((half_rows + 1):nrow(clus_df_gather))] <- subset_data[[reordered_column]]

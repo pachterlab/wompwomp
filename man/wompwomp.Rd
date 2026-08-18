@@ -23,6 +23,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Joseph Rich \email{jmrich@caltech.edu} (\href{https://orcid.org/0000-0003-1400-8479}{ORCID})
   \item Conrad Oakes \email{coakes@caltech.edu}
   \item Lior Pachter (\href{https://orcid.org/0000-0002-9164-6231}{ORCID})
 }

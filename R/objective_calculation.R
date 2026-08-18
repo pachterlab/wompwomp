@@ -9,10 +9,14 @@ utils::globalVariables(c(
     ".data", ":=", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"
 ))
 
-# ---- Binary Indexed Tree (Fenwick Tree), inlined as plain vectors ----
+# ---- Binary Indexed Tree (Fenwick Tree) ----
 # (An earlier R6-class version of this function was ~5x slower end-to-end due
 # to R6 method-dispatch overhead on the per-row update()/query() calls, which
-# dominate runtime since this is called on every cycle-start iteration.)
+# dominate runtime since this is called on every cycle-start iteration. The
+# BIT build/query loop itself was later profiled at >95% of wall time on
+# large sweeps -- bitwAnd() alone, called as a full R function per Fenwick
+# step, was ~37% on its own -- so that loop now runs as compiled code; see
+# calculate_objective_fenwick_cpp() in src/fenwick.cpp.)
 calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'value', weighted_metric = TRUE) {
     # Step 1: Sort by y1 (only the two columns actually needed below; avoids
     # reordering every column of `data`, which is a tibble and so pays
@@ -23,55 +27,9 @@ calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'value'
 
     # Step 2: Rank-compress y2 (higher y2 → higher rank)
     y2_rank <- match(y2v, sort(unique(y2v)))
-    max_rank <- max(y2_rank)
-    size <- max_rank + 2L
-
-    # Step 3: Initialize BIT
-    tree_count <- integer(size)
-    tree_weight <- numeric(size)
     weight_vec <- if (weighted_metric) data[[wt]][ord] else rep(1.0, n)
 
-    total_cross_weight <- 0.0
-
-    for (i in seq_len(n)) {
-        r <- y2_rank[i]
-        w <- weight_vec[i]
-
-        # Count previous y2s > current (strictly greater): query_range(r+1, max_rank)
-        idx <- max_rank + 1L
-        count_hi <- 0L
-        wsum_hi <- 0.0
-        while (idx > 0L) {
-            count_hi <- count_hi + tree_count[idx]
-            wsum_hi <- wsum_hi + tree_weight[idx]
-            idx <- idx - bitwAnd(idx, -idx)
-        }
-        idx <- r + 1L
-        count_lo <- 0L
-        wsum_lo <- 0.0
-        while (idx > 0L) {
-            count_lo <- count_lo + tree_count[idx]
-            wsum_lo <- wsum_lo + tree_weight[idx]
-            idx <- idx - bitwAnd(idx, -idx)
-        }
-
-        if (weighted_metric) {
-            total_cross_weight <- total_cross_weight + (w * (wsum_hi - wsum_lo))
-        } else {
-            total_cross_weight <- total_cross_weight + (count_hi - count_lo)
-        }
-
-        # Add current y2_rank to BIT
-        idx <- r + 1L
-        upd_w <- if (weighted_metric) w else 1.0
-        while (idx < size) {
-            tree_count[idx] <- tree_count[idx] + 1L
-            tree_weight[idx] <- tree_weight[idx] + upd_w
-            idx <- idx + bitwAnd(idx, -idx)
-        }
-    }
-
-    total_cross_weight
+    calculate_objective_fenwick_cpp(as.integer(y2_rank), as.numeric(weight_vec), weighted_metric)
 }
 
 
