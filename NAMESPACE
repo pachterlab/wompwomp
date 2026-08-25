@@ -5,37 +5,43 @@ export(get_lode_clusters)
 export(get_lode_clusters_options)
 export(lode_cluster_pal)
 export(prep_for_lodes)
-export(setup_python_env)
 export(sort_to_uncross)
 export(sort_to_uncross_options)
-importFrom(R6,R6Class)
-importFrom(dplyr,across)
-importFrom(dplyr,add_count)
-importFrom(dplyr,all_of)
-importFrom(dplyr,arrange)
-importFrom(dplyr,bind_rows)
-importFrom(dplyr,desc)
-importFrom(dplyr,group_by)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,n)
-importFrom(dplyr,pull)
-importFrom(dplyr,row_number)
-importFrom(dplyr,select)
-importFrom(dplyr,slice)
-importFrom(dplyr,summarise)
-importFrom(dplyr,ungroup)
-importFrom(igraph,E)
-importFrom(igraph,V)
-importFrom(igraph,cluster_leiden)
-importFrom(igraph,cluster_louvain)
-importFrom(purrr,map)
-importFrom(rlang,.data)
-importFrom(rlang,sym)
+importFrom(Rcpp,sourceCpp)
+importFrom(dplyr,
+  across,
+  add_count,
+  all_of,
+  arrange,
+  desc,
+  group_by,
+  left_join,
+  mutate,
+  n,
+  pull,
+  row_number,
+  select,
+  slice,
+  summarise,
+  ungroup
+)
+importFrom(igraph,
+  E,
+  V,
+  cluster_leiden,
+  cluster_louvain
+)
+importFrom(rlang,
+  .data,
+  sym
+)
 importFrom(stats,setNames)
 importFrom(tibble,is_tibble)
 importFrom(tidyselect,eval_select)
-importFrom(utils,combn)
-importFrom(utils,read.csv)
-importFrom(utils,write.csv)
+importFrom(utils,
+  combn,
+  read.csv,
+  write.csv
+)
 importFrom(vctrs,vec_cast)
+useDynLib(wompwomp, .registration = TRUE)

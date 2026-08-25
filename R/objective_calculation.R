@@ -4,87 +4,32 @@
 #' @rdname wompwomp
 #' @importFrom dplyr mutate group_by ungroup n row_number left_join
 #' @importFrom rlang sym .data
-#' @importFrom R6 R6Class
-#' 
+#'
 utils::globalVariables(c(
     ".data", ":=", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "total", "cum_y", "best_cluster_agreement"
 ))
 
 # ---- Binary Indexed Tree (Fenwick Tree) ----
-BIT <- R6::R6Class("BIT",
-                   public = list(
-                       tree_count = NULL,
-                       tree_weight = NULL,
-                       
-                       initialize = function(size) {
-                           self$tree_count <- integer(size + 1)
-                           self$tree_weight <- numeric(size + 1)
-                       },
-                       
-                       update = function(index, weight) {
-                           index <- index + 1L
-                           n <- length(self$tree_count)
-                           while (index < n) {
-                               self$tree_count[index] <- self$tree_count[index] + 1L
-                               self$tree_weight[index] <- self$tree_weight[index] + weight
-                               index <- index + bitwAnd(index, -index)
-                           }
-                       },
-                       
-                       query = function(index) {
-                           count <- 0L
-                           weight_sum <- 0.0
-                           index <- index + 1L
-                           while (index > 0L) {
-                               count <- count + self$tree_count[index]
-                               weight_sum <- weight_sum + self$tree_weight[index]
-                               index <- index - bitwAnd(index, -index)
-                           }
-                           list(count = count, weight_sum = weight_sum)
-                       },
-                       
-                       query_range = function(low, high) {
-                           q_high <- self$query(high)
-                           q_low <- self$query(low - 1L)
-                           list(
-                               count = q_high$count - q_low$count,
-                               weight_sum = q_high$weight_sum - q_low$weight_sum
-                           )
-                       }
-                   )
-)
-
+# (An earlier R6-class version of this function was ~5x slower end-to-end due
+# to R6 method-dispatch overhead on the per-row update()/query() calls, which
+# dominate runtime since this is called on every cycle-start iteration. The
+# BIT build/query loop itself was later profiled at >95% of wall time on
+# large sweeps -- bitwAnd() alone, called as a full R function per Fenwick
+# step, was ~37% on its own -- so that loop now runs as compiled code; see
+# calculate_objective_fenwick_cpp() in src/fenwick.cpp.)
 calculate_objective_fenwick <- function(data, y1 = "y1", y2 = "y2", wt = 'value', weighted_metric = TRUE) {
-    # Step 1: Sort by y1
-    df_sorted <- data[order(data[[y1]]), ]
-    rownames(df_sorted) <- NULL
-    
+    # Step 1: Sort by y1 (only the two columns actually needed below; avoids
+    # reordering every column of `data`, which is a tibble and so pays
+    # tibble-subsetting dispatch overhead on top of the copy).
+    n <- nrow(data)
+    ord <- order(data[[y1]])
+    y2v <- data[[y2]][ord]
+
     # Step 2: Rank-compress y2 (higher y2 → higher rank)
-    df_sorted$y2_rank <- match(df_sorted[[y2]], sort(unique(df_sorted[[y2]])))
-    max_rank <- max(df_sorted$y2_rank)
-    
-    # Step 3: Initialize BIT
-    bit <- BIT$new(size = max_rank + 2L)
-    total_cross_weight <- 0.0
-    
-    for (i in seq_len(nrow(df_sorted))) {
-        y2_rank <- df_sorted$y2_rank[i]
-        weight <- if (weighted_metric) df_sorted[[wt]][i] else 1.0
-        
-        # Count previous y2s > current (strictly greater)
-        q <- bit$query_range(y2_rank + 1L, max_rank)
-        
-        if (weighted_metric) {
-            total_cross_weight <- total_cross_weight + (weight * q$weight_sum)
-        } else {
-            total_cross_weight <- total_cross_weight + q$count
-        }
-        
-        # Add current y2_rank to BIT
-        bit$update(y2_rank, if (weighted_metric) weight else 1.0)
-    }
-    
-    total_cross_weight
+    y2_rank <- match(y2v, sort(unique(y2v)))
+    weight_vec <- if (weighted_metric) data[[wt]][ord] else rep(1.0, n)
+
+    calculate_objective_fenwick_cpp(as.integer(y2_rank), as.numeric(weight_vec), weighted_metric)
 }
 
 
@@ -99,6 +44,7 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
         wt <- ".wt_internal"
     }
 
+    n <- nrow(lode_df)
     n_cols <- length(cols)
     for (x in seq_len(n_cols)) {
         i <- cols[x]
@@ -110,13 +56,16 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
         } else {
             tiebreaker <- cols[x - 1]
         }
-        ordered_df <- lode_df[order(lode_df[[i]], lode_df[[tiebreaker]]), ]
-        ordered_df[[paste0('y', x)]] <- cumsum(ordered_df[[wt]])
-        lode_df <- dplyr::left_join(
-            lode_df,
-            ordered_df[, c('alluvium', paste0('y', x))],
-            by = 'alluvium'
-        )
+        ord <- order(lode_df[[i]], lode_df[[tiebreaker]])
+        y_vals <- cumsum(lode_df[[wt]][ord])
+
+        # `alluvium` is exactly 1:n, so `ord` is a permutation of the row
+        # indices; invert it to place each cumulative value back at its
+        # original row directly, instead of a dplyr::left_join keyed on that
+        # same permutation.
+        inv_ord <- integer(n)
+        inv_ord[ord] <- seq_len(n)
+        lode_df[[paste0('y', x)]] <- y_vals[inv_ord]
     }
 
     # remove temp column if created
