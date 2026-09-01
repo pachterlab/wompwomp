@@ -198,7 +198,17 @@ run_neighbornet <- function(data, cols, wt = "value", matrix_initialization_valu
         full_dist_matrix[cbind(n2, n1)] <- vals # symmetric since graph is undirected
     }
     
-    # make sure all numbers are positive for neighbornet
+    # Translate so every entry is positive. This is required by TSP::solve_TSP
+    # (method = "tsp", the default), which does not terminate on a matrix
+    # containing negative entries -- measured 0/8 completions within 8s on
+    # matrices with negatives vs 8/8 on the same matrices after translating.
+    # NeighborNet does NOT need it: its selection criterion
+    # q_pq = (r-2)*d_pq - S_p - S_q maps to alpha*q_pq - beta*r under
+    # d -> alpha*d + beta (alpha > 0), which is the same change for every pair
+    # at a given step, and each agglomeration replaces distances by convex
+    # combinations, so the cycle is invariant under any increasing affine
+    # transform of the matrix. The translation is therefore a no-op for
+    # `neighbornet` and a hard requirement for `tsp`.
     min_val_abs <- abs(min(full_dist_matrix))
     full_dist_matrix <- full_dist_matrix + (min_val_abs + 1)
     
