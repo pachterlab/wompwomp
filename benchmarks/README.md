@@ -41,8 +41,20 @@ Each config runs `sort_to_uncross()` end-to-end (synthetic data generation +
 aggregation + sorting/column-ordering, no coloring or plotting) in its own
 forked child process, isolated so a hung or crashing config can't take down
 the whole sweep. Recorded per run: wall time, user/sys CPU time, peak RSS
-(read from `/proc/self/status`), and the number of unique alluvia (rows in
-the aggregated table) actually sorted.
+(read from `/proc/self/status`), the number of unique alluvia (rows in the
+aggregated table) actually sorted, and the resulting crossing-count
+objective from the method's own sorted output in both variants
+`compute_crossing_objective()` supports: `objective` (weighted_metric =
+TRUE, the package default -- sum of products of crossing edge weights) and
+`objective_unweighted` (plain count of crossing edge pairs) -- so a sweep
+captures solution quality alongside speed/memory, not just the latter.
+`objective_unweighted` is a fixed topological invariant (always
+`choose(n_categories, 2)^2`), identical across every method, whenever the
+two-layer graph is *complete* (every category-pair combination occurs at
+least once) -- which most of `DEFAULT_SWEEP`'s `n_rows`/`n_categories`
+combinations are dense enough to produce. `SPARSE_SWEEP` deliberately keeps
+`n_rows` small relative to `n_categories^2` so the graph stays incomplete
+and `objective_unweighted` can actually differ by method.
 
 Before the sweep starts, `run_rows()` runs each `method` once on a tiny
 dataset in the parent process (`warm_up_namespaces()` in `run_benchmark.R`)
@@ -59,9 +71,10 @@ Cost drivers (see `generate_data.R` docstring for detail):
   `method="tsp"` is an *exact* exponential-time DP solver -- only include it
   with `n_categories <= ~15` (see `TSP_SWEEP` in `sweep_config.R`).
 - `n_columns` -- multiplies column-order-optimization cost when
-  `column_method != "none"`. `method %in% c("greedy_wolf", "greedy_wblf")`
-  only support `n_columns == 2` -- rows combining them with other column
-  counts are dropped when a sweep grid is built.
+  `column_method != "none"`. `method %in% c("greedy_wolf", "greedy_wblf",
+  "barycenter", "median", "barycenter_one_sided", "median_one_sided")` only
+  support `n_columns == 2` -- rows combining them with other column counts
+  are dropped when a sweep grid is built.
 - `n_rows` -- mainly controls how much of the `n_categories**n_columns`
   combinatorial space gets populated (more unique alluvia to sort).
 - `column_method` -- `"tsp"`/`"neighbornet"` add a nested pass of
@@ -73,6 +86,12 @@ Cost drivers (see `generate_data.R` docstring for detail):
 Smoke test first (~seconds):
 ```
 Rscript run_benchmark.R sweep --which smoke --out results/smoke.csv
+```
+
+Sparse-data objective comparison (~seconds -- see `SPARSE_SWEEP` in
+`sweep_config.R` and the `objective_unweighted` note above):
+```
+Rscript run_benchmark.R sweep --which sparse --out results/sparse.csv
 ```
 
 Check grid size before committing to a long run:

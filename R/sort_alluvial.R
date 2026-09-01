@@ -826,6 +826,100 @@ sort_greedy_wolf <- function(clus_df_gather, cols = NULL, fixed_column = NULL, w
     return(clus_df_gather_best)
 }
 
+weighted_median <- function(values, weights) {
+    ord <- order(values)
+    values <- values[ord]
+    weights <- weights[ord]
+    cum_w <- cumsum(weights)
+    half <- sum(weights) / 2
+    values[which(cum_w >= half)[1]]
+}
+
+# Reassigns integer positions in `reordered_column` by ranking each of its
+# levels by the weighted mean (barycenter) or weighted median of the
+# positions of its neighbors in `stable_column`, weighted by `wt`. This is
+# the classic Sugiyama-style two-layer crossing-reduction heuristic: a cheap
+# O(n log n) proxy for the crossing-count objective, rather than optimizing
+# it directly like TSP (exact, exponential-time) or greedy_wolf/greedy_wblf
+# (O(n1*n2) pairwise search).
+reorder_by_neighbor_stat <- function(clus_df_gather, stable_column, reordered_column, wt = "value", stat = c("barycenter", "median")) {
+    stat <- match.arg(stat)
+
+    positions <- as.numeric(as.character(clus_df_gather[[stable_column]]))
+    free_ids <- as.character(clus_df_gather[[reordered_column]])
+    weights <- clus_df_gather[[wt]]
+
+    split_idx <- split(seq_along(free_ids), free_ids)
+    node_stats <- vapply(split_idx, function(idx) {
+        if (stat == "barycenter") {
+            sum(positions[idx] * weights[idx]) / sum(weights[idx])
+        } else {
+            weighted_median(positions[idx], weights[idx])
+        }
+    }, numeric(1))
+
+    # Break ties deterministically by original position rather than relying
+    # on split()'s (locale-dependent) name ordering.
+    orig_ids <- as.numeric(names(node_stats))
+    ord <- order(node_stats, orig_ids)
+    new_rank <- integer(length(ord))
+    new_rank[ord] <- seq_along(ord)
+    new_positions <- setNames(new_rank, names(node_stats))
+
+    clus_df_gather[[reordered_column]] <- factor(unname(new_positions[free_ids]))
+    clus_df_gather
+}
+
+sort_barycenter_median <- function(clus_df_gather, cols = NULL, wt = "value", method = c("barycenter", "median", "barycenter_one_sided", "median_one_sided"), fixed_column = NULL, verbose = FALSE) {
+    method <- match.arg(method)
+    if (length(cols) != 2) {
+        stop(sprintf("cols must be of length 2 for method '%s'", method))
+    }
+
+    one_sided <- endsWith(method, "_one_sided")
+    stat <- sub("_one_sided$", "", method)
+
+    if (!one_sided) {
+        if (verbose) message(sprintf("Pass 1/2: reordering col2_int by %s of neighbor positions in col1_int", stat))
+        clus_df_gather <- reorder_by_neighbor_stat(clus_df_gather, stable_column = "col1_int", reordered_column = "col2_int", wt = wt, stat = stat)
+
+        if (verbose) message(sprintf("Pass 2/2: reordering col1_int by %s of neighbor positions in col2_int", stat))
+        clus_df_gather <- reorder_by_neighbor_stat(clus_df_gather, stable_column = "col2_int", reordered_column = "col1_int", wt = wt, stat = stat)
+
+        return(clus_df_gather)
+    }
+
+    # One-directional: `fixed_column` stays put and only the other column is
+    # reordered against it, mirroring sort_greedy_wolf()'s "wolf" mode.
+    column1 <- cols[1]
+    column2 <- cols[2]
+
+    if (is.null(fixed_column)) {
+        fixed_column <- column1
+    } else if ((is.integer(fixed_column) || (is.double(fixed_column)))) {
+        if (fixed_column > length(colnames(clus_df_gather))) {
+            stop(sprintf("fixed_column index '%s' is not a column in the dataframe.", fixed_column))
+        } else {
+            fixed_column <- colnames(clus_df_gather)[fixed_column]
+        }
+    } else if (!(fixed_column %in% colnames(clus_df_gather))) {
+        stop(sprintf("fixed_column '%s' is not a column in the dataframe.", fixed_column))
+    }
+
+    if (isTRUE(fixed_column == column1)) {
+        stable_column <- "col1_int"
+        reordered_column <- "col2_int"
+    } else if (isTRUE(fixed_column == column2)) {
+        stable_column <- "col2_int"
+        reordered_column <- "col1_int"
+    } else {
+        stop(sprintf("fixed_column '%s' is not recognized.", fixed_column))
+    }
+
+    if (verbose) message(sprintf("Reordering %s by %s of neighbor positions in %s (fixed)", reordered_column, stat, stable_column))
+    reorder_by_neighbor_stat(clus_df_gather, stable_column = stable_column, reordered_column = reordered_column, wt = wt, stat = stat)
+}
+
 #' Control Options for `sort_to_uncross()`
 #'
 #' Creates a list of control parameters that modify the behavior of
@@ -897,7 +991,7 @@ sort_to_uncross_options <- function(
     )
 }
 
-sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
+sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
     default_opt <- sort_to_uncross_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
@@ -939,7 +1033,7 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "n
         }
     }
     
-    if (((method == "none") || (method == "random") || method == "neighbornet" || (method == "tsp")) && (random_initializations > 1)) {
+    if (((method == "none") || (method == "random") || method == "neighbornet" || (method == "tsp") || (method == "barycenter") || (method == "median") || (method == "barycenter_one_sided") || (method == "median_one_sided")) && (random_initializations > 1)) {
         sprintf("random_initializations > 1 but sorting algorithm is %s Setting random_initializations to 1.", method)
         random_initializations <- 1
     }
@@ -981,6 +1075,9 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "n
     } else if (method == "greedy_wblf" || method == "greedy_wolf") {
         # O(n_1 * n_2) complexity, where n1 is the number of blocks in layer 1, and n2 is the number of blocks in layer 2
         clus_df_gather_sorted <- sort_greedy_wolf(clus_df_gather = clus_df_gather, cols = cols, wt = wt, fixed_column = fixed_column, random_initializations = random_initializations, method = method, verbose = verbose, weighted_metric = weighted_metric)
+    } else if (method == "barycenter" || method == "median" || method == "barycenter_one_sided" || method == "median_one_sided") {
+        # O(n log n) complexity, where n is the number of blocks across both layers -- see sort_barycenter_median()
+        clus_df_gather_sorted <- sort_barycenter_median(clus_df_gather = clus_df_gather, cols = cols, wt = wt, method = method, fixed_column = fixed_column, verbose = verbose)
     } else if (method == "random") {
         clus_df_gather_sorted <- randomly_map_int_columns(clus_df_gather)
         #!!! check this
@@ -1046,10 +1143,10 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "n
 #' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
-#' @param method Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
+#' @param method Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'barycenter', 'median', 'barycenter_one_sided', 'median_one_sided', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'barycenter' and 'median' implement the classic Sugiyama-style two-layer crossing-reduction heuristics: each node in one layer is repositioned at the weighted mean ('barycenter') or weighted median ('median') position of its neighbors in the other layer, alternating which layer is reordered (as in 'greedy_wblf'). 'barycenter_one_sided' and 'median_one_sided' apply that same repositioning only once, from \code{fixed_column} onto the other layer (as in 'greedy_wolf'), leaving \code{fixed_column}'s order untouched. All four are much cheaper (O(n log n) per pass) than 'greedy_wolf'/'greedy_wblf' (O(n1*n2)), at the cost of typically noisier (less minimized) crossing counts. 'greedy_wolf', 'greedy_wblf', 'barycenter', 'median', 'barycenter_one_sided', and 'median_one_sided' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
 #' @param column_method Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'random', and 'none'.
 #' @param weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method == 'tsp'}.
-#' @param fixed_column Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method == 'greedy_wolf'}.
+#' @param fixed_column Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method \%in\% c('greedy_wolf', 'barycenter_one_sided', 'median_one_sided')}.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param options Additional arguments. See [sort_to_uncross_options()].
 #'
@@ -1100,7 +1197,7 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "n
 #' lapply(clus_df_gather[, 1:2], levels)
 #'
 #' @export
-sort_to_uncross <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, verbose = FALSE, options = NULL) {
+sort_to_uncross <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, verbose = FALSE, options = NULL) {
     default_opt <- sort_to_uncross_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")

@@ -8,7 +8,8 @@ sort_to_uncross(
   data,
   cols,
   wt = NULL,
-  method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "none", "random"),
+  method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "barycenter", "median",
+    "barycenter_one_sided", "median_one_sided", "none", "random"),
   column_method = c("tsp", "neighbornet", "none", "random"),
   weight_scalar = 5e+05,
   fixed_column = NULL,
@@ -25,13 +26,13 @@ sort_to_uncross(
 
 \item{wt}{Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).}
 
-\item{method}{Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.}
+\item{method}{Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'barycenter', 'median', 'barycenter_one_sided', 'median_one_sided', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'barycenter' and 'median' implement the classic Sugiyama-style two-layer crossing-reduction heuristics: each node in one layer is repositioned at the weighted mean ('barycenter') or weighted median ('median') position of its neighbors in the other layer, alternating which layer is reordered (as in 'greedy_wblf'). 'barycenter_one_sided' and 'median_one_sided' apply that same repositioning only once, from \code{fixed_column} onto the other layer (as in 'greedy_wolf'), leaving \code{fixed_column}'s order untouched. All four are much cheaper (O(n log n) per pass) than 'greedy_wolf'/'greedy_wblf' (O(n1*n2)), at the cost of typically noisier (less minimized) crossing counts. 'greedy_wolf', 'greedy_wblf', 'barycenter', 'median', 'barycenter_one_sided', and 'median_one_sided' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.}
 
 \item{column_method}{Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'random', and 'none'.}
 
 \item{weight_scalar}{Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method == 'tsp'}.}
 
-\item{fixed_column}{Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method == 'greedy_wolf'}.}
+\item{fixed_column}{Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method \%in\% c('greedy_wolf', 'barycenter_one_sided', 'median_one_sided')}.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 

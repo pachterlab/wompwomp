@@ -1,3 +1,4 @@
 # wompwomp 0.99.5
 Initial release and Bioconductor checks
 - `calculate_objective_fenwick()`'s Binary Indexed Tree loop (the dominant cost of `neighbornet` sorting on large inputs) now runs as compiled Rcpp code instead of pure R.
+- Added `method = "barycenter"` and `method = "median"` to `sort_to_uncross()`: classic Sugiyama-style two-layer crossing-reduction heuristics, cheaper (O(n log n) per pass) than `greedy_wolf`/`greedy_wblf` (O(n1*n2)). One-directional variants `barycenter_one_sided`/`median_one_sided` (paired with `fixed_column`, like `greedy_wolf`) are also available alongside the two-pass alternating default.

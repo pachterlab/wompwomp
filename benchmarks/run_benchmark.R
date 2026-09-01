@@ -48,7 +48,7 @@ PARAM_FIELDS <- c(
 )
 RESULT_FIELDS <- c(
     "status", "error", "wall_time_s", "user_cpu_s", "sys_cpu_s",
-    "peak_rss_mb", "rss_metric", "n_unique_alluvia"
+    "peak_rss_mb", "rss_metric", "n_unique_alluvia", "objective", "objective_unweighted"
 )
 ALL_FIELDS <- c(PARAM_FIELDS, RESULT_FIELDS, "timeout_s", "timestamp")
 
@@ -66,7 +66,7 @@ run_one <- function(params) {
     # it with rlang::ensym(), which requires a literal string/symbol at the
     # call site, not a variable holding one. Every sweep fixes wt to "value"
     # anyway (see FIXED_PARAMS in sweep_config.R).
-    invisible(wompwomp::sort_to_uncross(
+    sorted <- wompwomp::sort_to_uncross(
         data = gen$data,
         cols = gen$cols,
         wt = "value",
@@ -74,9 +74,30 @@ run_one <- function(params) {
         column_method = params$column_method,
         weight_scalar = params$weight_scalar,
         verbose = FALSE
-    ))
+    )
 
-    list(n_unique_alluvia = n_unique_alluvia)
+    # Crossing-count objective of the method's own output -- lets the report
+    # compare solution *quality*, not just speed/memory. Computed inline
+    # (inside the same timed/isolated run) rather than as a second pass:
+    # it's O(n_unique_alluvia log n_unique_alluvia) via the compiled Fenwick
+    # tree, profiled at <2% of sort_to_uncross()'s own wall time even at the
+    # largest 4-column/16-category/100k-row configs, so it doesn't
+    # meaningfully distort wall_time_s/user_cpu_s/sys_cpu_s. Both variants
+    # are recorded: `objective` (weighted_metric = TRUE, the package
+    # default) and `objective_unweighted` (plain crossing-pair count) --
+    # the two only diverge in how much they penalize crossings between
+    # heavy vs. light edges, and unweighted is additionally a fixed
+    # topological invariant (independent of ordering) whenever the induced
+    # two-layer graph is complete, so it needs a sparse-enough config
+    # (see SPARSE_SWEEP in sweep_config.R) to differentiate methods at all.
+    objective <- wompwomp::compute_crossing_objective(
+        sorted, cols = gen$cols, wt = "value", weighted_metric = TRUE
+    )$output_objective
+    objective_unweighted <- wompwomp::compute_crossing_objective(
+        sorted, cols = gen$cols, wt = "value", weighted_metric = FALSE
+    )$output_objective
+
+    list(n_unique_alluvia = n_unique_alluvia, objective = objective, objective_unweighted = objective_unweighted)
 }
 
 # Each config runs in a forked child (parallel::mcparallel), which inherits
@@ -89,7 +110,7 @@ run_one <- function(params) {
 # path once here so every fork starts warm.
 warm_up_namespaces <- function() {
     gen <- make_synthetic_df(n_rows = 50, n_columns = 2, n_categories = 3, seed = 0)
-    for (method in c("neighbornet", "greedy_wblf", "tsp")) {
+    for (method in c("neighbornet", "greedy_wblf", "barycenter", "tsp")) {
         invisible(wompwomp::sort_to_uncross(
             data = gen$data, cols = gen$cols, wt = "value",
             method = method, column_method = "tsp", verbose = FALSE
@@ -99,11 +120,12 @@ warm_up_namespaces <- function() {
 
 build_grid <- function(sweep_list) {
     grid <- expand.grid(sweep_list, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
-    invalid <- grid$method %in% c("greedy_wolf", "greedy_wblf") & grid$n_columns != 2
+    two_col_only_methods <- c("greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided")
+    invalid <- grid$method %in% two_col_only_methods & grid$n_columns != 2
     if (any(invalid)) {
         message(sprintf(
-            "dropping %d row(s): greedy_wolf/greedy_wblf require n_columns == 2",
-            sum(invalid)
+            "dropping %d row(s): %s require n_columns == 2",
+            sum(invalid), paste(two_col_only_methods, collapse = "/")
         ))
         grid <- grid[!invalid, , drop = FALSE]
     }
