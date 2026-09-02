@@ -363,7 +363,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 57)
+    testthat::expect_equal(num, 44) # was 57 before the nearest-right/nearest-left within-stratum ordering
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_order TRUE", {
@@ -379,7 +379,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 57)
+    testthat::expect_equal(num, 44) # was 57 before the nearest-right/nearest-left within-stratum ordering
 })
 
 
@@ -411,7 +411,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 56)
+    testthat::expect_equal(num, 50) # was 56 before the nearest-right/nearest-left within-stratum ordering
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers, tsp, optimize_column_order TRUE", {
@@ -427,7 +427,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 56)
+    testthat::expect_equal(num, 50) # was 56 before the nearest-right/nearest-left within-stratum ordering
 })
 
 test_that("get_lode_clusters correctly handles multiple factor columns", {

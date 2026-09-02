@@ -1,0 +1,12 @@
+.git
+.Rproj.user
+*.Rproj
+.Rhistory
+**/.Rhistory
+**/.DS_Store
+.DS_Store
+paper_figures/output
+src/*.o
+src/*.so
+doc
+Meta

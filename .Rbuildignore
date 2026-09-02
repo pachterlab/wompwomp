@@ -3,6 +3,9 @@
 ^doc$
 ^Meta$
 ^figures$
+^paper_figures$
+^Dockerfile$
+^\.dockerignore$
 ^tmp\.Rmd$
 ^tmp_files$
 ^trash$

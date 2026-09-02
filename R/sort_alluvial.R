@@ -42,7 +42,7 @@ compute_alluvial_statistics <- function(clus_df_gather, cols, wt = "value") {
 determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value", matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_metric = "edge_crossing", column_method = "tsp", verbose = FALSE, weighted_metric = TRUE) {
     if (column_method == "none") {
         return(cols)
-    } else if (column_method == "none") {
+    } else if (column_method == "random") {
         return(sample(cols))
     }
     
@@ -86,10 +86,17 @@ determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value
         graphing_columns_tmp <- c(column1, column2)
         
         if (column_metric == "ARI") {
+            # NOTE: rep() coerces the weights to integer, so non-integer weights
+            # are silently truncated when expanding rows for the ARI.
             expanded_df <- clus_df_gather_neighbornet_tmp[rep(seq_len(nrow(clus_df_gather_neighbornet_tmp)), clus_df_gather_neighbornet_tmp[[wt]]), ]
             neighbornet_objective <- mclust::adjustedRandIndex(expanded_df$col1_int, expanded_df$col2_int)
-            neighbornet_objective <- -neighbornet_objective + 1 # convert from [-1,1] to [0,2], and flip the sign (so that 1 becomes smallest ie perfect cluster agreement --> smallest distance)
-            neighbornet_objective <- weight_scalar_column_order * 50 * neighbornet_objective # built-in scalar
+            # ARI in [-0.5, 1]; map to a distance in [0, 1.5] where perfect
+            # agreement (ARI = 1) is distance 0.
+            neighbornet_objective <- -neighbornet_objective + 1
+            # Rescale to a range comparable with the log1p edge-crossing metric so
+            # one TSP tolerance works for both.
+            ARI_DISTANCE_SCALE <- 50
+            neighbornet_objective <- weight_scalar_column_order * ARI_DISTANCE_SCALE * neighbornet_objective
         } else if (column_metric == "edge_crossing") {
             neighbornet_objective <- compute_crossing_objective(
                 clus_df_gather_neighbornet_tmp,
@@ -133,7 +140,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value
     return(cycle_mapped_optimal_start)
 }
 
-run_neighbornet <- function(data, cols, wt = "value", matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, method = "tsp", verbose = FALSE) {
+run_neighbornet <- function(data, cols, wt = "value", matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, method = "neighbornet", verbose = FALSE) {
     # map from string to int if needed
     if (is.null(wt) || length(wt) == 0 || !(wt %in% colnames(data))) {
         clus_df_gather <- get_alluvial_df(data, wt = wt)
@@ -734,7 +741,7 @@ prep_for_lodes <- function(data, cols, wt = NULL, default_sorting = "alphabetica
 
 
 
-sort_neighbornet <- function(clus_df_gather, cols = NULL, wt = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_metric = "edge_crossing", method = "tsp", column_method = "tsp", cycle_start_positions = NULL, verbose = FALSE, weighted_metric = TRUE) {
+sort_neighbornet <- function(clus_df_gather, cols = NULL, wt = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_metric = "edge_crossing", method = "neighbornet", column_method = "tsp", cycle_start_positions = NULL, verbose = FALSE, weighted_metric = TRUE) {
     if (verbose) message(sprintf("Running %s", method))
     cycle <- run_neighbornet(clus_df_gather, cols = cols, wt = wt, matrix_initialization_value = matrix_initialization_value, same_side_matrix_initialization_value = same_side_matrix_initialization_value, weight_scalar = weight_scalar, method = method, verbose = verbose)
     if (verbose) message("Cycle: ", paste(cycle, collapse = ", "))
@@ -936,14 +943,14 @@ sort_barycenter_median <- function(clus_df_gather, cols = NULL, wt = "value", me
 #' [sort_to_uncross()]. These options allow tuning algorithmic behavior without
 #' cluttering the main function arguments.
 #'
-#' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{cols} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{cols} to minimize edge overlap on the beginning cycle only. Only applies when \code{method == 'tsp'} and \code{length(cols) > 2}.
-#' @param matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{method == 'tsp'}.
-#' @param same_side_matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{method == 'tsp'}.
+#' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{cols} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{cols} to minimize edge overlap on the beginning cycle only. Only applies when \code{method \%in\% c('neighbornet', 'tsp')} and \code{length(cols) > 2}.
+#' @param matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
+#' @param same_side_matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
 #' @param matrix_initialization_value_column_order Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{column_method != 'none'}.
 #' @param weight_scalar_column_order Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when \code{column_method != 'none'}.
 #' @param column_metric Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{column_method != 'none'}.
 #' @param weighted_metric Logical. Determines if the objective is total number of edge crossings (weighted_metric=FALSE) or sum of product of overlapping edge weights (weighted_metric=TRUE).
-#' @param cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{method == 'tsp'}.
+#' @param cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
 #' @param random_initializations Integer. Number of random initializations for the positions of each grouping in \code{cols}. Only applies when \code{method == 'greedy_wolf' or method == 'greedy_wblf'}.
 #' @param preprocess_data Logical. If TRUE, will preprocess the data with the [prep_for_lodes()] function.
 #' @param default_sorting Character. Default column sorting in [prep_for_lodes()] if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
@@ -1001,7 +1008,7 @@ sort_to_uncross_options <- function(
     )
 }
 
-sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
+sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbornet", "tsp", "greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
     default_opt <- sort_to_uncross_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
@@ -1153,9 +1160,9 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "n
 #' (2) wt != NULL: Each row represents a combination of groupings, each column from \code{cols} represents a grouping, and the column \code{wt} represents the number of entities in that combination of groupings. Must contain at least three columns (two \code{cols}, one \code{wt}).
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
-#' @param method Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'tsp', 'greedy_wolf', 'greedy_wblf', 'barycenter', 'median', 'barycenter_one_sided', 'median_one_sided', 'none'. 'tsp' performs Traveling Salesman Problem solver from the TSP package. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'barycenter' and 'median' implement the classic Sugiyama-style two-layer crossing-reduction heuristics: each node in one layer is repositioned at the weighted mean ('barycenter') or weighted median ('median') position of its neighbors in the other layer, alternating which layer is reordered (as in 'greedy_wblf'). 'barycenter_one_sided' and 'median_one_sided' apply that same repositioning only once, from \code{fixed_column} onto the other layer (as in 'greedy_wolf'), leaving \code{fixed_column}'s order untouched. All four are much cheaper (O(n log n) per pass) than 'greedy_wolf'/'greedy_wblf' (O(n1*n2)), at the cost of typically noisier (less minimized) crossing counts. 'greedy_wolf', 'greedy_wblf', 'barycenter', 'median', 'barycenter_one_sided', and 'median_one_sided' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
+#' @param method Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'neighbornet' (default), 'tsp', 'greedy_wolf', 'greedy_wblf', 'barycenter', 'median', 'barycenter_one_sided', 'median_one_sided', 'random', 'none'. 'neighbornet' builds the block distance matrix and orders the blocks with the NeighborNet algorithm (the W_POMP method described in the paper). 'tsp' is identical except the block ordering is produced by the Traveling Salesman Problem solver from the TSP package rather than NeighborNet. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'barycenter' and 'median' implement the classic Sugiyama-style two-layer crossing-reduction heuristics: each node in one layer is repositioned at the weighted mean ('barycenter') or weighted median ('median') position of its neighbors in the other layer, alternating which layer is reordered (as in 'greedy_wblf'). 'barycenter_one_sided' and 'median_one_sided' apply that same repositioning only once, from \code{fixed_column} onto the other layer (as in 'greedy_wolf'), leaving \code{fixed_column}'s order untouched. All four are much cheaper (O(n log n) per pass) than 'greedy_wolf'/'greedy_wblf' (O(n1*n2)), at the cost of typically noisier (less minimized) crossing counts. 'greedy_wolf', 'greedy_wblf', 'barycenter', 'median', 'barycenter_one_sided', and 'median_one_sided' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
 #' @param column_method Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'random', and 'none'.
-#' @param weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method == 'tsp'}.
+#' @param weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
 #' @param fixed_column Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method \%in\% c('greedy_wolf', 'barycenter_one_sided', 'median_one_sided')}.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param options Additional arguments. See [sort_to_uncross_options()].
@@ -1207,7 +1214,7 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("tsp", "n
 #' lapply(clus_df_gather[, 1:2], levels)
 #'
 #' @export
-sort_to_uncross <- function(data, cols, wt = NULL, method = c("tsp", "neighbornet", "greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, verbose = FALSE, options = NULL) {
+sort_to_uncross <- function(data, cols, wt = NULL, method = c("neighbornet", "tsp", "greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, verbose = FALSE, options = NULL) {
     default_opt <- sort_to_uncross_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
@@ -1239,13 +1246,13 @@ sort_to_uncross <- function(data, cols, wt = NULL, method = c("tsp", "neighborne
         wt <- "value" # is set during prep_for_lodes
     }
     
-    cols_expr <- rlang::enquo(cols)
-    wt_expr <- rlang::ensym(wt)  # rlang::enquo(wt)
-    cols_pos <- tidyselect::eval_select(cols_expr, data = data)
-    wt_pos <- tidyselect::eval_select(wt_expr, data = data)
-    res <- rlang::set_names(
-        data[c(cols_pos, wt_pos)],
-        c(names(cols_pos), names(wt_pos))
-    )
-    sort_to_uncross_internal(data = res, cols = names(cols_pos), wt = names(wt_pos), method = method, column_method = column_method, weight_scalar = weight_scalar, fixed_column = fixed_column, verbose = verbose, options = options)
+    # `cols` and `wt` are documented as character vectors; select by value with
+    # all_of() so a variable holding the name works (ensym() resolved the
+    # variable name itself, not its value) and no external-vector warning fires.
+    cols_pos <- tidyselect::eval_select(tidyselect::all_of(cols), data = data)
+    wt_pos <- tidyselect::eval_select(tidyselect::all_of(wt), data = data)
+    # Pass the data through unchanged (rather than subsetting to cols + wt) so
+    # that pre-computed `col*_int` columns, a `color_band_column`, and any other
+    # metadata survive when `preprocess_data = FALSE`.
+    sort_to_uncross_internal(data = data, cols = names(cols_pos), wt = names(wt_pos), method = method, column_method = column_method, weight_scalar = weight_scalar, fixed_column = fixed_column, verbose = verbose, options = options)
 }

@@ -48,15 +48,16 @@ make_lode_df <- function(data, cols = NULL, wt = "value") {
     n_cols <- length(cols)
     for (x in seq_len(n_cols)) {
         i <- cols[x]
-        # Within each stratum, order edges by the adjacent axis so that edges
-        # sharing a stratum are not counted as crossings by the Fenwick tree.
-        # Use the next column as tiebreaker (or the previous for the last axis).
-        if (x < n_cols) {
-            tiebreaker <- cols[x + 1]
-        } else {
-            tiebreaker <- cols[x - 1]
-        }
-        ord <- order(lode_df[[i]], lode_df[[tiebreaker]])
+        # Within each stratum, order edges by a fully-specified key so the layout
+        # does not depend on input row order: the current axis, then the axes to
+        # its right (nearest first), then the axes to its left (nearest first).
+        # Ordering by the nearer axes first keeps edges that share a neighbouring
+        # stratum together, which lowers the crossing count the Fenwick tree
+        # reports. Matches _plot_alluvium() in wompywompy.
+        right_axes <- if (x < n_cols) cols[(x + 1):n_cols] else character(0)
+        left_axes <- if (x > 1) cols[(x - 1):1] else character(0)
+        key_cols <- c(i, right_axes, left_axes)
+        ord <- do.call(order, lapply(key_cols, function(cn) lode_df[[cn]]))
         y_vals <- cumsum(lode_df[[wt]][ord])
 
         # `alluvium` is exactly 1:n, so `ord` is a permutation of the row

@@ -4,6 +4,7 @@ export(compute_crossing_objective)
 export(get_lode_clusters)
 export(get_lode_clusters_options)
 export(lode_cluster_pal)
+export(plot_alluvial)
 export(prep_for_lodes)
 export(sort_to_uncross)
 export(sort_to_uncross_options)
@@ -13,17 +14,48 @@ importFrom(dplyr,
   add_count,
   all_of,
   arrange,
+  bind_rows,
   desc,
+  distinct,
+  filter,
   group_by,
   left_join,
+  matches,
   mutate,
   n,
   pull,
+  rename,
   row_number,
   select,
   slice,
   summarise,
   ungroup
+)
+importFrom(ggalluvial,
+  geom_alluvium,
+  geom_stratum,
+  stat_alluvium,
+  stat_stratum
+)
+importFrom(ggforce,gather_set_data)
+importFrom(ggplot2,
+  aes,
+  after_stat,
+  annotate,
+  coord_flip,
+  element_blank,
+  element_text,
+  geom_text,
+  ggplot,
+  ggsave,
+  guides,
+  labs,
+  rel,
+  scale_color_manual,
+  scale_fill_manual,
+  scale_x_continuous,
+  theme,
+  theme_void
 )
 importFrom(igraph,
   E,
@@ -31,6 +63,7 @@ importFrom(igraph,
   cluster_leiden,
   cluster_louvain
 )
+importFrom(magrittr,"%>%")
 importFrom(rlang,
   .data,
   sym
