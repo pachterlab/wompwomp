@@ -10,7 +10,7 @@ plot_alluvial(
   column1 = NULL,
   column2 = NULL,
   column_weights = NULL,
-  sorting_algorithm = "tsp",
+  sorting_algorithm = "neighbornet",
   optimize_column_order = TRUE,
   optimize_column_order_per_cycle = FALSE,
   matrix_initialization_value = 1e+06,
@@ -77,7 +77,7 @@ plot_alluvial(
 
 \item{column_weights}{Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).}
 
-\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.}
+\item{sorting_algorithm}{Character. Algorithm with which to sort the values in the dataframe (default 'neighbornet'). Can choose from: 'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.}
 
 \item{optimize_column_order}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.}
 

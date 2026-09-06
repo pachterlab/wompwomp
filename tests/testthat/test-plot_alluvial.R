@@ -540,8 +540,13 @@ test_that("get_lode_clusters correctly handles multiple factor columns with meth
         method2 = c("X", "Y", "Z")
     ))
     
+    # `resolution` is a modularity resolution (find_colors_advanced() passes
+    # objective_function = "modularity" to igraph::cluster_leiden(), whose own
+    # default is CPM). At resolution 1 the two layers' blocks merge into the
+    # two communities the data actually contains; raising it splits every block
+    # into its own community.
     cluster_mapping <- data |>
-        get_lode_clusters(cols = c("method1", "method2"), method = "advanced", resolution=10)
+        get_lode_clusters(cols = c("method1", "method2"), method = "advanced", resolution = 1)
     
     # ---- expectations (adjust to actual return type) ----
     
@@ -572,4 +577,29 @@ test_that("get_lode_clusters correctly handles multiple factor columns with meth
     )
     
     expect_identical(cluster_mapping, expected)
+
+    # A high resolution gives every block its own colour.
+    cluster_mapping_fine <- data |>
+        get_lode_clusters(cols = c("method1", "method2"), method = "advanced", resolution = 10)
+    expect_identical(
+        cluster_mapping_fine,
+        list(
+            method1 = list(A = 1L, B = 2L, C = 3L),
+            method2 = list(X = 4L, Y = 5L, Z = 6L)
+        )
+    )
+
+    # M: total weight of observations coloured the same on both sides.
+    agreement <- compute_color_agreement(
+        data, cols = c("method1", "method2"), mapping = cluster_mapping
+    )
+    expect_equal(agreement$color_agreement, 63)
+    expect_equal(nrow(agreement$per_pair), 1L)
+    # Every block its own colour => nothing agrees across layers.
+    expect_equal(
+        compute_color_agreement(
+            data, cols = c("method1", "method2"), mapping = cluster_mapping_fine
+        )$color_agreement,
+        0
+    )
 })

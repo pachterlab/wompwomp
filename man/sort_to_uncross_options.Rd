@@ -22,11 +22,11 @@ sort_to_uncross_options(
 )
 }
 \arguments{
-\item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{cols} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{cols} to minimize edge overlap on the beginning cycle only. Only applies when \code{method == 'tsp'} and \code{length(cols) > 2}.}
+\item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{cols} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{cols} to minimize edge overlap on the beginning cycle only. Only applies when \code{method \%in\% c('neighbornet', 'tsp')} and \code{length(cols) > 2}.}
 
-\item{matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{method == 'tsp'}.}
+\item{matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
 
-\item{same_side_matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{method == 'tsp'}.}
+\item{same_side_matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
 
 \item{matrix_initialization_value_column_order}{Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{column_method != 'none'}.}
 
@@ -36,7 +36,7 @@ sort_to_uncross_options(
 
 \item{weighted_metric}{Logical. Determines if the objective is total number of edge crossings (weighted_metric=FALSE) or sum of product of overlapping edge weights (weighted_metric=TRUE).}
 
-\item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{method == 'tsp'}.}
+\item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
 
 \item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{cols}. Only applies when \code{method == 'greedy_wolf' or method == 'greedy_wblf'}.}
 

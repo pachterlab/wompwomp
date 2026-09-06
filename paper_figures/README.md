@@ -25,7 +25,7 @@ Each `.Rmd` writes its output to `paper_figures/output/`.
 ## Requirements
 
 Use the Docker image built from `../Dockerfile` — it pins the toolchain
-(libpng/freetype/harfbuzz, `ggfittext`, `ggrastr`, Bioconductor
+(libpng/freetype/harfbuzz, `ggfittext`, `ggrastr`,
 `DuoClustering2018`) that the plotting and clustering-dataset steps need.
 
 ```

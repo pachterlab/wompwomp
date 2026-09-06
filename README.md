@@ -12,7 +12,7 @@ wompwomp solves the **W**eighted (permutation) **O**ptimization of **M**ultiple 
 
 ## Installation:
 
-### CRAN - Requires system [R](https://www.r-project.org/) to be installed
+### [CRAN](https://cran.r-project.org/web/packages/wompwomp/index.html) - Requires system [R](https://www.r-project.org/) to be installed
 ```         
 install.packages("wompwomp")
 ```

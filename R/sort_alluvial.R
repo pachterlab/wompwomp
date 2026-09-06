@@ -40,6 +40,9 @@ compute_alluvial_statistics <- function(clus_df_gather, cols, wt = "value") {
 }
 
 determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value", matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_metric = "edge_crossing", column_method = "tsp", verbose = FALSE, weighted_metric = TRUE) {
+    # sort_to_uncross_options() match.arg()s column_metric to lowercase, so
+    # accept either spelling of "ari" rather than only the uppercase one.
+    column_metric <- tolower(column_metric)
     if (column_method == "none") {
         return(cols)
     } else if (column_method == "random") {
@@ -51,7 +54,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value
         return(cols)
     }
     
-    if (column_metric == "ARI") {
+    if (column_metric == "ari") {
         if (!requireNamespace("mclust", quietly = TRUE)) {
             stop("The 'mclust' package is required to compute Adjusted Rand Index (ARI) with column_metric == 'ARI'. Please install it with install.packages('mclust').")
         }
@@ -85,7 +88,7 @@ determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value
         names(clus_df_gather_neighbornet_tmp)[match(c(col1_int, col2_int), names(clus_df_gather_neighbornet_tmp))] <- c("col1_int", "col2_int")
         graphing_columns_tmp <- c(column1, column2)
         
-        if (column_metric == "ARI") {
+        if (column_metric == "ari") {
             # NOTE: rep() coerces the weights to integer, so non-integer weights
             # are silently truncated when expanding rows for the ARI.
             expanded_df <- clus_df_gather_neighbornet_tmp[rep(seq_len(nrow(clus_df_gather_neighbornet_tmp)), clus_df_gather_neighbornet_tmp[[wt]]), ]

@@ -36,9 +36,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # CRAN dependencies not already in rocker/tidyverse.
 RUN R -q -e "install.packages(c('BiocManager', 'TSP', 'ggalluvial', 'ggforce', 'ggfittext', 'ggrastr', 'data.table', 'igraph', 'mclust', 'sessioninfo'))"
 
-# Bioconductor: BiocStyle for the vignette theme, DuoClustering2018 for the
-# clustering-comparison dataset.
-RUN R -q -e "BiocManager::install(c('BiocStyle', 'DuoClustering2018'), update = FALSE, ask = FALSE)"
+# DuoClustering2018 supplies the clustering-comparison dataset; it is only
+# distributed as an R data package, so BiocManager is used to fetch it.
+RUN R -q -e "BiocManager::install('DuoClustering2018', update = FALSE, ask = FALSE)"
 
 # Install wompwomp (which now includes plot_alluvial()) from the build context.
 COPY . /home/rstudio/wompwomp

@@ -1,7 +1,14 @@
-# wompwomp 0.99.5
-Initial release and Bioconductor checks
+# wompwomp 1.0.0
+Initial CRAN release
 - The `biowomp` package has been merged in: `plot_alluvial()` (build a data frame with `prep_for_lodes()` + `sort_to_uncross()`, colour it, and render with `ggalluvial`) now lives in `wompwomp`. `ggfittext` and `ggrastr` are optional (`Suggests`).
 - `sort_to_uncross()`'s default `method` is now `"neighbornet"` (was `"tsp"`), matching the algorithm described in the paper and the Python implementation.
+- `plot_alluvial()`'s default `sorting_algorithm` is now `"neighbornet"` (was `"tsp"`), matching `sort_to_uncross()`, the paper, and the Python implementation.
+- `get_lode_clusters(method = "advanced")` now maximizes **modularity**. `igraph::cluster_leiden()`'s own default objective is CPM, whose quality function compares edge weights directly against `resolution`, so the partition depended on the units the co-occurrence weights were in; `resolution` is now a modularity resolution and means the same thing for `"leiden"` and `"louvain"`. Colourings (and the meaning of `resolution`) change from previous versions.
+- The block-overlap graph behind `method = "advanced"` now adds one edge per unordered layer pair instead of one per ordered pair, so co-occurrence weights are no longer silently doubled. This matches `wompywompy`.
+- New `compute_color_agreement()`: the W_LOMP colour-agreement objective *M* (total weight of observations whose blocks share a colour across layers), summed over all layer pairs, or over adjacent pairs only with `adjacent_only = TRUE`.
+- `get_lode_clusters()` now works with a `wt` column other than `"value"` (both the `"advanced"` and the reference-propagation methods previously hard-coded `"value"` and errored).
+- `sort_to_uncross_options(column_metric = "ari")` now works. `sort_to_uncross_options()` lower-cases the value while `determine_column_order()` tested for `"ARI"`, so the ARI layer-ordering metric was unreachable through the public API.
+- A child block tied between two parents under reference propagation (`method = "left"`/`"right"`/a column name) now gets exactly one colour instead of duplicated rows.
 - Within a stratum, alluvia are now ordered by a fully-specified key (current axis, then nearest-right axes, then nearest-left axes) so the crossing objective no longer depends on input row order for 3+ layers.
 - Fixed `column_method = "random"` in `sort_to_uncross()` (previously always errored).
 - `get_lode_clusters(method = "right")` now propagates colours right-to-left (it was a duplicate of `"left"`), and no longer errors on a plain `data.frame` input.

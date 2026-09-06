@@ -1,7 +1,7 @@
 ---
 title: "Examples with Small Data"
 output:
-    BiocStyle::html_document:
+    html_document:
         toc: true
         toc_depth: 2
 vignette: >
