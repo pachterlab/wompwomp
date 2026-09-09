@@ -162,7 +162,7 @@ generalized_make_int_columns <- function(clus_df_gather, cols) {
 # }
 
 get_col_name <- function(data, col) {
-    col_quo <- rlang::enquo(col)
+    col_quo <- as_name_selection(rlang::enquo(col))
     
     # Try resolving selection.
     # If eval_select() fails (unknown column), return NULL.
@@ -185,7 +185,7 @@ get_col_name <- function(data, col) {
 }
 
 check_col <- function(data, col) {
-    col_quo <- rlang::enquo(col)
+    col_quo <- as_name_selection(rlang::enquo(col))
     
     # Try resolving tidyselect. If it fails, return FALSE.
     sel <- tryCatch(
@@ -205,4 +205,38 @@ check_col <- function(data, col) {
     
     # Valid: exactly one column selected
     TRUE
+}
+
+# `cols` and `wt` are documented as character vectors but are captured with
+# `enquo()` so that bare column names also work. A quosure whose expression is
+# a *symbol* that resolves to a character vector is a variable holding column
+# names -- the way a programmatic caller (e.g. ggalluvial) passes them -- and
+# tidyselect deprecated selecting by such an "external vector". Rewrite those
+# to `all_of(<value>)`, which selects by value; leave every other expression
+# (bare column names, `c(...)`, `starts_with(...)`, ...) untouched.
+as_name_selection <- function(quo) {
+    if (rlang::quo_is_null(quo) || rlang::quo_is_missing(quo)) {
+        return(quo)
+    }
+    expr <- rlang::quo_get_expr(quo)
+    if (!rlang::is_symbol(expr)) {
+        return(quo)
+    }
+    # A symbol that does not resolve outside the data is a bare column name, so
+    # it must be left for tidyselect to evaluate against the data. Distinguish
+    # that from a variable that resolves to NULL.
+    unresolved <- new.env()
+    val <- tryCatch(rlang::eval_tidy(quo), error = function(e) unresolved)
+    if (identical(val, unresolved)) {
+        return(quo)
+    }
+    env <- rlang::quo_get_env(quo)
+    if (is.null(val)) {
+        # a variable holding no column at all
+        return(rlang::new_quosure(NULL, env))
+    }
+    if (!is.character(val)) {
+        return(quo)
+    }
+    rlang::new_quosure(rlang::expr(tidyselect::all_of(!!val)), env)
 }

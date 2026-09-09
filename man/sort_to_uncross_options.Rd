@@ -6,8 +6,9 @@
 \usage{
 sort_to_uncross_options(
   optimize_column_order_per_cycle = FALSE,
-  matrix_initialization_value = 1e+06,
-  same_side_matrix_initialization_value = 1e+06,
+  weight_scalar = 5e+05,
+  matrix_initialization_value = NULL,
+  same_side_matrix_initialization_value = NULL,
   matrix_initialization_value_column_order = 1e+06,
   weight_scalar_column_order = 1,
   column_metric = c("edge_crossing", "ari"),
@@ -22,11 +23,13 @@ sort_to_uncross_options(
 )
 }
 \arguments{
-\item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{cols} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{cols} to minimize edge overlap on the beginning cycle only. Only applies when \code{method == 'tsp'} and \code{length(cols) > 2}.}
+\item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{cols} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{cols} to minimize edge overlap on the beginning cycle only. Only applies when \code{method \%in\% c('neighbornet', 'tsp')} and \code{length(cols) > 2}.}
 
-\item{matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{method == 'tsp'}.}
+\item{weight_scalar}{Advanced. Positive number \eqn{c} by which \eqn{-\log(\text{edge weight})} is multiplied in the block distance matrix. Because the NeighborNet cycle is invariant under rescaling of the whole matrix (up to floating-point ties), \code{weight_scalar} only sets the absolute scale of the matrix; the ratios that actually shape the cycle are \code{alpha} and \code{beta} in \code{\link[=sort_to_uncross]{sort_to_uncross()}}. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
 
-\item{same_side_matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{method == 'tsp'}.}
+\item{matrix_initialization_value}{Advanced. Positive number \eqn{d_{\max}}: the distance placed between two blocks in different axes that share no observations. \code{NULL} (default) derives it as \code{alpha * weight_scalar}; supplying a value overrides \code{alpha}. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
+
+\item{same_side_matrix_initialization_value}{Advanced. Positive number \eqn{d_{\text{same}}}: the distance placed between two distinct blocks of the same axis. \code{NULL} (default) derives it as \code{beta * weight_scalar}; supplying a value overrides \code{beta}. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
 
 \item{matrix_initialization_value_column_order}{Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{column_method != 'none'}.}
 
@@ -36,7 +39,7 @@ sort_to_uncross_options(
 
 \item{weighted_metric}{Logical. Determines if the objective is total number of edge crossings (weighted_metric=FALSE) or sum of product of overlapping edge weights (weighted_metric=TRUE).}
 
-\item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{method == 'tsp'}.}
+\item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
 
 \item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{cols}. Only applies when \code{method == 'greedy_wolf' or method == 'greedy_wblf'}.}
 
@@ -64,7 +67,7 @@ data <- data.frame(
 )
 opts <- sort_to_uncross_options(
   default_sorting = "reverse_alphabetical",
-  matrix_initialization_value = 100
+  weighted_metric = FALSE
 )
 sort_to_uncross(data = data, cols = c('method1', 'method2'), options = opts)
 

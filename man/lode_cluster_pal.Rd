@@ -4,7 +4,7 @@
 \alias{lode_cluster_pal}
 \title{Make stratum color list}
 \usage{
-lode_cluster_pal(data, cols, mapping, color_palette = NULL)
+lode_cluster_pal(data, cols, mapping, color_palette = NULL, per_axis = FALSE)
 }
 \arguments{
 \item{data}{A data frame with columns corresponding to axes, with factors indicating sorting. (eg run through sort_to_uncross)}
@@ -14,9 +14,15 @@ lode_cluster_pal(data, cols, mapping, color_palette = NULL)
 \item{mapping}{List. Output from get_lode_clusters.}
 
 \item{color_palette}{Optional named list or vector mapping values in the graphing columns to colors. Overrides default palette.}
+
+\item{per_axis}{Logical. If FALSE (default), returns one color per distinct
+stratum value across all columns (a flat named vector). If TRUE, returns a
+named list with one entry per column, each a named vector of colors for that
+column's levels -- so a value appearing in two columns can take a different
+color in each (as when a method over-splits a group).}
 }
 \value{
-A vector of colors.
+A named vector of colors, or (if \code{per_axis}) a list of them.
 }
 \description{
 Convert color mapping made by get_lode_clusters into list for scale_fill_manual

@@ -79,6 +79,143 @@ test_that("sort_to_uncross works with greedy_wblf algorithm", {
 })
 
 
+test_that("sort_to_uncross works with barycenter algorithm", {
+    set.seed(42)
+    # Generate raw data
+    raw_df <- data.frame(
+        method1 = sample(1:3, 100, TRUE),
+        method2 = sample(1:3, 100, TRUE)
+    )
+
+    # Aggregate by combination
+    data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
+    cols = c("method1", "method2")
+    barycenter_df <- sort_to_uncross(data, cols = cols, wt = "value", method = "barycenter")
+
+    ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "barycenter_df.rds"))
+
+    if (!file.exists(ground_truth_df_path)) {
+        saveRDS(barycenter_df, file = ground_truth_df_path)
+    }
+
+    ground_truth_df <- readRDS(ground_truth_df_path)
+    ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
+    ground_truth_df <- ground_truth_df |> dplyr::ungroup()
+
+    expect_equal(as.data.frame(barycenter_df), as.data.frame(ground_truth_df))
+})
+
+test_that("sort_to_uncross works with median algorithm", {
+    set.seed(42)
+    # Generate raw data
+    raw_df <- data.frame(
+        method1 = sample(1:3, 100, TRUE),
+        method2 = sample(1:3, 100, TRUE)
+    )
+
+    # Aggregate by combination
+    data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
+    cols = c("method1", "method2")
+    median_df <- sort_to_uncross(data, cols = cols, wt = "value", method = "median")
+
+    ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "median_df.rds"))
+
+    if (!file.exists(ground_truth_df_path)) {
+        saveRDS(median_df, file = ground_truth_df_path)
+    }
+
+    ground_truth_df <- readRDS(ground_truth_df_path)
+    ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
+    ground_truth_df <- ground_truth_df |> dplyr::ungroup()
+
+    expect_equal(as.data.frame(median_df), as.data.frame(ground_truth_df))
+})
+
+test_that("sort_to_uncross works with barycenter_one_sided algorithm", {
+    set.seed(42)
+    # Generate raw data
+    raw_df <- data.frame(
+        method1 = sample(1:3, 100, TRUE),
+        method2 = sample(1:3, 100, TRUE)
+    )
+
+    # Aggregate by combination
+    data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
+    cols = c("method1", "method2")
+    barycenter_one_sided_df <- sort_to_uncross(data, cols = cols, wt = "value", method = "barycenter_one_sided")
+
+    ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "barycenter_one_sided_df.rds"))
+
+    if (!file.exists(ground_truth_df_path)) {
+        saveRDS(barycenter_one_sided_df, file = ground_truth_df_path)
+    }
+
+    ground_truth_df <- readRDS(ground_truth_df_path)
+    ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
+    ground_truth_df <- ground_truth_df |> dplyr::ungroup()
+
+    expect_equal(as.data.frame(barycenter_one_sided_df), as.data.frame(ground_truth_df))
+})
+
+test_that("sort_to_uncross works with median_one_sided algorithm", {
+    set.seed(42)
+    # Generate raw data
+    raw_df <- data.frame(
+        method1 = sample(1:3, 100, TRUE),
+        method2 = sample(1:3, 100, TRUE)
+    )
+
+    # Aggregate by combination
+    data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
+    cols = c("method1", "method2")
+    median_one_sided_df <- sort_to_uncross(data, cols = cols, wt = "value", method = "median_one_sided")
+
+    ground_truth_df_path <- normalizePath(testthat::test_path("ground_truth", "median_one_sided_df.rds"))
+
+    if (!file.exists(ground_truth_df_path)) {
+        saveRDS(median_one_sided_df, file = ground_truth_df_path)
+    }
+
+    ground_truth_df <- readRDS(ground_truth_df_path)
+    ground_truth_df <- ground_truth_df[, c(cols, "value"), drop = FALSE]
+    ground_truth_df <- ground_truth_df |> dplyr::ungroup()
+
+    expect_equal(as.data.frame(median_one_sided_df), as.data.frame(ground_truth_df))
+})
+
+test_that("barycenter_one_sided/median_one_sided leave fixed_column's order untouched", {
+    set.seed(42)
+    raw_df <- data.frame(
+        method1 = sample(1:5, 200, TRUE),
+        method2 = sample(1:5, 200, TRUE)
+    )
+    data <- as.data.frame(dplyr::count(raw_df, method1, method2, name = "value"))
+    cols <- c("method1", "method2")
+
+    unsorted_df <- sort_to_uncross(data, cols = cols, wt = "value", method = "none")
+    fixed_levels <- levels(unsorted_df$method1)
+
+    for (m in c("barycenter_one_sided", "median_one_sided")) {
+        sorted_df <- sort_to_uncross(data, cols = cols, wt = "value", method = m, fixed_column = "method1")
+        expect_equal(levels(sorted_df$method1), fixed_levels)
+    }
+})
+
+test_that("sort_to_uncross barycenter/median require exactly 2 cols", {
+    set.seed(42)
+    raw_df <- data.frame(
+        method1 = sample(1:3, 60, TRUE),
+        method2 = sample(1:3, 60, TRUE),
+        method3 = sample(1:3, 60, TRUE)
+    )
+    data <- as.data.frame(dplyr::count(raw_df, method1, method2, method3, name = "value"))
+    cols <- c("method1", "method2", "method3")
+
+    for (m in c("barycenter", "median", "barycenter_one_sided", "median_one_sided")) {
+        expect_error(sort_to_uncross(data, cols = cols, wt = "value", method = m))
+    }
+})
+
 test_that("sort_to_uncross works with tsp algorithm", {
     set.seed(42)
     # Generate raw data
@@ -222,11 +359,11 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     clus_df_gather <- prep_for_lodes(data = data, cols = cols)
 
-    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", alpha = 1e6, options = list(weight_scalar = 1))
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 57)
+    testthat::expect_equal(num, 44) # was 57 before the nearest-right/nearest-left within-stratum ordering
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_order TRUE", {
@@ -238,11 +375,11 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     clus_df_gather <- prep_for_lodes(data = data, cols = cols)
 
-    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", options = list(optimize_column_order_per_cycle = TRUE), weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", alpha = 1e6, options = list(optimize_column_order_per_cycle = TRUE, weight_scalar = 1))
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 57)
+    testthat::expect_equal(num, 44) # was 57 before the nearest-right/nearest-left within-stratum ordering
 })
 
 
@@ -254,7 +391,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather <- prep_for_lodes(data = data, cols = cols)
 
-    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "none", column_method = "none", weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "none", column_method = "none", alpha = 1e6, options = list(weight_scalar = 1))
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
@@ -270,11 +407,11 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather <- prep_for_lodes(data = data, cols = cols)
 
-    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", alpha = 1e6, options = list(weight_scalar = 1))
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 56)
+    testthat::expect_equal(num, 50) # was 56 before the nearest-right/nearest-left within-stratum ordering
 })
 
 test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers, tsp, optimize_column_order TRUE", {
@@ -286,11 +423,11 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather <- prep_for_lodes(data = data, cols = cols)
 
-    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", options = list(optimize_column_order_per_cycle = TRUE), weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", alpha = 1e6, options = list(optimize_column_order_per_cycle = TRUE, weight_scalar = 1))
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
-    testthat::expect_equal(num, 56)
+    testthat::expect_equal(num, 50) # was 56 before the nearest-right/nearest-left within-stratum ordering
 })
 
 test_that("get_lode_clusters correctly handles multiple factor columns", {
@@ -403,8 +540,13 @@ test_that("get_lode_clusters correctly handles multiple factor columns with meth
         method2 = c("X", "Y", "Z")
     ))
     
+    # `resolution` is a modularity resolution (find_colors_advanced() passes
+    # objective_function = "modularity" to igraph::cluster_leiden(), whose own
+    # default is CPM). At resolution 1 the two layers' blocks merge into the
+    # two communities the data actually contains; raising it splits every block
+    # into its own community.
     cluster_mapping <- data |>
-        get_lode_clusters(cols = c("method1", "method2"), method = "advanced", resolution=10)
+        get_lode_clusters(cols = c("method1", "method2"), method = "advanced", resolution = 1)
     
     # ---- expectations (adjust to actual return type) ----
     
@@ -435,4 +577,29 @@ test_that("get_lode_clusters correctly handles multiple factor columns with meth
     )
     
     expect_identical(cluster_mapping, expected)
+
+    # A high resolution gives every block its own colour.
+    cluster_mapping_fine <- data |>
+        get_lode_clusters(cols = c("method1", "method2"), method = "advanced", resolution = 10)
+    expect_identical(
+        cluster_mapping_fine,
+        list(
+            method1 = list(A = 1L, B = 2L, C = 3L),
+            method2 = list(X = 4L, Y = 5L, Z = 6L)
+        )
+    )
+
+    # M: total weight of observations coloured the same on both sides.
+    agreement <- compute_color_agreement(
+        data, cols = c("method1", "method2"), mapping = cluster_mapping
+    )
+    expect_equal(agreement$color_agreement, 63)
+    expect_equal(nrow(agreement$per_pair), 1L)
+    # Every block its own colour => nothing agrees across layers.
+    expect_equal(
+        compute_color_agreement(
+            data, cols = c("method1", "method2"), mapping = cluster_mapping_fine
+        )$color_agreement,
+        0
+    )
 })

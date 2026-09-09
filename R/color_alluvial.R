@@ -117,6 +117,13 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
         }
     } else {
         clus_df_gather <- data
+        if (is.null(wt) || length(wt) == 0) {
+            wt <- "value"
+        }
+    }
+
+    if (!(wt %in% colnames(clus_df_gather))) {
+        stop(sprintf("Column '%s' (wt) not found in data.", wt))
     }
     
     for (col in cols) {
@@ -146,7 +153,7 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
             } else {
                 clus_df_gather_color <- find_group2_colors(clus_df_gather_color, max_level, 
                                                            group1_name = old_col_group, group2_name = col_group,
-                                                           cutoff = cutoff
+                                                           cutoff = cutoff, wt = wt
                 )
                 old_col_group <- col_group
                 max_level <- max(max_level, max(clus_df_gather_color[[paste0(col_group, "_colors")]]))
@@ -154,7 +161,8 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
             }
         }
     } else if (method == "right") {
-        for (col_group in cols) {
+        # propagate right-to-left: seed the rightmost column, walk toward the left
+        for (col_group in rev(cols)) {
             num_levels <- length(levels(clus_df_gather[[col_group]]))
             if (first) {
                 temp_df <- data.frame(name = levels(clus_df_gather[[col_group]]))
@@ -172,7 +180,7 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
             } else {
                 clus_df_gather_color <- find_group2_colors(clus_df_gather_color, max_level, 
                                                            group1_name = old_col_group, group2_name = col_group,
-                                                           cutoff = cutoff
+                                                           cutoff = cutoff, wt = wt
                 )
                 old_col_group <- col_group
                 max_level <- max(max_level, max(clus_df_gather_color[[paste0(col_group, "_colors")]]))
@@ -182,7 +190,7 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
     } else if (method == "advanced") {
         clus_df_gather_color <- find_colors_advanced(clus_df_gather, cols, unused_colors,
                                                      method_advanced_option = method_advanced_option, 
-                                                     resolution = resolution)
+                                                     resolution = resolution, wt = wt)
         return (clus_df_gather_color)
     } else {
         ref_group <- method
@@ -202,7 +210,7 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
             if (!(col_group == method)) {
                 clus_df_gather_color <- find_group2_colors(clus_df_gather_color, max_level, 
                                                            group1_name = ref_group, group2_name = col_group,
-                                                           cutoff = cutoff
+                                                           cutoff = cutoff, wt = wt
                 )
                 max_level <- max(max_level, max(clus_df_gather_color[[paste0(col_group, "_colors")]]))
                 #unused_colors <- unused_colors[!(unused_colors %in% clus_df_gather_color[[paste0(col_group, "_colors")]])]
@@ -229,13 +237,13 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
 
 find_group2_colors <- function(clus_df_gather, max_level,
                                group1_name, group2_name,
-                               cutoff = .5) {
+                               cutoff = .5, wt = "value") {
     num_levels <- length(levels(clus_df_gather[[group2_name]]))
     
-    clus_df_ungrouped <- clus_df_gather[, c(group1_name, group2_name, "value",
+    clus_df_ungrouped <- clus_df_gather[, c(group1_name, group2_name, wt,
                                             paste0(group1_name, '_colors'))]
     clus_df_filtered <- clus_df_ungrouped |>
-        dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) |>
+        dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = !!rlang::sym(wt)) |>
         dplyr::select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n, !!rlang::sym(paste0(group1_name, '_colors')))
     clus_df_filtered <- dplyr::distinct(clus_df_filtered)
     colnames(clus_df_filtered) <- c(group1_name, group2_name, "value", paste0(group1_name, '_colors'))
@@ -248,15 +256,22 @@ find_group2_colors <- function(clus_df_gather, max_level,
         dplyr::group_by(!!rlang::sym(group1_name)) |>
         dplyr::mutate(weight = value / group2_size)
     
+    # The parent score (manuscript eq. for s(B_i^(p), B_j^(c))) is the fraction
+    # of the child block's weight contributed by the parent block. Ties are
+    # broken by the first parent in row order so that a child tied between two
+    # parents still receives exactly one colour (an unbroken tie duplicated the
+    # child's row in the join below and emitted two colours for one stratum).
     parent_df <- clus_df_filtered |>
         dplyr::group_by(!!rlang::sym(group2_name)) |>
-        dplyr::filter(weight == max(weight)) # |> select(!!rlang::sym(group1_name))
+        dplyr::filter(weight == max(weight)) |>
+        dplyr::slice(1) |>
+        dplyr::ungroup()
     parent_df <- parent_df[parent_df$weight > cutoff,]
     
     parent_df <- parent_df[,c(group1_name, group2_name, paste0(group1_name, '_colors'))]
     colnames(parent_df) <- c(group1_name, group2_name, paste0(group2_name, '_colors'))
     final_df <- dplyr::left_join(
-        unique(clus_df_gather[, c(group2_name)]),
+        unique(clus_df_gather[, group2_name, drop = FALSE]),
         parent_df[, c(group2_name, paste0(group2_name, '_colors'))],
         by = c(group2_name)
     )
@@ -273,62 +288,61 @@ find_group2_colors <- function(clus_df_gather, max_level,
     return(final_df)
 }
 
-find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors = NULL, method_advanced_option = "leiden", resolution = 1) {
+find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors = NULL, method_advanced_option = "leiden", resolution = 1, wt = "value") {
     if (is.null(ditto_colors)) {
         ditto_colors <- default_colors
     }
-    clus_df_ungrouped <- clus_df_gather[, c(graphing_columns, "value")]
-    
+    clus_df_ungrouped <- clus_df_gather[, c(graphing_columns, wt)]
+
+    # Build an undirected block-similarity graph: one node per (layer, block),
+    # edge weight = the raw co-occurrence mass |B_i intersect B_j| between blocks
+    # of two different layers. Community detection (below) needs overlap *mass*,
+    # not the [0,1] parent score, so this is deliberately unnormalized. Every
+    # unordered layer pair contributes exactly one edge per block pair. (An
+    # earlier version walked ordered pairs, so every weight was doubled --
+    # not a no-op for a resolution-parameterized objective, and it made the R
+    # colouring disagree with wompywompy's on the same data.)
     first <- TRUE
-    compared <- c()
-    for (group1_name in graphing_columns) {
-        for (group2_name in graphing_columns) {
-            if (!(group1_name == group2_name)) {
-                comp1 <- paste0(group1_name, group2_name)
-                comp2 <- paste0(group2_name, group1_name)
-                if (!(comp1 %in% compared | comp2 %in% compared)) {
-                    if (first) {
-                        clus_df_filtered <- clus_df_ungrouped[, c(group1_name, group2_name, "value")]
-                        clus_df_filtered <- clus_df_filtered |>
-                            dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) |>
-                            dplyr::select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
-                        clus_df_filtered <- dplyr::distinct(clus_df_filtered)
-                        colnames(clus_df_filtered) <- c("group1", "group2", "value")
-
-                        clus_df_filtered$group1 <- sub("^", paste0(group1_name, "_"), clus_df_filtered[["group1"]])
-                        clus_df_filtered$group2 <- sub("^", paste0(group2_name, "_"), clus_df_filtered[["group2"]])
-                        
-                        first <- FALSE
-                    } else {
-                        temp_clus_df_filtered <- clus_df_ungrouped[, c(group1_name, group2_name, "value")]
-                        temp_clus_df_filtered <- temp_clus_df_filtered |>
-                            dplyr::add_count(!!rlang::sym(group1_name), !!rlang::sym(group2_name), wt = value) |>
-                            dplyr::select(!!rlang::sym(group1_name), !!rlang::sym(group2_name), n)
-                        temp_clus_df_filtered <- dplyr::distinct(temp_clus_df_filtered)
-                        colnames(temp_clus_df_filtered) <- c("group1", "group2", "value")
-
-                        temp_clus_df_filtered$group1 <- sub("^", paste0(group1_name, "_"), temp_clus_df_filtered[["group1"]])
-                        temp_clus_df_filtered$group2 <- sub("^", paste0(group2_name, "_"), temp_clus_df_filtered[["group2"]])
-                        
-                        clus_df_filtered <- rbind(clus_df_filtered, temp_clus_df_filtered)
-                    }
-                }
-            }
+    add_pair <- function(g1, g2) {
+        d <- clus_df_ungrouped[, c(g1, g2, wt)] |>
+            dplyr::add_count(!!rlang::sym(g1), !!rlang::sym(g2), wt = !!rlang::sym(wt)) |>
+            dplyr::select(!!rlang::sym(g1), !!rlang::sym(g2), n) |>
+            dplyr::distinct()
+        colnames(d) <- c("group1", "group2", "value")
+        d$group1 <- paste0(g1, "~~", d$group1)
+        d$group2 <- paste0(g2, "~~", d$group2)
+        d
+    }
+    for (pair in utils::combn(graphing_columns, 2, simplify = FALSE)) {
+        d <- add_pair(pair[1], pair[2])
+        if (first) {
+            clus_df_filtered <- d
+            first <- FALSE
+        } else {
+            clus_df_filtered <- rbind(clus_df_filtered, d)
         }
     }
-    
+
     clus_df_extra_filtered <- clus_df_filtered[, c("group1", "group2", "value")]
     g <- igraph::graph_from_data_frame(d = clus_df_extra_filtered, directed = FALSE)
+    # Both branches maximize modularity. igraph::cluster_leiden() defaults to
+    # objective_function = "CPM", whose quality function compares edge weights
+    # directly against `resolution`, so the partition would depend on the units
+    # the co-occurrence weights happen to be in (and on the 2x above). Modularity
+    # normalizes by total edge weight, which is what the manuscript describes and
+    # what makes the leiden and louvain options comparable to each other.
     if (method_advanced_option == "louvain") {
         partition <- igraph::cluster_louvain(g, weights = igraph::E(g)$value, resolution = resolution)
     } else if (method_advanced_option == "leiden") {
-        partition <- igraph::cluster_leiden(g, weights = igraph::E(g)$value, resolution = resolution)
+        partition <- igraph::cluster_leiden(g, weights = igraph::E(g)$value,
+                                            objective_function = "modularity",
+                                            resolution = resolution)
     } else {
         stop(sprintf("method_advanced_option '%s' is not recognized. Please choose from 'leiden' (default) or 'louvain'.", method_advanced_option))
     }
     
     clus_df_leiden <- data.frame(group_name = partition$names, leiden = partition$membership)
-    clus_df_leiden <- clus_df_leiden |> tidyr::separate_wider_delim(group_name, names = c("axis", 'value'), delim = "_")
+    clus_df_leiden <- clus_df_leiden |> tidyr::separate_wider_delim(group_name, names = c("axis", 'value'), delim = "~~", too_many = "merge")
     
     #clus_df_leiden[["leiden"]] <- unlist(Map(function(x) ditto_colors[x], clus_df_leiden$leiden))
     
@@ -343,6 +357,111 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
     })
     
     return(final_list)
+}
+
+
+#' Color agreement of a stratum coloring
+#'
+#' Computes the W\out{<sub>}L\out{</sub>}OMP color-agreement objective
+#' \eqn{\mathcal{M}} for a coloring produced by [get_lode_clusters()]: the total
+#' weight of the observations whose blocks in two different layers were given
+#' the same color.
+#'
+#' Writing \eqn{W_{b b'}^{(i,j)}} for the co-occurrence weight of block \eqn{b}
+#' of layer \eqn{i} and block \eqn{b'} of layer \eqn{j}, and \eqn{c^{(i)}} for
+#' the color assigned to the blocks of layer \eqn{i},
+#' \deqn{\mathcal{M} = \sum_{i < j} \sum_{b, b'}
+#'       \delta\!\left(c^{(i)}(b), c^{(j)}(b')\right) \cdot W_{b b'}^{(i,j)}.}
+#' The sum runs over every unordered pair of layers, matching the graph that
+#' [get_lode_clusters()] clusters (which also uses every pair, not only adjacent
+#' ones). Set \code{adjacent_only = TRUE} to restrict it to the \eqn{m - 1}
+#' adjacent pairs, i.e. to the layer pairs that are actually drawn side by side.
+#'
+#' \eqn{\mathcal{M}} is a diagnostic, not something the coloring maximizes:
+#' because colors may repeat within a layer, \eqn{\mathcal{M}} is maximized
+#' trivially by painting every block the same color. It is reported so a
+#' coloring can be compared against another coloring of the same data.
+#'
+#' @param data A data frame or tibble. Must be in one of two formats:
+#' (1) wt == NULL: each row represents an entity and each column a grouping; or
+#' (2) wt != NULL: each row represents a combination of groupings and the column
+#' \code{wt} holds the number of entities in that combination.
+#' @param cols Character vector. Column names from \code{data} used in graphing.
+#' @param mapping List. Output of [get_lode_clusters()]: a list indexed by column
+#'   name, each entry a list mapping that column's stratum values to color ids.
+#' @param wt Optional character. Column name holding the weight of each row.
+#' @param adjacent_only Logical. If TRUE, sum only over adjacent layer pairs
+#'   \code{(i, i+1)} in the order given by \code{cols}, rather than all pairs.
+#'
+#' @return A list with:
+#' \describe{
+#'   \item{\code{color_agreement}}{The scalar \eqn{\mathcal{M}}.}
+#'   \item{\code{per_pair}}{A data frame with one row per layer pair, giving the
+#'     contribution \eqn{\mathcal{M}^{(i,j)}} of that pair and the total
+#'     co-occurrence weight available to it.}
+#' }
+#'
+#' @examples
+#' set.seed(429144)
+#' data <- data.frame(
+#'   method1 = factor(LETTERS[sample(1:3, 100, TRUE)]),
+#'   method2 = factor(LETTERS[27 - sample(1:3, 100, TRUE)])
+#' )
+#' mapping <- get_lode_clusters(data, cols = c("method1", "method2"))
+#' compute_color_agreement(data, cols = c("method1", "method2"), mapping = mapping)
+#'
+#' @export
+compute_color_agreement <- function(data, cols, mapping, wt = NULL, adjacent_only = FALSE) {
+    if (length(cols) < 2) {
+        stop("cols must have at least 2 entries.")
+    }
+    if (any(!cols %in% colnames(data))) {
+        stop("Some cols are not present in the dataframe.")
+    }
+    missing_map <- setdiff(cols, names(mapping))
+    if (length(missing_map) > 0) {
+        stop(sprintf("mapping has no entry for column(s): %s", paste(missing_map, collapse = ", ")))
+    }
+
+    if (is.null(wt) || length(wt) == 0 || !(wt %in% colnames(data))) {
+        clus_df_gather <- prep_for_lodes(data = data, cols = cols, wt = wt, do_add_int_columns = FALSE)
+        wt <- "value"
+    } else {
+        clus_df_gather <- data
+    }
+
+    for (col in cols) {
+        clus_df_gather[[col]] <- as.character(clus_df_gather[[col]])
+    }
+    weights <- as.numeric(clus_df_gather[[wt]])
+
+    # Color of the block each row passes through, per layer. An unmapped
+    # stratum gets NA, which never matches anything (delta = 0).
+    colors <- lapply(cols, function(col) {
+        m <- mapping[[col]]
+        unlist(m, use.names = TRUE)[clus_df_gather[[col]]]
+    })
+    names(colors) <- cols
+
+    pairs <- if (adjacent_only) {
+        lapply(seq_len(length(cols) - 1), function(i) c(cols[i], cols[i + 1]))
+    } else {
+        utils::combn(cols, 2, simplify = FALSE)
+    }
+
+    per_pair <- do.call(rbind, lapply(pairs, function(pr) {
+        ci <- colors[[pr[1]]]
+        cj <- colors[[pr[2]]]
+        same <- !is.na(ci) & !is.na(cj) & (ci == cj)
+        data.frame(
+            layer1 = pr[1], layer2 = pr[2],
+            color_agreement = sum(weights[same]),
+            total_weight = sum(weights),
+            stringsAsFactors = FALSE
+        )
+    }))
+
+    list(color_agreement = sum(per_pair$color_agreement), per_pair = per_pair)
 }
 
 
@@ -362,8 +481,13 @@ convert_mapping_to_colors <- function(mapping, default_colors) {
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param mapping List. Output from get_lode_clusters.
 #' @param color_palette Optional named list or vector mapping values in the graphing columns to colors. Overrides default palette.
+#' @param per_axis Logical. If FALSE (default), returns one color per distinct
+#'   stratum value across all columns (a flat named vector). If TRUE, returns a
+#'   named list with one entry per column, each a named vector of colors for that
+#'   column's levels -- so a value appearing in two columns can take a different
+#'   color in each (as when a method over-splits a group).
 #'
-#' @return A vector of colors.
+#' @return A named vector of colors, or (if \code{per_axis}) a list of them.
 #'
 #' @examples
 #' # Example 1
@@ -374,11 +498,31 @@ convert_mapping_to_colors <- function(mapping, default_colors) {
 #' color_list <- lode_cluster_pal(data = clus_df_gather, cols = cols, mapping = color_mapping)
 #'
 #' @export
-lode_cluster_pal <- function(data, cols, mapping, color_palette = NULL) {
+lode_cluster_pal <- function(data, cols, mapping, color_palette = NULL, per_axis = FALSE) {
     cols_tmp <- substitute(cols)
     if (is.call(cols_tmp) && cols_tmp[[1]] == 'c') {
         items <- as.list(cols_tmp)[-1]
         cols <- as.list(sapply(items, function(x) rlang::as_string(x)))
+    }
+    if (is.null(color_palette)) {
+        color_palette <- default_colors
+    }
+
+    if (per_axis) {
+        out <- lapply(cols, function(col) {
+            if (!col %in% names(mapping)) {
+                stop(sprintf("Column '%s' not found in mapping", col))
+            }
+            lv <- levels(data[[col]])
+            ids <- vapply(lv, function(k) as.integer(mapping[[col]][[k]]), integer(1))
+            if (anyNA(ids)) {
+                stop("Missing colors for: ",
+                     paste(lv[is.na(ids)], collapse = ", "), " in column '", col, "'")
+            }
+            convert_mapping_to_colors(stats::setNames(ids, lv), color_palette)
+        })
+        names(out) <- unlist(cols)
+        return(out)
     }
 
     # 1. Collect all factor levels across all columns
@@ -409,11 +553,8 @@ lode_cluster_pal <- function(data, cols, mapping, color_palette = NULL) {
         )
     }
     
-    if (is.null(color_palette)) {
-        color_palette <- default_colors
-    }
     flat_colors <- convert_mapping_to_colors(flat_colors, color_palette)
-    
+
     return(flat_colors)
 }
 
@@ -446,7 +587,7 @@ lode_cluster_pal <- function(data, cols, mapping, color_palette = NULL) {
 #'
 #' @export
 get_lode_clusters <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
-    cols_expr <- rlang::enquo(cols)
+    cols_expr <- as_name_selection(rlang::enquo(cols))
     
     # if (missing(wt)) {
     #     col_names <- names(
@@ -456,7 +597,7 @@ get_lode_clusters <- function(data, cols, wt = NULL, method = "advanced", resolu
     #     wt <- "value" # is set during prep_for_lodes
     # }
     
-    wt_expr <- rlang::enquo(wt)
+    wt_expr <- as_name_selection(rlang::enquo(wt))
     cols_pos <- tidyselect::eval_select(cols_expr, data = data)
     wt_pos <- tidyselect::eval_select(wt_expr, data = data)
     res <- rlang::set_names(
