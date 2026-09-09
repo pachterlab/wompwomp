@@ -1,0 +1,139 @@
+---
+title: "Calling wompwomp from Inside ggalluvial"
+output:
+    rmarkdown::html_vignette:
+        toc: true
+        toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Calling wompwomp from Inside ggalluvial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+library(wompwomp)
+set.seed(43)
+```
+
+The `vignette("plotting")` workflow sorts and colours the data frame first and
+hands the result to ggplot2. Development versions of **ggalluvial** can instead
+call wompwomp from within the alluvial layers themselves, through the
+`sort_strata` and `color_strata` parameters of `stat_stratum()`,
+`stat_alluvium()` and `stat_flow()`. The parameter names an *engine*;
+`"wompwomp"` runs `sort_to_uncross(column_method = "none")` for `sort_strata`
+and `get_lode_clusters()` for `color_strata`, the latter exposed as the computed
+variable `cluster`. `sort_strata` must be given the same value in every layer of
+a plot, since each layer computes its own positions; wompwomp is still run only
+once per panel and the layers share the result.
+
+We use the same toy data as the other vignettes.
+
+```{r}
+df <- data.frame(
+  tissue = c(
+    "BRAIN", "BRAIN", "BRAIN",
+    "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH", "STOMACH",
+    "HEART", "HEART", "HEART", "HEART", "HEART", "HEART", "HEART",
+    "T CELL", "T CELL",
+    "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL", "B CELL"
+  ),
+  cluster = c(
+    1, 1, 2,
+    1, 2, 2, 2, 2, 2,
+    1, 3, 3, 3, 3, 3, 3,
+    4, 4,
+    4, 4, 4, 4, 4, 4, 4, 4, 4
+  )
+)
+
+df |> 
+  dplyr::group_by(tissue, cluster) |> 
+  dplyr::summarize(value = dplyr::n()) |> 
+  dplyr::ungroup() |> 
+  dplyr::mutate(dplyr::across(c(tissue, cluster), as.character)) |> 
+  print() -> clus_df_gather
+```
+
+## Sorting and colouring inside the layers
+
+```{r, eval = utils::packageVersion("ggalluvial") > "0.12.6"}
+clus_df_gather |>
+  ggplot(aes(y = value, axis1 = tissue, axis2 = cluster)) +
+  geom_alluvium(aes(fill = tissue), width = 1/12,
+                sort_strata = "wompwomp") +
+  geom_stratum(aes(fill = after_stat(cluster)), width = 1/12, color = "grey",
+               sort_strata = "wompwomp", color_strata = "wompwomp") +
+  geom_label(stat = "stratum", aes(label = after_stat(stratum)),
+             sort_strata = "wompwomp") +
+  scale_x_discrete(
+    limits = c("tissue", "cluster"),
+    expand = c(.05, .05)
+  )
+```
+
+## Choosing and tuning an algorithm
+
+To choose an algorithm other than the default, or to tune it, pass a list: the
+`method` selects among `sort_to_uncross()`'s (or `get_lode_clusters()`'s)
+methods, and the remaining named elements are that function's own arguments.
+Everything else wompwomp exposes lives in `sort_to_uncross_options()` and
+`get_lode_clusters_options()`, so those knobs travel in `options` --- passing
+one directly is an error that names the constructor to use.
+
+```{r, eval = FALSE}
+# arguments of sort_to_uncross() / get_lode_clusters()
+geom_stratum(sort_strata = list("wompwomp", method = "tsp", alpha = 3))
+geom_stratum(color_strata = list("wompwomp", method = "advanced",
+                                 resolution = 2))
+
+# anything from the *_options() constructors goes through `options`
+geom_stratum(sort_strata = list(
+  "wompwomp",
+  options = sort_to_uncross_options(weighted_metric = FALSE)
+))
+geom_stratum(color_strata = list(
+  "wompwomp", method = "left",
+  options = get_lode_clusters_options(cutoff = 0.3)
+))
+```
+
+Note that `method = "tsp"` starts the solver from a random tour, so seed it
+when a plot has to be redrawn identically; the default `"neighbornet"` is
+deterministic.
+
+## Axis order
+
+The order of the *axes* stays outside the layers: position scales are trained
+before statistical transformations run, so a `stat_*()` that permuted `x` would
+move the strata out from under their axis labels. `ggalluvial::sort_axes()`
+returns the recommended axis order instead, for use in
+`scale_x_discrete(limits = )` --- exactly where the axis order is written
+above.
+
+```{r, eval = FALSE}
+axis_order <- ggalluvial::sort_axes(
+  clus_df_gather, axes = c("tissue", "cluster"), weight = "value",
+  engine = "wompwomp"          # or list("wompwomp", method = "neighbornet")
+)
+```
+
+It runs `sort_to_uncross()` with `column_method` set and reads off only the
+column order. The strata are sorted while it searches, because candidate axis
+orders are compared by the crossings they induce; that inner ordering defaults
+to `"neighbornet"` and can be set with `strata_method`. Applying the result
+re-sorts the strata against the new axis order, since which strata minimise
+crossings depends on which axes end up adjacent.
+
+Sorting the axes and then the strata is two passes over a problem
+`sort_to_uncross(method = , column_method = )` optimises jointly, and the
+column-ordering heuristic does not guarantee an improvement --- on some data it
+returns an order no better than the one you started with. Check with
+`compute_crossing_objective()` before adopting it, or call `sort_to_uncross()`
+directly and plot the result the way `vignette("plotting")` does.
+
+```{r}
+sessionInfo()
+```

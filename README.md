@@ -28,6 +28,7 @@ remotes::install_github("pachterlab/wompwomp")
 See the vignettes for wompwomp in the "vignettes" folder. 
 - wompwomp_intro.Rmd introduces the package and its functions, and provides a walkthrough of how to use wompwomp on simulated data.
 - plotting.Rmd visualizes the results of wompwomp with ggplot2 and ggalluvial.
+- ggalluvial_integration.Rmd shows how to call wompwomp from inside ggalluvial's layers, via the `sort_strata` and `color_strata` parameters.
 
 ## Usage
 
