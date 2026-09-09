@@ -359,7 +359,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     clus_df_gather <- prep_for_lodes(data = data, cols = cols)
 
-    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", alpha = 1e6, options = list(weight_scalar = 1))
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
@@ -375,7 +375,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers, tsp, optimize_column_o
 
     clus_df_gather <- prep_for_lodes(data = data, cols = cols)
 
-    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", options = list(optimize_column_order_per_cycle = TRUE), weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", alpha = 1e6, options = list(optimize_column_order_per_cycle = TRUE, weight_scalar = 1))
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
@@ -391,7 +391,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather <- prep_for_lodes(data = data, cols = cols)
 
-    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "none", column_method = "none", weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "none", column_method = "none", alpha = 1e6, options = list(weight_scalar = 1))
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
@@ -407,7 +407,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather <- prep_for_lodes(data = data, cols = cols)
 
-    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "none", alpha = 1e6, options = list(weight_scalar = 1))
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 
@@ -423,7 +423,7 @@ test_that("Objective calculation, more_tsp.Rmd, 3 layers with 2 identical layers
 
     clus_df_gather <- prep_for_lodes(data = data, cols = cols)
 
-    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", options = list(optimize_column_order_per_cycle = TRUE), weight_scalar = 1)
+    clus_df_gather_sorted <- sort_to_uncross(clus_df_gather, cols = cols, wt = "value", method = "tsp", column_method = "tsp", alpha = 1e6, options = list(optimize_column_order_per_cycle = TRUE, weight_scalar = 1))
 
     num <- compute_crossing_objective(clus_df_gather_sorted, cols = cols)$output_objective
 

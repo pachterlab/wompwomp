@@ -88,6 +88,24 @@ p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = 
 p
 ```
 
+Expected objective of a random block order. The single random draw plotted
+above (seed 42) is one sample; here we sample 120 random block orders and report
+the mean and standard deviation of their crossing objectives, which is what the
+paper quotes for "random".
+```{r}
+n_random <- 120
+set.seed(42)
+random_objectives <- vapply(seq_len(n_random), function(i) {
+    sorted <- sort_to_uncross(df, cols = graphing_columns, method = "random", column_method = "none")
+    compute_crossing_objective(sorted, cols = graphing_columns, wt = "value")$output_objective
+}, numeric(1))
+message(sprintf("random block order, %d draws: mean = %.0f, sd = %.0f, min = %.0f, max = %.0f",
+                n_random, mean(random_objectives), sd(random_objectives),
+                min(random_objectives), max(random_objectives)))
+write.csv(data.frame(draw = seq_len(n_random), objective = random_objectives),
+          file.path(output_dir, "GoT_random_objectives.csv"), row.names = FALSE)
+```
+
 ```{r}
 p <- plot_alluvial(df, graphing_columns = graphing_columns, sorting_algorithm = "neighbornet", optimize_column_order = FALSE, color_bands = FALSE, coloring_algorithm = "left", min_text = 0.01, verbose = TRUE, output_plot_path = file.path(output_dir, "GoT_NN.pdf"), save_height = 24, save_width = 24, text_size = 35, axis_text_size = 25, axis_text_vjust = -5, text_width = 0.5)
 p

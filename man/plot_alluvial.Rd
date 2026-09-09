@@ -13,9 +13,11 @@ plot_alluvial(
   sorting_algorithm = "neighbornet",
   optimize_column_order = TRUE,
   optimize_column_order_per_cycle = FALSE,
-  matrix_initialization_value = 1e+06,
-  same_side_matrix_initialization_value = 1e+06,
+  alpha = 2,
+  beta = alpha,
   weight_scalar = 5e+05,
+  matrix_initialization_value = NULL,
+  same_side_matrix_initialization_value = NULL,
   matrix_initialization_value_column_order = 1e+06,
   weight_scalar_column_order = 1,
   column_sorting_metric = "edge_crossing",
@@ -83,11 +85,15 @@ plot_alluvial(
 
 \item{optimize_column_order_per_cycle}{Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.}
 
-\item{matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
+\item{alpha}{Positive number (default 2). Ratio between the distance assigned to two blocks in different axes that share no observations and the scale of the \eqn{-\log(\text{edge weight})} distances between blocks that do. Together with \code{beta}, this is the tuning knob of the block distance matrix; see \code{\link[=sort_to_uncross]{sort_to_uncross()}}. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
 
-\item{same_side_matrix_initialization_value}{Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
+\item{beta}{Positive number (default \code{alpha}). Ratio between the distance assigned to two distinct blocks of the same axis and the scale of the edge-weight distances. See \code{\link[=sort_to_uncross]{sort_to_uncross()}}. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
 
-\item{weight_scalar}{Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
+\item{weight_scalar}{Advanced. Positive number setting the absolute scale of the block distance matrix (the constant \eqn{c} multiplying \eqn{-\log(\text{edge weight})}). The cycle depends only on the ratios \code{alpha} and \code{beta}, so this rarely needs changing. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
+
+\item{matrix_initialization_value}{Advanced. Distance between blocks in different axes that share no observations. \code{NULL} (default) derives it as \code{alpha * weight_scalar}; a value overrides \code{alpha}. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
+
+\item{same_side_matrix_initialization_value}{Advanced. Distance between distinct blocks of the same axis. \code{NULL} (default) derives it as \code{beta * weight_scalar}; a value overrides \code{beta}. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.}
 
 \item{matrix_initialization_value_column_order}{Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.}
 

@@ -11,7 +11,8 @@ sort_to_uncross(
   method = c("neighbornet", "tsp", "greedy_wolf", "greedy_wblf", "barycenter", "median",
     "barycenter_one_sided", "median_one_sided", "none", "random"),
   column_method = c("tsp", "neighbornet", "none", "random"),
-  weight_scalar = 5e+05,
+  alpha = 2,
+  beta = alpha,
   fixed_column = NULL,
   verbose = FALSE,
   options = NULL
@@ -30,7 +31,9 @@ sort_to_uncross(
 
 \item{column_method}{Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'random', and 'none'.}
 
-\item{weight_scalar}{Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
+\item{alpha}{Positive number (default 2). Ratio \eqn{d_{\max} / c} between the distance assigned to two blocks in different axes that share no observations and the scale \eqn{c} of the \eqn{-\log(\text{edge weight})} distances between blocks that do. Larger values hold unconnected blocks further apart relative to the spread induced by differences in edge weight. Together with \code{beta} this is the only tuning knob of the block distance matrix: the NeighborNet (and TSP) cycle is unchanged when the whole matrix is rescaled, so the absolute values \eqn{c}, \eqn{d_{\max}} and \eqn{d_{\text{same}}} matter only through the ratios \code{alpha} and \code{beta} (see \code{weight_scalar}, \code{matrix_initialization_value} and \code{same_side_matrix_initialization_value} in \code{\link[=sort_to_uncross_options]{sort_to_uncross_options()}} for the underlying constants). Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
+
+\item{beta}{Positive number (default \code{alpha}). Ratio \eqn{d_{\text{same}} / c} between the distance assigned to two distinct blocks of the same axis and the scale \eqn{c} of the edge-weight distances. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
 
 \item{fixed_column}{Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method \%in\% c('greedy_wolf', 'barycenter_one_sided', 'median_one_sided')}.}
 

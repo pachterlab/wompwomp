@@ -70,9 +70,11 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
 #' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe (default 'neighbornet'). Can choose from: 'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
 #' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.
 #' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.
-#' @param matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
-#' @param same_side_matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
-#' @param weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
+#' @param alpha Positive number (default 2). Ratio between the distance assigned to two blocks in different axes that share no observations and the scale of the \eqn{-\log(\text{edge weight})} distances between blocks that do. Together with \code{beta}, this is the tuning knob of the block distance matrix; see [sort_to_uncross()]. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
+#' @param beta Positive number (default \code{alpha}). Ratio between the distance assigned to two distinct blocks of the same axis and the scale of the edge-weight distances. See [sort_to_uncross()]. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
+#' @param weight_scalar Advanced. Positive number setting the absolute scale of the block distance matrix (the constant \eqn{c} multiplying \eqn{-\log(\text{edge weight})}). The cycle depends only on the ratios \code{alpha} and \code{beta}, so this rarely needs changing. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
+#' @param matrix_initialization_value Advanced. Distance between blocks in different axes that share no observations. \code{NULL} (default) derives it as \code{alpha * weight_scalar}; a value overrides \code{alpha}. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
+#' @param same_side_matrix_initialization_value Advanced. Distance between distinct blocks of the same axis. \code{NULL} (default) derives it as \code{beta * weight_scalar}; a value overrides \code{beta}. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
 #' @param matrix_initialization_value_column_order Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.
 #' @param weight_scalar_column_order Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.
 #' @param column_sorting_metric Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.
@@ -151,8 +153,9 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
 plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 = NULL,
                           column_weights = NULL, sorting_algorithm = "neighbornet",
                           optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE,
-                          matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6,
-                          weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6,
+                          alpha = 2, beta = alpha,
+                          weight_scalar = 5e5, matrix_initialization_value = NULL, same_side_matrix_initialization_value = NULL,
+                          matrix_initialization_value_column_order = 1e6,
                           weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing",
                           column_sorting_algorithm = "tsp", weighted = TRUE, cycle_start_positions = NULL, fixed_column = NULL,
                           random_initializations = 1, color_boxes = TRUE, color_bands = FALSE,
@@ -268,11 +271,13 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         wt = column_weights,
         method = sorting_algorithm,
         column_method = column_method,
-        weight_scalar = weight_scalar,
+        alpha = alpha,
+        beta = beta,
         fixed_column = fixed_column,
         verbose = verbose,
         options = sort_to_uncross_options(
             optimize_column_order_per_cycle = optimize_column_order_per_cycle,
+            weight_scalar = weight_scalar,
             matrix_initialization_value = matrix_initialization_value,
             same_side_matrix_initialization_value = same_side_matrix_initialization_value,
             matrix_initialization_value_column_order = matrix_initialization_value_column_order,

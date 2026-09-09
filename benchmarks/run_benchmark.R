@@ -72,7 +72,7 @@ run_one <- function(params) {
         wt = "value",
         method = params$method,
         column_method = params$column_method,
-        weight_scalar = params$weight_scalar,
+        options = list(weight_scalar = params$weight_scalar),
         verbose = FALSE
     )
 

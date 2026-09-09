@@ -587,7 +587,7 @@ lode_cluster_pal <- function(data, cols, mapping, color_palette = NULL, per_axis
 #'
 #' @export
 get_lode_clusters <- function(data, cols, wt = NULL, method = "advanced", resolution = 1, verbose = FALSE, options = NULL) {
-    cols_expr <- rlang::enquo(cols)
+    cols_expr <- as_name_selection(rlang::enquo(cols))
     
     # if (missing(wt)) {
     #     col_names <- names(
@@ -597,7 +597,7 @@ get_lode_clusters <- function(data, cols, wt = NULL, method = "advanced", resolu
     #     wt <- "value" # is set during prep_for_lodes
     # }
     
-    wt_expr <- rlang::enquo(wt)
+    wt_expr <- as_name_selection(rlang::enquo(wt))
     cols_pos <- tidyselect::eval_select(cols_expr, data = data)
     wt_pos <- tidyselect::eval_select(wt_expr, data = data)
     res <- rlang::set_names(

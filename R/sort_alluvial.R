@@ -13,7 +13,7 @@
 utils::globalVariables(c(
     ".data", ":=", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name",
     "default_sorting", "print_params", "preprocess_data", "do_compute_alluvial_statistics",
-    "optimize_column_order_per_cycle", "matrix_initialization_value", "same_side_matrix_initialization_value",
+    "optimize_column_order_per_cycle", "weight_scalar", "matrix_initialization_value", "same_side_matrix_initialization_value",
     "matrix_initialization_value_column_order", "weight_scalar_column_order", "column_metric",
     "cycle_start_positions", "weighted_metric", "valid_algorithms"
 ))
@@ -945,8 +945,9 @@ sort_barycenter_median <- function(clus_df_gather, cols = NULL, wt = "value", me
 #' cluttering the main function arguments.
 #'
 #' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{cols} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{cols} to minimize edge overlap on the beginning cycle only. Only applies when \code{method \%in\% c('neighbornet', 'tsp')} and \code{length(cols) > 2}.
-#' @param matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in different layers without a shared edge/path. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
-#' @param same_side_matrix_initialization_value Positive integer. Initialized value in distance matrix for nodes in the same layer. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
+#' @param weight_scalar Advanced. Positive number \eqn{c} by which \eqn{-\log(\text{edge weight})} is multiplied in the block distance matrix. Because the NeighborNet cycle is invariant under rescaling of the whole matrix (up to floating-point ties), \code{weight_scalar} only sets the absolute scale of the matrix; the ratios that actually shape the cycle are \code{alpha} and \code{beta} in [sort_to_uncross()]. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
+#' @param matrix_initialization_value Advanced. Positive number \eqn{d_{\max}}: the distance placed between two blocks in different axes that share no observations. \code{NULL} (default) derives it as \code{alpha * weight_scalar}; supplying a value overrides \code{alpha}. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
+#' @param same_side_matrix_initialization_value Advanced. Positive number \eqn{d_{\text{same}}}: the distance placed between two distinct blocks of the same axis. \code{NULL} (default) derives it as \code{beta * weight_scalar}; supplying a value overrides \code{beta}. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
 #' @param matrix_initialization_value_column_order Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{column_method != 'none'}.
 #' @param weight_scalar_column_order Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when \code{column_method != 'none'}.
 #' @param column_metric Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{column_method != 'none'}.
@@ -968,15 +969,16 @@ sort_barycenter_median <- function(clus_df_gather, cols = NULL, wt = "value", me
 #' )
 #' opts <- sort_to_uncross_options(
 #'   default_sorting = "reverse_alphabetical",
-#'   matrix_initialization_value = 100
+#'   weighted_metric = FALSE
 #' )
 #' sort_to_uncross(data = data, cols = c('method1', 'method2'), options = opts)
 #'
 #' @export
 sort_to_uncross_options <- function(
         optimize_column_order_per_cycle = FALSE,
-        matrix_initialization_value = 1e6,
-        same_side_matrix_initialization_value = 1e6,
+        weight_scalar = 5e5,
+        matrix_initialization_value = NULL,
+        same_side_matrix_initialization_value = NULL,
         matrix_initialization_value_column_order = 1e6,
         weight_scalar_column_order = 1,
         column_metric = c("edge_crossing", "ari"),
@@ -994,6 +996,7 @@ sort_to_uncross_options <- function(
     
     list(
         optimize_column_order_per_cycle = optimize_column_order_per_cycle,
+        weight_scalar = weight_scalar,
         matrix_initialization_value = matrix_initialization_value,
         same_side_matrix_initialization_value = same_side_matrix_initialization_value,
         matrix_initialization_value_column_order = matrix_initialization_value_column_order,
@@ -1009,7 +1012,7 @@ sort_to_uncross_options <- function(
     )
 }
 
-sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbornet", "tsp", "greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
+sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbornet", "tsp", "greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), alpha = 2, beta = alpha, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
     default_opt <- sort_to_uncross_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
@@ -1073,6 +1076,26 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbor
     }
         
     optimize_column_order <- (column_method != "none")
+
+    # The block distance matrix (Eq. distmat of the paper) has three constants:
+    # c = weight_scalar, d_max = matrix_initialization_value and
+    # d_same = same_side_matrix_initialization_value. The cycle depends on them
+    # only through the ratios d_max / c and d_same / c, so the user-facing
+    # parameters are those ratios (alpha, beta); the constants themselves are
+    # advanced overrides in sort_to_uncross_options().
+    if (!is.numeric(alpha) || length(alpha) != 1 || !is.finite(alpha) || alpha <= 0) stop("`alpha` must be a single positive number.")
+    if (!is.numeric(beta) || length(beta) != 1 || !is.finite(beta) || beta <= 0) stop("`beta` must be a single positive number.")
+    if (!is.numeric(weight_scalar) || length(weight_scalar) != 1 || !is.finite(weight_scalar) || weight_scalar <= 0) stop("`weight_scalar` must be a single positive number.")
+    if (is.null(matrix_initialization_value)) {
+        matrix_initialization_value <- alpha * weight_scalar
+    } else if (verbose) {
+        message("matrix_initialization_value supplied; ignoring `alpha`")
+    }
+    if (is.null(same_side_matrix_initialization_value)) {
+        same_side_matrix_initialization_value <- beta * weight_scalar
+    } else if (verbose) {
+        message("same_side_matrix_initialization_value supplied; ignoring `beta`")
+    }
     #* Type Checking End
     
     # Preprocess (i.e., add int columns and do the grouping)
@@ -1163,7 +1186,8 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbor
 #' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
 #' @param method Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'neighbornet' (default), 'tsp', 'greedy_wolf', 'greedy_wblf', 'barycenter', 'median', 'barycenter_one_sided', 'median_one_sided', 'random', 'none'. 'neighbornet' builds the block distance matrix and orders the blocks with the NeighborNet algorithm (the W_POMP method described in the paper). 'tsp' is identical except the block ordering is produced by the Traveling Salesman Problem solver from the TSP package rather than NeighborNet. greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'barycenter' and 'median' implement the classic Sugiyama-style two-layer crossing-reduction heuristics: each node in one layer is repositioned at the weighted mean ('barycenter') or weighted median ('median') position of its neighbors in the other layer, alternating which layer is reordered (as in 'greedy_wblf'). 'barycenter_one_sided' and 'median_one_sided' apply that same repositioning only once, from \code{fixed_column} onto the other layer (as in 'greedy_wolf'), leaving \code{fixed_column}'s order untouched. All four are much cheaper (O(n log n) per pass) than 'greedy_wolf'/'greedy_wblf' (O(n1*n2)), at the cost of typically noisier (less minimized) crossing counts. 'greedy_wolf', 'greedy_wblf', 'barycenter', 'median', 'barycenter_one_sided', and 'median_one_sided' are only valid when \code{cols} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
 #' @param column_method Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'random', and 'none'.
-#' @param weight_scalar Positive integer. Scalar with which to multiply edge weights after taking their -log in the distance matrix for nodes with a nonzero edge. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
+#' @param alpha Positive number (default 2). Ratio \eqn{d_{\max} / c} between the distance assigned to two blocks in different axes that share no observations and the scale \eqn{c} of the \eqn{-\log(\text{edge weight})} distances between blocks that do. Larger values hold unconnected blocks further apart relative to the spread induced by differences in edge weight. Together with \code{beta} this is the only tuning knob of the block distance matrix: the NeighborNet (and TSP) cycle is unchanged when the whole matrix is rescaled, so the absolute values \eqn{c}, \eqn{d_{\max}} and \eqn{d_{\text{same}}} matter only through the ratios \code{alpha} and \code{beta} (see \code{weight_scalar}, \code{matrix_initialization_value} and \code{same_side_matrix_initialization_value} in [sort_to_uncross_options()] for the underlying constants). Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
+#' @param beta Positive number (default \code{alpha}). Ratio \eqn{d_{\text{same}} / c} between the distance assigned to two distinct blocks of the same axis and the scale \eqn{c} of the edge-weight distances. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
 #' @param fixed_column Character or Integer. Name or position of the column in \code{cols} to keep fixed during sorting. Only applies when \code{method \%in\% c('greedy_wolf', 'barycenter_one_sided', 'median_one_sided')}.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param options Additional arguments. See [sort_to_uncross_options()].
@@ -1215,7 +1239,7 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbor
 #' lapply(clus_df_gather[, 1:2], levels)
 #'
 #' @export
-sort_to_uncross <- function(data, cols, wt = NULL, method = c("neighbornet", "tsp", "greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), weight_scalar = 5e5, fixed_column = NULL, verbose = FALSE, options = NULL) {
+sort_to_uncross <- function(data, cols, wt = NULL, method = c("neighbornet", "tsp", "greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), alpha = 2, beta = alpha, fixed_column = NULL, verbose = FALSE, options = NULL) {
     default_opt <- sort_to_uncross_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
@@ -1255,5 +1279,5 @@ sort_to_uncross <- function(data, cols, wt = NULL, method = c("neighbornet", "ts
     # Pass the data through unchanged (rather than subsetting to cols + wt) so
     # that pre-computed `col*_int` columns, a `color_band_column`, and any other
     # metadata survive when `preprocess_data = FALSE`.
-    sort_to_uncross_internal(data = data, cols = names(cols_pos), wt = names(wt_pos), method = method, column_method = column_method, weight_scalar = weight_scalar, fixed_column = fixed_column, verbose = verbose, options = options)
+    sort_to_uncross_internal(data = data, cols = names(cols_pos), wt = names(wt_pos), method = method, column_method = column_method, alpha = alpha, beta = beta, fixed_column = fixed_column, verbose = verbose, options = options)
 }
