@@ -28,7 +28,8 @@ cases <- list(
   list(sorting_algorithm = "none",        coloring_algorithm = "left", color_bands = TRUE, color_band_column = "a"),
   list(sorting_algorithm = "neighbornet", coloring_algorithm = "left", flip_xy = TRUE),
   list(sorting_algorithm = "neighbornet", coloring_algorithm = "left", rasterise_alluvia = TRUE),
-  list(sorting_algorithm = "greedy_wolf", coloring_algorithm = "advanced", graphing_columns = c("a", "b"))
+  list(sorting_algorithm = "greedy", coloring_algorithm = "advanced", graphing_columns = c("a", "b")),
+  list(sorting_algorithm = "barycenter", coloring_algorithm = "advanced", fixed_column = c("a", "c"))
 )
 
 ok <- 0L

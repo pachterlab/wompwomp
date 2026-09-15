@@ -5,16 +5,15 @@
 # default grid since it's an exact exponential-time solver -- add it
 # explicitly with a small n_categories cap (<=15) via TSP_SWEEP below.
 #
-# method %in% c("greedy_wolf", "greedy_wblf", "barycenter", "median",
-# "barycenter_one_sided", "median_one_sided") only support n_columns == 2
-# (sort_greedy_wolf()/sort_barycenter_median() stop otherwise); build_grid()
-# in run_benchmark.R drops any row combining them with n_columns != 2.
+# A method label ending in "_fixed" (e.g. "barycenter_fixed") runs that
+# method with fixed_column = the first column; see run_one() in
+# run_benchmark.R.
 
 DEFAULT_SWEEP <- list(
     n_rows = c(1000, 10000, 100000),
     n_columns = c(2, 3, 4),
     n_categories = c(4, 8, 16),
-    method = c("neighbornet", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided"),
+    method = c("neighbornet", "greedy", "barycenter", "median", "barycenter_fixed", "median_fixed"),
     column_method = c("tsp", "none")
 )
 
@@ -30,7 +29,7 @@ SMOKE_SWEEP <- list(
     n_rows = c(500),
     n_columns = c(2),
     n_categories = c(4),
-    method = c("neighbornet", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided"),
+    method = c("neighbornet", "greedy", "barycenter", "median", "barycenter_fixed", "median_fixed"),
     column_method = c("none")
 )
 
@@ -52,7 +51,7 @@ SPARSE_SWEEP <- list(
     n_rows = c(50, 200, 1000, 5000),
     n_columns = c(2),
     n_categories = c(8, 16, 32),
-    method = c("neighbornet", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided"),
+    method = c("neighbornet", "greedy", "barycenter", "median", "barycenter_fixed", "median_fixed"),
     column_method = c("none")
 )
 

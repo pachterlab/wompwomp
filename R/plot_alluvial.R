@@ -67,8 +67,8 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
 #' @param column1 Optional character. Can be used along with \code{column2} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column2 Optional character. Can be used along with \code{column1} in place of \code{graphing_columns} if working with two columns only. Mutually exclusive with \code{graphing_columns}.
 #' @param column_weights Optional character. Column name from \code{df} that contains the weights of each combination of groupings if \code{df} is in format (2) (see above).
-#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe (default 'neighbornet'). Can choose from: 'neighbornet', 'tsp', 'greedy_wolf', 'greedy_wblf', 'random', 'none'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy_wolf' implements a custom greedy algorithm where one layer is fixed, and the other layer is sorted such that each node is positioned as close to its largest parent from the fixed side as possible in a greedy fashion. 'greedy_wblf' implements the 'greedy_wolf' algorithm described previously twice, treating each column as fixed in one iteration and free in the other iteration. 'greedy_wolf' and 'greedy_wblf' are only valid when \code{graphing_columns} has exactly two entries. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function.
-#' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.
+#' @param sorting_algorithm Character. Algorithm with which to sort the values in the dataframe (default 'neighbornet'). Can choose from: 'neighbornet', 'tsp', 'greedy', 'barycenter', 'median', 'random', 'none'. 'neighbornet' performs sorting with NeighborNet (Bryant and Moulton, 2004). 'tsp' performs Traveling Salesman Problem solver from the TSP package. 'greedy', 'barycenter' and 'median' sweep across the axes, reordering each against its neighbor: 'greedy' places each block as close as possible to its heaviest neighbor, 'barycenter'/'median' at the weighted mean/median position of its neighbors. All methods accept any number of \code{graphing_columns}. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function. See [sort_to_uncross()] for details and for the deprecated names 'greedy_wolf', 'greedy_wblf', 'barycenter_one_sided' and 'median_one_sided'.
+#' @param optimize_column_order Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap. Only applies when \code{length(graphing_columns) > 2}.
 #' @param optimize_column_order_per_cycle Logical. If TRUE, will optimize the order of \code{graphing_columns} to minimize edge overlap upon each cycle. If FALSE, will optimize the order of \code{graphing_columns} to minimize edge overlap on the beginning cycle only. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{length(graphing_columns) > 2}.
 #' @param alpha Positive number (default 2). Ratio between the distance assigned to two blocks in different axes that share no observations and the scale of the \eqn{-\log(\text{edge weight})} distances between blocks that do. Together with \code{beta}, this is the tuning knob of the block distance matrix; see [sort_to_uncross()]. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
 #' @param beta Positive number (default \code{alpha}). Ratio between the distance assigned to two distinct blocks of the same axis and the scale of the edge-weight distances. See [sort_to_uncross()]. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
@@ -81,8 +81,8 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
 #' @param column_sorting_algorithm Character. Algorithm to use for determining column order. Options are "tsp" (default) or "neighbornet". Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.
 #' @param weighted Logical. Weighted objective
 #' @param cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
-#' @param fixed_column Character or Integer. Name or position of the column in \code{graphing_columns} to keep fixed during sorting. Only applies when \code{sorting_algorithm == 'greedy_wolf'}.
-#' @param random_initializations Integer. Number of random initializations for the positions of each grouping in \code{graphing_columns}. Only applies when \code{sorting_algorithm == 'greedy_wolf' or sorting_algorithm == 'greedy_wblf'}.
+#' @param fixed_column Optional character or integer vector. Names, or positions in \code{graphing_columns}, of the axes whose stratum order is kept as given while the other axes are sorted. \code{NULL} (default) sorts every axis. See [sort_to_uncross()].
+#' @param random_initializations Integer. Number of initializations of the stratum positions of the non-fixed axes (the first from the incoming order, the rest random), keeping the one with the fewest crossings. Only applies when \code{sorting_algorithm \%in\% c('greedy', 'barycenter', 'median')}.
 #' @param color_boxes Logical. Whether to color the strata/boxes (representing groups).
 #' @param color_bands Logical. Whether to color the alluvia/edges (connecting the strata).
 #' @param color_list Optional named list or vector of colors to override default group colors.
@@ -224,26 +224,11 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
         graphing_columns <- c(column1, column2)
     }
     
-    if (is.null(fixed_column)) {
-        fixed_column <- column1
-    } else if ((is.integer(fixed_column) || (is.double(fixed_column)))) {
-        if (fixed_column > length(colnames(df))) {
-            stop(sprintf("fixed_column index '%s' is not a column in the dataframe.", fixed_column))
-        } else {
-            fixed_column <- colnames(df)[fixed_column]
-        }
-    } else if (!(fixed_column %in% colnames(df))) {
-        stop(sprintf("fixed_column '%s' is not a column in the dataframe.", fixed_column))
-    }
-    
     if (!is.null(color_band_column)) {
         color_bands <- TRUE
     }
     #* Type Checking End
     
-    if (sorting_algorithm == "greedy_wolf") {
-        default_sorting <- "fixed"
-    }
     # Preprocess
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")

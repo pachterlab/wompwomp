@@ -30,14 +30,14 @@ data is not -- edges have a magnitude (the size of the flow), and
 each crossing by the product of the two crossing edges' magnitudes, so a
 crossing between two large flows counts for more than one between two small
 ones. `neighbornet` (this package's default heuristic, adapted from
-phylogenetic network reconstruction) and the two-sided `greedy_wblf` heuristic
+phylogenetic network reconstruction) and the two-sided `greedy` heuristic
 were both designed with this weighted objective in mind. This vignette checks
 whether that design choice actually pays off: how close does each method get
 to the *true* weighted-optimal ordering, on data built for the weighted case?
 
 ## Establishing ground truth
 
-We compare five methods -- `tsp`, `neighbornet`, `greedy_wblf`, `barycenter`,
+We compare five methods -- `tsp`, `neighbornet`, `greedy`, `barycenter`,
 and `median` -- against the true optimum. For small enough instances, that
 optimum can be found by brute force: try every ordering of both layers and
 keep the best.
@@ -102,7 +102,7 @@ For a few problem sizes and several random replicates each, find the true
 optimum and see how far each method's result lands from it.
 
 ```{r}
-methods <- c("tsp", "neighbornet", "greedy_wblf", "barycenter", "median")
+methods <- c("tsp", "neighbornet", "greedy", "barycenter", "median")
 n_categories_vals <- c(3, 4, 5)
 n_seeds <- 6
 
@@ -158,7 +158,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 the true optimum (median 0% above optimal across these 18 configurations,
 hitting the exact optimum in more than half of them), clearly ahead of the
 classical `barycenter`/`median` heuristics (median ~8.6% above optimal) and
-the two-sided `greedy_wblf` heuristic, which performs identically to
+the two-sided `greedy` heuristic, which performs identically to
 `barycenter`/`median` at this scale. That three otherwise-different
 algorithms converge to the same answer here isn't a bug: at small
 `n_categories` with strongly clustered data, there's often one dominant,

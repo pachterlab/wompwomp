@@ -93,14 +93,14 @@ p1_5
 
 Implementing a greedy heuristic for weighted one-layer free problem
 ```{r}
-clus_df_gather_sorted_wolf <- sort_to_uncross(clus_df_gather, cols = c("tissue", "cluster"), wt = "value", method = "greedy_wolf")
+clus_df_gather_sorted_wolf <- sort_to_uncross(clus_df_gather, cols = c("tissue", "cluster"), wt = "value", method = "greedy", fixed_column = "tissue", options = list(default_sorting = "fixed"))
 clus_df_gather_sorted_wolf
 ```
 
 Plot the alluvial plot with sorting and color matching
 ```{r}
-p2 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_wolf", fixed_column = 1, color_bands = TRUE, coloring_algorithm = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_WOLF.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
-# alternatively: p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster") sorting_algorithm = "greedy_wolf", fixed_column = 1)
+p2 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy", fixed_column = 1, default_sorting = "fixed", color_bands = TRUE, coloring_algorithm = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_WOLF.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0)
+# alternatively: p2 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster") sorting_algorithm = "greedy", fixed_column = 1)
 p2
 
 # ggsave("wompwomp_WOLF.png", plot = p2, dpi = 300, bg = "white")
@@ -108,13 +108,13 @@ p2
 
 Notice how, because we kept the left layer fixed, B CELL and T CELL are separated far apart, even though we would minimize edge crossings if they were next to each other - we can fix this with the weighted both-layers free heuristic
 ```{r}
-clus_df_gather_sorted_wblf <- sort_to_uncross(clus_df_gather, cols = c("tissue", "cluster"), wt = "value", method = "greedy_wblf") # output_df_path = "vignette_intro_df_cluster_wblf.csv"
+clus_df_gather_sorted_wblf <- sort_to_uncross(clus_df_gather, cols = c("tissue", "cluster"), wt = "value", method = "greedy") # output_df_path = "vignette_intro_df_cluster_wblf.csv"
 clus_df_gather_sorted_wblf
 ```
 
 ```{r}
-p3 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy_wblf", color_bands = TRUE, coloring_algorithm = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_WBLF.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0) # output_plot_path = "vignette_intro_plot.png"
-# alternatively: p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster"), sorting_algorithm = "greedy_wblf")
+p3 <- plot_alluvial(clus_df_gather, graphing_columns = c("tissue", "cluster"), column_weights = "value", sorting_algorithm = "greedy", color_bands = TRUE, coloring_algorithm = "advanced", resolution = 1, output_plot_path = file.path(output_dir, "intro_WBLF.pdf"), text_size = 15, axis_text_size = 25, axis_text_vjust = 0) # output_plot_path = "vignette_intro_plot.png"
+# alternatively: p3 <- plot_alluvial(df, graphing_columns = c("tissue", "cluster"), sorting_algorithm = "greedy")
 p3
 
 # ggsave("wompwomp_WBLF.png", plot = p3, dpi = 300, bg = "white")

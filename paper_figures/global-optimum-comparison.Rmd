@@ -51,14 +51,14 @@ head(df)
 
 Implementing a greedy heuristic for weighted one-layer free problem
 ```{r}
-clus_df_gather_sorted <- sort_to_uncross(df, cols = c("tissue", "cluster"), method = "greedy_wolf", fixed_column = "tissue")
+clus_df_gather_sorted <- sort_to_uncross(df, cols = c("tissue", "cluster"), method = "greedy", fixed_column = "tissue", options = list(default_sorting = "fixed"))
 wompwomp_objective_greedy_wolf <- compute_crossing_objective(clus_df_gather_sorted, cols = c("col1_int", "col2_int"))$output_objective
 print(wompwomp_objective_greedy_wolf)
 ```
 
 Plot the alluvial plot with sorting and color matching
 ```{r}
-p1 <- plot_alluvial(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy_wolf", fixed_column = "tissue", color_bands = TRUE)
+p1 <- plot_alluvial(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy", fixed_column = "tissue", default_sorting = "fixed", color_bands = TRUE)
 p1
 ```
 
@@ -128,13 +128,13 @@ ggplot(df_plot, aes(x = perm_id, y = objective)) +
 
 Now do the same for WBLF
 ```{r}
-clus_df_gather_sorted <- sort_to_uncross(df, cols = c("tissue", "cluster"), method = "greedy_wblf", options = sort_to_uncross_options(random_initializations = 10))
+clus_df_gather_sorted <- sort_to_uncross(df, cols = c("tissue", "cluster"), method = "greedy", options = sort_to_uncross_options(random_initializations = 10))
 wompwomp_objective_greedy_wblf <- compute_crossing_objective(clus_df_gather_sorted, cols = c("col1_int", "col2_int"))$output_objective
 print(wompwomp_objective_greedy_wblf)
 ```
 
 ```{r}
-p2 <- plot_alluvial(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy_wblf", color_bands = TRUE)
+p2 <- plot_alluvial(clus_df_gather_sorted, column1 = "tissue", column2 = "cluster", column_weights = "value", sorting_algorithm = "greedy", color_bands = TRUE)
 p2
 ```
 

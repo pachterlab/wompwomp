@@ -71,10 +71,9 @@ Cost drivers (see `generate_data.R` docstring for detail):
   `method="tsp"` is an *exact* exponential-time DP solver -- only include it
   with `n_categories <= ~15` (see `TSP_SWEEP` in `sweep_config.R`).
 - `n_columns` -- multiplies column-order-optimization cost when
-  `column_method != "none"`. `method %in% c("greedy_wolf", "greedy_wblf",
-  "barycenter", "median", "barycenter_one_sided", "median_one_sided")` only
-  support `n_columns == 2` -- rows combining them with other column counts
-  are dropped when a sweep grid is built.
+  `column_method != "none"`. Every method runs at every `n_columns`; a
+  method label ending in `_fixed` (e.g. `barycenter_fixed`) runs that method
+  with `fixed_column` set to the first column.
 - `n_rows` -- mainly controls how much of the `n_categories**n_columns`
   combinatorial space gets populated (more unique alluvia to sort).
 - `column_method` -- `"tsp"`/`"neighbornet"` add a nested pass of

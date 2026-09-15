@@ -66,12 +66,14 @@ run_one <- function(params) {
     # it with rlang::ensym(), which requires a literal string/symbol at the
     # call site, not a variable holding one. Every sweep fixes wt to "value"
     # anyway (see FIXED_PARAMS in sweep_config.R).
+    fixed <- endsWith(params$method, "_fixed")
     sorted <- wompwomp::sort_to_uncross(
         data = gen$data,
         cols = gen$cols,
         wt = "value",
-        method = params$method,
+        method = sub("_fixed$", "", params$method),
         column_method = params$column_method,
+        fixed_column = if (fixed) gen$cols[1] else NULL,
         options = list(weight_scalar = params$weight_scalar),
         verbose = FALSE
     )
@@ -105,12 +107,12 @@ run_one <- function(params) {
 # wompwomp and its dependencies (dplyr, igraph, TSP, ...) haven't been
 # touched here yet, R lazy-loads their namespaces fresh in *every single
 # fork* -- profiling showed this costing ~0.15-0.2s per config (most of the
-# measured time for small/fast configs like greedy_wblf), which has nothing
+# measured time for small/fast configs like greedy), which has nothing
 # to do with sort_to_uncross()'s actual algorithmic cost. Run each method
 # path once here so every fork starts warm.
 warm_up_namespaces <- function() {
     gen <- make_synthetic_df(n_rows = 50, n_columns = 2, n_categories = 3, seed = 0)
-    for (method in c("neighbornet", "greedy_wblf", "barycenter", "tsp")) {
+    for (method in c("neighbornet", "greedy", "barycenter", "tsp")) {
         invisible(wompwomp::sort_to_uncross(
             data = gen$data, cols = gen$cols, wt = "value",
             method = method, column_method = "tsp", verbose = FALSE
@@ -120,15 +122,6 @@ warm_up_namespaces <- function() {
 
 build_grid <- function(sweep_list) {
     grid <- expand.grid(sweep_list, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
-    two_col_only_methods <- c("greedy_wolf", "greedy_wblf", "barycenter", "median", "barycenter_one_sided", "median_one_sided")
-    invalid <- grid$method %in% two_col_only_methods & grid$n_columns != 2
-    if (any(invalid)) {
-        message(sprintf(
-            "dropping %d row(s): %s require n_columns == 2",
-            sum(invalid), paste(two_col_only_methods, collapse = "/")
-        ))
-        grid <- grid[!invalid, , drop = FALSE]
-    }
     lapply(seq_len(nrow(grid)), function(i) {
         modifyList(as.list(grid[i, , drop = FALSE]), FIXED_PARAMS)
     })

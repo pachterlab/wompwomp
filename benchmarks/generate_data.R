@@ -7,9 +7,7 @@
 #     small (~15) when including it in a sweep.
 #   - n_columns: number of graphing columns. Multiplies column-order-
 #     optimization cost (column_method != "none"), since each column pair
-#     gets its own edge-crossing calculation. Note: method %in%
-#     c("greedy_wolf", "greedy_wblf", "barycenter", "median",
-#     "barycenter_one_sided", "median_one_sided") only support n_columns == 2.
+#     gets its own edge-crossing calculation.
 #   - n_rows: raw observation count, pre-aggregation. sort_to_uncross()
 #     operates on unique column-combinations (rows of the wt = "value"
 #     table), so n_rows mainly controls how much of the

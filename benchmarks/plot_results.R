@@ -11,16 +11,14 @@
 # the resulting panel made every method look identical rather than showing
 # real quality differences.
 #
-# Produces two figures, since most methods (greedy_wolf/greedy_wblf/
-# barycenter/median/barycenter_one_sided/median_one_sided) only ever run at
-# n_columns == 2 (see sweep_config.R):
+# Produces two figures, since some sweeps (smoke, sparse) only run at
+# n_columns == 2:
 #   - "<out>_2layer.png": every method, restricted to its n_columns == 2
 #     rows, plotted against n_categories / n_unique_alluvia. n_columns is
 #     constant here, so it isn't a useful x-axis -- this is the figure where
-#     all methods (including the 2-column-only ones) can be compared
-#     head-to-head.
+#     all methods can be compared head-to-head.
 #   - "<out>_multilayer.png": only methods actually swept across more than
-#     one n_columns value (e.g. neighbornet, tsp), plotted against
+#     one n_columns value, plotted against
 #     n_columns / n_categories / n_unique_alluvia as in the original single
 #     figure.
 #
@@ -178,10 +176,7 @@ render_figure <- function(df, out_path, title, x_specs) {
     invisible()
 }
 
-# Methods that were actually swept across more than one n_columns value
-# (e.g. neighbornet, tsp) vs. methods only ever run at n_columns == 2
-# (greedy_wolf/greedy_wblf/barycenter/median/*_one_sided -- see
-# sweep_config.R's comment on why).
+# Methods that were actually swept across more than one n_columns value.
 n_cols_per_method <- tapply(df_all$n_columns, df_all$method, function(x) length(unique(x)))
 multi_col_methods <- names(n_cols_per_method[n_cols_per_method > 1])
 

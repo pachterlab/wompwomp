@@ -41,7 +41,7 @@ sort_to_uncross_options(
 
 \item{cycle_start_positions}{Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
 
-\item{random_initializations}{Integer. Number of random initializations for the positions of each grouping in \code{cols}. Only applies when \code{method == 'greedy_wolf' or method == 'greedy_wblf'}.}
+\item{random_initializations}{Integer. Number of initializations of the stratum positions of the non-fixed axes: the first starts from the incoming order and each further one from a random order, and the one with the lowest crossing objective is kept. Only applies when \code{method \%in\% c('greedy', 'barycenter', 'median')}.}
 
 \item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{\link[=prep_for_lodes]{prep_for_lodes()}} function.}
 
