@@ -240,3 +240,69 @@ as_name_selection <- function(quo) {
     }
     rlang::new_quosure(rlang::expr(tidyselect::all_of(!!val)), env)
 }
+
+# `missing_value` is the label given to the stratum of missing (`NA`) entries:
+# a single string, or `NA` (where `allow_na`) to keep them as missing values.
+check_missing_value <- function(missing_value, allow_na = TRUE) {
+    if (length(missing_value) != 1 || !(is.character(missing_value) || is.na(missing_value))) {
+        stop("`missing_value` must be a single string", if (allow_na) " or NA" else "", ".")
+    }
+    if (is.na(missing_value) && !allow_na) {
+        stop("`missing_value` must be a single string, not NA.")
+    }
+    invisible(missing_value)
+}
+
+# The string that stands in for missing entries while the data are processed.
+# The sorting and coloring code identifies strata by name, so it cannot carry
+# real `NA`s: with `missing_value = NA` they travel under a placeholder that no
+# entry of `cols` uses, which restore_missing_as_na() turns back into `NA`.
+resolve_missing_label <- function(data, cols, missing_value) {
+    if (!is.na(missing_value)) {
+        return(as.character(missing_value))
+    }
+    used <- unique(unlist(lapply(intersect(cols, colnames(data)), function(col) as.character(data[[col]]))))
+    used <- used[!is.na(used)]
+    utils::tail(make.unique(c(used, "NA")), 1)
+}
+
+# Replaces the missing entries of each column of `cols` with `missing_label`,
+# returning the columns as character vectors. as.character() comes first so
+# that an explicit `NA` factor level counts as missing, which is.na() on the
+# factor itself would not report.
+fill_missing_values <- function(data, cols, missing_label) {
+    merged <- character(0)
+    for (col in cols) {
+        values <- as.character(data[[col]])
+        is_missing <- is.na(values)
+        if (any(is_missing) && missing_label %in% values) {
+            merged <- c(merged, col)
+        }
+        values[is_missing] <- missing_label
+        data[[col]] <- values
+    }
+    if (length(merged) > 0) {
+        warning(sprintf("Missing (NA) entries are labeled '%s', which is already a value of column(s) %s, so the two are merged into one stratum. Set `missing_value` to a label the data do not use (or to NA) to keep them apart.", missing_label, paste0("'", merged, "'", collapse = ", ")), call. = FALSE)
+    }
+    data
+}
+
+# Inverse of fill_missing_values() for `missing_value = NA`: the placeholder
+# becomes an explicit `NA` factor level (what forcats::fct_na_value_to_level()
+# produces), holding the position in the level order that the placeholder had.
+restore_missing_as_na <- function(data, cols, missing_label) {
+    for (col in cols) {
+        values <- data[[col]]
+        lv <- if (is.factor(values)) levels(values) else unique(as.character(values))
+        if (!(missing_label %in% lv)) next
+        values <- as.character(values)
+        values[values == missing_label] <- NA
+        lv[lv == missing_label] <- NA
+        if (is.factor(data[[col]])) {
+            data[[col]] <- factor(values, levels = lv, exclude = NULL)
+        } else {
+            data[[col]] <- values
+        }
+    }
+    data
+}

@@ -9,7 +9,7 @@ sort_to_uncross(
   cols,
   wt = NULL,
   method = c("neighbornet", "tsp", "greedy", "barycenter", "median", "none", "random"),
-  column_method = c("tsp", "neighbornet", "none", "random"),
+  column_method = c("neighbornet", "tsp", "none", "random"),
   alpha = 2,
   beta = alpha,
   fixed_column = NULL,
@@ -28,7 +28,7 @@ sort_to_uncross(
 
 \item{method}{Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'neighbornet' (default), 'tsp', 'greedy', 'barycenter', 'median', 'random', 'none'. All of them accept any number of \code{cols} and honor \code{fixed_column}. 'neighbornet' builds the block distance matrix and orders the blocks with the NeighborNet algorithm (the W_POMP method described in the paper). 'tsp' is identical except the block ordering is produced by the Traveling Salesman Problem solver from the TSP package rather than NeighborNet. 'greedy', 'barycenter' and 'median' are layer-by-layer sweeps: one pass forward across the axes and one back, each pass reordering an axis against a neighboring axis. 'greedy' places each block as close as possible to its heaviest neighbor in the neighboring axis (O(n_i * n_j) per pass); 'barycenter' and 'median' are the classic Sugiyama-style heuristics that place each block at the weighted mean or weighted median position of its neighbors (O(a log a) per pass, for a alluvia), typically at the cost of noisier (less minimized) crossing counts. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function. The former names 'greedy_wolf', 'greedy_wblf', 'barycenter_one_sided' and 'median_one_sided' are deprecated: 'greedy_wblf' is 'greedy', and the others are 'greedy', 'barycenter' or 'median' with \code{fixed_column} (defaulting to \code{cols[1]}).}
 
-\item{column_method}{Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'neighbornet', 'random', and 'none'. Only applies when \code{cols} has more than two entries. With 'greedy', 'barycenter' and 'median', the strata are swept once in the given axis order, the axis order is chosen from that result, and the strata are swept again in the new order.}
+\item{column_method}{Character. Algorithm to use for determining column order. Options are 'neighbornet' (default), 'tsp', 'random', and 'none'. Only applies when \code{cols} has more than two entries. With 'greedy', 'barycenter' and 'median', the strata are swept once in the given axis order, the axis order is chosen from that result, and the strata are swept again in the new order.}
 
 \item{alpha}{Positive number (default 2). Ratio \eqn{d_{\max} / c} between the distance assigned to two blocks in different axes that share no observations and the scale \eqn{c} of the \eqn{-\log(\text{edge weight})} distances between blocks that do. Larger values hold unconnected blocks further apart relative to the spread induced by differences in edge weight. Together with \code{beta} this is the only tuning knob of the block distance matrix: the NeighborNet (and TSP) cycle is unchanged when the whole matrix is rescaled, so the absolute values \eqn{c}, \eqn{d_{\max}} and \eqn{d_{\text{same}}} matter only through the ratios \code{alpha} and \code{beta} (see \code{weight_scalar}, \code{matrix_initialization_value} and \code{same_side_matrix_initialization_value} in \code{\link[=sort_to_uncross_options]{sort_to_uncross_options()}} for the underlying constants). Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.}
 

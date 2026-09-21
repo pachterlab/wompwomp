@@ -9,6 +9,7 @@ prep_for_lodes(
   cols,
   wt = NULL,
   default_sorting = "alphabetical",
+  missing_value = "Missing",
   verbose = FALSE,
   print_params = FALSE,
   do_gather_set_data = FALSE,
@@ -26,6 +27,8 @@ prep_for_lodes(
 \item{wt}{Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).}
 
 \item{default_sorting}{Character. Default column sorting in \code{\link[=prep_for_lodes]{prep_for_lodes()}} if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+
+\item{missing_value}{Character or \code{NA}. Missing (\code{NA}) entries of \code{cols} are kept as a stratum of their own, and this is the label they are given (default \code{"Missing"}). If a column that has missing entries already uses the label as a value, the two are merged into one stratum, with a warning; choose a label the data do not use to keep them apart. \code{NA} keeps the entries missing instead of labeling them: the columns are returned as factors with an explicit \code{NA} level (as from \code{forcats::fct_na_value_to_level()}), which cannot collide with any value.}
 
 \item{verbose}{Logical. If TRUE, will display messages during the function.}
 

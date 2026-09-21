@@ -18,6 +18,7 @@ sort_to_uncross_options(
   preprocess_data = TRUE,
   default_sorting = c("alphabetical", "reverse_alphabetical", "increasing", "decreasing",
     "random", "fixed"),
+  missing_value = "Missing",
   print_params = FALSE,
   do_compute_alluvial_statistics = FALSE
 )
@@ -46,6 +47,8 @@ sort_to_uncross_options(
 \item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{\link[=prep_for_lodes]{prep_for_lodes()}} function.}
 
 \item{default_sorting}{Character. Default column sorting in \code{\link[=prep_for_lodes]{prep_for_lodes()}} if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+
+\item{missing_value}{Character or \code{NA}. Missing (\code{NA}) entries of \code{cols} are sorted as a stratum of their own, and this is the label they are given in the result (default \code{"Missing"}). If a column that has missing entries already uses the label as a value, the two are merged into one stratum, with a warning; choose a label the data do not use to keep them apart. \code{NA} keeps the entries missing instead of labeling them: the stratum is returned as an explicit \code{NA} factor level (as from \code{forcats::fct_na_value_to_level()}), which cannot collide with any value. Note that \pkg{ggalluvial} does not draw missing strata, so use a label rather than \code{NA} for the stratum to appear in the plot. Under \code{default_sorting}, that level is placed where the string \code{"NA"} would be. Only applies when \code{preprocess_data} is TRUE.}
 
 \item{print_params}{Logical. If TRUE, will print function params.}
 

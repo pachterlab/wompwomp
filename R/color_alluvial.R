@@ -9,7 +9,7 @@
 
 utils::globalVariables(c(
     ".data", ":=", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name",
-    "print_params", "preprocess_data", "cutoff", "method_advanced_option"
+    "print_params", "preprocess_data", "cutoff", "method_advanced_option", "missing_value"
 ))
 default_colors <- c(
     "#D55E00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#E69F00", "#CC79A7", "#666666", "#AD7700", "#1C91D4", "#007756", "#D5C711", "#005685",
@@ -31,6 +31,14 @@ default_colors <- c(
 #'   threshold for deciding whether to reuse a color or assign a new one.
 #' @param preprocess_data Logical. If TRUE (default), preprocess data with
 #'   `prep_for_lodes()`.
+#' @param missing_value Character. Missing (`NA`) entries of `cols`, including
+#'   an explicit `NA` factor level such as `sort_to_uncross()` returns with
+#'   `missing_value = NA`, are colored as a stratum of their own, and this is
+#'   the name under which that stratum appears in the mapping (default
+#'   `"Missing"`). If a column that has missing entries already uses the name
+#'   as a value, the two are merged into one stratum, with a warning; choose a
+#'   name the data do not use to keep them apart. Only applies when
+#'   `preprocess_data` is TRUE.
 #' @param print_params Logical. If TRUE, prints parameters during execution.
 #'
 #' @return A named list of control parameters for use in `get_lode_clusters()`.
@@ -46,15 +54,18 @@ get_lode_clusters_options <- function(
         method_advanced_option = c("leiden", "louvain"),
         cutoff = 0.5,
         preprocess_data = TRUE,
+        missing_value = "Missing",
         print_params = FALSE
 ) {
     
     method_advanced_option <- match.arg(method_advanced_option)
+    check_missing_value(missing_value, allow_na = FALSE)
     
     list(
         method_advanced_option = method_advanced_option,
         cutoff = cutoff,
         preprocess_data = preprocess_data,
+        missing_value = missing_value,
         print_params = print_params
     )
 }
@@ -78,7 +89,7 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
         }
     }
     for (nm in names(options)) {
-        if (is.null(options[[nm]]) || options[[nm]] == "NULLTMP") {
+        if (is.null(options[[nm]]) || identical(options[[nm]], "NULLTMP")) {
             val <- NULL
         } else {
             val <- options[[nm]]
@@ -110,7 +121,8 @@ get_lode_clusters_internal <- function(data, cols, wt = NULL, method = "advanced
     # Preprocess (i.e., add int columns and do the grouping)
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
-        clus_df_gather <- prep_for_lodes(data = data, cols = cols, wt = wt, 
+        check_missing_value(missing_value, allow_na = FALSE)
+        clus_df_gather <- prep_for_lodes(data = data, cols = cols, wt = wt, missing_value = missing_value,
                                           do_gather_set_data = FALSE, do_add_int_columns = FALSE)
         if (is.null(wt) || length(wt) == 0) {
             wt <- "value" # is set during prep_for_lodes
@@ -392,6 +404,9 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
 #' @param wt Optional character. Column name holding the weight of each row.
 #' @param adjacent_only Logical. If TRUE, sum only over adjacent layer pairs
 #'   \code{(i, i+1)} in the order given by \code{cols}, rather than all pairs.
+#' @param missing_value Character. Name of the stratum of missing (\code{NA})
+#'   entries in \code{mapping}; pass the value given to
+#'   [get_lode_clusters_options()] (default \code{"Missing"}).
 #'
 #' @return A list with:
 #' \describe{
@@ -411,7 +426,7 @@ find_colors_advanced <- function(clus_df_gather, graphing_columns, ditto_colors 
 #' compute_color_agreement(data, cols = c("method1", "method2"), mapping = mapping)
 #'
 #' @export
-compute_color_agreement <- function(data, cols, mapping, wt = NULL, adjacent_only = FALSE) {
+compute_color_agreement <- function(data, cols, mapping, wt = NULL, adjacent_only = FALSE, missing_value = "Missing") {
     if (length(cols) < 2) {
         stop("cols must have at least 2 entries.")
     }
@@ -423,11 +438,12 @@ compute_color_agreement <- function(data, cols, mapping, wt = NULL, adjacent_onl
         stop(sprintf("mapping has no entry for column(s): %s", paste(missing_map, collapse = ", ")))
     }
 
+    check_missing_value(missing_value, allow_na = FALSE)
     if (is.null(wt) || length(wt) == 0 || !(wt %in% colnames(data))) {
-        clus_df_gather <- prep_for_lodes(data = data, cols = cols, wt = wt, do_add_int_columns = FALSE)
+        clus_df_gather <- prep_for_lodes(data = data, cols = cols, wt = wt, missing_value = missing_value, do_add_int_columns = FALSE)
         wt <- "value"
     } else {
-        clus_df_gather <- data
+        clus_df_gather <- fill_missing_values(data, cols, missing_value)
     }
 
     for (col in cols) {
@@ -487,7 +503,7 @@ convert_mapping_to_colors <- function(mapping, default_colors) {
 #'   column's levels -- so a value appearing in two columns can take a different
 #'   color in each (as when a method over-splits a group).
 #'
-#' @return A named vector of colors, or (if \code{per_axis}) a list of them.
+#' @return A named vector of colors, or (if \code{per_axis}) a list of them. An explicit \code{NA} factor level (as [sort_to_uncross()] returns with \code{missing_value = NA}) has no name and gets no entry; ggplot2 scales color it with their \code{na.value}.
 #'
 #' @examples
 #' # Example 1
@@ -513,7 +529,9 @@ lode_cluster_pal <- function(data, cols, mapping, color_palette = NULL, per_axis
             if (!col %in% names(mapping)) {
                 stop(sprintf("Column '%s' not found in mapping", col))
             }
+            # an NA level has no name to color by; ggplot2 scales give it `na.value`
             lv <- levels(data[[col]])
+            lv <- lv[!is.na(lv)]
             ids <- vapply(lv, function(k) as.integer(mapping[[col]][[k]]), integer(1))
             if (anyNA(ids)) {
                 stop("Missing colors for: ",
@@ -526,7 +544,9 @@ lode_cluster_pal <- function(data, cols, mapping, color_palette = NULL, per_axis
     }
 
     # 1. Collect all factor levels across all columns
+    # (an NA level has no name to color by; ggplot2 scales give it `na.value`)
     vals <- unique(unlist(lapply(cols, function(col) levels(data[[col]]))))
+    vals <- vals[!is.na(vals)]
     
     # 2. Initialize named color vector
     flat_colors <- setNames(rep(NA_character_, length(vals)), vals)

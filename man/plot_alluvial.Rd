@@ -21,7 +21,7 @@ plot_alluvial(
   matrix_initialization_value_column_order = 1e+06,
   weight_scalar_column_order = 1,
   column_sorting_metric = "edge_crossing",
-  column_sorting_algorithm = "tsp",
+  column_sorting_algorithm = "neighbornet",
   weighted = TRUE,
   cycle_start_positions = NULL,
   fixed_column = NULL,
@@ -45,6 +45,7 @@ plot_alluvial(
   output_df_path = NULL,
   preprocess_data = TRUE,
   default_sorting = "alphabetical",
+  missing_value = "Missing",
   box_width = 1/3,
   text_width = 1/4,
   min_text = 4,
@@ -101,7 +102,7 @@ plot_alluvial(
 
 \item{column_sorting_metric}{Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.}
 
-\item{column_sorting_algorithm}{Character. Algorithm to use for determining column order. Options are "tsp" (default) or "neighbornet". Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.}
+\item{column_sorting_algorithm}{Character. Algorithm to use for determining column order. Options are "neighbornet" (default) or "tsp". Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.}
 
 \item{weighted}{Logical. Weighted objective}
 
@@ -148,6 +149,8 @@ plot_alluvial(
 \item{preprocess_data}{Logical. If TRUE, will preprocess the data with the \code{prep_for_lodes} function.}
 
 \item{default_sorting}{Character. Default column sorting in prep_for_lodes if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.}
+
+\item{missing_value}{Character. Missing (\code{NA}) entries of the graphing columns are drawn as a stratum of their own, and this is its label (default \code{"Missing"}). If a column that has missing entries already uses the label as a value, the two are merged into one stratum, with a warning; choose a label the data do not use to keep them apart. Only applies when \code{preprocess_data} is TRUE.}
 
 \item{box_width}{Numeric between 0 and 1. Box width}
 

@@ -4,7 +4,14 @@
 \alias{compute_color_agreement}
 \title{Color agreement of a stratum coloring}
 \usage{
-compute_color_agreement(data, cols, mapping, wt = NULL, adjacent_only = FALSE)
+compute_color_agreement(
+  data,
+  cols,
+  mapping,
+  wt = NULL,
+  adjacent_only = FALSE,
+  missing_value = "Missing"
+)
 }
 \arguments{
 \item{data}{A data frame or tibble. Must be in one of two formats:
@@ -21,6 +28,10 @@ name, each entry a list mapping that column's stratum values to color ids.}
 
 \item{adjacent_only}{Logical. If TRUE, sum only over adjacent layer pairs
 \code{(i, i+1)} in the order given by \code{cols}, rather than all pairs.}
+
+\item{missing_value}{Character. Name of the stratum of missing (\code{NA})
+entries in \code{mapping}; pass the value given to
+\code{\link[=get_lode_clusters_options]{get_lode_clusters_options()}} (default \code{"Missing"}).}
 }
 \value{
 A list with:

@@ -12,7 +12,7 @@
 
 utils::globalVariables(c(
     ".data", ":=", "group_numeric", "col1_int", "col2_int", "id", "x", "y", "value", "stratum", "total", "cum_y", "best_cluster_agreement", "neighbor_net", "alluvium", "pos", "count", "group1", "group2", "value", "group1_size", "group2_size", "weight", "parent", "group_name",
-    "default_sorting", "print_params", "preprocess_data", "do_compute_alluvial_statistics",
+    "default_sorting", "missing_value", "print_params", "preprocess_data", "do_compute_alluvial_statistics",
     "optimize_column_order_per_cycle", "weight_scalar", "matrix_initialization_value", "same_side_matrix_initialization_value",
     "matrix_initialization_value_column_order", "weight_scalar_column_order", "column_metric",
     "cycle_start_positions", "weighted_metric", "valid_algorithms"
@@ -39,7 +39,7 @@ compute_alluvial_statistics <- function(clus_df_gather, cols, wt = "value") {
     message(sprintf("K_prod = %s", K_prod))
 }
 
-determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value", matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_metric = "edge_crossing", column_method = "tsp", verbose = FALSE, weighted_metric = TRUE) {
+determine_column_order <- function(clus_df_gather_neighbornet, cols, wt = "value", matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_metric = "edge_crossing", column_method = "neighbornet", verbose = FALSE, weighted_metric = TRUE) {
     # sort_to_uncross_options() match.arg()s column_metric to lowercase, so
     # accept either spelling of "ari" rather than only the uppercase one.
     column_metric <- tolower(column_metric)
@@ -322,7 +322,7 @@ swap_graphing_column_order_based_on_graphing_column_int_order <- function(cols, 
 
 
 
-determine_optimal_cycle_start <- function(data, cycle, cols = NULL, wt = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_metric = "edge_crossing", column_method = "tsp", cycle_start_positions = NULL, verbose = FALSE, weighted_metric = TRUE, fixed_orders = list()) {
+determine_optimal_cycle_start <- function(data, cycle, cols = NULL, wt = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_metric = "edge_crossing", column_method = "neighbornet", cycle_start_positions = NULL, verbose = FALSE, weighted_metric = TRUE, fixed_orders = list()) {
     # # Commented out because I'm not sold on ARI
     # if (optimize_column_order_per_cycle && (column_metric == "edge_crossing")) {
     #     if (verbose) message("column_metric == 'edge_crossing' and optimize_column_order_per_cycle is TRUE. This might be a bit slow. Consider setting column_metric == 'ARI' and/or optimize_column_order_per_cycle to FALSE.")
@@ -656,6 +656,7 @@ randomly_map_int_columns <- function(clus_df_gather, exclude = character(0)) {
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
 #' @param default_sorting Character. Default column sorting in [prep_for_lodes()] if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
+#' @param missing_value Character or \code{NA}. Missing (\code{NA}) entries of \code{cols} are kept as a stratum of their own, and this is the label they are given (default \code{"Missing"}). If a column that has missing entries already uses the label as a value, the two are merged into one stratum, with a warning; choose a label the data do not use to keep them apart. \code{NA} keeps the entries missing instead of labeling them: the columns are returned as factors with an explicit \code{NA} level (as from \code{forcats::fct_na_value_to_level()}), which cannot collide with any value.
 #' @param verbose Logical. If TRUE, will display messages during the function.
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param do_gather_set_data Internal flag; not recommended to modify.
@@ -700,9 +701,10 @@ randomly_map_int_columns <- function(clus_df_gather, exclude = character(0)) {
 #' lapply(clus_df_gather[, 1:2], unique)
 #'
 #' @export
-prep_for_lodes <- function(data, cols, wt = NULL, default_sorting = "alphabetical", verbose = FALSE, print_params = FALSE, do_gather_set_data = FALSE, color_band_column = NULL, do_add_int_columns = FALSE) {
+prep_for_lodes <- function(data, cols, wt = NULL, default_sorting = "alphabetical", missing_value = "Missing", verbose = FALSE, print_params = FALSE, do_gather_set_data = FALSE, color_band_column = NULL, do_add_int_columns = FALSE) {
     if (print_params) print_function_params()
     lowercase_args(c("default_sorting"))
+    check_missing_value(missing_value)
     
     # remove all columns outside of cols, wt, and int columns
     cols_to_keep <- c(
@@ -718,15 +720,11 @@ prep_for_lodes <- function(data, cols, wt = NULL, default_sorting = "alphabetica
         if (!(col %in% colnames(data))) {
             stop(sprintf("column '%s' is not a column in the dataframe.", col))
         }
-        
-        # convert to factor
-        if (!is.factor(data[[col]])) {
-            data[[col]] <- as.factor(data[[col]])
-        }
-        
-        # fill in na with "Missing"
-        data[[col]] <- replace(as.character(data[[col]]), is.na(data[[col]]), "Missing")
     }
+    
+    # label missing entries, so that they form a stratum of their own
+    missing_label <- resolve_missing_label(data, cols, missing_value)
+    data <- fill_missing_values(data, cols, missing_label)
     
     if (do_add_int_columns) {
         data <- add_int_columns(data, cols = cols, default_sorting = default_sorting)
@@ -751,6 +749,10 @@ prep_for_lodes <- function(data, cols, wt = NULL, default_sorting = "alphabetica
     
     clus_df_gather <- clus_df_gather |> dplyr::ungroup()
     
+    if (is.na(missing_value)) {
+        clus_df_gather <- restore_missing_as_na(clus_df_gather, cols, missing_label)
+    }
+    
     # if ((is.character(output_df_path) && grepl("\\.rds$", output_df_path, ignore.case = TRUE))) {
     #     if (verbose) message(sprintf("Saving dataframe to=%s", output_df_path))
     #     saveRDS(clus_df_gather, output_df_path)
@@ -761,7 +763,7 @@ prep_for_lodes <- function(data, cols, wt = NULL, default_sorting = "alphabetica
 
 
 
-sort_neighbornet <- function(clus_df_gather, cols = NULL, wt = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_metric = "edge_crossing", method = "neighbornet", column_method = "tsp", cycle_start_positions = NULL, verbose = FALSE, weighted_metric = TRUE, fixed_column = character(0)) {
+sort_neighbornet <- function(clus_df_gather, cols = NULL, wt = "value", optimize_column_order = TRUE, optimize_column_order_per_cycle = FALSE, matrix_initialization_value = 1e6, same_side_matrix_initialization_value = 1e6, weight_scalar = 5e5, matrix_initialization_value_column_order = 1e6, weight_scalar_column_order = 1, column_metric = "edge_crossing", method = "neighbornet", column_method = "neighbornet", cycle_start_positions = NULL, verbose = FALSE, weighted_metric = TRUE, fixed_column = character(0)) {
     if (verbose) message(sprintf("Running %s", method))
     fixed_orders <- lapply(setNames(fixed_column, fixed_column), function(col) {
         positions <- as.numeric(as.character(clus_df_gather[[int_col(match(col, cols))]]))
@@ -983,6 +985,7 @@ sort_by_sweep <- function(clus_df_gather, cols, wt = "value", method = c("greedy
 #' @param random_initializations Integer. Number of initializations of the stratum positions of the non-fixed axes: the first starts from the incoming order and each further one from a random order, and the one with the lowest crossing objective is kept. Only applies when \code{method \%in\% c('greedy', 'barycenter', 'median')}.
 #' @param preprocess_data Logical. If TRUE, will preprocess the data with the [prep_for_lodes()] function.
 #' @param default_sorting Character. Default column sorting in [prep_for_lodes()] if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
+#' @param missing_value Character or \code{NA}. Missing (\code{NA}) entries of \code{cols} are sorted as a stratum of their own, and this is the label they are given in the result (default \code{"Missing"}). If a column that has missing entries already uses the label as a value, the two are merged into one stratum, with a warning; choose a label the data do not use to keep them apart. \code{NA} keeps the entries missing instead of labeling them: the stratum is returned as an explicit \code{NA} factor level (as from \code{forcats::fct_na_value_to_level()}), which cannot collide with any value. Note that \pkg{ggalluvial} does not draw missing strata, so use a label rather than \code{NA} for the stratum to appear in the plot. Under \code{default_sorting}, that level is placed where the string \code{"NA"} would be. Only applies when \code{preprocess_data} is TRUE.
 #' @param print_params Logical. If TRUE, will print function params.
 #' @param do_compute_alluvial_statistics Internal flag; not recommended to modify.
 #' 
@@ -1014,12 +1017,14 @@ sort_to_uncross_options <- function(
         random_initializations = 1,
         preprocess_data = TRUE,
         default_sorting = c("alphabetical", "reverse_alphabetical", "increasing", "decreasing", "random", "fixed"),
+        missing_value = "Missing",
         print_params = FALSE,
         do_compute_alluvial_statistics = FALSE
 ) {
     # enforce match.arg for any fixed-choice settings
     column_metric <- match.arg(column_metric)
     default_sorting <- match.arg(default_sorting)
+    check_missing_value(missing_value)
     
     list(
         optimize_column_order_per_cycle = optimize_column_order_per_cycle,
@@ -1034,12 +1039,13 @@ sort_to_uncross_options <- function(
         random_initializations = random_initializations,
         preprocess_data = preprocess_data,
         default_sorting = default_sorting,
+        missing_value = missing_value,
         print_params = print_params,
         do_compute_alluvial_statistics = do_compute_alluvial_statistics
     )
 }
 
-sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbornet", "tsp", "greedy", "barycenter", "median", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), alpha = 2, beta = alpha, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
+sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbornet", "tsp", "greedy", "barycenter", "median", "none", "random"), column_method = c("neighbornet", "tsp", 'none', 'random'), alpha = 2, beta = alpha, fixed_column = NULL, output_df_path = NULL, verbose = FALSE, options = NULL) {
     default_opt <- sort_to_uncross_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
@@ -1058,7 +1064,7 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbor
         }
     }
     for (nm in names(options)) {
-        if (is.null(options[[nm]]) || options[[nm]] == "NULLTMP") {
+        if (is.null(options[[nm]]) || identical(options[[nm]], "NULLTMP")) {
             val <- NULL
         } else {
             val <- options[[nm]]
@@ -1134,14 +1140,21 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbor
     #* Type Checking End
     
     # Preprocess (i.e., add int columns and do the grouping)
+    # With missing_value = NA the missing stratum is sorted under a placeholder
+    # label, which becomes an NA factor level at the end.
+    check_missing_value(missing_value)
+    missing_label <- resolve_missing_label(data, cols, missing_value)
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
-        clus_df_gather <- prep_for_lodes(data = data, cols = cols, wt = wt, default_sorting = default_sorting, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
+        clus_df_gather <- prep_for_lodes(data = data, cols = cols, wt = wt, default_sorting = default_sorting, missing_value = missing_label, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
         if (is.null(wt) || length(wt) == 0) {
             wt <- "value" # is set during prep_for_lodes
         }
     } else {
         clus_df_gather <- data
+        if (is.na(missing_value)) {
+            clus_df_gather <- fill_missing_values(clus_df_gather, cols, missing_label)
+        }
     }
     
     if (verbose && do_compute_alluvial_statistics) compute_alluvial_statistics(clus_df_gather = clus_df_gather, cols = cols, wt = wt)
@@ -1196,6 +1209,9 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbor
     graphing_columns_sorted <- cols[order(match(cols, names(clus_df_gather_sorted)))]
     clus_df_gather <- generalized_reorder(clus_df_gather=clus_df_gather, clus_df_gather_sorted=clus_df_gather_sorted, cols=graphing_columns_sorted)
     clus_df_gather <- clus_df_gather |> dplyr::ungroup()
+    if (is.na(missing_value)) {
+        clus_df_gather <- restore_missing_as_na(clus_df_gather, graphing_columns_sorted, missing_label)
+    }
     
     # Save if desired
     if ((is.character(output_df_path) && grepl("\\.rds$", output_df_path, ignore.case = TRUE))) {
@@ -1217,7 +1233,7 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbor
 #' @param cols Character vector. Vector of column names from \code{data} to be used in graphing (i.e., alluvial plotting).
 #' @param wt Optional character. Column name from \code{data} that contains the weights of each combination of groupings if \code{data} is in format (2) (see above).
 #' @param method Character. Algorithm with which to sort the values in the dataframe. Can choose from: 'neighbornet' (default), 'tsp', 'greedy', 'barycenter', 'median', 'random', 'none'. All of them accept any number of \code{cols} and honor \code{fixed_column}. 'neighbornet' builds the block distance matrix and orders the blocks with the NeighborNet algorithm (the W_POMP method described in the paper). 'tsp' is identical except the block ordering is produced by the Traveling Salesman Problem solver from the TSP package rather than NeighborNet. 'greedy', 'barycenter' and 'median' are layer-by-layer sweeps: one pass forward across the axes and one back, each pass reordering an axis against a neighboring axis. 'greedy' places each block as close as possible to its heaviest neighbor in the neighboring axis (O(n_i * n_j) per pass); 'barycenter' and 'median' are the classic Sugiyama-style heuristics that place each block at the weighted mean or weighted median position of its neighbors (O(a log a) per pass, for a alluvia), typically at the cost of noisier (less minimized) crossing counts. 'random' randomly maps blocks. 'none' keeps the mappings as-is when passed into the function. The former names 'greedy_wolf', 'greedy_wblf', 'barycenter_one_sided' and 'median_one_sided' are deprecated: 'greedy_wblf' is 'greedy', and the others are 'greedy', 'barycenter' or 'median' with \code{fixed_column} (defaulting to \code{cols[1]}).
-#' @param column_method Character. Algorithm to use for determining column order. Options are 'tsp' (default), 'neighbornet', 'random', and 'none'. Only applies when \code{cols} has more than two entries. With 'greedy', 'barycenter' and 'median', the strata are swept once in the given axis order, the axis order is chosen from that result, and the strata are swept again in the new order.
+#' @param column_method Character. Algorithm to use for determining column order. Options are 'neighbornet' (default), 'tsp', 'random', and 'none'. Only applies when \code{cols} has more than two entries. With 'greedy', 'barycenter' and 'median', the strata are swept once in the given axis order, the axis order is chosen from that result, and the strata are swept again in the new order.
 #' @param alpha Positive number (default 2). Ratio \eqn{d_{\max} / c} between the distance assigned to two blocks in different axes that share no observations and the scale \eqn{c} of the \eqn{-\log(\text{edge weight})} distances between blocks that do. Larger values hold unconnected blocks further apart relative to the spread induced by differences in edge weight. Together with \code{beta} this is the only tuning knob of the block distance matrix: the NeighborNet (and TSP) cycle is unchanged when the whole matrix is rescaled, so the absolute values \eqn{c}, \eqn{d_{\max}} and \eqn{d_{\text{same}}} matter only through the ratios \code{alpha} and \code{beta} (see \code{weight_scalar}, \code{matrix_initialization_value} and \code{same_side_matrix_initialization_value} in [sort_to_uncross_options()] for the underlying constants). Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
 #' @param beta Positive number (default \code{alpha}). Ratio \eqn{d_{\text{same}} / c} between the distance assigned to two distinct blocks of the same axis and the scale \eqn{c} of the edge-weight distances. Only applies when \code{method \%in\% c('neighbornet', 'tsp')}.
 #' @param fixed_column Optional character or integer vector. Names, or positions in \code{cols}, of the axes whose stratum order is kept as it comes in (the order \code{method = 'none'} would return, set by \code{default_sorting} in [sort_to_uncross_options()] unless the data already carry \code{col*_int} columns); only the other axes are sorted. With 'greedy', 'barycenter' and 'median', order propagates outward from the fixed axes. With 'neighbornet' and 'tsp', which order a distance matrix rather than axes, the fixed order is encouraged in the distance matrix and then imposed exactly on the resulting cycle, whose start and direction are chosen to minimize crossings with the fixed axes in place. Because the cycle is only nudged toward the fixed order, 'greedy', 'barycenter' and 'median' usually reach fewer crossings than 'neighbornet' and 'tsp' when axes are fixed. \code{NULL} (default) sorts every axis. Does not affect the order of the axes themselves (see \code{column_method}).
@@ -1271,7 +1287,7 @@ sort_to_uncross_internal <- function(data, cols, wt = NULL, method = c("neighbor
 #' lapply(clus_df_gather[, 1:2], levels)
 #'
 #' @export
-sort_to_uncross <- function(data, cols, wt = NULL, method = c("neighbornet", "tsp", "greedy", "barycenter", "median", "none", "random"), column_method = c("tsp", "neighbornet", 'none', 'random'), alpha = 2, beta = alpha, fixed_column = NULL, verbose = FALSE, options = NULL) {
+sort_to_uncross <- function(data, cols, wt = NULL, method = c("neighbornet", "tsp", "greedy", "barycenter", "median", "none", "random"), column_method = c("neighbornet", "tsp", 'none', 'random'), alpha = 2, beta = alpha, fixed_column = NULL, verbose = FALSE, options = NULL) {
     default_opt <- sort_to_uncross_options()
     if (!is.null(options)) {
         if (!is.list(options)) stop("`options` must be a list.")
@@ -1290,7 +1306,7 @@ sort_to_uncross <- function(data, cols, wt = NULL, method = c("neighbornet", "ts
         }
     }
     for (nm in names(options)) {
-        if (is.null(options[[nm]]) || options[[nm]] == "NULLTMP") {
+        if (is.null(options[[nm]]) || identical(options[[nm]], "NULLTMP")) {
             val <- NULL
         } else {
             val <- options[[nm]]
@@ -1299,7 +1315,7 @@ sort_to_uncross <- function(data, cols, wt = NULL, method = c("neighbornet", "ts
     }
 
     if (missing(wt)) {
-        data <- prep_for_lodes(data = data, cols = cols, default_sorting = default_sorting, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
+        data <- prep_for_lodes(data = data, cols = cols, default_sorting = default_sorting, missing_value = missing_value, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
         wt <- "value" # is set during prep_for_lodes
     }
     

@@ -8,6 +8,7 @@ get_lode_clusters_options(
   method_advanced_option = c("leiden", "louvain"),
   cutoff = 0.5,
   preprocess_data = TRUE,
+  missing_value = "Missing",
   print_params = FALSE
 )
 }
@@ -21,6 +22,15 @@ threshold for deciding whether to reuse a color or assign a new one.}
 
 \item{preprocess_data}{Logical. If TRUE (default), preprocess data with
 \code{prep_for_lodes()}.}
+
+\item{missing_value}{Character. Missing (\code{NA}) entries of \code{cols}, including
+an explicit \code{NA} factor level such as \code{sort_to_uncross()} returns with
+\code{missing_value = NA}, are colored as a stratum of their own, and this is
+the name under which that stratum appears in the mapping (default
+\code{"Missing"}). If a column that has missing entries already uses the name
+as a value, the two are merged into one stratum, with a warning; choose a
+name the data do not use to keep them apart. Only applies when
+\code{preprocess_data} is TRUE.}
 
 \item{print_params}{Logical. If TRUE, prints parameters during execution.}
 }

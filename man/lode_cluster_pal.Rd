@@ -22,7 +22,7 @@ column's levels -- so a value appearing in two columns can take a different
 color in each (as when a method over-splits a group).}
 }
 \value{
-A named vector of colors, or (if \code{per_axis}) a list of them.
+A named vector of colors, or (if \code{per_axis}) a list of them. An explicit \code{NA} factor level (as \code{\link[=sort_to_uncross]{sort_to_uncross()}} returns with \code{missing_value = NA}) has no name and gets no entry; ggplot2 scales color it with their \code{na.value}.
 }
 \description{
 Convert color mapping made by get_lode_clusters into list for scale_fill_manual

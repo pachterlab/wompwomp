@@ -78,7 +78,7 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
 #' @param matrix_initialization_value_column_order Positive integer. Initialized value in distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.
 #' @param weight_scalar_column_order Positive integer. Scalar with which to loss function after taking their log1p in the distance matrix for optimizing column order. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.
 #' @param column_sorting_metric Character. Metric to use for determining column order. Options are "edge_crossing" (default) or "ARI". Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.
-#' @param column_sorting_algorithm Character. Algorithm to use for determining column order. Options are "tsp" (default) or "neighbornet". Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.
+#' @param column_sorting_algorithm Character. Algorithm to use for determining column order. Options are "neighbornet" (default) or "tsp". Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'} and \code{optimize_column_order} is TRUE.
 #' @param weighted Logical. Weighted objective
 #' @param cycle_start_positions Set. Cycle start positions to consider. Anything outside this set will be skipped. Only applies when \code{sorting_algorithm == 'neighbornet' or 'tsp'}.
 #' @param fixed_column Optional character or integer vector. Names, or positions in \code{graphing_columns}, of the axes whose stratum order is kept as given while the other axes are sorted. \code{NULL} (default) sorts every axis. See [sort_to_uncross()].
@@ -102,6 +102,7 @@ load_in_df <- function(df, graphing_columns = NULL, column_weights = NULL) {
 #' @param output_df_path Optional character. Output path for the output data frame, in CSV format. If \code{NULL}, then will not be saved.
 #' @param preprocess_data Logical. If TRUE, will preprocess the data with the \code{prep_for_lodes} function.
 #' @param default_sorting Character. Default column sorting in prep_for_lodes if integer columns do not exist. Options are 'alphabetical' (default), 'reverse_alphabetical', 'increasing', 'decreasing', 'random'.
+#' @param missing_value Character. Missing (\code{NA}) entries of the graphing columns are drawn as a stratum of their own, and this is its label (default \code{"Missing"}). If a column that has missing entries already uses the label as a value, the two are merged into one stratum, with a warning; choose a label the data do not use to keep them apart. Only applies when \code{preprocess_data} is TRUE.
 #' @param box_width Numeric between 0 and 1. Box width
 #' @param text_width Numeric between 0 and 1. Text width
 #' @param min_text Integer greater than 0. Min text
@@ -157,13 +158,13 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
                           weight_scalar = 5e5, matrix_initialization_value = NULL, same_side_matrix_initialization_value = NULL,
                           matrix_initialization_value_column_order = 1e6,
                           weight_scalar_column_order = 1, column_sorting_metric = "edge_crossing",
-                          column_sorting_algorithm = "tsp", weighted = TRUE, cycle_start_positions = NULL, fixed_column = NULL,
+                          column_sorting_algorithm = "neighbornet", weighted = TRUE, cycle_start_positions = NULL, fixed_column = NULL,
                           random_initializations = 1, color_boxes = TRUE, color_bands = FALSE,
                           color_list = NULL, color_band_list = NULL, color_band_column = NULL, color_val = NULL,
                           color_band_boundary = FALSE, coloring_algorithm = "advanced", coloring_algorithm_advanced_option = "leiden", resolution = 1, cutoff = .5,
                           alluvial_alpha = 0.5, include_labels_in_boxes = TRUE, include_axis_titles = TRUE, include_group_sizes = FALSE,
                           output_plot_path = NULL, output_df_path = NULL, preprocess_data = TRUE,
-                          default_sorting = "alphabetical", box_width = 1 / 3, text_width = 1 / 4, min_text = 4, text_size = 14,
+                          default_sorting = "alphabetical", missing_value = "Missing", box_width = 1 / 3, text_width = 1 / 4, min_text = 4, text_size = 14,
                           auto_adjust_text = TRUE, axis_text_size = 2, axis_text_vjust = 0, save_height = 6, save_width = 6, dpi = 300, rasterise_alluvia = FALSE,
                           keep_y_labels = FALSE, keep_x_labels = TRUE, 
                           box_line_width = 1, verbose = FALSE, print_params = FALSE,
@@ -192,6 +193,8 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
     if (nrow(df) == 0) {
         stop("df has no rows.")
     }
+    
+    check_missing_value(missing_value, allow_na = FALSE)
     
     if (!is.null(graphing_columns) && any(!graphing_columns %in% colnames(df))) {
         stop("Some graphing_columns are not present in the dataframe.")
@@ -232,7 +235,7 @@ plot_alluvial <- function(df, graphing_columns = NULL, column1 = NULL, column2 =
     # Preprocess
     if (preprocess_data) {
         if (verbose) message("Preprocessing data before sorting")
-        clus_df_gather_unsorted <- prep_for_lodes(data = df, cols = graphing_columns, wt = column_weights, color_band_column = color_band_column, default_sorting = default_sorting, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
+        clus_df_gather_unsorted <- prep_for_lodes(data = df, cols = graphing_columns, wt = column_weights, color_band_column = color_band_column, default_sorting = default_sorting, missing_value = missing_value, do_gather_set_data = FALSE, do_add_int_columns = TRUE)
         if (is.null(column_weights)) {
             column_weights <- "value" # is set during prep_for_lodes
         }
